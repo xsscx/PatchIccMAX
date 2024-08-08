@@ -76,7 +76,7 @@
 #include "IccProfLibVer.h"
 #include "IccApplyBPC.h"
 #include "TiffImg.h"
-
+#include <tiffio.h>
 
 typedef struct {
   unsigned long nId;
@@ -123,6 +123,8 @@ const char* GetId(unsigned long nId, IdList* pIdList)
 void Usage() 
 {
   printf("iccTiffDump built with IccProfLib version " ICCPROFLIBVER "\n\n");
+  
+  printf("Built with TIFFLIB version %s\n\n", TIFFLIB_VERSION_STR);
 
   printf("Usage: iccTiffDump tiff_file {exported_icc_file}\n\n");
 }

@@ -10896,19 +10896,35 @@ CIccTagSpectralViewingConditions &CIccTagSpectralViewingConditions::operator=(co
 
 /**
  ****************************************************************************
- * Name: CIccTagSpectralViewingConditions::~CIccTagResponseCurveSet16
- * 
+ * Name: CIccTagSpectralViewingConditions::~CIccTagSpectralViewingConditions
+ *
  * Purpose: Destructor
- * 
+ *
  *****************************************************************************
  */
 CIccTagSpectralViewingConditions::~CIccTagSpectralViewingConditions()
 {
-  if (m_observer)
-    delete [] m_observer;
+    // Ensure that the deallocation matches the allocation method
 
-  if (m_illuminant)
-    delete [] m_illuminant;
+    if (m_observer) {
+        // If m_observer was allocated with new[], this is correct:
+        //delete m_observer;
+
+        // If m_observer was allocated with malloc, use this instead:
+         free(m_observer);
+
+        m_observer = nullptr;  // Nullify the pointer for safety
+    }
+
+    if (m_illuminant) {
+        // If m_illuminant was allocated with new[], this is correct:
+        // delete[] m_illuminant;
+
+        // If m_illuminant was allocated with malloc, use this instead:
+        free(m_illuminant);
+
+        m_illuminant = nullptr;  // Nullify the pointer for safety
+    }
 }
 
 

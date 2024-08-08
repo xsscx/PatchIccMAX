@@ -79,10 +79,13 @@
 #include "IccDefs.h"
 #include "IccApplyBPC.h"
 #include "TiffImg.h"
+#include <tiffio.h>
 
-void Usage() 
+void Usage()
 {
-  printf("Usage: SpecSep2Tiff output_file compress_flag sep_flag infile_fmt_file start_nm end_nm inc_nm {embedded_icc_profile_file}\n\n");
+    // Print the TIFF library version and usage instructions
+    printf("Usage: SpecSep2Tiff output_file compress_flag sep_flag infile_fmt_file start_nm end_nm inc_nm [embedded_icc_profile_file]\n\n");
+    printf("Built with TIFFLIB version %s\n\n", TIFFLIB_VERSION_STR);
 }
 
 #ifndef _MAX_PATH
@@ -92,9 +95,12 @@ void Usage()
 //===================================================
 
 int main(int argc, char* argv[]) {
-    int minargs = 8; // Minimum number of arguments should account for the optional ICC profile
+    const int minargs = 8; // Minimum number of arguments should account for the optional ICC profile
+
+    // Check if the number of arguments is less than required
     if (argc < minargs) {
-        std::cerr << "Usage: SpecSep2Tiff output_file compress_flag sep_flag infile_fmt_file start_nm end_nm inc_nm [embedded_icc_profile_file]\n";
+        // std::cerr << "Error: Not enough arguments.\n";
+        Usage(); // Call the Usage function to display the correct usage and exit
         return -1;
     }
 

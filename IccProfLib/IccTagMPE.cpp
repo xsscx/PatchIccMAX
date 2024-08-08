@@ -1377,39 +1377,41 @@ CIccMultiProcessElementList::iterator CIccTagMultiProcessElement::GetLastElem()
 /**
 ******************************************************************************
 * Name: CIccTagMultiProcessElement::GetNewApply
-* 
-* Purpose: 
-* 
-* Args: 
-* 
-* Return: 
-******************************************************************************/
-CIccApplyTagMpe *CIccTagMultiProcessElement::GetNewApply()
+*
+* Purpose: Creates and initializes a new CIccApplyTagMpe object.
+*
+* Return: Pointer to the newly created CIccApplyTagMpe object, or nullptr on failure.
+******************************************************************************
+*/
+CIccApplyTagMpe* CIccTagMultiProcessElement::GetNewApply()
 {
-  CIccApplyTagMpe *pApply = new CIccApplyTagMpe(this);
+    // Create a new CIccApplyTagMpe object
+    auto pApply = std::make_unique<CIccApplyTagMpe>(this);
 
-  if (!pApply)
-    return NULL;
+    // Check if creation failed
+    if (!pApply)
+        return nullptr;
 
-  CIccDblPixelBuffer *pApplyBuf = pApply->GetBuf();
-  pApplyBuf->UpdateChannels(m_nBufChannels);
-  if (!pApplyBuf->Begin()) {
-    delete pApply;
-    return NULL;
-  }
+    // Initialize the pixel buffer with the required number of channels
+    auto pApplyBuf = pApply->GetBuf();
+    pApplyBuf->UpdateChannels(m_nBufChannels);
 
-  if (!m_list || !m_list->size())
-    return pApply;
+    // If initialization of the buffer fails, return nullptr
+    if (!pApplyBuf->Begin()) {
+        return nullptr;
+    }
 
-  CIccMultiProcessElementList::iterator i, last;
-  last = GetLastElem();
-  for (i=GetFirstElem(); i!=last;) {
-    pApply->AppendElem(i->ptr);
+    // If there are no elements in the list, return the created object
+    if (!m_list || m_list->empty())
+        return pApply.release();
 
-    GetNextElemIterator(i);
-  }
+    // Append elements to the CIccApplyTagMpe object
+    for (auto i = GetFirstElem(), last = GetLastElem(); i != last; GetNextElemIterator(i)) {
+        pApply->AppendElem(i->ptr);
+    }
 
-  return pApply;
+    // Return the newly created and initialized CIccApplyTagMpe object
+    return pApply.release();
 }
 
 //#define DEBUG_MPE_APPLY

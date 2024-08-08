@@ -131,15 +131,17 @@ CIccMatrixMath::CIccMatrixMath(const CIccMatrixMath &matrix)
 /**
 **************************************************************************
 * Name: CIccMatrixMath::~CIccMatrixMath
-* 
-* Purpose: 
-*  Destructor
+*
+* Purpose:
+*  Destructor - Cleans up allocated resources
 **************************************************************************
 */
 CIccMatrixMath::~CIccMatrixMath()
 {
-  if (m_vals)
-    delete m_vals;
+    if (m_vals) {
+        delete[] m_vals;  // Correct deallocation for new[] allocated memory
+        m_vals = nullptr; // Nullify the pointer for safety
+    }
 }
 
 

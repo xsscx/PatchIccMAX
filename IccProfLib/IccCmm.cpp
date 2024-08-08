@@ -1902,42 +1902,13 @@ CIccApplyXform::CIccApplyXform(CIccXform *pXform) : m_AbsLab{}
 /**
 **************************************************************************
 * Name: CIccApplyXform::CIccApplyXform
-*
-* Purpose:
+* 
+* Purpose: 
 *  Destructor
 **************************************************************************
 */
 CIccApplyXform::~CIccApplyXform()
 {
-}
-
-
-/**
-**************************************************************************
-* Name: CIccApplyNDLutXform::CIccApplyNDLutXform
-*
-* Purpose:
-*  Constructor
-**************************************************************************
-*/
-CIccApplyNDLutXform::CIccApplyNDLutXform(CIccXformNDLut* pXform, CIccApplyCLUT *pApply) : CIccApplyXform(pXform)
-{
-  m_pApply = pApply;
-}
-
-
-/**
-**************************************************************************
-* Name: CIccApplyNDLutXform::~CIccApplyNDLutXform
-*
-* Purpose:
-*  Destructor
-**************************************************************************
-*/
-CIccApplyNDLutXform::~CIccApplyNDLutXform()
-{
-  if (m_pApply)
-    delete m_pApply;
 }
 
 
@@ -1966,21 +1937,21 @@ CIccApplyPcsXform::CIccApplyPcsXform(CIccXform *pXform) : CIccApplyXform(pXform)
 */
 CIccApplyPcsXform::~CIccApplyPcsXform()
 {
-
-  if (m_list) {
-    CIccApplyPcsStepList::iterator i;
-    for (i=m_list->begin(); i!=m_list->end(); i++) {
-      if (i->ptr)
-        delete i->ptr;
+    if (m_list) {
+        for (auto& step : *m_list) {
+            if (step.ptr) {
+                delete step.ptr; // Properly deallocate the object
+                step.ptr = nullptr; // Nullify pointer after deletion for safety
+            }
+        }
+        delete m_list;
+        m_list = nullptr; // Nullify pointer after deletion for safety
     }
 
-    delete m_list;
-  }
-
-  if (m_temp1)
-    delete m_temp1;
-  if (m_temp2)
-    delete m_temp2;
+    delete[] m_temp1; // Use delete[] to match array allocation
+    delete[] m_temp2; // Use delete[] to match array allocation
+    m_temp1 = nullptr; // Nullify pointer after deletion for safety
+    m_temp2 = nullptr; // Nullify pointer after deletion for safety
 }
 
 /**
@@ -3920,30 +3891,30 @@ CIccPcsStep *CIccPcsStepXYZToLab2::concat(CIccPcsStep *pNext) const
 /**
 **************************************************************************
 * Name: CIccPcsStepOffset::CIccPcsStepOffset
-* 
-* Purpose: 
-*  Constructor
+*
+* Purpose:
+*  Constructor - Initializes the offset with the given number of channels.
 **************************************************************************
 */
 CIccPcsStepOffset::CIccPcsStepOffset(icUInt16Number nChannels)
 {
-  m_nChannels = nChannels;
-  m_vals = new icFloatNumber[nChannels];
+    m_nChannels = nChannels;
+    m_vals = new icFloatNumber[nChannels]; // Allocate an array using new[]
 }
 
 
 /**
 **************************************************************************
-* Name: CIccPcsStepOffset::CIccPcsStepOffset
-* 
-* Purpose: 
-*  Destructor
+* Name: CIccPcsStepOffset::~CIccPcsStepOffset
+*
+* Purpose:
+*  Destructor - Cleans up allocated resources.
 **************************************************************************
 */
 CIccPcsStepOffset::~CIccPcsStepOffset()
 {
-  if (m_vals)
-    delete m_vals;
+    delete[] m_vals; // Use delete[] to properly deallocate the array
+    m_vals = nullptr; // Nullify the pointer for safety
 }
 
 
@@ -4059,30 +4030,30 @@ bool CIccPcsStepOffset::isIdentity() const
 /**
 **************************************************************************
 * Name: CIccPcsStepScale::CIccPcsStepScale
-* 
-* Purpose: 
-*  Constructor
+*
+* Purpose:
+*  Constructor - Initializes the scale with the given number of channels.
 **************************************************************************
 */
 CIccPcsStepScale::CIccPcsStepScale(icUInt16Number nChannels)
 {
-  m_nChannels = nChannels;
-  m_vals = new icFloatNumber[nChannels];
+    m_nChannels = nChannels;
+    m_vals = new icFloatNumber[nChannels]; // Allocate an array using new[]
 }
 
 
 /**
 **************************************************************************
 * Name: CIccPcsStepScale::~CIccPcsStepScale
-* 
-* Purpose: 
-*  Destructor
+*
+* Purpose:
+*  Destructor - Cleans up allocated resources.
 **************************************************************************
 */
 CIccPcsStepScale::~CIccPcsStepScale()
 {
-  if (m_vals)
-    delete m_vals;
+    delete[] m_vals; // Use delete[] to properly deallocate the array
+    m_vals = nullptr; // Nullify the pointer for safety
 }
 
 /**
@@ -6278,46 +6249,6 @@ icStatusCMM CIccXformNDLut::Begin()
 
 /**
  **************************************************************************
- * Name: CIccXformNDLut::GetNewApply
- *
- * Purpose:
- *  Allocates a new apply object
- *
- * Args:
- *  status = reference to status of creation of the apply object
- **************************************************************************
- */
-CIccApplyXform* CIccXformNDLut::GetNewApply(icStatusCMM& status)
-{
-  if (!m_pTag)
-    return NULL;
-
-  CIccCLUT* pCLUT = m_pTag->GetCLUT();
-  CIccApplyCLUT* pApply = NULL;
-
-  if (pCLUT && m_nNumInput > 6) {
-    pApply = pCLUT->GetNewApply();
-    if (!pApply) {
-      status = icCmmStatAllocErr;
-      return NULL;
-    }
-  }
-
-  CIccApplyNDLutXform* rv = new CIccApplyNDLutXform(this, pApply);
-  
-  if (!rv) {
-    if (pApply)
-      delete pApply;
-    status = icCmmStatAllocErr;
-    return NULL;
-  }
-
-  status = icCmmStatOk;
-  return rv;
-}
-
-/**
- **************************************************************************
  * Name: CIccXformNDLut::Apply
  * 
  * Purpose: 
@@ -6353,11 +6284,8 @@ void CIccXformNDLut::Apply(CIccApplyXform* pApply, icFloatNumber *DstPixel, cons
         m_pTag->m_CLUT->Interp6d(Pixel, Pixel);
         break;
       default:
-        {
-          CIccApplyNDLutXform* pNDApply = (CIccApplyNDLutXform*)pApply;
-          m_pTag->m_CLUT->InterpND(Pixel, Pixel, pNDApply->m_pApply);
-          break;
-        }
+        m_pTag->m_CLUT->InterpND(Pixel, Pixel);
+        break;
       }
     }
 
@@ -6383,12 +6311,8 @@ void CIccXformNDLut::Apply(CIccApplyXform* pApply, icFloatNumber *DstPixel, cons
         m_pTag->m_CLUT->Interp6d(Pixel, Pixel);
         break;
       default:
-      {
-        CIccApplyNDLutXform* pNDApply = (CIccApplyNDLutXform*)pApply;
-        m_pTag->m_CLUT->InterpND(Pixel, Pixel, pNDApply->m_pApply);
+        m_pTag->m_CLUT->InterpND(Pixel, Pixel);
         break;
-      }
-      break;
       }
     }
 

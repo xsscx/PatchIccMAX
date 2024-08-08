@@ -986,48 +986,61 @@ icUInt32Number CIccXmlArrayType<T, Tsig>::ParseTextCount(const char *szText)
 }
 
 template <class T, icTagTypeSignature Tsig>
-icUInt32Number CIccXmlArrayType<T, Tsig>::ParseText(T* pBuf, icUInt32Number nSize, const char *szText)
-{	
-  icUInt32Number n = 0, b = 0;
-  bool bInNum = false;
-  char num[256] = {0};
+icUInt32Number CIccXmlArrayType<T, Tsig>::ParseText(T* pBuf, icUInt32Number nSize, const char* szText)
+{
+    if (!pBuf || !szText) {
+        // Handle null pointers gracefully
+        return 0;
+    }
 
-  while (*szText && n<nSize) {	  
-	  if (icIsNumChar(*szText)) {
-      if (!bInNum) {
-        bInNum = true;
-        b=0;
-      }
-      num[b] = *szText;
- 
-      if (b+2<sizeof(num))
-        b++;
-    }
-    else if (bInNum) {
-      num[b] = 0;
-      if (!strncmp(num, "nan", 3) || !strncmp(num, "-nan", 4)) {
-        pBuf[n] = (T)nanf(num);
-      }
-      else {
-        pBuf[n] = (T)atof(num);
-      }
-      n++;
-      bInNum = false;
-    }
-    szText++;
-  }
-  if (bInNum) {
-    num[b] = 0;
-    if (!strncmp(num, "nan", 3) || !strncmp(num, "-nan", 4)) {
-      pBuf[n] = (T)nanf(num);
-    }
-    else {
-      pBuf[n] = (T)atof(num);
-    }
-    n++;
-  } 
+    icUInt32Number n = 0, b = 0;
+    bool bInNum = false;
+    char num[256] = { 0 };
 
-  return n;
+    while (*szText && n < nSize) {
+        if (icIsNumChar(*szText)) {
+            if (!bInNum) {
+                bInNum = true;
+                b = 0;
+            }
+
+            if (b + 1 < sizeof(num)) {  // Ensure we do not overflow the 'num' buffer
+                num[b] = *szText;
+                b++;
+            }
+        }
+        else if (bInNum) {
+            num[b] = 0;
+
+            if (!strncmp(num, "nan", 3) || !strncmp(num, "-nan", 4)) {
+                pBuf[n] = (T)nanf(num);
+            }
+            else {
+                pBuf[n] = static_cast<T>(std::strtof(num, nullptr));  // Use std::strtof for safer conversion
+            }
+
+            n++;
+            bInNum = false;
+
+            if (n >= nSize) {  // Prevents out-of-bounds access
+                break;
+            }
+        }
+        szText++;
+    }
+
+    if (bInNum && n < nSize) {
+        num[b] = 0;
+        if (!strncmp(num, "nan", 3) || !strncmp(num, "-nan", 4)) {
+            pBuf[n] = (T)nanf(num);
+        }
+        else {
+            pBuf[n] = static_cast<T>(std::strtof(num, nullptr));  // Use std::strtof for safer conversion
+        }
+        n++;
+    }
+
+    return n;
 }
 
 template <class T, icTagTypeSignature Tsig>

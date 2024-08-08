@@ -51,13 +51,3 @@ CIccCmmEnvVarHint::~CIccCmmEnvVarHint()
   delete m_map;
 }
 
-CIccCmmPccEnvVarHint::CIccCmmPccEnvVarHint(icCmmEnvSigMap& map)
-{
-  m_map = new icCmmEnvSigMap();
-  *m_map = map;
-}
-
-CIccCmmPccEnvVarHint::~CIccCmmPccEnvVarHint()
-{
-  delete m_map;
-}

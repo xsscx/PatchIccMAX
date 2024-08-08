@@ -68,15 +68,16 @@
     <IntDir>.\Debug\</IntDir>
     <NMakeBuildCommandLine>echo "All Done!"</NMakeBuildCommandLine>
     <NMakeReBuildCommandLine>echo "All Done!" /a</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine />
-    <NMakeOutput>All.exe</NMakeOutput>
+    <NMakeCleanCommandLine>Echo "All Done"</NMakeCleanCommandLine>
+    <NMakeOutput>
+    </NMakeOutput>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>.\Release\</OutDir>
     <IntDir>.\Release\</IntDir>
     <NMakeBuildCommandLine>Echo "All Done"</NMakeBuildCommandLine>
     <NMakeReBuildCommandLine>Echo "All Done" /a</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine />
+    <NMakeCleanCommandLine>Echo "All Done"</NMakeCleanCommandLine>
     <NMakeOutput>All.exe</NMakeOutput>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -84,15 +85,16 @@
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <NMakeBuildCommandLine>echo "All Done!"</NMakeBuildCommandLine>
     <NMakeReBuildCommandLine>echo "All Done!" /a</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine />
-    <NMakeOutput>All.exe</NMakeOutput>
+    <NMakeCleanCommandLine>Echo "All Done"</NMakeCleanCommandLine>
+    <NMakeOutput>
+    </NMakeOutput>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <NMakeBuildCommandLine>Echo "All Done"</NMakeBuildCommandLine>
     <NMakeReBuildCommandLine>Echo "All Done" /a</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine />
+    <NMakeCleanCommandLine>Echo "All Done"</NMakeCleanCommandLine>
     <NMakeOutput>All.exe</NMakeOutput>
   </PropertyGroup>
   <ItemDefinitionGroup>

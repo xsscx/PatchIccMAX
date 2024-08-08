@@ -1409,37 +1409,46 @@ bool CIccTagArray::Write(CIccIO *pIO)
 /**
  ****************************************************************************
  * Name: CIccTagArray::SetSize
- * 
+ *
  * Purpose: Sets the size of the tag array.
- * 
- * Args: 
+ *
+ * Args:
  *  nSize - number of tag entries,
  *****************************************************************************
  */
 bool CIccTagArray::SetSize(icUInt32Number nSize)
 {
-  if (!m_nSize) {
-    m_TagVals = (IccTagPtr*)calloc(nSize, sizeof(IccTagPtr));
-    if (!m_TagVals) {
-      m_nSize =0;
-      return false;
+    if (!m_nSize) {
+        // Replace calloc with new[]
+        m_TagVals = new IccTagPtr[nSize]();
+        if (!m_TagVals) {
+            m_nSize = 0;
+            return false;
+        }
     }
-  }
-  else {
-    if (nSize<=m_nSize)
-      return true;
+    else {
+        if (nSize <= m_nSize)
+            return true;
 
-    m_TagVals = (IccTagPtr*)icRealloc(m_TagVals, nSize*sizeof(IccTagPtr));
-    if (!m_TagVals) {
-      m_nSize = 0;
-      return false;
+        // Use a temporary pointer to avoid losing the original memory on reallocation failure
+        IccTagPtr* newTagVals = new IccTagPtr[nSize]();
+
+        if (!newTagVals) {
+            m_nSize = 0;
+            return false;
+        }
+
+        // Copy old values to the new array and clean up old array
+        memcpy(newTagVals, m_TagVals, m_nSize * sizeof(IccTagPtr));
+        delete[] m_TagVals;
+        m_TagVals = newTagVals;
+
+        memset(&m_TagVals[m_nSize], 0, (nSize - m_nSize) * sizeof(IccTagPtr));
     }
-    memset(&m_TagVals[m_nSize], 0, (nSize-m_nSize)*sizeof(IccTagPtr));
-  }
-  m_nSize = nSize;
-  return true;
+
+    m_nSize = nSize;
+    return true;
 }
-
 
 /**
 ******************************************************************************
@@ -1495,34 +1504,34 @@ icValidateStatus CIccTagArray::Validate(std::string sigPath, std::string &sRepor
 /**
 ***************************************************************************
 * Name: CIccTagArray::Cleanup
-* 
+*
 * Purpose: Detach from a pending IO object
 ***************************************************************************
 */
 void CIccTagArray::Cleanup()
 {
-  icUInt32Number i, j;
-  CIccTag* pTag;
+    icUInt32Number i, j;
+    CIccTag* pTag;
 
-  for (i=0; i<m_nSize; i++) {
-    pTag = m_TagVals[i].ptr;
-    if (pTag) {
-      for (j=i+1; j<m_nSize; j++) {
-        if (m_TagVals[i].ptr==pTag)
-          m_TagVals[i].ptr = NULL;
-      }
-      delete pTag;
-      m_TagVals[i].ptr = NULL;
+    for (i = 0; i < m_nSize; i++) {
+        pTag = m_TagVals[i].ptr;
+        if (pTag) {
+            for (j = i + 1; j < m_nSize; j++) {
+                if (m_TagVals[j].ptr == pTag)
+                    m_TagVals[j].ptr = NULL;
+            }
+            delete pTag;
+            m_TagVals[i].ptr = NULL;
+        }
     }
-  }
 
-  delete [] m_TagVals;
+    delete[] m_TagVals;
 
-  if (m_pArray)
-    delete m_pArray;
+    if (m_pArray)
+        delete m_pArray;
 
-  m_pArray = NULL;
-  m_sigArrayType = icSigUndefinedArray;
+    m_pArray = NULL;
+    m_sigArrayType = icSigUndefinedArray;
 }
 
 /**
