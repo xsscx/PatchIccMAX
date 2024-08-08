@@ -251,20 +251,26 @@ CIccProfile::~CIccProfile()
  */
 void CIccProfile::Cleanup()
 {
+  // Delete the attached IO object if it exists
   if (m_pAttachIO) {
     delete m_pAttachIO;
-    m_pAttachIO = NULL;
+    m_pAttachIO = nullptr;
   }
 
-  TagPtrList::iterator i;
-
-  for (i=m_TagVals->begin(); i!=m_TagVals->end(); i++) {
-    if (NULL != i->ptr)
-      delete i->ptr;
+  // Iterate through the tag values and delete them if they are not null
+  for (auto &tagVal : *m_TagVals) {
+    if (tagVal.ptr != nullptr) {
+      delete tagVal.ptr;
+      tagVal.ptr = nullptr;
+    }
   }
+
+  // Clear the tag lists
   m_Tags->clear();
   m_TagVals->clear();
-  memset(&m_Header, 0, sizeof(m_Header));
+
+  // Reset the header to zero
+  std::memset(&m_Header, 0, sizeof(m_Header));
 }
 
 /**

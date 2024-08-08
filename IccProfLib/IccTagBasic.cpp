@@ -10905,10 +10905,10 @@ CIccTagSpectralViewingConditions &CIccTagSpectralViewingConditions::operator=(co
 CIccTagSpectralViewingConditions::~CIccTagSpectralViewingConditions()
 {
   if (m_observer)
-    delete [] m_observer;
+    free(m_observer);  // Correct deallocation for malloc
 
   if (m_illuminant)
-    delete [] m_illuminant;
+    free(m_illuminant);  // Correct deallocation for malloc
 }
 
 
