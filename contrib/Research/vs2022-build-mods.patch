@@ -1,0 +1,312 @@
+diff --git a/Build/Cmake/CMakeLists.txt b/Build/Cmake/CMakeLists.txt
+index 8e433c0..b23cc30 100644
+--- a/Build/Cmake/CMakeLists.txt
++++ b/Build/Cmake/CMakeLists.txt
+@@ -132,9 +132,9 @@ IF(ENABLE_ICCXML)
+   ELSE( LIBXML2_FOUND )
+     IF(CMAKE_VERSION VERSION_GREATER 2.8.0)
+       SET( HAVE_LIBXML2 TRUE  )
+-      INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/IccXML/libxml2 )
+-      LINK_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/IccXML/libxml2 )
+-      ADD_SUBDIRECTORY( IccXML/libxml2 )
++#      INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/IccXML/libxml2 )
++#      LINK_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/IccXML/libxml2 )
++#      ADD_SUBDIRECTORY( IccXML/libxml2 )
+       SET( LIBXML2_LIBRARIES xml2-static )
+     ENDIF()
+   ENDIF(LIBXML2_FOUND)
+diff --git a/Build/MSVC/BuildAll_v22.sln b/Build/MSVC/BuildAll_v22.sln
+index 58d1fcb..6c79c80 100644
+--- a/Build/MSVC/BuildAll_v22.sln
++++ b/Build/MSVC/BuildAll_v22.sln
+@@ -5,6 +5,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "All", "BuildAll_v22.vcxproj", "{F70F064E-0377-484E-8F86-BEC03F35F950}"
+ 	ProjectSection(ProjectDependencies) = postProject
+ 		{89E73097-58F4-4FE4-A24D-A388F79C898B} = {89E73097-58F4-4FE4-A24D-A388F79C898B}
++		{A6858D8F-E1C7-44FD-B8DB-2D1700B73950} = {A6858D8F-E1C7-44FD-B8DB-2D1700B73950}
+ 	EndProjectSection
+ EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iccApplyNamedCmm", "..\..\Tools\CmdLine\IccApplyNamedCmm\iccApplyNamedCmm_v22.vcxproj", "{BAEA1593-F6A4-48A1-95AA-8FA09E1ECACE}"
+diff --git a/Build/MSVC/BuildAll_v22.vcxproj b/Build/MSVC/BuildAll_v22.vcxproj
+index 4dc5103..2b1baf1 100644
+--- a/Build/MSVC/BuildAll_v22.vcxproj
++++ b/Build/MSVC/BuildAll_v22.vcxproj
+@@ -68,7 +68,7 @@
+     <IntDir>.\Debug\</IntDir>
+     <NMakeBuildCommandLine>echo "All Done!"</NMakeBuildCommandLine>
+     <NMakeReBuildCommandLine>echo "All Done!" /a</NMakeReBuildCommandLine>
+-    <NMakeCleanCommandLine />
++    <NMakeCleanCommandLine>Echo "All Done"</NMakeCleanCommandLine>
+     <NMakeOutput>All.exe</NMakeOutput>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+@@ -76,7 +76,7 @@
+     <IntDir>.\Release\</IntDir>
+     <NMakeBuildCommandLine>Echo "All Done"</NMakeBuildCommandLine>
+     <NMakeReBuildCommandLine>Echo "All Done" /a</NMakeReBuildCommandLine>
+-    <NMakeCleanCommandLine />
++    <NMakeCleanCommandLine>Echo "All Done"</NMakeCleanCommandLine>
+     <NMakeOutput>All.exe</NMakeOutput>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+@@ -84,7 +84,7 @@
+     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+     <NMakeBuildCommandLine>echo "All Done!"</NMakeBuildCommandLine>
+     <NMakeReBuildCommandLine>echo "All Done!" /a</NMakeReBuildCommandLine>
+-    <NMakeCleanCommandLine />
++    <NMakeCleanCommandLine>Echo "All Done"</NMakeCleanCommandLine>
+     <NMakeOutput>All.exe</NMakeOutput>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+@@ -92,7 +92,7 @@
+     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+     <NMakeBuildCommandLine>Echo "All Done"</NMakeBuildCommandLine>
+     <NMakeReBuildCommandLine>Echo "All Done" /a</NMakeReBuildCommandLine>
+-    <NMakeCleanCommandLine />
++    <NMakeCleanCommandLine>Echo "All Done"</NMakeCleanCommandLine>
+     <NMakeOutput>All.exe</NMakeOutput>
+   </PropertyGroup>
+   <ItemDefinitionGroup>
+diff --git a/Build/MSVC/BuildDefs.props b/Build/MSVC/BuildDefs.props
+index dd6c098..8f70b22 100644
+--- a/Build/MSVC/BuildDefs.props
++++ b/Build/MSVC/BuildDefs.props
+@@ -13,8 +13,8 @@
+ 	<LIBTIFF_LIBDIR>$(VendorTreeDir)\libtiff\tiff-4.0.3\libtiff</LIBTIFF_LIBDIR>
+ 	<LIBTIFF_LIBDIRx64>$(VendorTreeDir)\libtiff\tiff-4.0.3\libtiffx64</LIBTIFF_LIBDIRx64>
+ 	<LIBXML2>$(VendorTreeDir)\libxml2\libxml2-2.8.0</LIBXML2>
+-	<WXVER>30</WXVER>
+-	<WXWIN>$(VendorTreeDir)\WXWidgets\wxWidgets-3.0.2</WXWIN>
++	<WXVER>32</WXVER>
++	<WXWIN>$(VendorTreeDir)\WXWidgets\wxWidgets-3.2.0</WXWIN>
+     <ZLIB>$(VendorTreeDir)\ZLib\zlib-1.2.8</ZLIB>
+     <ZLIBLIB>$(VendorTreeDir)\ZLib\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibStatRelease</ZLIBLIB>
+   </PropertyGroup>
+diff --git a/IccXML/IccLibXML/IccLibXML_CRTDLL_v22.vcxproj b/IccXML/IccLibXML/IccLibXML_CRTDLL_v22.vcxproj
+index e581a2a..97073c4 100644
+--- a/IccXML/IccLibXML/IccLibXML_CRTDLL_v22.vcxproj
++++ b/IccXML/IccLibXML/IccLibXML_CRTDLL_v22.vcxproj
+@@ -81,11 +81,11 @@
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)_CRTDLL\</OutDir>
+-    <IntDir>$(Platform)\$(Configuration)_CRTDLL\</IntDir>
++    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)_CRTDLL\</IntDir>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)_CRTDLL\</OutDir>
+-    <IntDir>$(Platform)\$(Configuration)_CRTDLL\</IntDir>
++    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)_CRTDLL\</IntDir>
+   </PropertyGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <ClCompile>
+@@ -145,7 +145,7 @@
+       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+     </ClCompile>
+     <Lib>
+-      <OutputFile>$(IntDir)_CRTDLL\IccLibXML_CRTDLL.lib</OutputFile>
++      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+     </Lib>
+   </ItemDefinitionGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+@@ -166,7 +166,7 @@
+       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+     </ClCompile>
+     <Lib>
+-      <OutputFile>$(IntDir)_CRTDLL\IccLibXML_CRTDLL.lib</OutputFile>
++      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+     </Lib>
+   </ItemDefinitionGroup>
+   <ItemGroup>
+diff --git a/IccXML/IccLibXML/IccLibXML_v22.vcxproj b/IccXML/IccLibXML/IccLibXML_v22.vcxproj
+index d64c6c2..9a3b388 100644
+--- a/IccXML/IccLibXML/IccLibXML_v22.vcxproj
++++ b/IccXML/IccLibXML/IccLibXML_v22.vcxproj
+@@ -23,6 +23,7 @@
+     <ProjectGuid>{40023C16-B89B-48F6-92ED-B28FABBDB6FD}</ProjectGuid>
+     <RootNamespace>IccLibXML</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
++    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+@@ -75,7 +76,7 @@
+     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
++    <OutDir>$(Platform)\$(Configuration)\</OutDir>
+     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+diff --git a/Tools/CmdLine/IccApplyProfiles/iccApplyProfiles_v22.vcxproj b/Tools/CmdLine/IccApplyProfiles/iccApplyProfiles_v22.vcxproj
+index 41bf0a4..ab2a02c 100644
+--- a/Tools/CmdLine/IccApplyProfiles/iccApplyProfiles_v22.vcxproj
++++ b/Tools/CmdLine/IccApplyProfiles/iccApplyProfiles_v22.vcxproj
+@@ -232,7 +232,7 @@ copy $(Platform)\$(Configuration)\iccApplyProfiles.pdb ..\..\..\Testing
+     </Midl>
+     <ClCompile>
+       <Optimization>Disabled</Optimization>
+-      <AdditionalIncludeDirectories>..\..\..\IccProfLib;$(LIBTIFF_INCLUDEx64);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>..\..\..\IccProfLib;$(INCLUDE);$(TIFF_INCLUDEx64);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+@@ -251,10 +251,10 @@ copy $(Platform)\$(Configuration)\iccApplyProfiles.pdb ..\..\..\Testing
+       <Culture>0x0409</Culture>
+     </ResourceCompile>
+     <Link>
+-      <AdditionalDependencies>IccProfLib.lib;$(LIBTIFF_DLIB);%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalDependencies>IccProfLib.lib;$(TIFF_DLIB);%(AdditionalDependencies)</AdditionalDependencies>
+       <OutputFile>$(Platform)\$(Configuration)/iccApplyProfiles.exe</OutputFile>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+-      <AdditionalLibraryDirectories>..\..\..\IccProfLib\$(Platform)\$(Configuration);$(LIBTIFF_LIBDIRx64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++      <AdditionalLibraryDirectories>..\..\..\IccProfLib\$(Platform)\$(Configuration);$(LIB);$(TIFF_LIBDIRx64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+       <ProgramDatabaseFile>$(Platform)\$(Configuration)/iccApplyProfiles.pdb</ProgramDatabaseFile>
+       <SubSystem>Console</SubSystem>
+diff --git a/Tools/CmdLine/IccSpecSepToTiff/iccSpecSepToTiff_v22.vcxproj b/Tools/CmdLine/IccSpecSepToTiff/iccSpecSepToTiff_v22.vcxproj
+index 3c5db6a..cc503ef 100644
+--- a/Tools/CmdLine/IccSpecSepToTiff/iccSpecSepToTiff_v22.vcxproj
++++ b/Tools/CmdLine/IccSpecSepToTiff/iccSpecSepToTiff_v22.vcxproj
+@@ -229,7 +229,7 @@ copy $(Platform)\$(Configuration)\iccSpecSepToTiff.pdb ..\..\..\Testing
+     </Midl>
+     <ClCompile>
+       <Optimization>Disabled</Optimization>
+-      <AdditionalIncludeDirectories>..\..\..\IccProfLib;$(LIBTIFF_INCLUDEx64);..\IccApplyProfiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>..\..\..\IccProfLib;$(TIFF_INCLUDEx64);$(INCLUDE);..\IccApplyProfiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+@@ -248,10 +248,10 @@ copy $(Platform)\$(Configuration)\iccSpecSepToTiff.pdb ..\..\..\Testing
+       <Culture>0x0409</Culture>
+     </ResourceCompile>
+     <Link>
+-      <AdditionalDependencies>IccProfLib.lib;$(LIBTIFF_DLIB);%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalDependencies>IccProfLib.lib;$(TIFF_DLIB);%(AdditionalDependencies)</AdditionalDependencies>
+       <OutputFile>$(Platform)\$(Configuration)/iccSpecSepToTiff.exe</OutputFile>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+-      <AdditionalLibraryDirectories>..\..\..\IccProfLib\$(Platform)\$(Configuration);$(LIBTIFF_LIBDIRx64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++      <AdditionalLibraryDirectories>..\..\..\IccProfLib\$(Platform)\$(Configuration);$(TIFF_LIBDIRx64);$(LIB);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+       <ProgramDatabaseFile>$(Platform)\$(Configuration)/iccSpecSepToTiff.pdb</ProgramDatabaseFile>
+       <SubSystem>Console</SubSystem>
+diff --git a/Tools/CmdLine/IccTiffDump/iccTiffDump_v22.vcxproj b/Tools/CmdLine/IccTiffDump/iccTiffDump_v22.vcxproj
+index d0ac4f1..e09527d 100644
+--- a/Tools/CmdLine/IccTiffDump/iccTiffDump_v22.vcxproj
++++ b/Tools/CmdLine/IccTiffDump/iccTiffDump_v22.vcxproj
+@@ -222,43 +222,43 @@ copy $(Platform)\$(Configuration)\iccTiffDump.pdb ..\..\..\Testing
+     </PostBuildEvent>
+   </ItemDefinitionGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+-    <Midl>
+-      <TargetEnvironment>X64</TargetEnvironment>
+-      <TypeLibraryName>$(Platform)\$(Configuration)/iccTiffDump.tlb</TypeLibraryName>
+-      <HeaderFileName />
+-    </Midl>
+-    <ClCompile>
+-      <Optimization>Disabled</Optimization>
+-      <AdditionalIncludeDirectories>..\..\..\IccProfLib;$(LIBTIFF_INCLUDEx64);..\IccApplyProfiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+-      <PrecompiledHeaderOutputFile>$(Platform)\$(Configuration)/iccTiffDump.pch</PrecompiledHeaderOutputFile>
+-      <AssemblerListingLocation>$(Platform)\$(Configuration)/</AssemblerListingLocation>
+-      <ObjectFileName>$(Platform)\$(Configuration)/</ObjectFileName>
+-      <ProgramDataBaseFileName>$(Platform)\$(Configuration)/</ProgramDataBaseFileName>
+-      <WarningLevel>Level3</WarningLevel>
+-      <SuppressStartupBanner>true</SuppressStartupBanner>
+-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <CompileAs>Default</CompileAs>
+-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+-    </ClCompile>
+-    <ResourceCompile>
+-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+-      <Culture>0x0409</Culture>
+-    </ResourceCompile>
+-    <Link>
+-      <AdditionalDependencies>IccProfLib.lib;$(LIBTIFF_DLIB);%(AdditionalDependencies)</AdditionalDependencies>
+-      <OutputFile>$(Platform)\$(Configuration)/iccTiffDump.exe</OutputFile>
+-      <SuppressStartupBanner>true</SuppressStartupBanner>
+-      <AdditionalLibraryDirectories>..\..\..\IccProfLib\$(Platform)\$(Configuration);$(LIBTIFF_LIBDIRx64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+-      <GenerateDebugInformation>true</GenerateDebugInformation>
+-      <ProgramDatabaseFile>$(Platform)\$(Configuration)/iccTiffDump.pdb</ProgramDatabaseFile>
+-      <SubSystem>Console</SubSystem>
+-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+-      <DataExecutionPrevention />
+-      <TargetMachine>MachineX64</TargetMachine>
+-    </Link>
++  <Midl>
++    <TargetEnvironment>X64</TargetEnvironment>
++    <TypeLibraryName>$(Platform)\$(Configuration)\iccTiffDump.tlb</TypeLibraryName>
++    <HeaderFileName />
++  </Midl>
++  <ClCompile>
++    <Optimization>Disabled</Optimization>
++    <AdditionalIncludeDirectories>..\..\..\IccProfLib;$(TIFF_INCLUDEx64);$(INCLUDE);..\IccApplyProfiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++    <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
++    <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++    <PrecompiledHeaderOutputFile>$(Platform)\$(Configuration)\iccTiffDump.pch</PrecompiledHeaderOutputFile>
++    <AssemblerListingLocation>$(Platform)\$(Configuration)\</AssemblerListingLocation>
++    <ObjectFileName>$(Platform)\$(Configuration)\</ObjectFileName>
++    <ProgramDataBaseFileName>$(Platform)\$(Configuration)\</ProgramDataBaseFileName>
++    <WarningLevel>Level3</WarningLevel>
++    <SuppressStartupBanner>true</SuppressStartupBanner>
++    <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    <CompileAs>Default</CompileAs>
++    <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
++  </ClCompile>
++  <ResourceCompile>
++    <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    <Culture>0x0409</Culture>
++  </ResourceCompile>
++  <Link>
++    <AdditionalDependencies>IccProfLib.lib;$(TIFF_DLIB);%(AdditionalDependencies)</AdditionalDependencies>
++    <OutputFile>$(Platform)\$(Configuration)\iccTiffDump.exe</OutputFile>
++    <SuppressStartupBanner>true</SuppressStartupBanner>
++    <AdditionalLibraryDirectories>..\..\..\IccProfLib\$(Platform)\$(Configuration);$(TIFF_LIBDIRx64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++    <GenerateDebugInformation>true</GenerateDebugInformation>
++    <ProgramDatabaseFile>$(Platform)\$(Configuration)\iccTiffDump.pdb</ProgramDatabaseFile>
++    <SubSystem>Console</SubSystem>
++    <RandomizedBaseAddress>false</RandomizedBaseAddress>
++    <DataExecutionPrevention />
++    <TargetMachine>MachineX64</TargetMachine>
++  </Link>
+     <PostBuildEvent>
+       <Command>copy $(Platform)\$(Configuration)\iccTiffDump.exe ..\..\..\Testing\iccTiffDump_d.exe
+ copy $(Platform)\$(Configuration)\iccTiffDump.pdb ..\..\..\Testing
+diff --git a/Tools/CmdLine/IccV5DspObsToV4Dsp/IccV5DspObsToV4Dsp_v22.vcxproj b/Tools/CmdLine/IccV5DspObsToV4Dsp/IccV5DspObsToV4Dsp_v22.vcxproj
+index c9d94df..9775cd1 100644
+--- a/Tools/CmdLine/IccV5DspObsToV4Dsp/IccV5DspObsToV4Dsp_v22.vcxproj
++++ b/Tools/CmdLine/IccV5DspObsToV4Dsp/IccV5DspObsToV4Dsp_v22.vcxproj
+@@ -230,7 +230,7 @@ copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.pdb ..\..\..\Testing
+     </Midl>
+     <ClCompile>
+       <Optimization>Disabled</Optimization>
+-      <AdditionalIncludeDirectories>..\..\..\IccProfLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>..\..\..\IccProfLib;%(AdditionalIncludeDirectories);C:\tmp\vcpkg\libxml2-win-build\lib</AdditionalIncludeDirectories>
+       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+diff --git a/Tools/wxWidget/wxProfileDump/wxProfileDump_v22.vcxproj b/Tools/wxWidget/wxProfileDump/wxProfileDump_v22.vcxproj
+index 0097416..0ac8258 100644
+--- a/Tools/wxWidget/wxProfileDump/wxProfileDump_v22.vcxproj
++++ b/Tools/wxWidget/wxProfileDump/wxProfileDump_v22.vcxproj
+@@ -233,6 +233,7 @@
+     <OutDir>.\vc_mswd_x64\</OutDir>
+     <IntDir>.\vc_mswd_x64\wxProfileDump\</IntDir>
+     <LinkIncremental>false</LinkIncremental>
++    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\tmp\vcpkg\libxml2-win-build\include</IncludePath>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug with ZLIB|x64'">
+     <OutDir>.\vc_mswd_x64\</OutDir>
+@@ -730,7 +731,7 @@ copy .\vc_mswd\wxProfileDump.pdb ..\..\..\Testing
+       <AdditionalIncludeDirectories>$(WXWIN)\include;$(WXWIN)\lib\$(Platform)\vc_lib\mswd;.;$(WXWIN)\samples;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+     </ResourceCompile>
+     <Link>
+-      <AdditionalDependencies>IccProfLib_CRTDLL.lib;wxmsw$(WXVER)d_core.lib;wxbase$(WXVER)d.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexd.lib;wxexpatd.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;oleacc.lib;odbc32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalDependencies>IccProfLib_CRTDLL.lib;wxmsw32u_stc.lib;wxmsw$(WXVER)u_core.lib;wxbase$(WXVER)u.lib;tiff.lib;turbojpeg.lib;libpng16.lib;zlib.lib;pcre2-32.lib;libexpat.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;oleacc.lib;odbc32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+       <OutputFile>$(OutDir)\wxProfileDump.exe</OutputFile>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <AdditionalLibraryDirectories>..\..\..\IccProfLib\$(Platform)\$(Configuration)_CRTDLL;$(WXWIN)\lib\$(Platform)\vc_lib;$(WXWIN)\lib\vc_x64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
