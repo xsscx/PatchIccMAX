@@ -34,7 +34,7 @@ for file in $(find . -type f \( -name "*.xml" -o -name "*.icc" \)); do
         base_name="${file%.xml}"
         xml_map["$base_name"]=1
     fi
-
+    
     # Check if it's an ICC file
     if [[ "$file" == *.icc ]]; then
         total_icc=$((total_icc + 1))
@@ -62,3 +62,4 @@ echo "Total failed creations (XML without ICC): $failed_files" | tee -a $report_
 
 # End of script
 log_banner "Analysis completed"
+
