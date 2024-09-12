@@ -8,6 +8,11 @@ failed_files=0
 # File to store the report
 report_file="creation_report.txt"
 
+# Directories to exclude
+EXCLUDE_DIRS=(
+    "./xnuiccprofiles"
+)
+
 # Clear report file at the start
 : > $report_file  # Correct way to empty the file
 
@@ -18,6 +23,19 @@ log_banner() {
   echo "==================================================" | tee -a $report_file
 }
 
+# Function to construct the 'find' command excluding the specified directories
+find_with_excludes() {
+  local find_command="find . -type f \( -name '*.xml' -o -name '*.icc' \)"
+
+  # Add excluded directories to the find command
+  for exclude_dir in "${EXCLUDE_DIRS[@]}"; do
+    find_command="$find_command -not -path '$exclude_dir/*'"
+  done
+
+  # Execute the constructed find command
+  eval $find_command
+}
+
 # Start logging
 log_banner "Starting XML to ICC correlation analysis"
 
@@ -25,8 +43,8 @@ log_banner "Starting XML to ICC correlation analysis"
 typeset -A xml_map
 typeset -A icc_map
 
-# Traverse current directory and subdirectories to find XML and ICC files
-for file in $(find . -type f \( -name "*.xml" -o -name "*.icc" \)); do
+# Traverse the directory and find XML and ICC files excluding certain directories
+for file in $(find_with_excludes); do
     # Check if it's an XML file
     if [[ "$file" == *.xml ]]; then
         total_xml=$((total_xml + 1))
@@ -34,7 +52,7 @@ for file in $(find . -type f \( -name "*.xml" -o -name "*.icc" \)); do
         base_name="${file%.xml}"
         xml_map["$base_name"]=1
     fi
-    
+
     # Check if it's an ICC file
     if [[ "$file" == *.icc ]]; then
         total_icc=$((total_icc + 1))
@@ -62,4 +80,3 @@ echo "Total failed creations (XML without ICC): $failed_files" | tee -a $report_
 
 # End of script
 log_banner "Analysis completed"
-

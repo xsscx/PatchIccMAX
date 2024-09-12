@@ -1,6 +1,6 @@
 #!/bin/sh
 
-config="Release"
+config="Debug"
 
 cd ../../IccProfLib
 xcodebuild -target IccProfLib-macOS -configuration "$config" -arch x86_64 clean
