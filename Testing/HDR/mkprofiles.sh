@@ -1,12 +1,10 @@
-iccFromXml BT2100HlgFullScene.xml BT2100HlgFullScene.icc
-iccFromXml BT2100HlgNarrowScene.xml BT2100HlgNarrowScene.icc
-iccFromXml BT2100HlgFullDisplay.xml BT2100HlgFullDisplay.icc
-iccFromXml BT2100HlgNarrowDisplay.xml BT2100HlgNarrowDisplay.icc
-
-iccFromXml BT2100PQFullScene.xml BT2100PQFullScene.icc
-iccFromXml BT2100PQNarrowScene.xml BT2100PQNarrowScene.icc
-iccFromXml BT2100PQFullDisplay.xml BT2100PQFullDisplay.icc
-iccFromXml BT2100PQNarrowDisplay.xml BT2100PQNarrowDisplay.icc
-
-iccFromXml BT2100HlgSceneToDisplayLink.xml BT2100HlgSceneToDisplayLink.icc
-iccFromXml BT2100PQSceneToDisplayLink.xml BT2100PQSceneToDisplayLink.icc
+/tmp/test/DemoIccMAX/Build/Tools/IccFromXml/iccFromXml BT2100HlgFullScene.xml BT2100HlgFullScene.icc
+/tmp/test/DemoIccMAX/Build/Tools/IccFromXml/iccFromXml BT2100HlgNarrowScene.xml BT2100HlgNarrowScene.icc
+/tmp/test/DemoIccMAX/Build/Tools/IccFromXml/iccFromXml BT2100HlgFullDisplay.xml BT2100HlgFullDisplay.icc
+/tmp/test/DemoIccMAX/Build/Tools/IccFromXml/iccFromXml BT2100HlgNarrowDisplay.xml BT2100HlgNarrowDisplay.icc
+/tmp/test/DemoIccMAX/Build/Tools/IccFromXml/iccFromXml BT2100PQFullScene.xml BT2100PQFullScene.icc
+/tmp/test/DemoIccMAX/Build/Tools/IccFromXml/iccFromXml BT2100PQNarrowScene.xml BT2100PQNarrowScene.icc
+/tmp/test/DemoIccMAX/Build/Tools/IccFromXml/iccFromXml BT2100PQFullDisplay.xml BT2100PQFullDisplay.icc
+/tmp/test/DemoIccMAX/Build/Tools/IccFromXml/iccFromXml BT2100PQNarrowDisplay.xml BT2100PQNarrowDisplay.icc
+/tmp/test/DemoIccMAX/Build/Tools/IccFromXml/iccFromXml BT2100HlgSceneToDisplayLink.xml BT2100HlgSceneToDisplayLink.icc
+/tmp/test/DemoIccMAX/Build/Tools/IccFromXml/iccFromXml BT2100PQSceneToDisplayLink.xml BT2100PQSceneToDisplayLink.icc
