@@ -7,7 +7,7 @@ command script import ../lldb/float32_array.py
 command script import ../lldb/hex_dump.py
 command script import ../lldb/inspect_buffer_overflow.py
 command script import ../lldb/inspect_icc_tag.py
-command script import ../lldb/inspect_stack_frame_cars.py
+command script import ../lldb/inspect_stack_frame_vars.py
 command script import ../lldb/read_profile_header.py
 command script import ../lldb/read_uint32.py
 command script import ../lldb/read_xml_attributes.py
