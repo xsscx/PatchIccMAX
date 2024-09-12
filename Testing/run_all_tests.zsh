@@ -20,4 +20,5 @@ cd ../mcs
 ./updateprev.sh
 echo "cd Testing"
 cd ../
+./testing_summary.zsh
 echo "done..."
