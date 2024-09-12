@@ -6,9 +6,13 @@ This document outlines the security practices for the `DemoIccMAX` project, incl
 The DemoIccMAX reference implementation is intended as a guideline and should not be considered production-ready code.
 Any code intended for production use should undergo thorough security reviews and extensive product testing to ensure it meets the necessary standards.
 
-## Reporting a Bug
+## Bug Reporting
 
-When you discover a bug, please open an Issue with all relevant details and a proof of concept. Including a patch is highly encouraged.
+When you discover something is wrong or unexpected, please open an Issue with all relevant details and a proof of concept. Including a patch is highly encouraged.
+
+**Bug** if User Controllable Input causes a Crash.
+
+**Bad** if User Controllable Input causes Arbitrary Code Execution.
 
 ## CVE Assignments
 
