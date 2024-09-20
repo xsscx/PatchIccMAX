@@ -1,0 +1,1 @@
+Get-ChildItem -Path "IccXML/" -Recurse -Include *.exe, *.dll, *.a, *.lib | ForEach-Object { link /dump /dependents $_.FullName | Select-String -NotMatch ".data|.pdata|.reloc|.rsrc|.text|.INTR|.WEAK|.debug|.00cfg|.tls|.ASAN|.CRT|.bss|.chks64|.drectve|.rtc|.voltbl|.comment|.gfids|.eh_fram|.rsrc$|.stab" }
