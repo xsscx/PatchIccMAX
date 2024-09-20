@@ -1,7 +1,7 @@
 
 # Development Branch
 
-Hello and Welcome to Hoyt's Development Branch of the Development Branch.
+Hello and Welcome to Hoyt's Development Branch of the DemoIccMAX Project.
 
 The Development Branch provides updated documentation, additional scripts, and modernized build instructions to supplement the legacy documentation of the DemoIccMAX project. The contrib/ directory provides updated examples and verified instructions to ensure a smooth experience with modern build systems and environments.
 
