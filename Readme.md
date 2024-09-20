@@ -103,7 +103,7 @@ https://github.com/xsscx/PatchIccMAX.git
 Change into the Development Branch directory:
 
 ```
-cd PatchIcMAX
+cd PatchIccMAX
 checkout development
 ```
 
