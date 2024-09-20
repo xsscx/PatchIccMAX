@@ -1,0 +1,39 @@
+{
+  "msbuild_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe",
+  "solution_file": "..\\..\\..\\Build\\MSVC\\BuildAll_v22.sln",  // Adjusted to relative path from VS2022E to BuildAll_v22.sln
+  "build_options": {
+    "configurations": [
+      {
+        "name": "Debug",
+        "platform": "x64",
+        "compiler_options": "/Zi /Od /DDEBUG /W4",
+        "linker_options": "/DEBUG /INCREMENTAL:NO"
+      },
+      {
+        "name": "Debug",
+        "platform": "Win32",
+        "compiler_options": "/Zi /Od /DDEBUG /W4",
+        "linker_options": "/DEBUG /INCREMENTAL:NO"
+      },
+      {
+        "name": "Release",
+        "platform": "x64",
+        "compiler_options": "/O2 /DNDEBUG /W4",
+        "linker_options": "/INCREMENTAL:NO /OPT:REF /OPT:ICF"
+      },
+      {
+        "name": "Release",
+        "platform": "Win32",
+        "compiler_options": "/O2 /DNDEBUG /W4",
+        "linker_options": "/INCREMENTAL:NO /OPT:REF /OPT:ICF"
+      }
+    ],
+    "max_cpu_count": "/maxcpucount",
+    "additional_include_directories": "$vcpkgDir\\installed\\x64-windows\\include",
+    "additional_library_directories": "$vcpkgDir\\installed\\x64-windows\\lib",
+    "binary_logging": "/bl"
+  },
+  "environment_variables": {
+    "MSBUILDLOGALLENVIRONMENTVARIABLES": "1"
+  }
+}
