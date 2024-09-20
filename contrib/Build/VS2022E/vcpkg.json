@@ -1,0 +1,9 @@
+{
+  "name": "PatchIccMAX",
+  "version": "2.2.3",
+  "dependencies": [
+    "libxml2",
+    "tiff",
+    "wxwidgets"
+  ]
+}
