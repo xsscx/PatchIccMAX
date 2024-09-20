@@ -1,7 +1,7 @@
 
 # Development Branch
 
-Hello and Welcome to Hoyt's Development Branch of the DemoIccMAX Project.
+Hello and Welcome to Hoyt's Development Branch of the Development Branch.
 
 The Development Branch provides updated documentation, additional scripts, and modernized build instructions to supplement the legacy documentation of the DemoIccMAX project. The contrib/ directory provides updated examples and verified instructions to ensure a smooth experience with modern build systems and environments.
 
@@ -9,7 +9,7 @@ The Development Branch provides updated documentation, additional scripts, and m
 
 ### Prerequisites
 
-Before building the DemoIccMAX project on a WSL (Windows Subsystem for Linux) Ubuntu environment, ensure that the necessary libraries and tools are installed. Use the following command to install the required packages:
+Before building the Development Branch on a WSL (Windows Subsystem for Linux) Ubuntu environment, ensure that the necessary libraries and tools are installed. Use the following command to install the required packages:
 
 ```
 sudo apt-get install libwxgtk-media3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev \
@@ -63,7 +63,7 @@ This command will compile the project and filter the output to display any error
 
 ### Overview
 
-The DemoIccMAX project can be built on macOS using Xcode, with CMake as the preferred method for generating Xcode projects. This method provides more flexibility and ensures compatibility with modern build systems.
+The Development Branch can be built on macOS using Xcode, with CMake as the preferred method for generating Xcode projects. This method provides more flexibility and ensures compatibility with modern build systems.
 
 ### Prerequisites
 
@@ -96,13 +96,14 @@ Follow these steps to generate and build the project using CMake:
 Next, clone the project repository from GitHub:
 
 ```
-git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+https://github.com/xsscx/PatchIccMAX.git
 ```
 
-Change into the project directory:
+Change into the Development Branch directory:
 
 ```
-cd DemoIccMAX/
+cd PatchIcMAX
+checkout development
 ```
 
 #### Run CMake to Generate Xcode Projects
@@ -130,7 +131,7 @@ Alternatively, you can open the project manually in Xcode by navigating to the `
 With the project open in Xcode, you can now build it directly using the Xcode interface. The resulting binaries will be placed in the Testing folder after a successful build.
 
 Conclusion
-The CMake method for generating Xcode projects provides a streamlined and modern approach to building the DemoIccMAX project on macOS. This method is recommended for developers who prefer a flexible and compatible build process, ensuring that the project is set up correctly and efficiently on macOS.
+The CMake method for generating Xcode projects provides a streamlined and modern approach to building the Development Branch on macOS. This method is recommended for developers who prefer a flexible and compatible build process, ensuring that the project is set up correctly and efficiently on macOS.
 
 ## Building the Project on Windows
 
@@ -154,7 +155,7 @@ Use the following PowerShell script to create a temporary directory and set up p
     New-Item -ItemType Directory -Path $tempDir -Force
 
     # Set up paths within the temp directory
-    $baseDir = "$tempDir\DemoIccMAXBuild"
+    $baseDir = "$tempDir\PatchIccMAXBuild"
     $vcpkgDir = "$baseDir\vcpkg"
     $patchDir = "$baseDir\patch"
     $outputDir = "$baseDir\output"
@@ -181,16 +182,18 @@ Next, clone the vcpkg repository and install the required packages:
     .\vcpkg.exe install libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows
 ```
 
-#### Clone the DemoIccMAX Repository and Revert a Commit
+#### Clone and Checkout
 
 Clone the DemoIccMAX repository and revert a commit:
 
 ```
-    # Clone DemoIccMAX repository and revert commit
-    cd $baseDir
-    if (-not (Test-Path "$baseDir\DemoIccMAX")) {
-        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
-    }
+# Clone
+cd $baseDir
+if (-not (Test-Path "$baseDir\PatchIccMAX")) {
+    git clone https://github.com/xsscx/PatchIccMAX.git
+}
+cd "$baseDir\PatchIccMAX"
+git checkout development
 ```
 
 #### Verify and Display the Directory Contents
@@ -307,7 +310,7 @@ The `UnitTest` directory includes unit test files and related scripts.
 
 ### Conclusion
 
-This documentation is intended to assist with setting up and building the DemoIccMAX project using modern tools and practices. If you encounter any issues or have suggestions for improvement, please feel free to contribute to this repository.
+This documentation is intended to assist with setting up and building the Development Branch using modern tools and practices. If you encounter any issues or have suggestions for improvement, please feel free to contribute to this repository.
 
 ---
 
