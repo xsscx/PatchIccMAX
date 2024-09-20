@@ -22,13 +22,14 @@ libwxgtk3.0-gtk3 libxml2 libtiff5 libxml2-dev libtiff5-dev
 Next, clone the project repository from GitHub:
 
 ```
-git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+https://github.com/xsscx/PatchIccMAX.git
 ```
 
-Change into the project directory:
+Change into the Development Branch directory:
 
 ```
-cd DemoIccMAX/
+cd PatchIcMAX
+checkout development
 ```
 
 ### Configure the Build with CMake
