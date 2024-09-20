@@ -25,10 +25,10 @@ Next, clone the project repository from GitHub:
 https://github.com/xsscx/PatchIccMAX.git
 ```
 
-Change into the Development Branch directory:
+Change to the Development Branch directory:
 
 ```
-cd PatchIcMAX
+cd PatchIccMAX
 checkout development
 ```
 
@@ -79,8 +79,9 @@ This command will install CMake as well as the required `libtiff`, `libxml2`, an
 For those familiar with the process, here’s a quick guide to cloning the repository, reverting to a stable commit, and building the project using CMake:
 
 ```
-git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
-cd DemoIccMAX/Build
+git clone https://github.com/xsscx/PatchIccMAX.git
+cd PatchoIccMAX/Build
+checkout development
 cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug \
 -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
 -Wno-dev Cmake/
