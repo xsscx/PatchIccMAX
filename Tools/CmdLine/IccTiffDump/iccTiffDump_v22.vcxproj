@@ -248,6 +248,7 @@ copy $(Platform)\$(Configuration)\iccTiffDump.pdb ..\..\..\Testing
       <CompileAs>Default</CompileAs>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -270,6 +271,9 @@ copy $(Platform)\$(Configuration)\iccTiffDump.pdb ..\..\..\Testing
 copy $(Platform)\$(Configuration)\iccTiffDump.pdb ..\..\..\Testing
 </Command>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\IccApplyProfiles\TiffImg.cpp" />

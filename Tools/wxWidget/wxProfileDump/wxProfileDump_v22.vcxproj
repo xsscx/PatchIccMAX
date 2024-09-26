@@ -739,6 +739,7 @@ copy .\vc_mswd\wxProfileDump.pdb ..\..\..\Testing
       <CompileAs>Default</CompileAs>
       <DisableSpecificWarnings>4996;4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXMSW__;__WXDEBUG__;_WINDOWS;NOPCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -763,6 +764,9 @@ copy .\vc_mswd\wxProfileDump.pdb ..\..\..\Testing
 copy .\vc_mswd_x64\wxProfileDump.pdb ..\..\..\Testing
 </Command>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug with ZLIB|x64'">
     <Midl>
