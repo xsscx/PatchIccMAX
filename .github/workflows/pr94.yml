@@ -25,7 +25,7 @@ steps:
     msbuildArchitecture: 'x64'
     createLogFile: true
     logFileVerbosity: 'normal'  # Can set to 'detailed' for more info
-    msbuildArgs: '/verbosity:minimal /fileLogger /fileLoggerParameters:LogFile=$(Build.ArtifactStagingDirectory)\msbuild.log'
+    msbuildArgs: '/verbosity:minimal /fileLogger /fileLoggerParameters:LogFile=$(Build.ArtifactStagingDirectory)\msbuild.log /t:Clean,Build'
     
 # Step 3: Build Solution - Release
 - task: VSBuild@1
@@ -38,7 +38,7 @@ steps:
     msbuildArchitecture: 'x64'
     createLogFile: true
     logFileVerbosity: 'normal'
-    msbuildArgs: '/verbosity:minimal /fileLogger /fileLoggerParameters:LogFile=$(Build.ArtifactStagingDirectory)\msbuild_release.log'
+    msbuildArgs: '/verbosity:minimal /fileLogger /fileLoggerParameters:LogFile=$(Build.ArtifactStagingDirectory)\msbuild_release.log /t:Clean,Build'
 
 # Step 5: Publish MSBuild Logs (optional, but good for debugging)
 - task: PublishBuildArtifacts@1
