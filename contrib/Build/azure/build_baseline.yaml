@@ -1,0 +1,27 @@
+pool:
+  name: Default
+  demands:
+  - msbuild
+  - visualstudio
+
+steps:
+- task: VSBuild@1
+  displayName: 'Build solution Build/MSVC/BuildAll_v22.sln'
+  inputs:
+    solution: 'Build/MSVC/BuildAll_v22.sln'
+    platform: x64
+    configuration: Debug
+    maximumCpuCount: true
+    msbuildArchitecture: x64
+    createLogFile: true
+
+steps:
+- task: VSBuild@1
+  displayName: 'Build solution Build/MSVC/BuildAll_v22.sln'
+  inputs:
+    solution: 'Build/MSVC/BuildAll_v22.sln'
+    platform: x64
+    configuration: Debug
+    maximumCpuCount: true
+    msbuildArchitecture: x64
+    createLogFile: true
