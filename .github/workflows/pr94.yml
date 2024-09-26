@@ -1,125 +1,64 @@
-name: C/C++ CI
+pool:
+  name: Default
+  demands:
+  - msbuild
+  - visualstudio
 
-on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-  workflow_dispatch:
+steps:
+# Step 1: Clean up any previous builds (optional but recommended)
+- task: PowerShell@2
+  displayName: 'Clean build directories'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Remove-Item -Recurse -Force -ErrorAction Continue $(Build.BinariesDirectory)\* 
+      Remove-Item -Recurse -Force -ErrorAction Continue $(Build.ArtifactStagingDirectory)\*
 
-jobs:
-  build-linux:
+# Step 2: Build Solution
+- task: VSBuild@1
+  displayName: 'Build solution Build/MSVC/BuildAll_v22.sln - Debug'
+  inputs:
+    solution: 'Build/MSVC/BuildAll_v22.sln'
+    platform: 'x64'
+    configuration: 'Debug'
+    maximumCpuCount: true
+    msbuildArchitecture: 'x64'
+    createLogFile: true
+    logFileVerbosity: 'normal'  # Can set to 'detailed' for more info
+    msbuildArgs: '/verbosity:minimal /fileLogger /fileLoggerParameters:LogFile=$(Build.ArtifactStagingDirectory)\msbuild.log'
+    
+# Step 3: Build Solution - Release
+- task: VSBuild@1
+  displayName: 'Build solution Build/MSVC/BuildAll_v22.sln - Release'
+  inputs:
+    solution: 'Build/MSVC/BuildAll_v22.sln'
+    platform: 'x64'
+    configuration: 'Release'
+    maximumCpuCount: true
+    msbuildArchitecture: 'x64'
+    createLogFile: true
+    logFileVerbosity: 'normal'
+    msbuildArgs: '/verbosity:minimal /fileLogger /fileLoggerParameters:LogFile=$(Build.ArtifactStagingDirectory)\msbuild_release.log'
 
-    runs-on: ubuntu-latest
+# Step 4: Publish Build Artifacts
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Debug Binaries'
+  inputs:
+    pathtoPublish: '$(Build.BinariesDirectory)\Debug'
+    artifactName: 'DebugBuild'
+    publishLocation: 'Container'
 
-    steps:
-    - name: Checkout your repository
-      uses: actions/checkout@v4
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Release Binaries'
+  inputs:
+    pathtoPublish: '$(Build.BinariesDirectory)\Release'
+    artifactName: 'ReleaseBuild'
+    publishLocation: 'Container'
 
-    - name: Set up Git anonymous identity
-      run: |
-        git config --global user.email "github-actions@github.com"
-        git config --global user.name "GitHub Actions"
-
-    - name: Clone the DemoIccMAX repository
-      run: |
-        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
-        cd DemoIccMAX
-        git fetch origin pull/94/head:pr-94
-        git checkout pr-94
-        git revert --no-edit b90ac3933da99179df26351c39d8d9d706ac1cc6
-
-    - name: Configure the build with CMake
-      run: |
-        cd DemoIccMAX/Build/
-        cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
-              -DCMAKE_BUILD_TYPE=Debug \
-              -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
-              -Wno-dev Cmake/
-
-    - name: Build project
-      run: |
-        cd DemoIccMAX/Build/
-        make
-
-    - name: Create artifact directory
-      run: mkdir -p artifact
-
-    - name: Find and copy binary tools, libraries, and archive files (Ubuntu)
-      run: |
-        # Check if the Tools directory exists and copy executables if found
-        if [ -d DemoIccMAX/Build/Tools ]; then
-          find DemoIccMAX/Build/Tools/ -type f -executable -exec cp {} artifact/ \;
-        fi
-
-        # Check if the bin directory exists and copy executables if found
-        if [ -d DemoIccMAX/Build/bin ]; then
-          find DemoIccMAX/Build/bin/ -type f -executable -exec cp {} artifact/ \;
-        fi
-
-        # Find and copy static and dynamic libraries (.a, .so files)
-        find DemoIccMAX/Build/ -type f \( -name "*.a" -o -name "*.so" \) -exec cp {} artifact/ \;
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: DemoIccMAX-build-linux
-        path: artifact/
-
-  build-macos:
-
-    runs-on: macos-latest
-
-    steps:
-    - name: Checkout your repository
-      uses: actions/checkout@v4
-
-    - name: Set up Git anonymous identity
-      run: |
-        git config --global user.email "github-actions@github.com"
-        git config --global user.name "GitHub Actions"
-
-    - name: Clone the DemoIccMAX repository
-      run: |
-        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
-        cd DemoIccMAX
-        git fetch origin pull/94/head:pr-94
-        git checkout pr-94
-        git revert --no-edit b90ac3933da99179df26351c39d8d9d706ac1cc6
-
-    - name: Configure the build with CMake
-      run: |
-        cd DemoIccMAX/Build/
-        cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
-              -DCMAKE_BUILD_TYPE=Debug \
-              -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
-              -Wno-dev Cmake/
-
-    - name: Build project
-      run: |
-        cd DemoIccMAX/Build/
-        make
-
-    - name: Create artifact directory
-      run: mkdir -p artifact
-
-    - name: Find and copy binary tools, libraries, and archive files (macOS)
-      run: |
-        # Check if the Tools directory exists and copy executables if found
-        if [ -d DemoIccMAX/Build/Tools ]; then
-          find DemoIccMAX/Build/Tools/ -type f -perm +111 -exec cp {} artifact/ \;
-        fi
-
-        # Check if the bin directory exists and copy executables if found
-        if [ -d DemoIccMAX/Build/bin ]; then
-          find DemoIccMAX/Build/bin/ -type f -perm +111 -exec cp {} artifact/ \;
-        fi
-
-        # Find and copy static and dynamic libraries (.a, .lib, .dylib files)
-        find DemoIccMAX/Build/ -type f \( -name "*.a" -o -name "*.lib" -o -name "*.dylib" \) -exec cp {} artifact/ \;
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: DemoIccMAX-build-macos
-        path: artifact/
+# Step 5: Publish MSBuild Logs (optional, but good for debugging)
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish MSBuild Logs'
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'BuildLogs'
+    publishLocation: 'Container'
