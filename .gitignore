@@ -252,3 +252,5 @@ compile_commands.json
 CTestTestfile.cmake
 _deps/
 CMakeUserPresets.json
+/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/CodeAnalysisResultManifest.txt
+/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/wxProfileDump.sbr
