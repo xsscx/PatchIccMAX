@@ -40,21 +40,6 @@ steps:
     logFileVerbosity: 'normal'
     msbuildArgs: '/verbosity:minimal /fileLogger /fileLoggerParameters:LogFile=$(Build.ArtifactStagingDirectory)\msbuild_release.log'
 
-# Step 4: Publish Build Artifacts
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Debug Binaries'
-  inputs:
-    pathtoPublish: '$(Build.BinariesDirectory)\Debug'
-    artifactName: 'DebugBuild'
-    publishLocation: 'Container'
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Release Binaries'
-  inputs:
-    pathtoPublish: '$(Build.BinariesDirectory)\Release'
-    artifactName: 'ReleaseBuild'
-    publishLocation: 'Container'
-
 # Step 5: Publish MSBuild Logs (optional, but good for debugging)
 - task: PublishBuildArtifacts@1
   displayName: 'Publish MSBuild Logs'
