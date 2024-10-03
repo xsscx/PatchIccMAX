@@ -92,7 +92,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <PlatformToolset>v143</PlatformToolset>
-    <EnableASAN>true</EnableASAN>
+    <EnableASAN>false</EnableASAN>
     <SpectreMitigation>false</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug with ZLIB|x64'" Label="Configuration">
