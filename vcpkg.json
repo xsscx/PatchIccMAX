@@ -15,5 +15,43 @@
       "name": "wxwidgets",
       "features": ["sound", "debug-support"]
     }
+  ],
+  "overrides": [
+    {
+      "name": "patchiccmax",
+      "version": "1.0.0",
+      "triplet": "x64-windows",
+      "features": []
+    },
+    {
+      "name": "patchiccmax",
+      "version": "1.0.0",
+      "triplet": "x64-windows-debug",
+      "features": []
+    },
+    {
+      "name": "patchiccmax",
+      "version": "1.0.0",
+      "triplet": "x64-windows-static",
+      "features": []
+    },
+    {
+      "name": "patchiccmax",
+      "version": "1.0.0",
+      "triplet": "x64-windows-static-debug",
+      "features": []
+    },
+    {
+      "name": "patchiccmax",
+      "version": "1.0.0",
+      "triplet": "x64-windows-asan",
+      "features": []
+    },
+    {
+      "name": "patchiccmax",
+      "version": "1.0.0",
+      "triplet": "x64-windows-asan-debug",
+      "features": []
+    }
   ]
 }
