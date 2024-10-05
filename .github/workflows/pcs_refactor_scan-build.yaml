@@ -119,12 +119,11 @@ jobs:
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
     # Clone the DemoIccMAX repository and checkout the pull request
-    - name: Clone the DemoIccMAX repository
+    - name: Checkout Code
       run: |
         git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
         cd DemoIccMAX
-        git fetch origin pull/94/head:pr-94
-        git checkout pr-94
+        git checkout PCS_Refactor
         git revert --no-edit b90ac3933da99179df26351c39d8d9d706ac1cc6  # Optional revert
     # Configure the build with CMake
     - name: Configure the build with CMake
