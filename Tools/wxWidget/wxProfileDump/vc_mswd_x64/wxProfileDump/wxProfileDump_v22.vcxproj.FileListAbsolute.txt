@@ -1,0 +1,9 @@
+C:\gits-repo\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_mswd_x64\wxProfileDump\wxProfil.945B59E2.Up2Date
+C:\gits-repo\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_mswd_x64\wxmsw32u_core_vc_custom.dll
+C:\gits-repo\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_mswd_x64\wxbase32u_vc_custom.dll
+C:\gits-repo\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_mswd_x64\zlib1.dll
+C:\gits-repo\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_mswd_x64\pcre2-16.dll
+C:\gits-repo\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_mswd_x64\jpeg62.dll
+C:\gits-repo\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_mswd_x64\libpng16.dll
+C:\gits-repo\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_mswd_x64\tiff.dll
+C:\gits-repo\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_mswd_x64\liblzma.dll
