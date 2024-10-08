@@ -9,9 +9,7 @@ cp build/$config/libIccProfLib.a ../Build/XCode/lib
 
 cd ../IccXML/IccLibXML
 xcodebuild -target IccLibXML-macOS -configuration "$config" -arch x86_64 clean
-xcodebuild -target IccLibXML-macOS -configuration "$config" -arch x86_64 \
-LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
-OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+xcodebuild -target IccLibXML-macOS -configuration "$config" -arch x86_64 
 cp build/$config/libIccLibXML.a ../../Build/XCode/lib
 
 cd ../../Tools/CmdLine/IccApplyNamedCmm
