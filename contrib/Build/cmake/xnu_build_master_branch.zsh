@@ -55,7 +55,7 @@ run_and_log echo "master branch checked out."
 
 # Step 4: Installing Dependencies
 print_banner "Step 4: Installing Dependencies, you will be prompted for the sudo password to continue..."
-brew install curl git cmake clang wxmac libxml2 libtiff || { echo "Error: Failed to install dependencies via Homebrew. Exiting."; exit 1; }
+brew install libtiff libxml2 wxwidgets libxml2 libtiff|| { echo "Error: Failed to install dependencies via Homebrew. Exiting."; exit 1; }
 
 # Step 5: Build
 print_banner "Step 5: Starting Build...."
