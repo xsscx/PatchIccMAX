@@ -12,12 +12,11 @@ The [Development Branch](https://github.com/xsscx/PatchIccMAX/tree/development/)
 | Ubuntu WSL   | ✅          | ✅          |    ✅     | ✅          |
 | Windows 11  | ✅          | ✅          | ✅   | ✅          |
 
-
-# Automated Builds
+## Automated Builds
 
 The Project can be cloned and built automatically. Copy the command below and Paste into your Terminal to start the Build.
 
-## Build via CMake
+### Build via CMake
 
 ***tl;dr***
 
@@ -25,7 +24,14 @@ The Project can be cloned and built automatically. Copy the command below and Pa
   /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/cmake/build_master_branch.sh)"
    ```
 
-## MSBuild on Windows using VS2022 Community
+### Manual Build
+
+```
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -Wno-dev  Cmake
+make -j$(nproc) 2>&1 | grep 'error:'
+```
+
+### MSBuild on Windows using VS2022 Community
 
 ***tl;dr***
 
@@ -33,7 +39,7 @@ The Project can be cloned and built automatically. Copy the command below and Pa
    iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch.ps1").Content
    ```
 
-## Open in Visual Studio 2022 Enterprise
+### Open in Visual Studio 2022 Enterprise
 
 ***tl;dr***
 
