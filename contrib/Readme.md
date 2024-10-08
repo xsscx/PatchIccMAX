@@ -311,18 +311,16 @@ OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -lwebp -llzma -lz -lzstd"
 
 ```
 xcodebuild -target iccFromXml -configuration "$config" -arch x86_64 clean
-xcodebuild -target iccFromXml -configuration "$config" -arch x86_64 \
-LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
-OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+xcodebuild -target iccFromXml -configuration "$config" -arch x86_64 -sdk macosx15.0 \
+ARCHS="x86_64" VALID_ARCHS="x86_64"
 ```
 
-**IccToXml
+**IccToXml***
 
 ```
 xcodebuild -target IccToXml -configuration "$config" -arch x86_64 clean
-xcodebuild -target IccToXml -configuration "$config" -arch x86_64 \
-LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
-OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+xcodebuild -target IccToXml -configuration "$config" -arch x86_64 -sdk macosx15.0 \
+ARCHS="x86_64" VALID_ARCHS="x86_64"
 ```
 
 
