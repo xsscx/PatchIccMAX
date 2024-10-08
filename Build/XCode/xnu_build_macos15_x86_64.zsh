@@ -60,10 +60,9 @@ cd ../../../IccXML/CmdLine/IccFromXml
 xcodebuild -target iccFromXml -configuration "$config" -arch x86_64 clean
 xcodebuild -target iccFromXml -configuration "$config" -arch x86_64 -sdk macosx15.0 \
 ARCHS="x86_64" VALID_ARCHS="x86_64"
-cp build/$config/IccFromXml ../../../Testing
+cp build/$config/iccFromXml ../../../Testing
 
 cd ../../../IccXML/CmdLine/IccToXml
 xcodebuild -target IccToXml -configuration "$config" -arch x86_64 clean
-xcodebuild -target IccToXml -configuration "$config" -arch x86_64 -sdk macosx15.0 \
-ARCHS="x86_64" VALID_ARCHS="x86_64"
-cp build/$config/IccToXml ../../../Testing
+xcodebuild -target IccToXml -arch x86_64 -sdk macosx15.0 ARCHS="x86_64" -configuration Debug
+cp build/$config/iccToXml ../../../Testing
