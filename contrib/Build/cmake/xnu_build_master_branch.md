@@ -108,3 +108,150 @@ The script terminates if any command fails, displaying an error message. It chec
 
 Ensure all prerequisites are installed and properly configured before running the script to avoid interruptions.
 
+## Expected Output
+
+```
+/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/cmake/xnu_build_master_branch.zsh)"
+============================================================
+ International Color Consortium | DemoIccMAX Project | Copyright 2024. For more information on The International Color Consortium, please see http://color.org/.
+ Time: Tue Oct  8 13:22:26 EDT 2024
+============================================================
+============================================================
+ XNU Build Script now running..
+ Time: Tue Oct  8 13:22:26 EDT 2024
+============================================================
+Logfile: build_log_2024-10-08_13-22-26.log
+============================================================
+ Step 1: Configuring Git user for this session
+ Time: Tue Oct  8 13:22:26 EDT 2024
+============================================================
+Git user configuration done.
+============================================================
+ Step 2: Cloning DemoIccMAX on master branch
+ Time: Tue Oct  8 13:22:26 EDT 2024
+============================================================
+Cloning into 'DemoIccMAX'...
+Repository cloned and switched to DemoIccMAX directory.
+============================================================
+ Step 3: Reverting a bad commit
+ Time: Tue Oct  8 13:22:28 EDT 2024
+============================================================
+Step 3a: Reverting 6ac1cc6
+Auto-merging ChangeLog
+Auto-merging IccProfLib/icProfileHeader.h
+[master 4549ad4] Revert "Integrate 5.1 changes into Master Branch (#69)"
+ Date: Tue Oct 8 13:22:29 2024 -0400
+ 28 files changed, 554 insertions(+), 3626 deletions(-)
+ delete mode 100644 Tools/CmdLine/IccCommon/IccCmmConfig.cpp
+ delete mode 100644 Tools/CmdLine/IccCommon/IccCmmConfig.h
+ delete mode 100644 Tools/CmdLine/IccCommon/IccJsonUtil.cpp
+ delete mode 100644 Tools/CmdLine/IccCommon/IccJsonUtil.h
+master branch checked out.
+============================================================
+ Step 4: Installing Dependencies, you will be prompted for the sudo password to continue...
+ Time: Tue Oct  8 13:22:29 EDT 2024
+============================================================
+Warning: libtiff 4.7.0 is already installed and up-to-date.
+To reinstall 4.7.0, run:
+  brew reinstall libtiff
+Warning: libxml2 2.13.4_1 is already installed and up-to-date.
+To reinstall 2.13.4_1, run:
+  brew reinstall libxml2
+Warning: wxwidgets 3.2.6 is already installed and up-to-date.
+To reinstall 3.2.6, run:
+  brew reinstall wxwidgets
+============================================================
+ Step 5: Starting Build....
+ Time: Tue Oct  8 13:22:32 EDT 2024
+============================================================
+============================================================
+ Step 5a: configuring cmake
+ Time: Tue Oct  8 13:22:32 EDT 2024
+============================================================
+-- The C compiler identification is AppleClang 16.0.0.16000026
+-- The CXX compiler identification is AppleClang 16.0.0.16000026
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring build for X86_64 architecture.
+-- Info build "Debug"
+-- Found LibXml2: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/usr/lib/libxml2.tbd (found version "2.9.4")
+-- Found TIFF: /usr/local/lib/libtiff.dylib (found version "4.7.0")
+-- Found wxWidgets: -L/usr/local/lib;;;-framework IOKit;-framework Carbon;-framework Cocoa;-framework QuartzCore;-framework AudioToolbox;-framework System;-framework OpenGL;-lwx_osx_cocoau_core-3.2;-lwx_baseu-3.2 (found version "3.2.6")
+Configured RefIccMAX-Darwin64-2.1.17
+-- Configuring done (2.8s)
+-- Generating done (0.2s)
+-- Build files have been written to: /tmp/DemoIccMAX/Build
+============================================================
+ Step 6: running make
+ Time: Tue Oct  8 13:22:35 EDT 2024
+============================================================
+============================================================
+ Built Files:
+ Time: Tue Oct  8 13:23:01 EDT 2024
+============================================================
+./Tools/IccTiffDump/iccTiffDump
+./Tools/IccFromXml/iccFromXml
+./Tools/IccRoundTrip/iccRoundTrip
+./Tools/wxProfileDump/iccDumpProfileGui
+./Tools/IccSpecSepToTiff/iccSpecSepToTiff
+./Tools/IccToXml/iccToXml
+./Tools/IccApplyNamedCmm/iccApplyNamedCmm
+./Tools/IccDumpProfile/iccDumpProfile
+./Tools/IccApplyProfiles/iccApplyProfiles
+./IccXML/libIccXML2-static.a
+./IccXML/libIccXML2.2.1.17.dylib
+./IccProfLib/libIccProfLib2.2.1.17.dylib
+./IccProfLib/libIccProfLib2-static.a
+============================================================
+ cd Testing/
+ Time: Tue Oct  8 13:23:01 EDT 2024
+============================================================
+============================================================
+ Creating Profiles
+ Time: Tue Oct  8 13:23:01 EDT 2024
+============================================================
+Creating Profiles...
+cd to CalcTest
+cd to HDR
+cd to Overprint
+cd mcs
+cd Testing
+==================================================
+[2024-10-08 13:23:27] Starting XML to ICC correlation analysis
+==================================================
+==================================================
+[2024-10-08 13:23:27] Identifying non-creations (XML files without corresponding ICC files)
+==================================================
+Non-creation: ./CMYK-3DLUTs/CMYK-3DLUTs.xml
+Non-creation: ./CMYK-3DLUTs/CMYK-3DLUTs2.xml
+Non-creation: ./Calc/calcImport.xml
+Non-creation: ./Calc/calcVars.xml
+Non-creation: ./Overprint/17ChanPart1.xml
+Non-creation: ./SpecRef/RefEstimationImport.xml
+Non-creation: ./mcs/17ChanWithSpots-MVIS.xml
+Non-creation: ./mcs/18ChanWithSpots-MVIS.xml
+==================================================
+[2024-10-08 13:23:28] Summary Report
+==================================================
+Total XML files: 144
+Total ICC files: 214
+Total successful creations (matched XML and ICC): 136
+Total non-creation (XML without ICC): 8
+==================================================
+[2024-10-08 13:23:28] Analysis completed
+==================================================
+Cross-Check for CreateAllProfiles Done!
+============================================================
+ XNU Build Project and CreateAllProfiles Done!
+ Time: Tue Oct  8 13:23:28 EDT 2024
+============================================================
+Elapsed Time: 00:01:02
+```
