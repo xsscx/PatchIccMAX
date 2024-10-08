@@ -1,7 +1,7 @@
 
 # DemoIccMAX XNU Build Script for macOS
 
-**tl;dr:**
+**tl;dr**
 
 Copy and Paste the folowing Command into your Terminal to Build the DemoIccMAX Project:
 
