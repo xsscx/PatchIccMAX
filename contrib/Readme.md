@@ -100,6 +100,7 @@ Instead of manually editing the registry, you can use a `.reg` file to automate 
 This method simplifies the installation process and reduces the potential for manual errors when updating the registry.
 
 
+
 # Contrib Directory for DemoIccMAX Project
 
 This `Contrib` directory is intended to provide enhanced documentation, additional scripts, and modernized build instructions to supplement the legacy documentation of the DemoIccMAX project. The contrib/ directory provides updated examples and verified instructions to ensure a smooth experience with modern build systems and environments.
@@ -227,8 +228,94 @@ Alternatively, you can open the project manually in Xcode by navigating to the `
 #### Build the Project via Xcode
 With the project open in Xcode, you can now build it directly using the Xcode interface. The resulting binaries will be placed in the Testing folder after a successful build.
 
-Conclusion
-The CMake method for generating Xcode projects provides a streamlined and modern approach to building the DemoIccMAX project on macOS. This method is recommended for developers who prefer a flexible and compatible build process, ensuring that the project is set up correctly and efficiently on macOS.
+##### xcodebuild
+
+As of Q4/2024 and macOS 15 on x86_64, there are some recent build observations using brew:
+
+```
+export config="Debug"
+```
+
+
+**IccProfLib**
+
+```
+cd IccProfLib
+xcodebuild -target IccProfLib-macOS -configuration "$config" -arch x86_64 clean
+xcodebuild -target IccProfLib-macOS -configuration "$config" -arch x86_64
+```
+
+
+**IccLibXML**
+
+```
+cd IccXML/IccLibXML
+xcodebuild -target IccLibXML-macOS -configuration "$config" -arch x86_64 clean
+xcodebuild -target IccLibXML-macOS -configuration "$config" -arch x86_64
+```
+
+**IccApplyNamedCmm**
+
+```
+cd Tools/CmdLine/IccApplyNamedCmm
+xcodebuild -target IccApplyNamedCMM -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/Debug /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+```
+
+**IccApplyProfiles**
+
+```
+cd Tools/CmdLine/IccApplyProfiles
+xcodebuild -target iccApplyProfiles -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+```
+
+**IccDumpProfile**
+
+```
+xcodebuild -target IccDumpProfile -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+```
+
+**IccRoundTrip**
+
+```
+xcodebuild -target IccRoundTrip -configuration "$config" -arch x86_64 clean
+xcodebuild -target IccRoundTrip -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+```
+
+**IccTiffDump**
+
+```
+xcodebuild -target IccTiffDump -configuration "$config" -arch x86_64 clean
+xcodebuild -target IccTiffDump -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+```
+
+**IccFromXml**
+
+```
+xcodebuild -target iccFromXml -configuration "$config" -arch x86_64 clean
+xcodebuild -target iccFromXml -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+```
+
+**IccToXml
+
+```
+xcodebuild -target IccToXml -configuration "$config" -arch x86_64 clean
+xcodebuild -target IccToXml -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+```
+
 
 ## Building the Project on Windows
 
@@ -402,46 +489,3 @@ The `UnitTest` directory includes unit test files and related scripts.
 - **cve-2023-46602.zsh**: A shell script for testing the specific CVE issue.
 - **TestCIccTagXmlProfileSequenceId.cpp**: A C++ test file for the `CIccTagXmlProfileSequenceId` class.
 - **TestParseText.cpp**: A C++ test file for testing text parsing functionality.
-
----
-
-## Subdirectories and Files in contrib/
-
-### [Workflows](contrib/.github/workflows)
-This directory contains GitHub Actions workflow files used for continuous integration (CI) and code scanning.
-
-- **codeql.yml**: A GitHub Actions workflow for CodeQL code scanning, which helps identify vulnerabilities and errors in the code.
-- **macos-self-hosted-example.yml**: An example workflow for building the project using a self-hosted macOS runner.
-- **windows-vs2022-vcpkg-example.yml**: An example workflow for building the project on Windows using Visual Studio 2022 and vcpkg.
-
-### [CalcTest](contrib/CalcTest)
-The `CalcTest` directory includes shell scripts for performing various calculations and profile checks.
-
-- **calc_test.zsh**: A script for running a set of calculation tests.
-- **check_profiles.zsh**: A script for verifying ICC profile compatibility and integrity.
-- **test_icc_apply_named_cmm.zsh**: A script for testing the application of named Color Management Modules (CMM) to ICC profiles.
-
-### [Doxygen](contrib/Doxygen)
-The `Doxygen` directory contains configuration files for generating project documentation using Doxygen.
-
-- **Doxyfile**: The main configuration file for Doxygen, specifying how the documentation should be generated.
-- **README.md**: A readme file providing an overview of how to use Doxygen for generating documentation.
-
-### [HelperScripts](contrib/HelperScripts)
-The `HelperScripts` directory contains various helper scripts for building dependencies and running tests.
-
-- **libtiff_build.zsh**: A script for building the libtiff library, which is a dependency for the project.
-- **libxml2_build.zsh**: A script for building the libxml2 library, another dependency for the project.
-- **test_xmlarray_type.zsh**: A script for testing XML array types.
-- **vs2022_build.ps1**: A PowerShell script for building the project using Visual Studio 2022.
-
-### [UnitTest](contrib/UnitTest)
-The `UnitTest` directory includes unit test files and related scripts.
-
-- **cve-2023-46602-icFixXml-function-IccTagXml_cpp-line_337-baseline-variant-000.xml**: An XML file related to testing a specific CVE (Common Vulnerabilities and Exposures) issue.
-- **cve-2023-46602.icc**: An ICC profile file related to the same CVE issue.
-- **cve-2023-46602.zsh**: A shell script for testing the specific CVE issue.
-- **TestCIccTagXmlProfileSequenceId.cpp**: A C++ test file for the `CIccTagXmlProfileSequenceId` class.
-- **TestParseText.cpp**: A C++ test file for testing text parsing functionality.
-
-For further information, please refer to the legacy documentation or contact the project maintainers.
