@@ -22,14 +22,23 @@ The Project can be cloned and built automatically. Copy the command below and Pa
 ***tl;dr***
 
    ```
+  cd /tmp
   /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/cmake/build_master_branch.sh)"
    ```
 
 ### Manual Build
 
 ```
+cd Build/
 cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -Wno-dev  Cmake
 make -j$(nproc) 2>&1 | grep 'error:'
+```
+
+### Xcode Build
+
+```
+cd Build/Xcode
+/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/Build/XCode/xnu_build_macos15_x86_64.zsh)"
 ```
 
 ## MSBuild on Windows using VS2022 Community
@@ -37,6 +46,7 @@ make -j$(nproc) 2>&1 | grep 'error:'
 ***tl;dr***
 
    ```
+   cd C:\temp\
    iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch.ps1").Content
    ```
 
@@ -45,6 +55,7 @@ make -j$(nproc) 2>&1 | grep 'error:'
 ***tl;dr***
 
    ```
+cd C:\temp
    Start-Process "vsweb://vs/?Product=Visual_Studio&EncFormat=UTF8&tfslink=dnN0ZnM6Ly8vRnJhbWV3b3JrL1RlYW1Qcm9qZWN0L2FhNWY1ODIxLTI1ZDItNDhkNi04ODZmLTcxODMzMjliYWUwYz91cmw9aHR0cHM6Ly94c3NjeC52aXN1YWxzdHVkaW8uY29tLw=="
    ```
 
