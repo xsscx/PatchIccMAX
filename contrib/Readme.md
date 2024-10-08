@@ -303,8 +303,8 @@ OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -lwebp -llzma -lz -lzstd"
 ```
 xcodebuild -target IccTiffDump -configuration "$config" -arch x86_64 clean
 xcodebuild -target IccTiffDump -configuration "$config" -arch x86_64 \
-LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
-OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib /usr/local/opt/webp/lib /usr/local/opt/zstd/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -lwebp -llzma -lz -lzstd"
 ```
 
 **IccFromXml**
