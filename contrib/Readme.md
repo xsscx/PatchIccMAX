@@ -289,6 +289,15 @@ LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/li
 OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
 ```
 
+**IccSpecSepToTiff**
+
+```
+xcodebuild -target IccSpecSepToTiff -configuration "$config" -arch x86_64 clean
+xcodebuild -target IccSpecSepToTiff -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib /usr/local/opt/webp/lib /usr/local/opt/zstd/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -lwebp -llzma -lz -lzstd"
+```
+
 **IccTiffDump**
 
 ```
