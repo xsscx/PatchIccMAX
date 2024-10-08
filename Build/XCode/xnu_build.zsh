@@ -47,9 +47,9 @@ cp build/$config/IccTiffDump ../../../Testing
 cd ../../../IccXML/CmdLine/IccFromXml
 xcodebuild -target iccFromXml -configuration "$config" -arch x86_64 clean
 xcodebuild -target iccFromXml -configuration "$config" -arch x86_64
-cp $config/IccFromXml ../../../Testing
+cp build/$config/IccFromXml ../../../Testing
 
 cd ../../../IccXML/CmdLine/IccToXml
 xcodebuild -target IccToXml -configuration "$config" -arch x86_64 clean
 xcodebuild -target IccToXml -configuration "$config" -arch x86_64
-cp $config/IccToXml ../../../Testing
+cp build/$config/IccToXml ../../../Testing
