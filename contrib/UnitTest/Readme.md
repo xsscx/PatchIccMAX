@@ -10,8 +10,22 @@ This directory contains various scripts, test files, and documentation related t
 - [CreateAllProfiles.sh](https://github.com/xsscx/PatchIccMAX/tree/development/contrib/UnitTest/CreateAllProfiles.sh)  
   Automates the process of creating ICC profiles within the DemoIccMAX environment. The script is designed to validate profile creation by running tests and generating logs for analysis.
 
+**Run:**
+
+   ```
+   cd Testing/
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/CreateAllProfiles.sh)"
+   ```
+
 - [CreateAllProfiles_cross_check.sh](https://github.com/xsscx/PatchIccMAX/tree/development/contrib/UnitTest/CreateAllProfiles_cross_check.sh)  
   A more comprehensive profile creation script that performs cross-checks on the generated profiles. It ensures consistency and correctness across profiles by comparing them to a reference set.
+
+**Run:**
+
+   ```
+   cd Testing/
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/CreateAllProfiles_cross_check.sh)"
+   ```
 
 - [CreateAllProfiles_cross_check.md](https://github.com/xsscx/PatchIccMAX/tree/development/contrib/UnitTest/CreateAllProfiles_cross_check.md)  
   Documentation detailing the cross-check process for the generated profiles, including expected results and error handling steps.
@@ -20,6 +34,13 @@ This directory contains various scripts, test files, and documentation related t
 
 - [build_development_branch.sh](https://github.com/xsscx/PatchIccMAX/tree/development/contrib/UnitTest/build_development_branch.sh)  
   This script is responsible for building the development branch of the DemoIccMAX project. It configures the build environment using CMake and Make, then runs various tests to verify the build’s correctness. It also includes AddressSanitizer (Asan) checks.
+
+**Run:**
+
+   ```
+   cd /tmp
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/build_development_branch.sh)"
+   ```
 
 - [build_development_branch.md](https://github.com/xsscx/PatchIccMAX/tree/development/contrib/UnitTest/build_development_branch.md)  
   Documentation for the `build_development_branch.sh` script, including instructions on how to use the script, required dependencies, and troubleshooting tips for build failures.
@@ -80,6 +101,12 @@ This directory contains various scripts, test files, and documentation related t
 
 - [icPlatformSignature-ubsan-poc.icc](https://github.com/xsscx/PatchIccMAX/tree/development/contrib/UnitTest/icPlatformSignature-ubsan-poc.icc)  
   A test ICC profile used to check for UBSan (Undefined Behavior Sanitizer) issues with the platform signature element.
+
+**Run:**
+   ```
+   cd Testing/
+   /bin/sh -c 'curl -fsSL -o iccProfile.icc https://github.com/xsscx/PatchIccMAX/raw/development/contrib/UnitTest/icPlatformSignature-ubsan-poc.icc && ../Build/Tools/IccDumpProfile/iccDumpProfile 100 iccProfile.icc ALL'
+   ```
 
 - [icSigMatrixElemType-Read-poc.icc](https://github.com/xsscx/PatchIccMAX/tree/development/contrib/UnitTest/icSigMatrixElemType-Read-poc.icc)  
   Another test ICC profile, designed to identify UBSan issues when reading matrix element types.
