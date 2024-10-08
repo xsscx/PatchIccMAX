@@ -6,18 +6,24 @@ This repository contains scripts that automate the setup and build process on CM
 
 ### Build Master from Repository
 
-**gnu**: Copy and Paste the Build from Remote Script into your Terminal:
+**Ubuntu gnu**: Copy and Paste the Build from Remote Script into your Terminal:
 
 ```bash
 cd /tmp
 /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/Build/cmake/build_master_branch.sh)"
 ```
 
-**clang**: Copy and Paste the Build from Remote Script into your Terminal:
+**Ubuntu clang**: Copy and Paste the Build from Remote Script into your Terminal:
 
 ```bash
 cd /tmp
 /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/cmake/build_clang_master_branch.sh)"
+```
+
+**macOS clang**
+
+```
+ /bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/cmake/xnu_build_master_branch.zsh)"
 ```
 
 The script performs the following steps:
