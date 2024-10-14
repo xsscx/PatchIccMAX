@@ -94,6 +94,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <EnableASAN>false</EnableASAN>
     <SpectreMitigation>false</SpectreMitigation>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug with ZLIB|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>

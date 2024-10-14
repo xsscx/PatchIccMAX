@@ -1,11 +1,12 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 3.3.0)
+
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8.5)
 
 PROJECT (RefIccMAX)
 SET (PROJECT_UP_NAME "REFICCMAX" )
 SET(CMAKE_CXX_STANDARD 17)
 SET( ${PROJECT_UP_NAME}_MAJOR_VERSION 2)
 SET( ${PROJECT_UP_NAME}_MINOR_VERSION 1)
-SET( ${PROJECT_UP_NAME}_MICRO_VERSION 20.development)
+SET( ${PROJECT_UP_NAME}_MICRO_VERSION 17)
 SET( ${PROJECT_UP_NAME}_VERSION "${${PROJECT_UP_NAME}_MAJOR_VERSION}.${${PROJECT_UP_NAME}_MINOR_VERSION}.${${PROJECT_UP_NAME}_MICRO_VERSION}" )
 
 SET (PROJECT_DOWN_NAME "reficcmax" )
@@ -66,7 +67,7 @@ if(APPLE)
 endif()
 
 IF( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
-  MESSAGE( "-- Info build "${CMAKE_BUILD_TYPE}"" )
+  MESSAGE( "-- Info build \"${CMAKE_BUILD_TYPE}\"" )
   SET( DEBUG 1 )
   add_definitions( -D_DEBUG )
 ENDIF()
@@ -76,30 +77,30 @@ ENDIF()
 #
 
 SET (TARGET_INCLUDE_FOLDER
-    ${PROJECT_NAME}
-    CACHE STRING
-    "Optional folder below system include folder to install include files."
+		${PROJECT_NAME}
+		CACHE STRING
+		"Optional folder below system include folder to install include files."
     )
 
 IF(NOT CMAKE_MODULES_INSTALL_DIR)
   SET (CMAKE_MODULES_INSTALL_DIR
-    "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_DOWN_NAME}"
-    CACHE STRING
-    "The folder where to install cmake files."
+		"${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_DOWN_NAME}"
+		CACHE STRING
+		"The folder where to install cmake files."
     )
 ENDIF(NOT CMAKE_MODULES_INSTALL_DIR)
 
 
 SET (TARGET_PKGCONFIG_FOLDER
-    "pkgconfig"
-    CACHE STRING
-    "The folder below system library folder where to install pkgconfig files."
+		"pkgconfig"
+		CACHE STRING
+		"The folder below system library folder where to install pkgconfig files."
     )
 
 SET (TARGET_DOCUMENTATION_FOLDER
-    "share/doc/${PACKAGE_NAME}-api"
-    CACHE STRING
-    "The folder below system prefix where to install api documentation files."
+		"share/doc/${PACKAGE_NAME}-api"
+		CACHE STRING
+		"The folder below system prefix where to install api documentation files."
     )
 
 # additional cmake modules for loading libraries
@@ -166,23 +167,13 @@ IF(ENABLE_TOOLS)
   ADD_SUBDIRECTORY( Tools/IccToXml )
 
   # needs wxWidgets
-  find_package(wxWidgets COMPONENTS core base REQUIRED)
-  if(wxWidgets_FOUND)
-    include(${wxWidgets_USE_FILE})
-    message(STATUS "wxWidgets found and configured")
-  else()
-    message(FATAL_ERROR "wxWidgets not found. Please install it manually or via vcpkg.")
-  endif()
+  FIND_PACKAGE(wxWidgets COMPONENTS core base)
+  IF( WXWIDGETS_FOUND )
+    INCLUDE(${wxWidgets_USE_FILE})
+    ADD_SUBDIRECTORY( Tools/wxProfileDump )
+  ENDIF( WXWIDGETS_FOUND )
 
 ENDIF(ENABLE_TOOLS)
-
-# Optionally add a description for the option
-option(ENABLE_FUZZING "Enable fuzzing sanitizer" OFF)
-
-if(ENABLE_FUZZING)
-    message(STATUS "Fuzzing enabled")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=fuzzer")
-endif()
 
 IF( ENABLE_TESTS )
   ADD_SUBDIRECTORY( Testing )
@@ -194,7 +185,7 @@ CONFIGURE_FILE(
     IMMEDIATE @ONLY)
 
 ADD_CUSTOM_TARGET( uninstall
-  "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Uninstall.cmake")
+	"${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Uninstall.cmake")
 
 IF( CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "64" )
   SET( ARCH 64 )
@@ -218,10 +209,10 @@ ADD_CUSTOM_TARGET( dist-bin
     COMMAND echo "We are in:"
     COMMAND pwd
     COMMAND ls -l ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}.tar.gz
-    COMMENT Make a ${PROJECT_NAME} binary package
-    VERBATIM
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    )
+		COMMENT Make a ${PROJECT_NAME} binary package
+		VERBATIM
+		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+		)
 
 ADD_CUSTOM_TARGET( dist-bin2
     DEPENDS check
@@ -239,10 +230,10 @@ ADD_CUSTOM_TARGET( dist-bin2
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/RunTests.sh ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND echo tar cf - ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/ --owner user:1000 --group group:500 | gzip -9 > ../${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}.tar.gz
     COMMAND tar cf - ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/ ${GNUTAR_OPTS} | gzip -9 > ../${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}.tar.gz
-                COMMENT Helper for making a ${PROJECT_NAME} binary package
-                VERBATIM
-                WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-                )
+		COMMENT Helper for making a ${PROJECT_NAME} binary package
+		VERBATIM
+		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+		)
 
 #
 # Misc.
@@ -250,14 +241,14 @@ ADD_CUSTOM_TARGET( dist-bin2
 
 #cmake settings for use by find_package
 CONFIGURE_FILE (
-                "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in"
-                "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-                @ONLY
-        )
+		"${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in"
+		"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+		@ONLY
+	)
 
 IF(ENABLE_INSTALL_RIM)
   INSTALL ( FILES
-                "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-                DESTINATION ${CMAKE_MODULES_INSTALL_DIR} COMPONENT dev
-        )
+		"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+		DESTINATION ${CMAKE_MODULES_INSTALL_DIR} COMPONENT dev
+	)
 ENDIF(ENABLE_INSTALL_RIM)

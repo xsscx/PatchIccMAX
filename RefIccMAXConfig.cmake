@@ -1,0 +1,52 @@
+# - Find RefIccMAX
+# Find the native RefIccMAX headers and libraries.
+#
+#  REFICCMAX_FOUND        - True if RefIccMAX found.
+#  REFICCMAX_INCLUDE_DIRS - where to find kdb.h, etc.
+#  REFICCMAX_LIBRARIES    - List of libraries when using RefIccMAX.
+#
+#  REFICCMAX_VERSION       - The version of openicc (x.y.z)
+#  REFICCMAX_VERSION_MAJOR - The major version of openicc (x)
+#  REFICCMAX_VERSION_MINOR - The minor version of openicc (y)
+#  REFICCMAX_VERSION_MICRO - The patch version of openicc (z)
+#
+
+
+
+# Set path to the header file.
+FIND_PATH(REFICCMAX_INCLUDE_DIR
+	NAMES IccProfLib2/IccProfLibVer.h
+	PATHS E:/repos/PatchIccMAX/%USERPROFILE%/.local/include/RefIccMAX/
+)
+MARK_AS_ADVANCED(REFICCMAX_INCLUDE_DIR)
+
+
+# Set path to the library.
+FIND_LIBRARY( REFICCMAX_LIBRARIES
+	NAMES IccProfLib2
+	PATHS E:/repos/PatchIccMAX/%USERPROFILE%/.local/lib/
+)
+FIND_LIBRARY( REFICCMAX_STATIC_LIBRARY
+	NAMES IccProfLib2-static
+	PATHS E:/repos/PatchIccMAX/%USERPROFILE%/.local/lib/
+)
+MARK_AS_ADVANCED(REFICCMAX_STATIC_LIBRARY)
+IF(NOT REFICCMAX_LIBRARIES AND REFICCMAX_STATIC_LIBRARY)
+  SET( REFICCMAX_LIBRARIES ${REFICCMAX_STATIC_LIBRARY}} )
+ENDIF()
+MARK_AS_ADVANCED(REFICCMAX_LIBRARIES)
+
+# handle the QUIETLY and REQUIRED arguments and set REFICCMAX_FOUND to TRUE if
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(IccProfLib2 DEFAULT_MSG REFICCMAX_LIBRARIES REFICCMAX_INCLUDE_DIR)
+
+IF (REFICCMAX_FOUND)
+  SET( REFICCMAX_VERSION_MAJOR 2 )
+  SET( REFICCMAX_VERSION_MINOR 1 )
+  SET( REFICCMAX_VERSION_MICRO 17 )
+  SET( REFICCMAX_VERSION 2.1.17 )
+  SET( HAVE_REFICCMAX TRUE )
+	SET( REFICCMAX_INCLUDE_DIRS ${REFICCMAX_INCLUDE_DIR})
+ENDIF (REFICCMAX_FOUND)
+

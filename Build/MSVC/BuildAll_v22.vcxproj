@@ -88,6 +88,8 @@
     <NMakeCleanCommandLine>Echo "All Done"</NMakeCleanCommandLine>
     <NMakeOutput>
     </NMakeOutput>
+    <IncludePath>F:\test\vcpkg\installed\x64-windows\include;F:\test\vcpkg\installed\x64-windows-static\include;$(IncludePath)</IncludePath>
+    <LibraryPath>F:\test\vcpkg\installed\x64-windows\lib;F:\test\vcpkg\installed\x64-windows-static\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(Platform)\$(Configuration)\</OutDir>
