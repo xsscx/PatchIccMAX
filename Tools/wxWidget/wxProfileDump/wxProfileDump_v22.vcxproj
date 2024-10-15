@@ -95,6 +95,7 @@
     <EnableASAN>false</EnableASAN>
     <SpectreMitigation>false</SpectreMitigation>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <UseDebugLibraries>false</UseDebugLibraries>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug with ZLIB|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -742,6 +743,7 @@ copy .\vc_mswd\wxProfileDump.pdb ..\..\..\Testing
       <DisableSpecificWarnings>4996;4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <BrowseInformation>true</BrowseInformation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXMSW__;__WXDEBUG__;_WINDOWS;NOPCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>

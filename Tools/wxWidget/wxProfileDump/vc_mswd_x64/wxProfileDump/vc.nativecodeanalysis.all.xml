@@ -6,12 +6,12 @@
       <COLUMN>2</COLUMN>
     </SFA>
     <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'CIccCreateNamedColorXformHint::csDevice' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <DESCRIPTION>Variable 'CIccCreateNamedColorXformHint::csPcs' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
     <FUNCTION>CIccCreateNamedColorXformHint::{ctor}</FUNCTION>
     <DECORATED>??0CIccCreateNamedColorXformHint@@QEAA@XZ</DECORATED>
     <FUNCLINE>225</FUNCLINE>
     <ADDITIONALINFO>
-      <targetSymbol>CIccCreateNamedColorXformHint::csDevice</targetSymbol>
+      <targetSymbol>CIccCreateNamedColorXformHint::csPcs</targetSymbol>
     </ADDITIONALINFO>
     <PATH></PATH>
   </DEFECT><DEFECT>
@@ -22,12 +22,12 @@
       <COLUMN>2</COLUMN>
     </SFA>
     <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'CIccCreateNamedColorXformHint::csPcs' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <DESCRIPTION>Variable 'CIccCreateNamedColorXformHint::csDevice' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
     <FUNCTION>CIccCreateNamedColorXformHint::{ctor}</FUNCTION>
     <DECORATED>??0CIccCreateNamedColorXformHint@@QEAA@XZ</DECORATED>
     <FUNCLINE>225</FUNCLINE>
     <ADDITIONALINFO>
-      <targetSymbol>CIccCreateNamedColorXformHint::csPcs</targetSymbol>
+      <targetSymbol>CIccCreateNamedColorXformHint::csDevice</targetSymbol>
     </ADDITIONALINFO>
     <PATH></PATH>
   </DEFECT><DEFECT>

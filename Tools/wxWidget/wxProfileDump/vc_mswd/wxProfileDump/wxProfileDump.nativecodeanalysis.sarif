@@ -7,35 +7,6 @@
         {
           "ruleId": "C26495",
           "message": {
-            "text": "Variable 'CIccCreateNamedColorXformHint::csDevice' is uninitialized. Always initialize a member variable (type.6)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "file:///E:/repos/PatchIccMAX/IccProfLib/IccCmm.h"
-                },
-                "region": {
-                  "startLine": 225,
-                  "startColumn": 3
-                }
-              },
-              "logicalLocations": [
-                {
-                  "fullyQualifiedName": "CIccCreateNamedColorXformHint::{ctor}",
-                  "decoratedName": "??0CIccCreateNamedColorXformHint@@QEAA@XZ",
-                  "kind": "function"
-                }
-              ]
-            }
-          ],
-          "properties": {
-            "targetSymbol": "CIccCreateNamedColorXformHint::csDevice"
-          }
-        },
-        {
-          "ruleId": "C26495",
-          "message": {
             "text": "Variable 'CIccCreateNamedColorXformHint::csPcs' is uninitialized. Always initialize a member variable (type.6)."
           },
           "locations": [
@@ -60,6 +31,35 @@
           ],
           "properties": {
             "targetSymbol": "CIccCreateNamedColorXformHint::csPcs"
+          }
+        },
+        {
+          "ruleId": "C26495",
+          "message": {
+            "text": "Variable 'CIccCreateNamedColorXformHint::csDevice' is uninitialized. Always initialize a member variable (type.6)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///E:/repos/PatchIccMAX/IccProfLib/IccCmm.h"
+                },
+                "region": {
+                  "startLine": 225,
+                  "startColumn": 3
+                }
+              },
+              "logicalLocations": [
+                {
+                  "fullyQualifiedName": "CIccCreateNamedColorXformHint::{ctor}",
+                  "decoratedName": "??0CIccCreateNamedColorXformHint@@QEAA@XZ",
+                  "kind": "function"
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "targetSymbol": "CIccCreateNamedColorXformHint::csDevice"
           }
         },
         {
