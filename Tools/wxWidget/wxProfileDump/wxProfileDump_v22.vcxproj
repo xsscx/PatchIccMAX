@@ -239,6 +239,7 @@
     <IntDir>.\vc_mswd_x64\wxProfileDump\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VCPKG_ROOT)\libxml2-win-build\include</IncludePath>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug with ZLIB|x64'">
     <OutDir>.\vc_mswd_x64\</OutDir>
