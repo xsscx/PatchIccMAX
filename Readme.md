@@ -40,14 +40,6 @@ make -j$(nproc) 2>&1 | grep 'error:'
    iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch.ps1").Content
    ```
 
-## Open in Visual Studio 2022 Enterprise
-
-***tl;dr***
-
-   ```
-   Start-Process "vsweb://vs/?Product=Visual_Studio&EncFormat=UTF8&tfslink=dnN0ZnM6Ly8vRnJhbWV3b3JrL1RlYW1Qcm9qZWN0L2FhNWY1ODIxLTI1ZDItNDhkNi04ODZmLTcxODMzMjliYWUwYz91cmw9aHR0cHM6Ly94c3NjeC52aXN1YWxzdHVkaW8uY29tLw=="
-   ```
-
 ### Windows Prerequisites
 
 Ensure that you have the following tools installed on your Windows system:
