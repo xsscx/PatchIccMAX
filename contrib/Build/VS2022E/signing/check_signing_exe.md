@@ -45,14 +45,60 @@ epos\PatchIccMAX\Testing` directory.
 -----------------------------
 Verification Process Start: 10/26/2024 19:20:13
 -----------------------------
-Checking file: E:
-epos\PatchIccMAX\Testing\example1.exe
-SIGNED: E:
-epos\PatchIccMAX\Testing\example1.exe
-Checking file: E:
-epos\PatchIccMAX\Testing\example2.exe
-NOT SIGNED or SIGNED by another entity: E:
-epos\PatchIccMAX\Testing\example2.exe
+Verifying: E:\repos\PatchIccMAX\Testing\iccToXml.exe
+
+Signature Index: 0 (Primary Signature)
+Hash of file (sha256): 2CCC929A6877D23C67536AE03126389CCA43A416C53A0D58B214A0F946F831D4
+
+Signing Certificate Chain:
+    Issued to: Microsoft Identity Verification Root Certificate Authority 2020
+    Issued by: Microsoft Identity Verification Root Certificate Authority 2020
+    Expires:   Sun Apr 16 14:44:40 2045
+    SHA1 hash: F40042E2E5F7E8EF8189FED15519AECE42C3BFA2
+
+        Issued to: Microsoft ID Verified Code Signing PCA 2021
+        Issued by: Microsoft Identity Verification Root Certificate Authority 2020
+        Expires:   Tue Apr 01 16:15:20 2036
+        SHA1 hash: 8E750F459DAF9A79D6370DB747AD2226866AD818
+
+            Issued to: Microsoft ID Verified CS AOC CA 01
+            Issued by: Microsoft ID Verified Code Signing PCA 2021
+            Expires:   Mon Apr 13 13:31:54 2026
+            SHA1 hash: D7B1118AFBB879D9F2F8E98B9AC12F9367FACE88
+
+                Issued to: David H Hoyt LLC
+                Issued by: Microsoft ID Verified CS AOC CA 01
+                Expires:   Tue Oct 29 09:08:18 2024
+                SHA1 hash: E20F0D74A2481A62E715034709F968F3BD01C736
+
+The signature is timestamped: Sat Oct 26 17:58:21 2024
+Timestamp Verified by:
+    Issued to: DigiCert Assured ID Root CA
+    Issued by: DigiCert Assured ID Root CA
+    Expires:   Sun Nov 09 20:00:00 2031
+    SHA1 hash: 0563B8630D62D75ABBC8AB1E4BDFB5A899B24D43
+
+        Issued to: DigiCert Trusted Root G4
+        Issued by: DigiCert Assured ID Root CA
+        Expires:   Sun Nov 09 19:59:59 2031
+        SHA1 hash: A99D5B79E9F1CDA59CDAB6373169D5353F5874C6
+
+            Issued to: DigiCert Trusted G4 RSA4096 SHA256 TimeStamping CA
+            Issued by: DigiCert Trusted Root G4
+            Expires:   Sun Mar 22 19:59:59 2037
+            SHA1 hash: B6C8AF834D4E53B673C76872AA8C950C7C54DF5F
+
+                Issued to: DigiCert Timestamp 2024
+                Issued by: DigiCert Trusted G4 RSA4096 SHA256 TimeStamping CA
+                Expires:   Sun Nov 25 19:59:59 2035
+                SHA1 hash: DBD385EE62DBD23E7BE4F67148508724D5865B45
+
+
+Successfully verified: E:\repos\PatchIccMAX\Testing\iccToXml.exe
+
+Number of files successfully Verified: 1
+Number of warnings: 0
+Number of errors: 0
 -----------------------------
 Process Complete: 10/26/2024 19:25:13
 Number of files signed by David H Hoyt LLC: 12
