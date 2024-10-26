@@ -10,7 +10,7 @@ This script compiles a solution using **MSBuild** with specific build parameters
 
 ## Script Details
 
-This is specific to building a static .exe which is now configured in the Static Brnach of the Sisual studio Train of the PatchIccMAX Project by David H Hoyt LLC
+This is specific to building a static .exe which is now configured in the Static Brnach of the Visual Studio Train of the PatchIccMAX Project by David H Hoyt LLC
 
 ### PowerShell Command:
 
