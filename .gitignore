@@ -259,3 +259,6 @@ CMakeUserPresets.json
 /Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump.exe.lastcodeanalysissucceeded
 /msbuild.binlog
 /vcpkg_installed
+/msbuild.rsp
+/msbuild
+/more
