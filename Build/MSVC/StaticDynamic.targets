@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <BUILD_TYPE Condition="'$(Configuration)'=='Static'">Static</BUILD_TYPE>
+    <BUILD_TYPE Condition="'$(Configuration)'=='Dynamic'">Dynamic</BUILD_TYPE>
+  </PropertyGroup>
+</Project>

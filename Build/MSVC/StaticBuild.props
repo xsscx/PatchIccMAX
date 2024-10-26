@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' or '$(Configuration)' == 'Debug'">
+    <!-- Define static library linking settings -->
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    <PreprocessorDefinitions>$(PreprocessorDefinitions);STATIC_BUILD</PreprocessorDefinitions>
+    <!-- Additional properties for static build -->
+  </PropertyGroup>
+</Project>

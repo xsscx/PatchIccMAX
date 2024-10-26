@@ -83,7 +83,7 @@
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
-    <EnableASAN>false</EnableASAN>
+    <EnableASAN>true</EnableASAN>
     <VCToolsVersion>14.41.34120</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">

@@ -92,7 +92,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <PlatformToolset>v143</PlatformToolset>
-    <EnableASAN>false</EnableASAN>
+    <EnableASAN>true</EnableASAN>
     <SpectreMitigation>false</SpectreMitigation>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -113,6 +113,7 @@
     <UseOfMfc>false</UseOfMfc>
     <PlatformToolset>v143</PlatformToolset>
     <EnableASAN>false</EnableASAN>
+    <VCToolsVersion>14.41.34120</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release with ZLIB|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -252,6 +253,10 @@
     <OutDir>.\vc_mswd_x64\</OutDir>
     <IntDir>.\vc_mswd_x64\wxProfileDump\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgUseMD>false</VcpkgUseMD>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -420,7 +425,7 @@
       <AdditionalIncludeDirectories>$(WXWIN)\include;$(WXWIN)\lib\$(Platform)\vc_lib\msw;$(WXWIN)\lib\vc_x64_lib\mswd;.;..\..\..\IccProfLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;__WXMSW__;_WINDOWS;NOPCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeaderOutputFile>.\vc_msw\wxProfileDump/wxProfileDump.pch</PrecompiledHeaderOutputFile>
@@ -439,10 +444,10 @@
       <AdditionalIncludeDirectories>$(WXWIN)\include;$(WXWIN)\lib\$(Platform)\vc_lib\msw;.;$(WXWIN)\samples;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>IccProfLib_CRTDLL.lib;wxmsw32u_stc.lib;wxmsw$(WXVER)u_core.lib;wxbase$(WXVER)u.lib;tiff.lib;turbojpeg.lib;libpng16.lib;zlib.lib;pcre2-32.lib;libexpat.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;oleacc.lib;odbc32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>IccProfLib_CRTDLL.lib;wxmsw32u_stc.lib;wxmsw$(WXVER)u_core.lib;wxbase$(WXVER)u.lib;tiff.lib;turbojpeg.lib;libpng16.lib;zlib.lib;pcre2-32.lib;libexpatMT.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;oleacc.lib;odbc32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)\wxProfileDump.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\..\..\IccProfLib\$(Platform)\$(Configuration)_CRTDLL;$(WXWIN)\lib\$(Platform)\vc_lib;$(WXWIN)\lib\vc_x64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\IccProfLib\$(Platform)\$(Configuration)_CRTDLL;$(WXWIN)\lib\$(Platform)\vc_lib;$(WXWIN)\lib\vc_x64_lib;F:\test\vcpkg\installed\x64-windows-static\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(OutDir)\wxProfileDump.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>

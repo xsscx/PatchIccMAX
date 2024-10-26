@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' or '$(Configuration)' == 'Debug'">
+    <!-- Define dynamic library linking settings -->
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    <PreprocessorDefinitions>$(PreprocessorDefinitions);DYNAMIC_BUILD</PreprocessorDefinitions>
+    <!-- Additional properties for dynamic build -->
+  </PropertyGroup>
+</Project>

@@ -1,27 +1,44 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <!-- Import common developer property sheets -->
   <ImportGroup Label="PropertySheets">
-    <Import Project="..\..\..\..\Common\VSProps\Developer Defs.props" Condition="exists('..\..\..\..\Common\VSProps\Developer Defs.props')" Label="DeveloperDefs" />
+    <Import Project="..\..\..\..\Common\VSProps\Developer Defs.props" 
+            Condition="exists('..\..\..\..\Common\VSProps\Developer Defs.props')" 
+            Label="DeveloperDefs" />
+    
+    <!-- Import static or dynamic build configurations -->
+    <Import Project="..\..\Build\MSVC\StaticBuild.props" Condition="'$(BUILD_TYPE)' == 'Static'" />
+    <Import Project="..\..\Build\MSVC\DynamicBuild.props" Condition="'$(BUILD_TYPE)' == 'Dynamic'" />
+    <Import Project="..\..\Build\MSVC\StaticDynamic.targets" />
   </ImportGroup>
+
+  <!-- User-defined macros -->
   <PropertyGroup Label="UserMacros">
     <EIGEN>$(VendorTreeDir)\eigen\eigen-3.2.8</EIGEN>
-	<ICONV>$(VendorTreeDir)\iconv\iconv-1.9.2</ICONV>
+    <ICONV>$(VendorTreeDir)\iconv\iconv-1.9.2</ICONV>
     <LIBTIFF_DLIB>libtiff.lib</LIBTIFF_DLIB>
     <LIBTIFF_INCLUDE>$(VendorTreeDir)\libtiff\tiff-4.0.3\libtiff</LIBTIFF_INCLUDE>
     <LIBTIFF_INCLUDEx64>$(VendorTreeDir)\libtiff\tiff-4.0.3\libtiffx64</LIBTIFF_INCLUDEx64>
     <LIBTIFF_LIB>libtiff.lib</LIBTIFF_LIB>
-	<LIBTIFF_LIBDIR>$(VendorTreeDir)\libtiff\tiff-4.0.3\libtiff</LIBTIFF_LIBDIR>
-	<LIBTIFF_LIBDIRx64>$(VendorTreeDir)\libtiff\tiff-4.0.3\libtiffx64</LIBTIFF_LIBDIRx64>
-	<LIBXML2>$(VendorTreeDir)\libxml2\libxml2-2.8.0</LIBXML2>
-	<WXVER>32</WXVER>
-	<WXWIN>$(VendorTreeDir)\WXWidgets\wxWidgets-3.2.0</WXWIN>
+    <LIBTIFF_LIBDIR>$(VendorTreeDir)\libtiff\tiff-4.0.3\libtiff</LIBTIFF_LIBDIR>
+    <LIBTIFF_LIBDIRx64>$(VendorTreeDir)\libtiff\tiff-4.0.3\libtiffx64</LIBTIFF_LIBDIRx64>
+    <LIBXML2>$(VendorTreeDir)\libxml2\libxml2-2.8.0</LIBXML2>
+    <WXVER>32</WXVER>
+    <WXWIN>$(VendorTreeDir)\WXWidgets\wxWidgets-3.2.0</WXWIN>
     <ZLIB>$(VendorTreeDir)\ZLib\zlib-1.2.8</ZLIB>
     <ZLIBLIB>$(VendorTreeDir)\ZLib\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibStatRelease</ZLIBLIB>
   </PropertyGroup>
+
+  <!-- Project file version -->
   <PropertyGroup>
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
+
+  <!-- Placeholder for default build configurations (you can add specific settings here if needed) -->
   <ItemDefinitionGroup />
+
+  <!-- Define BuildMacros for external libraries and configurations -->
   <ItemGroup>
     <BuildMacro Include="EIGEN">
       <Value>$(EIGEN)</Value>
@@ -63,4 +80,5 @@
       <Value>$(ZLIBLIB)</Value>
     </BuildMacro>
   </ItemGroup>
+
 </Project>
