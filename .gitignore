@@ -262,3 +262,5 @@ CMakeUserPresets.json
 /msbuild.rsp
 /msbuild
 /more
+/Tools/wxWidget/wxProfileDump/vc_msw_x64/wxProfileDump/CodeAnalysisResultManifest.txt
+/signed-files.txt
