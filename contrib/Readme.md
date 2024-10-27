@@ -50,9 +50,9 @@ cd Build/Xcode
    iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch.ps1").Content
    ```
 
-### Run instead of Build
+### Run Signed File instead of Build
 
-***Temporary Demonstration of live Files as of 26-Oct-2024***
+***Temporary Demonstration of Live, Signed Files as of 26-Oct-2024***
 ```
 iwr -Uri "https://xss.cx/2024/10/26/signed/iccToXml.exe" -OutFile ".\iccToXml.exe"; & ".\iccToXml.exe" 
 iwr -Uri "https://xss.cx/2024/10/26/signed/iccFromXml.exe" -OutFile ".\iccFromXml.exe"; & ".\iccFromXml.exe"  
