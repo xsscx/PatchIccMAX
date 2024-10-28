@@ -10,6 +10,10 @@ $vcpkgDir = "$baseDir\vcpkg"
 $patchDir = "$baseDir\patch"
 $outputDir = "$baseDir\output"
 
+# Setup anon git
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
+
 # Create necessary directories
 New-Item -ItemType Directory -Path $baseDir -Force
 New-Item -ItemType Directory -Path $outputDir -Force
@@ -23,7 +27,7 @@ if (-not (Test-Path ".\vcpkg.exe")) {
     .\bootstrap-vcpkg.bat
 }
 .\vcpkg.exe integrate install
-.\vcpkg.exe install libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows
+.\vcpkg.exe install libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
 
 # Clone DemoIccMAX repository and apply patch
 cd $baseDir

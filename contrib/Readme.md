@@ -1,3 +1,132 @@
+# PatchIccMAX [Development Branch](https://github.com/xsscx/PatchIccMAX/tree/development/)
+
+Welcome to Hoyt's Development Branch of the DemoIccMAX Project where I focus on accuracy and precision to safely work with ICC Color Profiles because **Data** is ***Code***.  There are updated Build [Scripts](https://github.com/xsscx/PatchIccMAX/tree/development/contrib/Build) and [Unit Tests](https://github.com/xsscx/PatchIccMAX/tree/development/contrib/UnitTest).
+
+The [Development Branch](https://github.com/xsscx/PatchIccMAX/tree/development/) provides updated documentation, additional scripts, and modernized build instructions to supplement the legacy documentation of the DemoIccMAX project. The contrib/ directory provides updated examples and verified instructions to ensure a smooth experience with modern build systems and environments.
+
+### Build Status | Development Branch
+| Build OS & Device Info           | Build   |  Install  | IDE | CLI |
+| -------------------------------- | ------------- | ------------- | ------------- | ------------- |
+| macOS 15 X86_64       | ✅          | ✅          |     ✅          |   ✅          |
+| macOS 15 arm  | ✅          | ✅          | ✅  | ✅          |
+| Ubuntu WSL   | ✅          | ✅          |    ✅     | ✅          |
+| Windows 11  | ✅          | ✅          | ✅   | ✅          |
+
+
+# Automated Builds
+
+The Project can be cloned and built automatically. Copy the command below and Paste into your Terminal to start the Build.
+
+## Build via CMake
+
+***tl;dr***
+
+   ```
+  cd /tmp
+  /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/cmake/build_master_branch.sh)"
+   ```
+
+### Manual Build
+
+```
+cd Build/
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -Wno-dev  Cmake
+make -j$(nproc) 2>&1 | grep 'error:'
+```
+
+### Xcode Build
+
+```
+cd Build/Xcode
+/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/Build/XCode/xnu_build_macos15_x86_64.zsh)"
+```
+
+## MSBuild on Windows using VS2022 Community
+
+***tl;dr***
+
+   ```
+   cd C:\temp\
+   iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch.ps1").Content
+   ```
+
+### Run Signed File instead of Build
+
+***Temporary Demonstration of Live, Signed Files as of 26-Oct-2024***
+```
+iwr -Uri "https://xss.cx/2024/10/26/signed/iccToXml.exe" -OutFile ".\iccToXml.exe"; & ".\iccToXml.exe" 
+iwr -Uri "https://xss.cx/2024/10/26/signed/iccFromXml.exe" -OutFile ".\iccFromXml.exe"; & ".\iccFromXml.exe"  
+iwr -Uri "https://xss.cx/2024/10/26/signed/iccDumpProfile.exe" -OutFile ".\iccDumpProfile.exe"; & ".\iccDumpProfile.exe" 
+iwr -Uri "https://xss.cx/2024/10/26/signed/iccSpecSepToTiff.exe" -OutFile ".\iccSpecSepToTiff.exe"; & ".\iccSpecSepToTiff.exe"
+iwr -Uri "https://xss.cx/2024/10/26/signed/iccApplyToLink.exe" -OutFile ".\iccApplyToLink.exe"; & ".\iccApplyToLink.exe"
+iwr -Uri "https://xss.cx/2024/10/26/signed/iccApplyProfiles.exe" -OutFile ".\iccApplyProfiles.exe"; & ".\iccApplyProfiles.exe"
+iwr -Uri "https://xss.cx/2024/10/26/signed/iccApplyNamedCmm.exe" -OutFile ".\iccApplynamedCmm.exe"; & ".\iccApplyNamedCmm.exe"
+iwr -Uri "https://xss.cx/2024/10/26/signed/iccV5DspObsToV4Dsp.exe" -OutFile ".\iccV5DspObsToV4Dsp.exe"; & ".\iccV5DspObsToV4Dsp.exe"
+iwr -Uri "https://xss.cx/2024/10/26/signed/wxProfileDump.exe" -OutFile ".\wxProfileDump.exe"; & ".\wxProfileDump.exe"
+iwr -Uri "https://xss.cx/2024/10/26/signed/iccRoundTrip.exe" -OutFile ".\iccRoundTrip.exe"; & ".\iccRoundTrip.exe"
+iwr -Uri "https://xss.cx/2024/10/26/signed/iccFromCube.exe" -OutFile ".\iccFromCube.exe"; & ".\iccFromCube.exe"
+```
+
+Note: iccTiffDump.exe has a memory leak and bails out
+
+### Windows Prerequisites
+
+Ensure that you have the following tools installed on your Windows system:
+
+- [Git for Windows](https://gitforwindows.org/)
+- [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+- [vcpkg](https://github.com/microsoft/vcpkg)
+
+***Note** As of 26-September-2024 there is a ***temporary*** [Visual Studio Project](https://xsscx.visualstudio.com/PatchIccMAX) available for aid in Collaboration, Development & Reproduction.
+
+----
+## Installing the RefIccMAX CMM on Windows
+
+To install the RefIccMAX CMM on Windows, follow these simplified steps:
+
+### Create the Installation Directory
+In `C:\Program Files`, create a new directory called `RefIccMAX`. Then, copy the `RefIccMAXCmm.dll` file into the directory `C:\Program Files\RefIccMAX`.
+
+The .dll is Signed by David H Hoyt LLC
+```
+cd "C:\Program Files\RefIccMAX"
+iwr -Uri "https://xss.cx/2024/10/26/signed/DemoIccMAXCmm.dll" -OutFile ".\DemoIccMAXCmm.dll"
+```
+
+### Update the Windows Registry
+Instead of manually editing the registry, you can use a `.reg` file to automate the process.
+
+#### Instructions:
+- Create a new text file and paste the following content:
+
+```
+  Windows Registry Editor Version 5.00
+
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ICM\ICMatchers]
+  "SICC"="C:\\Program Files\\RefIccMAX\\RefIccMAXCmm.dll"
+```
+- Save this file with a `.reg` extension, such as `Install-RefIccMAX.reg`.
+- Double-click the `.reg` file to apply the registry settings.
+- When prompted, confirm that you want to add the information to the registry.
+
+### Verify the Installation
+- Open the Registry Editor (`regedit`) by typing `regedit` in the Start > Run dialog.
+- Navigate to `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ICM\ICMatchers`.
+- Ensure that the `SICC` string value is present and points to `C:\Program Files\RefIccMAX\RefIccMAXCmm.dll`.
+
+### Notes:
+- **Elevated Prompt**: If you find an elevated powershell command prompt is necessary to perform the Automated Build on Windows using Visual Studio 2022 Community, copy and paste the following into your terminal:
+
+   ```
+   Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command "iex (iwr -UseBasicParsing -Uri ''https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch.ps1'').Content"' -Verb RunAs
+   ```
+
+- **Registry Backup**: Although using a `.reg` file is a straightforward process, it's always good practice to back up the registry before making changes. For more information on how to back up and restore the registry, refer to the Windows documentation.
+- **Custom Installation Path**: If you install the `RefIccMAXCmm.dll` in a different directory, ensure you update the `.reg` file to reflect the correct path.
+
+This method simplifies the installation process and reduces the potential for manual errors when updating the registry.
+
+
 
 # Contrib Directory for DemoIccMAX Project
 
@@ -126,8 +255,101 @@ Alternatively, you can open the project manually in Xcode by navigating to the `
 #### Build the Project via Xcode
 With the project open in Xcode, you can now build it directly using the Xcode interface. The resulting binaries will be placed in the Testing folder after a successful build.
 
-Conclusion
-The CMake method for generating Xcode projects provides a streamlined and modern approach to building the DemoIccMAX project on macOS. This method is recommended for developers who prefer a flexible and compatible build process, ensuring that the project is set up correctly and efficiently on macOS.
+##### xcodebuild
+
+As of Q4/2024 and macOS 15 on x86_64, there are some recent build observations using brew:
+
+```
+export config="Debug"
+```
+
+
+**IccProfLib**
+
+```
+cd IccProfLib
+xcodebuild -target IccProfLib-macOS -configuration "$config" -arch x86_64 clean
+xcodebuild -target IccProfLib-macOS -configuration "$config" -arch x86_64
+```
+
+
+**IccLibXML**
+
+```
+cd IccXML/IccLibXML
+xcodebuild -target IccLibXML-macOS -configuration "$config" -arch x86_64 clean
+xcodebuild -target IccLibXML-macOS -configuration "$config" -arch x86_64
+```
+
+**IccApplyNamedCmm**
+
+```
+cd Tools/CmdLine/IccApplyNamedCmm
+xcodebuild -target IccApplyNamedCMM -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/Debug /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+```
+
+**IccApplyProfiles**
+
+```
+cd Tools/CmdLine/IccApplyProfiles
+xcodebuild -target iccApplyProfiles -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+```
+
+**IccDumpProfile**
+
+```
+xcodebuild -target IccDumpProfile -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+```
+
+**IccRoundTrip**
+
+```
+xcodebuild -target IccRoundTrip -configuration "$config" -arch x86_64 clean
+xcodebuild -target IccRoundTrip -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config/  /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -llzma -lz"
+```
+
+**IccSpecSepToTiff**
+
+```
+xcodebuild -target IccSpecSepToTiff -configuration "$config" -arch x86_64 clean
+xcodebuild -target IccSpecSepToTiff -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib /usr/local/opt/webp/lib /usr/local/opt/zstd/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -lwebp -llzma -lz -lzstd"
+```
+
+**IccTiffDump**
+
+```
+xcodebuild -target IccTiffDump -configuration "$config" -arch x86_64 clean
+xcodebuild -target IccTiffDump -configuration "$config" -arch x86_64 \
+LIBRARY_SEARCH_PATHS="../../../IccProfLib/build/$config /usr/local/opt/jpeg/lib /usr/local/opt/libtiff/lib /usr/local/opt/webp/lib /usr/local/opt/zstd/lib" \
+OTHER_LDFLAGS="-lIccProfLib -ljpeg -ltiff -lwebp -llzma -lz -lzstd"
+```
+
+**IccFromXml**
+
+```
+xcodebuild -target iccFromXml -configuration "$config" -arch x86_64 clean
+xcodebuild -target iccFromXml -configuration "$config" -arch x86_64 -sdk macosx15.0 \
+ARCHS="x86_64" VALID_ARCHS="x86_64"
+```
+
+**IccToXml***
+
+```
+xcodebuild -target IccToXml -configuration "$config" -arch x86_64 clean
+xcodebuild -target IccToXml -configuration "$config" -arch x86_64 -sdk macosx15.0 \
+ARCHS="x86_64" VALID_ARCHS="x86_64"
+```
+
 
 ## Building the Project on Windows
 
@@ -301,11 +523,3 @@ The `UnitTest` directory includes unit test files and related scripts.
 - **cve-2023-46602.zsh**: A shell script for testing the specific CVE issue.
 - **TestCIccTagXmlProfileSequenceId.cpp**: A C++ test file for the `CIccTagXmlProfileSequenceId` class.
 - **TestParseText.cpp**: A C++ test file for testing text parsing functionality.
-
-### Conclusion
-
-This documentation is intended to assist with setting up and building the DemoIccMAX project using modern tools and practices. If you encounter any issues or have suggestions for improvement, please feel free to contribute to this repository.
-
----
-
-For further information, please refer to the legacy documentation or contact the project maintainers.
