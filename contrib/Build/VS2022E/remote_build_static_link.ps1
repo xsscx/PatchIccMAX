@@ -72,9 +72,15 @@ $cloneVcpkgTime = Time-Execution -Code {
 } -taskName "Cloning vcpkg"
 Log-Status "Finished cloning vcpkg" "SUCCESS" $cloneVcpkgTime
 
-# Check if the vcpkg directory exists before proceeding
+# **Check if vcpkg directory exists and required files (like bootstrap-vcpkg.bat) are present**
 if (-Not (Test-Path -Path "C:\Testing\vcpkg")) {
-    Log-Status "vcpkg directory not found. Exiting." "ERROR"
+    Log-Status "vcpkg directory not found after clone. Exiting." "ERROR"
+    Stop-Transcript
+    exit 1
+}
+
+if (-Not (Test-Path -Path "C:\Testing\vcpkg\bootstrap-vcpkg.bat")) {
+    Log-Status "'bootstrap-vcpkg.bat' not found. Exiting." "ERROR"
     Stop-Transcript
     exit 1
 }
