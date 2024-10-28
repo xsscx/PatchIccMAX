@@ -1,4 +1,3 @@
-
 trigger:
   - static
 
@@ -34,7 +33,7 @@ steps:
         Write-Host "vcpkg directory removed."
       } else {
         Write-Host "vcpkg directory does not exist, skipping removal."
-      } # <--- This closing curly brace was missing
+      }
   displayName: 'Clean Workspace'
 
 # Step to install vcpkg libraries
@@ -42,6 +41,7 @@ steps:
     $vcpkgDir = "$(Build.SourcesDirectory)\vcpkg"
     
     if (-not (Test-Path "$vcpkgDir")) {
+        Write-Host "Cloning vcpkg..."
         git clone https://github.com/microsoft/vcpkg.git $vcpkgDir
     }
 
@@ -123,7 +123,7 @@ steps:
 
 # Collect and publish build artifacts (.exe, .dll, .lib)
 - powershell: |
-    $buildDir = "$(Build.SourcesDirectory)"  # Adjust to actual output directory
+    $buildDir = "$(Build.SourcesDirectory)\Build\MSVC\x64\Release"  # Adjust to actual output directory
     $outputDir = "$(Build.ArtifactStagingDirectory)\output"
     New-Item -ItemType Directory -Path $outputDir -Force
     
