@@ -222,6 +222,9 @@ copy $(Platform)\$(Configuration)\iccToXml.pdb ..\..\..\Testing
     <PostBuildEvent>
       <Command>copy $(Platform)\$(Configuration)\iccToXml.exe ..\..\..\Testing\iccToXml.exe</Command>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="IccToXml.cpp">

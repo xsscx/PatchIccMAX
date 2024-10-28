@@ -524,6 +524,9 @@
       <OutputFile>$(Platform)\$(Configuration)_CRTDLL\IccProfLib_CRTDLL.lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with ZLIB|x64'">
     <Midl>

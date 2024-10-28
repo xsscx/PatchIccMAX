@@ -227,6 +227,9 @@ copy $(Platform)\$(Configuration)\iccSpecSepToTiff.pdb ..\..\..\Testing
     <PostBuildEvent>
       <Command>copy $(Platform)\$(Configuration)\iccSpecSepToTiff.exe ..\..\..\Testing\iccSpecSepToTiff.exe</Command>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>

@@ -228,6 +228,9 @@ copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.pdb ..\..\..\Testing
     <PostBuildEvent>
       <Command>copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.exe ..\..\..\Testing\iccV5DspObsToV4Dsp.exe</Command>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>

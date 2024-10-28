@@ -227,6 +227,9 @@ copy $(Platform)\$(Configuration)\iccRoundTrip.pdb ..\..\..\Testing
     <PostBuildEvent>
       <Command>copy $(Platform)\$(Configuration)\iccRoundTrip.exe ..\..\..\Testing\iccRoundTrip.exe</Command>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>

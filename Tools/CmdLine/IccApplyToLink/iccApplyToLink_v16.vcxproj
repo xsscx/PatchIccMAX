@@ -229,6 +229,9 @@ copy $(Platform)\$(Configuration)\iccApplyToLink.pdb ..\..\..\Testing
     <PostBuildEvent>
       <Command>copy $(Platform)\$(Configuration)\iccApplyToLink.exe ..\..\..\Testing\iccApplyToLink.exe</Command>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>

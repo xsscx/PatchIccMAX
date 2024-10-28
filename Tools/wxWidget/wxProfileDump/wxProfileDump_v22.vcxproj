@@ -462,6 +462,9 @@
     <PostBuildEvent>
       <Command>copy .\vc_msw_x64\wxProfileDump.exe ..\..\..\Testing\wxProfileDump.exe</Command>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with ZLIB|x64'">
     <Midl>
