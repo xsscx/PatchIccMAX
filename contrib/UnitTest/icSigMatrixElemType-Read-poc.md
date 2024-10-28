@@ -5,10 +5,10 @@
 ## PoC
 
 ```
-cd Testing/
-wget https://github.com/xsscx/PatchIccMAX/raw/development/contrib/UnitTest/icSigMatrixElemType-Read-poc.icc
-iccToXml icSigMatrixElemType-Read-poc.icc icSigMatrixElemType-Read-poc.icc
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/icSigMatrixElemType-Read-poc.sh)"
 ```
+
+### Manual Debugging with lldb
 
 #### 1. Breakpoint Setup
 - A breakpoint set at line 4562 in `IccMpeCalc.cpp`, which is where the type confusion occurs:
@@ -69,49 +69,3 @@ iccToXml icSigMatrixElemType-Read-poc.icc icSigMatrixElemType-Read-poc.icc
 **CWE ID: CWE-843** - Access of Resource Using Incompatible Type ('**Type Confusion**').
 
 **MITRE ATT&CK ID: T1569** - System Binary Proxy Execution (applicable in broader contexts).
-
-## Takeaway
-These findings should be thoroughly analyzed and discussed by the relevant technical groups to validate and address the identified issues.
-
-## Prior Art
-- https://bugs.chromium.org/p/project-zero/issues/detail?id=2225
-- https://bugs.chromium.org/p/project-zero/issues/detail?id=2226
-- https://srd.cx/cve-2022-26730/
-- https://srd.cx/cve-2023-32443/
-
-### Recent CVE's for the DemoIccMAX Project
-- CVE-2023-46602 https://nvd.nist.gov/vuln/detail/CVE-2023-46602
-- CVE-2023-46603 https://nvd.nist.gov/vuln/detail/CVE-2023-46603
-- CVE-2023-46866 https://nvd.nist.gov/vuln/detail/CVE-2023-46866
-- CVE-2023-46867 https://nvd.nist.gov/vuln/detail/CVE-2023-46867
-- CVE-2023-47249 https://nvd.nist.gov/vuln/detail/CVE-2023-47249
-- CVE-2023-48736 https://nvd.nist.gov/vuln/detail/CVE-2023-48736
-- CVE-2024-38427 https://nvd.nist.gov/vuln/detail/CVE-2024-38427
-
-### Finding Open Source Repositories
-```
-inurl:github.com "CIccTagXmlProfileSequenceId"
-inurl:gitlab.com "CIccTagXmlProfileSequenceId"
-```
-
-### Identifying Web Applications and Services:
-```
-"ICC profile XML parsing" inurl:app
-"embed ICC profile into images" inurl:service
-"extract ICC profile from images" inurl:service
-```
-
-### Locating Documentation and Tutorials
-```
-"CIccTagXmlProfileSequenceId::ParseXml" intitle:documentation
-"ICC profile parsing tutorial" intitle:guide
-```
-
-### Finding Vulnerable Instances
-```
-"XML parsing error" "ICC profile" inurl:log
-"XML parsing failure" "ICC profile" inurl:error
-intext:"libiccxml" OR intext:"iccproflib" "International Color Consortium" filetype:pdf OR filetype:txt OR filetype:md OR filetype:xml OR filetype:txt OR filetype:cpp
-"Libiccxml" OR "iccproflib"
-"iccxmllib" OR "iccproflib"
-```
