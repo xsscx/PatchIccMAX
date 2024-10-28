@@ -99,11 +99,25 @@ steps:
       Write-Host "Environment variables set."
   displayName: 'Set Environment Variables'
 
-# Build the solution using Visual Studio Build task
+## Build the solution using Visual Studio Build task
 - task: VSBuild@1
   inputs:
     solution: '$(Build.SourcesDirectory)\Build\MSVC\BuildAll_v22.sln'
-    msbuildArgs: '/verbosity:detailed /p:Platform=x64 /p:Configuration=$(BuildConfiguration) /p:AdditionalIncludeDirectories=$(LIBTIFF_INCLUDE) /p:AdditionalLibraryDirectories=$(LIBTIFF_LIBDIR) /p:LIBTIFF_DLIB=$(LIBTIFF_DLIB)'
+    msbuildArgs: |
+      /verbosity:detailed
+      /p:Platform=x64
+      /p:Configuration=Release
+      /p:VcpkgTriplet=x64-windows-static
+      /p:AdditionalIncludeDirectories=$(LIBTIFF_INCLUDE)
+      /p:AdditionalLibraryDirectories=$(LIBTIFF_LIBDIR)
+      /p:LIBTIFF_DLIB=$(LIBTIFF_DLIB)
+      /p:CLToolAdditionalOptions="/MT /W4 /GS /Qspectre /GL /std:c++17"
+      /p:LinkToolAdditionalOptions="/NODEFAULTLIB:msvcrt /LTCG /OPT:REF /INCREMENTAL:NO /DYNAMICBASE /HIGHENTROPYVA /NXCOMPAT /GUARD:CF /GUARD:EH /SAFESEH /FIXED:NO"
+      /p:PreprocessorDefinitions="STATIC_LINK"
+      /p:RuntimeLibrary=MultiThreaded
+      /p:AdditionalLibraryDirectories="$(Build.SourcesDirectory)\vcpkg\\x64-windows-static\lib"
+      /p:AdditionalDependencies="wxmsw32u_core.lib;wxbase32u.lib;%(AdditionalDependencies)"
+      /t:Clean,Build
     configuration: '$(BuildConfiguration)'
   displayName: 'Build PatchIccMAX project'
 
