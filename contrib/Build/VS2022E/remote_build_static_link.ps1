@@ -5,172 +5,108 @@
 # Description: This script builds the static branch of PatchIccMAX with improved UI/UX.
 # -----------------------------------------------------
 
-# Helper function for status updates with color
-function Log-Status {
+# Banner
+$banner = @"
+========================================
+        DemoIccMAX Static Branch Build
+========================================
+"@
+Write-Host $banner
+
+# Function for logging
+function Log-Message {
     param (
         [string]$message,
-        [string]$status = "INFO",  # Status: INFO, SUCCESS, WARNING, ERROR
-        [int]$timer = 0            # Time in seconds for step completion (optional)
+        [string]$level = "INFO"
     )
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $timerMessage = ""
-    if ($timer -gt 0) {
-        $timerMessage = " (Time taken: $timer seconds)"
-    }
-
-    switch ($status) {
-        "INFO"     { Write-Host "[$timestamp][INFO] $message$timerMessage" -ForegroundColor White }
-        "SUCCESS"  { Write-Host "[$timestamp][SUCCESS] $message$timerMessage" -ForegroundColor Green }
-        "WARNING"  { Write-Host "[$timestamp][WARNING] $message$timerMessage" -ForegroundColor Yellow }
-        "ERROR"    { Write-Host "[$timestamp][ERROR] $message$timerMessage" -ForegroundColor Red }
-    }
+    Write-Host "[$timestamp] [$level] $message"
 }
 
-# Start script timer
-$scriptStartTime = Get-Date
+# Error handling
+trap {
+    Log-Message "An error occurred: $_" "ERROR"
+    exit 1
+}
 
-# Check if the 'Testing' directory exists, if not, create it
-if (-Not (Test-Path -Path "C:\Testing")) {
-    Log-Status "Directory 'C:\Testing' does not exist. Creating directory." "INFO"
-    New-Item -Path "C:\Testing" -ItemType Directory
+Log-Message "Starting DemoIccMAX Static Branch Build..."
+
+# Create testing directory
+if (-not (Test-Path -Path "C:\testing")) {
+    Log-Message "Creating testing directory..."
+    mkdir C:\testing
 } else {
-    Log-Status "Directory 'C:\Testing' already exists. Proceeding..." "INFO"
+    Log-Message "Testing directory already exists."
 }
 
-# Now create log file after ensuring directory exists
-$logFile = "C:\Testing\build_log_$(Get-Date -Format "yyyyMMdd_HHmmss").txt"
-Start-Transcript -Path $logFile -Append
+cd C:\testing
 
-# Start of script
-Log-Status "Starting DemoIccMAX Static Branch Build......" "INFO"
-
-# Function to time and log execution of a block of code
-function Time-Execution {
-    param (
-        [ScriptBlock]$Code,
-        [string]$taskName
-    )
-
-    $startTime = Get-Date
-    Invoke-Command $Code
-    $endTime = Get-Date
-    $elapsedTime = ($endTime - $startTime).TotalSeconds
-    return [math]::Round($elapsedTime, 2)
-}
-
-# Step: Clone vcpkg repository
-$cloneVcpkgTime = Time-Execution -Code {
-    Log-Status "Cloning vcpkg repository..." "INFO"
+# Clone vcpkg repository
+if (-not (Test-Path -Path "C:\testing\vcpkg")) {
+    Log-Message "Cloning vcpkg repository..."
     git clone https://github.com/microsoft/vcpkg.git
-    if ($LASTEXITCODE -eq 0) {
-        Log-Status "Successfully cloned vcpkg." "SUCCESS"
-    } else {
-        Log-Status "Failed to clone vcpkg. Exiting." "ERROR"
-        Stop-Transcript
-        exit 1
-    }
-} -taskName "Cloning vcpkg"
-Log-Status "Finished cloning vcpkg" "SUCCESS" $cloneVcpkgTime
-
-# **Check if vcpkg directory exists and required files (like bootstrap-vcpkg.bat) are present**
-if (-Not (Test-Path -Path "C:\Testing\vcpkg")) {
-    Log-Status "vcpkg directory not found after clone. Exiting." "ERROR"
-    Stop-Transcript
-    exit 1
+} else {
+    Log-Message "vcpkg repository already exists, skipping clone."
 }
 
-if (-Not (Test-Path -Path "C:\Testing\vcpkg\bootstrap-vcpkg.bat")) {
-    Log-Status "'bootstrap-vcpkg.bat' not found. Exiting." "ERROR"
-    Stop-Transcript
-    exit 1
+cd vcpkg
+Log-Message "Bootstrapping vcpkg..."
+.\bootstrap-vcpkg.bat
+
+# Integrate vcpkg
+Log-Message "Integrating vcpkg..."
+.\vcpkg.exe integrate install
+
+# Install required libraries
+Log-Message "Installing required libraries..."
+$requiredPackages = @(
+    "libxml2:x64-windows",
+    "tiff:x64-windows",
+    "wxwidgets:x64-windows",
+    "libxml2:x64-windows-static",
+    "tiff:x64-windows-static",
+    "wxwidgets:x64-windows-static"
+)
+
+foreach ($package in $requiredPackages) {
+    Log-Message "Installing package: $package..."
+    .\vcpkg.exe install $package
 }
 
-# Step: Bootstrap vcpkg
-$bootstrapTime = Time-Execution -Code {
-    Log-Status "Running vcpkg bootstrap..." "INFO"
-    Set-Location -Path "C:\Testing\vcpkg"
-    .\bootstrap-vcpkg.bat
-    if ($LASTEXITCODE -eq 0) {
-        Log-Status "vcpkg bootstrap completed." "SUCCESS"
-    } else {
-        Log-Status "vcpkg bootstrap failed. Exiting." "ERROR"
-        Stop-Transcript
-        exit 1
-    }
-} -taskName "Bootstrapping vcpkg"
-Log-Status "Finished bootstrapping vcpkg" "SUCCESS" $bootstrapTime
+cd C:\testing
 
-# Step: Install dependencies
-$installDepsTime = Time-Execution -Code {
-    Log-Status "Installing dependencies via vcpkg..." "INFO"
-    .\vcpkg.exe install libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows `
-                       libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
-    if ($LASTEXITCODE -eq 0) {
-        Log-Status "Dependencies installed successfully." "SUCCESS"
-    } else {
-        Log-Status "Failed to install dependencies. Exiting." "ERROR"
-        Stop-Transcript
-        exit 1
-    }
-} -taskName "Installing dependencies"
-Log-Status "Finished installing dependencies" "SUCCESS" $installDepsTime
-
-# Step: Clone PatchIccMAX repository
-$clonePatchIccMAXTime = Time-Execution -Code {
-    Log-Status "Cloning PatchIccMAX repository..." "INFO"
-    Set-Location -Path "C:\Testing"
+# Clone PatchIccMAX repository
+if (-not (Test-Path -Path "C:\testing\PatchIccMAX")) {
+    Log-Message "Cloning PatchIccMAX repository..."
     git clone https://github.com/xsscx/PatchIccMAX.git
-    if ($LASTEXITCODE -eq 0) {
-        Log-Status "Successfully cloned PatchIccMAX." "SUCCESS"
-    } else {
-        Log-Status "Failed to clone PatchIccMAX. Exiting." "ERROR"
-        Stop-Transcript
-        exit 1
-    }
-} -taskName "Cloning PatchIccMAX"
-Log-Status "Finished cloning PatchIccMAX" "SUCCESS" $clonePatchIccMAXTime
+} else {
+    Log-Message "PatchIccMAX repository already exists, skipping clone."
+}
 
-# Step: Checkout the static branch
-$checkoutStaticTime = Time-Execution -Code {
-    Log-Status "Checking out 'static' branch..." "INFO"
-    Set-Location -Path "C:\Testing\PatchIccMAX"
-    git checkout static
-    if ($LASTEXITCODE -eq 0) {
-        Log-Status "Checked out 'static' branch successfully." "SUCCESS"
-    } else {
-        Log-Status "Failed to checkout 'static' branch. Exiting." "ERROR"
-        Stop-Transcript
-        exit 1
-    }
-} -taskName "Checking out static branch"
-Log-Status "Finished checking out static branch" "SUCCESS" $checkoutStaticTime
+cd PatchIccMAX
 
-# Step: Start build process
-$buildTime = Time-Execution -Code {
-    Log-Status "Starting build process..." "INFO"
-    msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln `
-        /p:Configuration=Release /p:Platform=x64 /p:VcpkgTriplet=x64-windows-static `
-        /p:CLToolAdditionalOptions="/MT /W4" `
-        /p:LinkToolAdditionalOptions="/NODEFAULTLIB:msvcrt /LTCG /OPT:REF /INCREMENTAL:NO" `
-        /p:PreprocessorDefinitions="STATIC_LINK" `
-        /p:RuntimeLibrary=MultiThreaded `
-        /p:AdditionalLibraryDirectories="C:\Testing\vcpkg\installed\x64-windows-static\lib" `
-        /p:AdditionalDependencies="wxmsw32u_core.lib;wxbase32u.lib;%(AdditionalDependencies)" `
-        /p:LinkToolAdditionalOptions="/DYNAMICBASE /HIGHENTROPYVA /NXCOMPAT /GUARD:CF /GUARD:EH /SAFESEH /FIXED:NO" `
-        /t:Clean,Build /bl /verbosity:minimal
+# Checkout the 'static' branch
+Log-Message "Checking out 'static' branch..."
+git checkout static
 
-    if ($LASTEXITCODE -eq 0) {
-        Log-Status "Build succeeded." "SUCCESS"
-    } else {
-        Log-Status "Build failed with exit code $LASTEXITCODE." "ERROR"
-    }
-} -taskName "Build Process"
-Log-Status "Build process completed" "SUCCESS" $buildTime
+# Start the build process
+Log-Message "Starting build process..."
+msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln `
+    /p:Configuration=Release `
+    /p:Platform=x64 `
+    /p:VcpkgTriplet=x64-windows-static `
+    /p:CLToolAdditionalOptions="/MT /W4" `
+    /p:LinkToolAdditionalOptions="/NODEFAULTLIB:msvcrt /LTCG /OPT:REF /INCREMENTAL:NO" `
+    /p:PreprocessorDefinitions="STATIC_LINK" `
+    /p:RuntimeLibrary=MultiThreaded `
+    /p:AdditionalLibraryDirectories="C:\testing\vcpkg\installed\x64-windows-static\lib" `
+    /p:AdditionalDependencies="wxmsw32u_core.lib%3Bwxbase32u.lib%3B%(AdditionalDependencies)" `
+    /p:LinkToolAdditionalOptions="/DYNAMICBASE /HIGHENTROPYVA /NXCOMPAT /GUARD:CF /GUARD:EH /SAFESEH /FIXED:NO" `
+    /t:Clean,Build /bl /verbosity:minimal > $null 2>&1
 
-# End of script timer
-$scriptEndTime = Get-Date
-$totalScriptTime = [math]::Round(($scriptEndTime - $scriptStartTime).TotalSeconds, 2)
-Log-Status "Total time taken for the build script: $totalScriptTime seconds." "INFO"
-
-# Stop logging
-Stop-Transcript
+# Check build result
+if ($LASTEXITCODE -eq 0) {
+    Log-Message "Build succeeded." "SUCCESS"
+} else {
+    Log-Message "Build failed with exit code $LASTEXITCODE." "ERROR"
+}
