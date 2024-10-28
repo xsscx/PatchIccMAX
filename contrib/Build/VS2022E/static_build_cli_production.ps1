@@ -2,7 +2,7 @@ Write-Host "Starting DemoIccMAX Static Branch Build......"
 Write-Host "mkdir \Testing"
 mkdir \testing
 cd \testing
-Write-Host "Clone vcpke"
+Write-Host "Clone vcpkg"
 git clone https://github.com/microsoft/vcpkg.git
 cd vcpkg
 .\bootstrap-vcpkg.bat
