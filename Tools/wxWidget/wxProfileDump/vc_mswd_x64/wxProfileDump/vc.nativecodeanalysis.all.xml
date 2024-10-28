@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?><DEFECTS><DEFECT>
     <SFA>
-      <FILEPATH>E:\repos\PatchIccMAX\IccProfLib\</FILEPATH>
+      <FILEPATH>E:\sssss\PatchIccMAX\IccProfLib\</FILEPATH>
       <FILENAME>IccCmm.h</FILENAME>
       <LINE>225</LINE>
       <COLUMN>2</COLUMN>
@@ -16,7 +16,7 @@
     <PATH></PATH>
   </DEFECT><DEFECT>
     <SFA>
-      <FILEPATH>E:\repos\PatchIccMAX\IccProfLib\</FILEPATH>
+      <FILEPATH>E:\sssss\PatchIccMAX\IccProfLib\</FILEPATH>
       <FILENAME>IccCmm.h</FILENAME>
       <LINE>225</LINE>
       <COLUMN>2</COLUMN>
@@ -750,7 +750,7 @@
     </PATH>
   </DEFECT><DEFECT>
     <SFA>
-      <FILEPATH>E:\repos\PatchIccMAX\Tools\wxWidget\wxProfileDump\</FILEPATH>
+      <FILEPATH>E:\sssss\PatchIccMAX\Tools\wxWidget\wxProfileDump\</FILEPATH>
       <FILENAME>wxProfileDump.cpp</FILENAME>
       <LINE>118</LINE>
       <COLUMN>0</COLUMN>
