@@ -25,30 +25,30 @@ function LogMessage {
 }
 
 # Step 1: Create the 'testing' directory if it doesn't already exist
-LogMessage "Step 1: Creating directory 'testing'..."
+LogMessage "Step 1: Creating directory 'C:\\testing'..."
 if (-Not (Test-Path -Path "C:\testing")) {
     try {
         mkdir C:\testing
-        LogMessage "Directory 'testing' created successfully." "PASS"
+        LogMessage "Directory 'C:\\testing' created successfully." "PASS"
     } catch {
-        LogMessage "Failed to create directory 'testing'." "ERROR"
+        LogMessage "Failed to create directory 'C:\\testing'." "ERROR"
         exit 1
     }
 } else {
-    LogMessage "Directory 'testing' already exists." "INFO"
+    LogMessage "Directory 'C:\\testing' already exists." "INFO"
 }
 
 # Step 2: Navigate to the 'testing' directory
-LogMessage "Step 2: Navigating to 'testing' directory..."
+LogMessage "Step 2: Navigating to 'C:\\testing' directory..."
 try {
     Set-Location "C:\testing"
-    LogMessage "Successfully navigated to 'testing' directory." "PASS"
+    LogMessage "Successfully navigated to 'C:\\testing' directory." "PASS"
 } catch {
-    LogMessage "Failed to change directory to 'testing'." "ERROR"
+    LogMessage "Failed to change directory to 'C:\\testing'." "ERROR"
     exit 1
 }
 
-# Step 3: Clone the vcpkg repository from GitHub
+# Step 3: Clone the vcpkg repository from GitHub if not already cloned
 LogMessage "Step 3: Cloning vcpkg repository from GitHub..."
 if (-Not (Test-Path -Path "C:\testing\vcpkg")) {
     if (git clone https://github.com/microsoft/vcpkg.git) {
@@ -105,17 +105,17 @@ foreach ($library in $libraries) {
     }
 }
 
-# Step 8: Navigate back to 'testing' directory
-LogMessage "Step 8: Returning to 'testing' directory..."
+# Step 8: Navigate back to the 'testing' directory
+LogMessage "Step 8: Returning to 'C:\\testing' directory..."
 try {
     Set-Location "C:\testing"
-    LogMessage "Successfully returned to 'testing' directory." "PASS"
+    LogMessage "Successfully returned to 'C:\\testing' directory." "PASS"
 } catch {
-    LogMessage "Failed to return to 'testing' directory." "ERROR"
+    LogMessage "Failed to return to 'C:\\testing' directory." "ERROR"
     exit 1
 }
 
-# Step 9: Clone the PatchIccMAX repository from GitHub
+# Step 9: Clone the PatchIccMAX repository from GitHub if not already cloned
 LogMessage "Step 9: Cloning PatchIccMAX repository from GitHub..."
 if (-Not (Test-Path -Path "C:\testing\PatchIccMAX")) {
     if (git clone https://github.com/xsscx/PatchIccMAX.git) {
@@ -147,16 +147,4 @@ if (git checkout static) {
     exit 1
 }
 
-# Step 12: Build the solution using msbuild
-LogMessage "Step 12: Building the solution using msbuild..."
-$msbuildCmd = "msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configuration=Release /p:Platform=x64 /p:VcpkgTriplet=x64-windows-static /p:CLToolAdditionalOptions='/MT /W4' /p:LinkToolAdditionalOptions='/NODEFAULTLIB:msvcrt /LTCG /OPT:REF /INCREMENTAL:NO' /p:PreprocessorDefinitions='STATIC_LINK' /p:RuntimeLibrary=MultiThreaded /p:AdditionalLibraryDirectories='C:\testing\vcpkg\installed\x64-windows-static\lib' /p:AdditionalDependencies='wxmsw32u_core.lib;wxbase32u.lib;%(AdditionalDependencies)' /p:LinkToolAdditionalOptions='/DYNAMICBASE /HIGHENTROPYVA /NXCOMPAT /GUARD:CF /GUARD:EH /SAFESEH /FIXED:NO' /t:Clean,Build"
-
-try {
-    Invoke-Expression $msbuildCmd
-    LogMessage "Solution built successfully." "PASS"
-} catch {
-    LogMessage "Failed to build the solution." "ERROR"
-    exit 1
-}
-
-LogMessage "All steps completed successfully."
+LogMessage "Script execution completed successfully. Ready for building!" "PASS"
