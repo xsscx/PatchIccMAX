@@ -1,6 +1,6 @@
 # -----------------------------------------------------
 # DemoIccMAX Static Branch Build Script
-# Author: [Your Name]
+# Author: David Hoyt
 # Date: $(Get-Date -Format "yyyy-MM-dd")
 # Description: This script builds the static branch of PatchIccMAX with improved UI/UX.
 # -----------------------------------------------------
@@ -72,6 +72,13 @@ $cloneVcpkgTime = Time-Execution -Code {
 } -taskName "Cloning vcpkg"
 Log-Status "Finished cloning vcpkg" "SUCCESS" $cloneVcpkgTime
 
+# Check if the vcpkg directory exists before proceeding
+if (-Not (Test-Path -Path "C:\Testing\vcpkg")) {
+    Log-Status "vcpkg directory not found. Exiting." "ERROR"
+    Stop-Transcript
+    exit 1
+}
+
 # Step: Bootstrap vcpkg
 $bootstrapTime = Time-Execution -Code {
     Log-Status "Running vcpkg bootstrap..." "INFO"
@@ -135,7 +142,17 @@ Log-Status "Finished checking out static branch" "SUCCESS" $checkoutStaticTime
 # Step: Start build process
 $buildTime = Time-Execution -Code {
     Log-Status "Starting build process..." "INFO"
-msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configuration=Release /p:Platform=x64 /p:VcpkgTriplet=x64-windows-static /p:CLToolAdditionalOptions="/MT /W4" /p:LinkToolAdditionalOptions="/NODEFAULTLIB:msvcrt /LTCG /OPT:REF /INCREMENTAL:NO" /p:PreprocessorDefinitions="STATIC_LINK" /p:RuntimeLibrary=MultiThreaded /p:AdditionalLibraryDirectories="C:\test\vcpkg\installed\x64-windows-static\lib" /p:AdditionalDependencies="wxmsw32u_core.lib%3Bwxbase32u.lib%3B%(AdditionalDependencies)" /p:LinkToolAdditionalOptions="/DYNAMICBASE /HIGHENTROPYVA /NXCOMPAT /GUARD:CF /GUARD:EH /SAFESEH /FIXED:NO" /t:Clean,Build
+    msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln `
+        /p:Configuration=Release /p:Platform=x64 /p:VcpkgTriplet=x64-windows-static `
+        /p:CLToolAdditionalOptions="/MT /W4" `
+        /p:LinkToolAdditionalOptions="/NODEFAULTLIB:msvcrt /LTCG /OPT:REF /INCREMENTAL:NO" `
+        /p:PreprocessorDefinitions="STATIC_LINK" `
+        /p:RuntimeLibrary=MultiThreaded `
+        /p:AdditionalLibraryDirectories="C:\Testing\vcpkg\installed\x64-windows-static\lib" `
+        /p:AdditionalDependencies="wxmsw32u_core.lib;wxbase32u.lib;%(AdditionalDependencies)" `
+        /p:LinkToolAdditionalOptions="/DYNAMICBASE /HIGHENTROPYVA /NXCOMPAT /GUARD:CF /GUARD:EH /SAFESEH /FIXED:NO" `
+        /t:Clean,Build /bl /verbosity:minimal
+
     if ($LASTEXITCODE -eq 0) {
         Log-Status "Build succeeded." "SUCCESS"
     } else {
