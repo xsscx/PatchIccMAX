@@ -48,7 +48,7 @@ try {
     exit 1
 }
 
-# Step 3: Clone the vcpkg repository from GitHub if not already cloned
+# Step 3: Clone the vcpkg repository
 LogMessage "Step 3: Cloning vcpkg repository from GitHub..."
 if (-Not (Test-Path -Path "C:\testing\vcpkg")) {
     if (git clone https://github.com/microsoft/vcpkg.git) {
@@ -59,6 +59,12 @@ if (-Not (Test-Path -Path "C:\testing\vcpkg")) {
     }
 } else {
     LogMessage "vcpkg repository already exists. Skipping clone." "INFO"
+}
+
+# Additional check for vcpkg directory
+if (-Not (Test-Path -Path "C:\testing\vcpkg")) {
+    LogMessage "ERROR: The vcpkg directory does not exist even after clone operation. Exiting." "ERROR"
+    exit 1
 }
 
 # Step 4: Navigate to the 'vcpkg' directory
