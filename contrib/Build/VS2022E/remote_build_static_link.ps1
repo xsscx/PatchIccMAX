@@ -1,156 +1,128 @@
-# Function to log messages with color for better UI/UX
-function LogMessage {
+# -----------------------------------------------------
+# DemoIccMAX Static Branch Build Script
+# Author: David Hoyt
+# Date: $(Get-Date -Format "yyyy-MM-dd")
+# Description: This script builds the static branch of PatchIccMAX.
+# -----------------------------------------------------
+
+# Enable logging
+$logFile = "C:\Testing\build_log_$(Get-Date -Format "yyyyMMdd_HHmmss").txt"
+Start-Transcript -Path $logFile -Append
+
+# Helper function for status updates
+function Log-Status {
     param (
         [string]$message,
-        [string]$type = "INFO"  # Default type is INFO
+        [string]$status = "INFO"
     )
-    
-    switch ($type) {
-        "INFO" {
-            Write-Host "INFO: $message" -ForegroundColor Green
-        }
-        "ERROR" {
-            Write-Host "ERROR: $message" -ForegroundColor Red
-        }
-        "WARNING" {
-            Write-Host "WARNING: $message" -ForegroundColor Yellow
-        }
-        "PASS" {
-            Write-Host "PASS: $message" -ForegroundColor Green
-        }
-        "FAIL" {
-            Write-Host "FAIL: $message" -ForegroundColor Red
-        }
-    }
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    Write-Host "[$timestamp][$status] $message"
 }
 
-# Step 1: Create the 'testing' directory if it doesn't already exist
-LogMessage "Step 1: Creating directory 'C:\\testing'..."
-if (-Not (Test-Path -Path "C:\testing")) {
-    try {
-        mkdir C:\testing
-        LogMessage "Directory 'C:\\testing' created successfully." "PASS"
-    } catch {
-        LogMessage "Failed to create directory 'C:\\testing'." "ERROR"
-        exit 1
-    }
+# Start of script
+Log-Status "Starting DemoIccMAX Static Branch Build......"
+
+# Check if the 'Testing' directory exists, if not, create it
+if (-Not (Test-Path -Path "C:\Testing")) {
+    Log-Status "Directory 'C:\Testing' does not exist. Creating directory." "INFO"
+    New-Item -Path "C:\Testing" -ItemType Directory
 } else {
-    LogMessage "Directory 'C:\\testing' already exists." "INFO"
+    Log-Status "Directory 'C:\Testing' already exists. Proceeding..." "INFO"
 }
 
-# Step 2: Navigate to the 'testing' directory
-LogMessage "Step 2: Navigating to 'C:\\testing' directory..."
-try {
-    Set-Location "C:\testing"
-    LogMessage "Successfully navigated to 'C:\\testing' directory." "PASS"
-} catch {
-    LogMessage "Failed to change directory to 'C:\\testing'." "ERROR"
-    exit 1
-}
+# Change to the Testing directory
+Set-Location -Path "C:\Testing"
 
-# Step 3: Clone the vcpkg repository
-LogMessage "Step 3: Cloning vcpkg repository from GitHub..."
-if (-Not (Test-Path -Path "C:\testing\vcpkg")) {
-    if (git clone https://github.com/microsoft/vcpkg.git) {
-        LogMessage "vcpkg repository cloned successfully." "PASS"
-    } else {
-        LogMessage "Failed to clone vcpkg repository." "ERROR"
-        exit 1
-    }
+# Clone vcpkg repository
+Log-Status "Cloning vcpkg repository..." "INFO"
+git clone https://github.com/microsoft/vcpkg.git
+if ($LASTEXITCODE -eq 0) {
+    Log-Status "Successfully cloned vcpkg." "SUCCESS"
 } else {
-    LogMessage "vcpkg repository already exists. Skipping clone." "INFO"
-}
-
-# Additional check for vcpkg directory
-if (-Not (Test-Path -Path "C:\testing\vcpkg")) {
-    LogMessage "ERROR: The vcpkg directory does not exist even after clone operation. Exiting." "ERROR"
+    Log-Status "Failed to clone vcpkg. Exiting." "ERROR"
+    Stop-Transcript
     exit 1
 }
 
-# Step 4: Navigate to the 'vcpkg' directory
-LogMessage "Step 4: Navigating to 'vcpkg' directory..."
-try {
-    Set-Location "C:\testing\vcpkg"
-    LogMessage "Successfully navigated to 'vcpkg' directory." "PASS"
-} catch {
-    LogMessage "Failed to change directory to 'vcpkg'." "ERROR"
-    exit 1
-}
-
-# Step 5: Bootstrap vcpkg
-LogMessage "Step 5: Bootstrapping vcpkg..."
-try {
-    & .\bootstrap-vcpkg.bat
-    LogMessage "vcpkg bootstrapped successfully." "PASS"
-} catch {
-    LogMessage "Failed to bootstrap vcpkg." "ERROR"
-    exit 1
-}
-
-# Step 6: Integrate vcpkg with the system
-LogMessage "Step 6: Integrating vcpkg with the system..."
-try {
-    & .\vcpkg.exe integrate install
-    LogMessage "vcpkg integration completed successfully." "PASS"
-} catch {
-    LogMessage "Failed to integrate vcpkg with the system." "ERROR"
-    exit 1
-}
-
-# Step 7: Install required libraries
-$libraries = @("libxml2:x64-windows", "tiff:x64-windows", "wxwidgets:x64-windows", "libxml2:x64-windows-static", "tiff:x64-windows-static", "wxwidgets:x64-windows-static")
-LogMessage "Step 7: Installing required libraries..."
-foreach ($library in $libraries) {
-    LogMessage "Installing $library..."
-    try {
-        & .\vcpkg.exe install $library
-        LogMessage "$library installed successfully." "PASS"
-    } catch {
-        LogMessage "Failed to install $library." "ERROR"
-        exit 1
-    }
-}
-
-# Step 8: Navigate back to the 'testing' directory
-LogMessage "Step 8: Returning to 'C:\\testing' directory..."
-try {
-    Set-Location "C:\testing"
-    LogMessage "Successfully returned to 'C:\\testing' directory." "PASS"
-} catch {
-    LogMessage "Failed to return to 'C:\\testing' directory." "ERROR"
-    exit 1
-}
-
-# Step 9: Clone the PatchIccMAX repository from GitHub if not already cloned
-LogMessage "Step 9: Cloning PatchIccMAX repository from GitHub..."
-if (-Not (Test-Path -Path "C:\testing\PatchIccMAX")) {
-    if (git clone https://github.com/xsscx/PatchIccMAX.git) {
-        LogMessage "PatchIccMAX repository cloned successfully." "PASS"
-    } else {
-        LogMessage "Failed to clone PatchIccMAX repository." "ERROR"
-        exit 1
-    }
+# Change to vcpkg directory and run bootstrap
+Set-Location -Path "C:\Testing\vcpkg"
+Log-Status "Running vcpkg bootstrap..." "INFO"
+.\bootstrap-vcpkg.bat
+if ($LASTEXITCODE -eq 0) {
+    Log-Status "vcpkg bootstrap completed." "SUCCESS"
 } else {
-    LogMessage "PatchIccMAX repository already exists. Skipping clone." "INFO"
-}
-
-# Step 10: Navigate to the PatchIccMAX directory
-LogMessage "Step 10: Navigating to 'PatchIccMAX' directory..."
-try {
-    Set-Location "C:\testing\PatchIccMAX"
-    LogMessage "Successfully navigated to 'PatchIccMAX' directory." "PASS"
-} catch {
-    LogMessage "Failed to change directory to 'PatchIccMAX'." "ERROR"
+    Log-Status "vcpkg bootstrap failed. Exiting." "ERROR"
+    Stop-Transcript
     exit 1
 }
 
-# Step 11: Checkout the 'static' branch
-LogMessage "Step 11: Checking out the 'static' branch..."
-if (git checkout static) {
-    LogMessage "Successfully checked out the 'static' branch." "PASS"
+# Integrate vcpkg
+Log-Status "Integrating vcpkg..." "INFO"
+.\vcpkg.exe integrate install
+if ($LASTEXITCODE -eq 0) {
+    Log-Status "vcpkg integration successful." "SUCCESS"
 } else {
-    LogMessage "Failed to checkout the 'static' branch." "ERROR"
+    Log-Status "vcpkg integration failed. Exiting." "ERROR"
+    Stop-Transcript
     exit 1
 }
 
-LogMessage "Script execution completed successfully. Ready for building!" "PASS"
+# Install dependencies
+Log-Status "Installing dependencies via vcpkg..." "INFO"
+.\vcpkg.exe install libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows `
+                   libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
+if ($LASTEXITCODE -eq 0) {
+    Log-Status "Dependencies installed successfully." "SUCCESS"
+} else {
+    Log-Status "Failed to install dependencies. Exiting." "ERROR"
+    Stop-Transcript
+    exit 1
+}
+
+# Clone PatchIccMAX repository
+Set-Location -Path "C:\Testing"
+Log-Status "Cloning PatchIccMAX repository..." "INFO"
+git clone https://github.com/xsscx/PatchIccMAX.git
+if ($LASTEXITCODE -eq 0) {
+    Log-Status "Successfully cloned PatchIccMAX." "SUCCESS"
+} else {
+    Log-Status "Failed to clone PatchIccMAX. Exiting." "ERROR"
+    Stop-Transcript
+    exit 1
+}
+
+# Checkout the static branch
+Set-Location -Path "C:\Testing\PatchIccMAX"
+Log-Status "Checking out 'static' branch..." "INFO"
+git checkout static
+if ($LASTEXITCODE -eq 0) {
+    Log-Status "Checked out 'static' branch successfully." "SUCCESS"
+} else {
+    Log-Status "Failed to checkout 'static' branch. Exiting." "ERROR"
+    Stop-Transcript
+    exit 1
+}
+
+# Start build process
+Log-Status "Starting build process..." "INFO"
+msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln `
+    /p:Configuration=Release /p:Platform=x64 /p:VcpkgTriplet=x64-windows-static `
+    /p:CLToolAdditionalOptions="/MT /W4" /p:LinkToolAdditionalOptions="/NODEFAULTLIB:msvcrt /LTCG /OPT:REF /INCREMENTAL:NO" `
+    /p:PreprocessorDefinitions="STATIC_LINK" `
+    /p:RuntimeLibrary=MultiThreaded `
+    /p:AdditionalLibraryDirectories="C:\Testing\vcpkg\installed\x64-windows-static\lib" `
+    /p:AdditionalDependencies="wxmsw32u_core.lib;wxbase32u.lib;%(AdditionalDependencies)" `
+    /p:LinkToolAdditionalOptions="/DYNAMICBASE /HIGHENTROPYVA /NXCOMPAT /GUARD:CF /GUARD:EH /SAFESEH /FIXED:NO" `
+    /t:Clean,Build /bl /verbosity:minimal
+
+if ($LASTEXITCODE -eq 0) {
+    Log-Status "Build succeeded." "SUCCESS"
+} else {
+    Log-Status "Build failed with exit code $LASTEXITCODE." "ERROR"
+}
+
+# End of script
+Log-Status "Build process completed." "INFO"
+
+# Stop logging
+Stop-Transcript
