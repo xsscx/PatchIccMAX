@@ -47,9 +47,7 @@ $msbuildPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild
 ```
 ### Build the project with static link
 ```
-cd PatchIccMAX
-git checkout static
-& $msbuildPath /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configuration=Debug /p:Platform=x64 /p:AdditionalIncludeDirectories="$vcpkgDir\installed\x64-windows-static\include" /p:AdditionalLibraryDirectories="$vcpkgDir\installed\x64-windows-static\lib" /p:CLToolAdditionalOptions="/MT /Zi /Od /DDEBUG /W4" /p:LinkToolAdditionalOptions="/NODEFAULTLIB:msvcrt /LTCG /OPT:REF /INCREMENTAL:NO" /t:Clean,Build
+iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022E/static_build_cli_production.ps1").Content
 ```
 
 ## Expected Output
