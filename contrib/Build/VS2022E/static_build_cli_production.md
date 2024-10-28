@@ -2,6 +2,12 @@
 
 This document provides insight for building the **DemoIccMAX** project using a static linking configuration, optimized for performance, security, and best practices. This build is intended for **Windows 11** with **Visual Studio 2022 Enterprise** and uses the MSBuild CLI.
 
+***tl;dr***
+
+```
+iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022E/static_build_cli_production.ps1").Content
+```
+
 ## Overview
 
 The following MSBuild command is used to compile and link the DemoIccMAX project:
