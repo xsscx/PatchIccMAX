@@ -5,10 +5,6 @@
 # Description: This script builds the static branch of PatchIccMAX.
 # -----------------------------------------------------
 
-# Enable logging
-$logFile = "C:\Testing\build_log_$(Get-Date -Format "yyyyMMdd_HHmmss").txt"
-Start-Transcript -Path $logFile -Append
-
 # Helper function for status updates
 function Log-Status {
     param (
@@ -19,9 +15,6 @@ function Log-Status {
     Write-Host "[$timestamp][$status] $message"
 }
 
-# Start of script
-Log-Status "Starting DemoIccMAX Static Branch Build......"
-
 # Check if the 'Testing' directory exists, if not, create it
 if (-Not (Test-Path -Path "C:\Testing")) {
     Log-Status "Directory 'C:\Testing' does not exist. Creating directory." "INFO"
@@ -29,6 +22,13 @@ if (-Not (Test-Path -Path "C:\Testing")) {
 } else {
     Log-Status "Directory 'C:\Testing' already exists. Proceeding..." "INFO"
 }
+
+# Now create log file after ensuring directory exists
+$logFile = "C:\Testing\build_log_$(Get-Date -Format "yyyyMMdd_HHmmss").txt"
+Start-Transcript -Path $logFile -Append
+
+# Start of script
+Log-Status "Starting DemoIccMAX Static Branch Build......"
 
 # Change to the Testing directory
 Set-Location -Path "C:\Testing"
