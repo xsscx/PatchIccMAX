@@ -53,11 +53,11 @@ cd vcpkg
 Log-Message "Bootstrapping vcpkg..."
 .\bootstrap-vcpkg.bat
 
-# Integrate vcpkg
+# Integrate vcpkg with specified root path
 Log-Message "Integrating vcpkg..."
-.\vcpkg.exe integrate install
+.\vcpkg.exe integrate install --vcpkg-root "C:\testing\vcpkg"
 
-# Install required libraries
+# Install required libraries with explicit triplet and root path
 Log-Message "Installing required libraries..."
 $requiredPackages = @(
     "libxml2:x64-windows",
@@ -70,7 +70,7 @@ $requiredPackages = @(
 
 foreach ($package in $requiredPackages) {
     Log-Message "Installing package: $package..."
-    .\vcpkg.exe install $package
+    .\vcpkg.exe install $package --vcpkg-root "C:\testing\vcpkg" --triplet x64-windows
 }
 
 cd C:\testing
