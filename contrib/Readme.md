@@ -19,8 +19,6 @@ The Project can be cloned and built automatically. Copy the command below and Pa
 
 ## Build via CMake
 
-***tl;dr***
-
    ```
   cd /tmp
   /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/cmake/build_master_branch.sh)"
@@ -41,9 +39,7 @@ cd Build/Xcode
 /bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/Build/XCode/xnu_build_macos15_x86_64.zsh)"
 ```
 
-## MSBuild on Windows using VS2022 Community
-
-***tl;dr***
+## MSBuild on Windows using VS2022
 
    ```
    cd C:\temp\
@@ -52,7 +48,6 @@ cd Build/Xcode
 
 ### Run Signed Files from Powershell
 
-***Temporary Demonstration of Live, Signed Files as of 26-Oct-2024***
 ```
 iwr -Uri "https://xss.cx/2024/10/26/signed/iccToXml.exe" -OutFile ".\iccToXml.exe"; & ".\iccToXml.exe" 
 iwr -Uri "https://xss.cx/2024/10/26/signed/iccFromXml.exe" -OutFile ".\iccFromXml.exe"; & ".\iccFromXml.exe"  
@@ -66,7 +61,7 @@ iwr -Uri "https://xss.cx/2024/10/26/signed/iccRoundTrip.exe" -OutFile ".\iccRoun
 iwr -Uri "https://xss.cx/2024/10/26/signed/iccFromCube.exe" -OutFile ".\iccFromCube.exe"; & ".\iccFromCube.exe"
 ```
 
-## Click to Download
+## Click to Download Signed Tools
 [iccToXml](https://xss.cx/2024/10/26/signed/iccToXml.exe)
 [iccFromXml](https://xss.cx/2024/10/26/signed/iccFromXml.exe)
 [iccDumpProfile](https://xss.cx/2024/10/26/signed/iccDumpProfile.exe)
