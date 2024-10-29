@@ -1,5 +1,11 @@
 @echo on
-where C:\test\DemoIccMAX\IccXML\CmdLine\IccFromXml\x64\Release\IccFromXml.exe
+if exist C:\test\DemoIccMAX\IccXML\CmdLine\IccFromXml\x64\Release\IccFromXml.exe (
+    echo Executable found.
+) else (
+    echo Executable not found. Exiting.
+    goto end_Calc
+)
+
 if not "%1"=="clean" goto do_begin
 echo CLEANING!
 :do_begin
@@ -8,6 +14,7 @@ cd Calc
 if not "%1"=="clean" goto do_Calc
 del /F/Q *.icc 2>NUL:
 goto end_Calc
+
 :do_Calc
 @echo on
 C:\test\DemoIccMAX\IccXML\CmdLine\IccFromXml\x64\Release\IccFromXml.exe CameraModel.xml CameraModel.icc
