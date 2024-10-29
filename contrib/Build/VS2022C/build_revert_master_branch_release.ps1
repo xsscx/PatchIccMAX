@@ -1,13 +1,22 @@
-
-#
-# DemoIccMAX Project | PCS_Refactor Branch | Build Script for Windows & VS2022C
-# Refactor Date: 30-Sept-2024
+# ========================== DemoIccMAX Master Branch Build Script ==========================
+# DemoIccMAX Static Branch Build Script
+# Copyright (c) 2024 The International Color Consortium. All rights reserved.
 # Author: David Hoyt
-# Purpose: Automates the build and testing for the PCS_Refactor on Windows + VS2022C
-#
-# Run via pwsh: iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/win11_devenv_build_PCS_Refactor_branch_static.ps1").Content
+# Date: $(Get-Date -Format "yyyy-MM-dd")
+# Description: This script builds the master branch of PatchIccMAX with improved UI/UX.
+# This script automates the process of setting up a build environment for DemoIccMAX.
+# It will clone the necessary repositories, install dependencies, and perform a build
+# for the 'master' branch of PatchIccMAX.
+# Run via pwsh: iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/win11_devenv_build_developer_branch_static.ps1").Content
 #
 # ============================================================
+
+# Start of Script
+Write-Host "============================= Starting DemoIccMAX Master Branch Build =============================" -ForegroundColor Green
+$env:VSCMD_ARG_HOST_ARCH = "x64"
+$env:VSCMD_ARG_TGT_ARCH = "x64"
+Write-Host "Copyright (c) 2024 The International Color Consortium. All rights reserved." -ForegroundColor Green
+Write-Host "Author: David Hoyt written for ICC color.org and DemoIccMAX Project" -ForegroundColor Green
 
 # Set up directories and environment variables
 $optDir = "C:\test"
