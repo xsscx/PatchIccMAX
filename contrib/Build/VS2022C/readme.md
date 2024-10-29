@@ -23,7 +23,7 @@ This directory contains build scripts and documentation for building the DemoIcc
 	- Powershell
 
    ```
-   iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch.ps1").Content
+   iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch_release.ps1").Content
    ```
 
 ## Contributing
