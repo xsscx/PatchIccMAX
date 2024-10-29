@@ -84,8 +84,6 @@ Ensure that you have the following tools installed on your Windows system:
 - [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
 - [vcpkg](https://github.com/microsoft/vcpkg)
 
-***Note** As of 26-September-2024 there is a ***temporary*** [Visual Studio Project](https://xsscx.visualstudio.com/PatchIccMAX) available for aid in Collaboration, Development & Reproduction.
-
 ----
 ## Installing the RefIccMAX CMM on Windows
 
@@ -96,8 +94,42 @@ In `C:\Program Files`, create a new directory called `RefIccMAX`. Then, copy the
 
 The .dll is Signed by David H Hoyt LLC
 ```
+mkdir "C:\Program Files\RefIccMAX"
 cd "C:\Program Files\RefIccMAX"
 iwr -Uri "https://xss.cx/2024/10/26/signed/DemoIccMAXCmm.dll" -OutFile ".\DemoIccMAXCmm.dll"
+```
+
+#### Signing Details
+
+```
+
+[2024-10-29 12:02:18 E:\repos\PatchIccMAX\Testing]%  & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\signtool.exe" verify /pa /v .\DemoIccMAXCmm.dll
+
+Verifying: .\DemoIccMAXCmm.dll
+
+Signature Index: 0 (Primary Signature)
+Hash of file (sha256): 7E2F11063DAF467FFC5ED1B587B804135CC98F7666A843776EEC3F3B17C7FA2C
+
+Signing Certificate Chain:
+    Issued to: Microsoft Identity Verification Root Certificate Authority 2020
+    Issued by: Microsoft Identity Verification Root Certificate Authority 2020
+    Expires:   Sun Apr 16 14:44:40 2045
+    SHA1 hash: F40042E2E5F7E8EF8189FED15519AECE42C3BFA2
+
+        Issued to: Microsoft ID Verified Code Signing PCA 2021
+        Issued by: Microsoft Identity Verification Root Certificate Authority 2020
+        Expires:   Tue Apr 01 16:15:20 2036
+        SHA1 hash: 8E750F459DAF9A79D6370DB747AD2226866AD818
+
+            Issued to: Microsoft ID Verified CS EOC CA 02
+            Issued by: Microsoft ID Verified Code Signing PCA 2021
+            Expires:   Mon Apr 13 13:31:53 2026
+            SHA1 hash: 8BC0201379A2A31BA36EDD20223865C194A02174
+
+                Issued to: David H Hoyt LLC
+                Issued by: Microsoft ID Verified CS EOC CA 02
+                Expires:   Fri Nov 01 08:51:14 2024
+                SHA1 hash: E981AE86000472346E3E5FB83C7FA01B2A14D283
 ```
 
 ### Update the Windows Registry
