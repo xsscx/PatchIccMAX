@@ -5,6 +5,8 @@ echo     Copyright (C) 2024 Internation Color Consortium
 echo     Author: David Hoyt dhoyt@hoyt.net  29-Oct-2024
 echo =========================================================
 
+title ICC DemoIccMAX - Profile Creation Script
+
 @echo on
 if exist C:\test\DemoIccMAX\IccXML\CmdLine\IccFromXml\x64\Release\IccFromXml.exe (
     echo Executable found.
