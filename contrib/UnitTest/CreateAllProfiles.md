@@ -22,5 +22,6 @@ Ensure the following are met before running the script:
   
 ## Script Usage
 
-```bash
-sh CreateAllProfiles.sh [options]
+```
+/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/CreateAllProfiles.sh)"
+```
