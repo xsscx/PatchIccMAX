@@ -7,16 +7,17 @@ This Shell script is designed for building the master branch. It automates tasks
 ## Usage
 To use this script, open a PowerShell window and execute the following command:
 
-```powershell
-.\build_master_branch.sh
+```
+cd /tmp
+/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/cmake/build_master_branch.sh)"
 ```
 
 ## Parameters
 No parameters required.
 
 ## Requirements
-- Windows PowerShell
-- None
+- Unix Shell
+- apt
 
 ## Notes
 Ensure all build dependencies are installed
