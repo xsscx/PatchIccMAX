@@ -50,7 +50,7 @@ cd Build/Xcode
    iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch_release.ps1").Content
    ```
 
-### Run Signed File instead of Build
+### Run Signed Files from Powershell
 
 ***Temporary Demonstration of Live, Signed Files as of 26-Oct-2024***
 ```
@@ -62,10 +62,22 @@ iwr -Uri "https://xss.cx/2024/10/26/signed/iccApplyToLink.exe" -OutFile ".\iccAp
 iwr -Uri "https://xss.cx/2024/10/26/signed/iccApplyProfiles.exe" -OutFile ".\iccApplyProfiles.exe"; & ".\iccApplyProfiles.exe"
 iwr -Uri "https://xss.cx/2024/10/26/signed/iccApplyNamedCmm.exe" -OutFile ".\iccApplynamedCmm.exe"; & ".\iccApplyNamedCmm.exe"
 iwr -Uri "https://xss.cx/2024/10/26/signed/iccV5DspObsToV4Dsp.exe" -OutFile ".\iccV5DspObsToV4Dsp.exe"; & ".\iccV5DspObsToV4Dsp.exe"
-iwr -Uri "https://xss.cx/2024/10/26/signed/wxProfileDump.exe" -OutFile ".\wxProfileDump.exe"; & ".\wxProfileDump.exe"
 iwr -Uri "https://xss.cx/2024/10/26/signed/iccRoundTrip.exe" -OutFile ".\iccRoundTrip.exe"; & ".\iccRoundTrip.exe"
 iwr -Uri "https://xss.cx/2024/10/26/signed/iccFromCube.exe" -OutFile ".\iccFromCube.exe"; & ".\iccFromCube.exe"
 ```
+
+## Click to Download
+[iccToXml](https://xss.cx/2024/10/26/signed/iccToXml.exe)
+[iccFromXml](https://xss.cx/2024/10/26/signed/iccFromXml.exe)
+[iccDumpProfile](https://xss.cx/2024/10/26/signed/iccDumpProfile.exe)
+[iccSpecSepToTiff](https://xss.cx/2024/10/26/signed/iccSpecSepToTiff.exe)
+[iccApplyToLink](https://xss.cx/2024/10/26/signed/iccApplyToLink.exe)
+[iccApplyProfiles](https://xss.cx/2024/10/26/signed/iccApplyProfiles.exe)
+[iccApplyNamedCmm](https://xss.cx/2024/10/26/signed/iccApplyNamedCmm.exe)
+[iccV5DspObsToV4Dsp](https://xss.cx/2024/10/26/signed/iccV5DspObsToV4Dsp.exe)
+[iccRoundTrip](https://xss.cx/2024/10/26/signed/iccRoundTrip.exe)
+[iccFromCube](https://xss.cx/2024/10/26/signed/iccFromCube.exe)
+
 
 Note: iccTiffDump.exe has a memory leak and bails out
 
