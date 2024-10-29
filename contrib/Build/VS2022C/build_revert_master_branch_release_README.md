@@ -7,8 +7,8 @@ This PowerShell script is designed for reverting the master branch to a previous
 ## Usage
 To use this script, open a PowerShell window and execute the following command:
 
-```powershell
-.\build_revert_master_branch_release.ps1
+```
+ iex (iwr -Uri "https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/Build/VS2022C/build_revert_master_branch.ps1").Content
 ```
 
 ## Parameters
