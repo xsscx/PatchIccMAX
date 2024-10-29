@@ -10,6 +10,8 @@
 
 # Start of Script
 Write-Host "============================= Starting DemoIccMAX Static Branch Build =============================" -ForegroundColor Green
+$env:VSCMD_ARG_HOST_ARCH = "x64"
+$env:VSCMD_ARG_TGT_ARCH = "x64"
 Write-Host "Copyright (c) 2024 The International Color Consortium. All rights reserved." -ForegroundColor Green
 Write-Host "Author: David Hoyt written for ICC color.org and DemoIccMAX Project" -ForegroundColor Green
 Write-Host "Creating 'testing' directory..." -ForegroundColor Yellow
