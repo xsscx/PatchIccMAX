@@ -60,4 +60,8 @@ git checkout development
 # Build the project using msbuild
 Write-Host "Building the project..."
 msbuild  /m /maxcpucount "Build\MSVC\BuildAll_v22.sln" /p:Configuration=Debug /p:Platform=x64 /p:AdditionalIncludeDirectories="C:\test\vcpkg\installed\x64-windows\include" /p:AdditionalLibraryDirectories="C:\test\vcpkg\installed\x64-windows-static\lib" /p:CLToolAdditionalOptions="/MT /Zi /Od /DDEBUG /W4" /p:LinkToolAdditionalOptions="/NODEFAULTLIB:msvcrt /LTCG /OPT:REF /INCREMENTAL:NO" /t:Clean,Build
+
+Write-Host "Running CreateAllProfiles.bat from remote"
+$tempFile = "$env:TEMP\CreateAllProfiles.bat"; iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/CreateAllProfiles.bat" -OutFile $tempFile; & $tempFile; Remove-Item $tempFile
+
 Write-Host "All Done!"
