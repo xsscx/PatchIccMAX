@@ -4,15 +4,16 @@
 - Windows 11
 - VS2022
 - Git for Windows
+- 
+### Automated Windows & Profile Build
 
-Build the Master Branch for Windows
+- **Build the master branch of the project**:
 
-Copy and Paste into Developer Powershell:
+	- Powershell
 
-```
-cd \temp
-iex (iwr -Uri "https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/Build/VS2022C/build_revert_master_branch.ps1").Content
-```
+   ```
+   iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch_release.ps1").Content
+   ```
 
 ### Build the project with static link
 ```
