@@ -4,7 +4,8 @@
 # Date: $(Get-Date -Format "yyyy-MM-dd")
 # Description: This script builds the static branch of PatchIccMAX with improved UI/UX.
 # -----------------------------------------------------
-
+$env:VSCMD_ARG_HOST_ARCH = "x64"
+$env:VSCMD_ARG_TGT_ARCH = "x64"
 # Banner
 $banner = @"
 ========================================
