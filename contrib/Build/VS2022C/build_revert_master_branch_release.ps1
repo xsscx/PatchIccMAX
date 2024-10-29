@@ -7,7 +7,7 @@
 # This script automates the process of setting up a build environment for DemoIccMAX.
 # It will clone the necessary repositories, install dependencies, and perform a build
 # for the 'master' branch of PatchIccMAX.
-# Run via pwsh: iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/win11_devenv_build_developer_branch_static.ps1").Content
+# Run via pwsh: iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch_release.ps1").Content
 #
 # ============================================================
 
