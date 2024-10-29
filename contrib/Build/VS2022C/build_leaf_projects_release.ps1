@@ -1,12 +1,18 @@
-#
+# Copyright (c) 2024 The International Color Consortium. All rights reserved
 # DemoIccMAX Project | Build Leaf Projects | Build Script for Windows & VS2022C
-# Refactor Date: 30-Sept-2024
+# Refactor Date: 29-Oct-2024
 # Author: David Hoyt
-# Purpose: Automates the build and testing for the PCS_Refactor on Windows + VS2022C
+# Purpose: Automates the build and testing for the sub-projects
 #
 # Run via pwsh: iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_leaf_projects_release.ps1").Content
 #
 # ============================================================
+
+Write-Host "============================= Starting DemoIccMAX Leaf Projects Build =============================" -ForegroundColor Green
+$env:VSCMD_ARG_HOST_ARCH = "x64"
+$env:VSCMD_ARG_TGT_ARCH = "x64"
+Write-Host "Copyright (c) 2024 The International Color Consortium. All rights reserved." -ForegroundColor Green
+Write-Host "Author: David Hoyt | dhoyt@hoyt.net" -ForegroundColor Green
 
 Write-Host "Fixups for bad project configs"
 copy C:\test\vcpkg\installed\x64-windows\lib\tiff.lib C:\test\vcpkg\installed\x64-windows\lib\libtiff.lib
