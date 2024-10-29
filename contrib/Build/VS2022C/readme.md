@@ -16,15 +16,7 @@ This directory contains build scripts and documentation for building the DemoIcc
 - Visual Studio 2022 Community
 	- Git for Windows
 
-### Setup
-
-To build and test the project, use the provided PowerShell scripts:
-- `build_leaf_projects_release.ps1`: Builds all leaf projects in release mode.
-- `build_revert_master_branch.ps1`: Reverts changes to the master branch if needed.
-- `win11_devenv_build_PCS_Refactor_branch_static.ps1`: Builds the refactor branch using a static development environment for Windows 11.
-
-
-### Example Commands
+### Automated Windows & Profile Build
 
 - **Build the master branch of the project**:
 
@@ -32,23 +24,6 @@ To build and test the project, use the provided PowerShell scripts:
 
    ```
    iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch.ps1").Content
-   ```
-
-- **Diagnostic build of development branch**:
-
-	- Powershell
-	
-   ```
-   iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_diagnostics.ps1").Content
-   ```
-
-
-- **Create ICC profiles after build**:
-
-	- Powershell
-
-   ```
-   $tempFile = "$env:TEMP\CreateAllProfiles.bat"; iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/CreateAllProfiles.bat" -OutFile $tempFile; & $tempFile; Remove-Item $tempFile
    ```
 
 ## Contributing
