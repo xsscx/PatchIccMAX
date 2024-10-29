@@ -1,8 +1,8 @@
 #!/bin/sh
 #
 # Development Branch Build Script
-# Refactor Date: [Insert Current Date]
-# Author: David Hoyt (Refactor by [Your Name])
+# Refactor Date: 29-OCT-2024
+# Author: David Hoyt
 # Purpose: Automates the build and testing for the development branch
 #
 # ============================================================
