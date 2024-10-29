@@ -73,25 +73,11 @@ iwr -Uri "https://xss.cx/2024/10/26/signed/iccFromCube.exe" -OutFile ".\iccFromC
 [iccRoundTrip](https://xss.cx/2024/10/26/signed/iccRoundTrip.exe)
 [iccFromCube](https://xss.cx/2024/10/26/signed/iccFromCube.exe)
 
-
 Note: iccTiffDump.exe has a memory leak and bails out
 
-### Windows Prerequisites
+## Automatic Install of DemoIccMAXCmm.dll and Registry Key
 
-Ensure that you have the following tools installed on your Windows system:
-
-- [Git for Windows](https://gitforwindows.org/)
-- [Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-- [vcpkg](https://github.com/microsoft/vcpkg)
-
-----
-## Installing the RefIccMAX CMM on Windows
-
-To install the RefIccMAX CMM on Windows, follow these simplified steps:
-
-### Automatic Install of DemoIccMAXCmm.dll and Registry Key
-
-Copy and paste into Powershell:
+Copy and Paste into Powershell:
 
 ```
 mkdir "C:\Program Files\RefIccMAX"
