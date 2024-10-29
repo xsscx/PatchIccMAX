@@ -1,3 +1,10 @@
+@echo off
+echo =========================================================
+echo     Welcome to the DemoIccMAX Profile Creation Script
+echo     Copyright (C) 2024 Internation Color Consortium
+echo     Author: David Hoyt dhoyt@hoyt.net  29-Oct-2024
+echo =========================================================
+
 @echo on
 if exist C:\test\DemoIccMAX\IccXML\CmdLine\IccFromXml\x64\Release\IccFromXml.exe (
     echo Executable found.
