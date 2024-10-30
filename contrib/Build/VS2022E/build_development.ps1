@@ -68,5 +68,13 @@ foreach ($file in $files) {
 Write-Host "Listing files in the output directory:"
 Get-ChildItem -Path $outputDir | Write-Host
 
+Write-Host "Running the .exe files built"
+Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
+
+Write-Host "Running CreateAllProfiles.bat from remote"
+$tempFile = "$env:TEMP\CreateAllProfiles.bat"; iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/CreateAllProfiles.bat" -OutFile $tempFile; & $tempFile; Remove-Item $tempFile
+
+Write-Host "All Done!"
+
 # Optionally clean up the temporary directory after the build
 # Remove-Item -Recurse -Force $tempDir
