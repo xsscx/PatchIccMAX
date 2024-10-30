@@ -81,8 +81,5 @@ Write-Host "Running the .exe files built"
 # copy ..\..\vcpkg\installed\x64-windows-static\lib\tiff.lib  ..\..\vcpkg\installed\x64-windows-static\lib\libtiff.lib
 Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
 
-Write-Host "Running CreateAllProfiles.bat from remote"
-$tempFile = "$env:TEMP\CreateAllProfiles.bat"; iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/CreateAllProfiles.bat" -OutFile $tempFile; & $tempFile; Remove-Item $tempFile
-
 # End of Script
 Write-Host "============================= DemoIccMAX Build Complete =============================" -ForegroundColor Green
