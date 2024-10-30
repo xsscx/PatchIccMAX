@@ -16,7 +16,7 @@ iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/de
 - Static Link
 
 ```
-iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022E/static_build_cli_production.ps1").Content
+iex (iwr -Uri "").Content
 ```
 
 ## Expected Output
