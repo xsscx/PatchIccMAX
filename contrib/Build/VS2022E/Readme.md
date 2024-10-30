@@ -4,7 +4,7 @@
 - Windows 11
 - VS2022
 - Git for Windows
-- 
+  
 ### Automated Windows & Profile Build
 
 - Dynamic Link
