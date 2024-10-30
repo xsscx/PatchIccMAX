@@ -7,17 +7,15 @@
 - 
 ### Automated Windows & Profile Build
 
-- **Build the master branch of the project**:
+- Dynamic Link
 
-	- Powershell
-
-   ```
-   iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch_release.ps1").Content
-   ```
-
-### Build the project with static link
 ```
-cd \temp
+iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch_release.ps1").Content
+```
+
+- Static Link
+
+```
 iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022E/static_build_cli_production.ps1").Content
 ```
 
