@@ -1,6 +1,6 @@
 # Security
 
-This document outlines the security information for the `DemoIccMAX` project, including reporting bugs, tracking CVEs, and guidelines for using the reference implementation.
+This document outlines the security information and bug reporting for the `DemoIccMAX` project, including reporting bugs, tracking CVEs, and guidelines for using the reference implementation.
 
 ## Reference Implementation
 
@@ -10,6 +10,7 @@ The `DemoIccMAX` reference implementation is intended as a guideline and **shoul
 - Conducting extensive product testing, including fuzzing and performance testing, to ensure stability and security.
   
 ## Bug Reporting
+[Bug Report Samples](contrib/BugReportSamples)
 
 When you discover a bug or unexpected behavior, please [open an issue](https://github.com/InternationalColorConsortium/DemoIccMAX/issues) with the following details:
 1. **Description**: A clear and concise explanation of the issue.
