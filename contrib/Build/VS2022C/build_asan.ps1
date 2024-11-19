@@ -9,7 +9,7 @@
 
 # Start of Script
 Write-Host "============================= Starting PatchIccMAX ASAN Branch Build for VS2022 Community =============================" -ForegroundColor Green
-Write-Host "Copyright (c) 2024 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
+Write-Host "Copyright (©) 2024 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
 Write-Host "Author: David H Hoyt LLC | dhoyt@hoyt.net | https://srd.cx" -ForegroundColor Green
 
 # Set up directories and environment variables
