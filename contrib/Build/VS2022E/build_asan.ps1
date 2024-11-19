@@ -49,7 +49,8 @@ cd PatchIccMAX
 Write-Host "Running: git checkout asan"
 git checkout asan
 Write-Host "Running: msbuild with ASAN"
-msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configuration=Asan /p:Platform=x64 /p:AdditionalIncludeDirectories="$vcpkgDir\installed\x64-windows\include" /p:AdditionalLibraryDirectories="$vcpkgDir\installed\x64-windows\lib" /p:CLToolAdditionalOptions="/fsanitize=address /O2 /W4" /p:LinkToolAdditionalOptions="/fsanitize=address /INCREMENTAL:NO" /t:Clean,BuildsWrite-Host "Testing .exe's"
+msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configuration=Asan /p:Platform=x64 /p:AdditionalIncludeDirectories="$vcpkgDir\installed\x64-windows\include" /p:AdditionalLibraryDirectories="$vcpkgDir\installed\x64-windows\lib" /p:CLToolAdditionalOptions="/fsanitize=address /O2 /W4" /p:LinkToolAdditionalOptions="/fsanitize=address /INCREMENTAL:NO" /t:Clean,Build
+Write-Host "Testing .exe's"
 Write-Host "Copying .dll's to .\Testing\"
 copy C:\test\vcpkg\installed\x64-windows\bin\*.dll C:\test\vcpkg\PatchIccMAX\Testing\
 # Set the PATH in case build and link static not working
