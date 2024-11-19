@@ -8,11 +8,13 @@
 # ============================================================
 
 # Start of Script
-Write-Host "============================= Starting PatchIccMAX ASAN Branch Build for Vs2022 Community =============================" -ForegroundColor Green
+Write-Host "============================= Starting PatchIccMAX ASAN Branch Build for VS2022 Community =============================" -ForegroundColor Green
 Write-Host "Copyright (c) 2024 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
-Write-Host "Author: David H Hoyt LLC | dhoyt@hoyt.net" -ForegroundColor Green
+Write-Host "Author: David H Hoyt LLC | dhoyt@hoyt.net | https://srd.cx" -ForegroundColor Green
 
 # Set up directories and environment variables
+# Platform Toolset Query
+$vsPath = (Get-ChildItem Env:VSINSTALLDIR).Value; if ($vsPath -match "Enterprise") { "Identified Enterprise Edition - Version: $($vsPath -split '\\' | Select-Object -Skip 3 -First 1)" } elseif ($vsPath -match "Community") { "Identified Community Edition - Version: $($vsPath -split '\\' | Select-Object -Skip 3 -First 1)" } else { "No Visual Studio Edition Found" }
 Write-Host "Set up \test directories and environment variables...."
 $env:VSCMD_ARG_HOST_ARCH = "x64"
 $env:VSCMD_ARG_TGT_ARCH = "x64"
@@ -21,16 +23,15 @@ $vcpkgDir = "$optDir\vcpkg"
 $patchDir = "$optDir\DemoIccMAX"
 
 # Setup anon git
+Write-Host "Set up git user...."
 git config --global user.email "you@example.com"
 git config --global user.name "Your Name"
 
 # Create the /opt directory if it doesn't exist
+Write-Host "Create Directory \test "
 if (-Not (Test-Path $optDir)) {
     New-Item -ItemType Directory -Path $optDir
 }
-
-# Platform Toolset Query
-$vsPath = (Get-ChildItem Env:VSINSTALLDIR).Value; if ($vsPath -match "Enterprise") { "Identified Enterprise Edition - Version: $($vsPath -split '\\' | Select-Object -Skip 3 -First 1)" } elseif ($vsPath -match "Community") { "Identified Community Edition - Version: $($vsPath -split '\\' | Select-Object -Skip 3 -First 1)" } else { "No Visual Studio Edition Found" }
 
 # Clone vcpkg repository and bootstrap
 Write-Host "Cloning vcpkg repository..."
@@ -43,6 +44,7 @@ Write-Host "Bootstrapping vcpkg..."
 # Integrate vcpkg and install dependencies
 Write-Host "Integrating vcpkg..."
 .\vcpkg.exe integrate install
+Write-Host "Set up vcpkg...   this will take some time ...."
 .\vcpkg.exe install libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
 
 # Clone PatchIccMAX repository
@@ -68,5 +70,5 @@ cd Testing/
 Write-Host "Running CreateAllProfiles.bat from remote"
 $tempFile = "$env:TEMP\CreateAllProfiles.bat"; iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/CreateAltAsanProfiles.bat" -OutFile $tempFile; & $tempFile; Remove-Item $tempFile
 Write-Host "Summary: Installed vcpkg, Build PatchIccMAX, Create Profiles"
+cd ..
 Write-Host "All Done!"
-
