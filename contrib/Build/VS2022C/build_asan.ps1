@@ -29,6 +29,9 @@ if (-Not (Test-Path $optDir)) {
     New-Item -ItemType Directory -Path $optDir
 }
 
+# Platform Toolset Query
+$vsPath = (Get-ChildItem Env:VSINSTALLDIR).Value; if ($vsPath -match "Enterprise") { "Identified Enterprise Edition - Version: $($vsPath -split '\\' | Select-Object -Skip 3 -First 1)" } elseif ($vsPath -match "Community") { "Identified Community Edition - Version: $($vsPath -split '\\' | Select-Object -Skip 3 -First 1)" } else { "No Visual Studio Edition Found" }
+
 # Clone vcpkg repository and bootstrap
 Write-Host "Cloning vcpkg repository..."
 cd $optDir
