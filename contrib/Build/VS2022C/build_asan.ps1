@@ -91,8 +91,7 @@ Run-Command "copy 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\To
 
 Log-Message "Adding vcpkg bin directory to PATH, Setting ASAN Options..."
 $Env:PATH = "$vcpkgDir\installed\x64-windows\bin;$Env:PATH"
-$env:ASAN_OPTIONS="verbosity=1,log_path=asan.log,intercept_strtoll=false,intercept_strtod=false"
-
+$env:ASAN_OPTIONS="verbosity=1,log_path=asan.log"
 Write-Host "ASAN_OPTIONS: $env:ASAN_OPTIONS"
 
 Log-Message "Running .exe tests in Testing directory..."
