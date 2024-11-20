@@ -2,12 +2,12 @@
 # Purpose: Automate build, integration, and testing for the PatchIccMAX ASAN branch using Visual Studio 2022
 # Date: 19-NOV-2024
 # Run via pwsh: iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/development/contrib/Build/VS2022C/build_asan.ps1").Content
-# Copyright © 2024 David H Hoyt LLC. All rights reserved.
+# © 2024 David H Hoyt LLC. All rights reserved.
 # ==============================================================================================
 
 # Start of Script
 Write-Host "============================= Starting PatchIccMAX ASAN Branch Build =============================" -ForegroundColor Green
-Write-Host "Copyright (c) 2024 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
+Write-Host "(©) 2024 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
 Write-Host "https://srd.cx" -ForegroundColor Green
 
 # === Function Definitions ===
