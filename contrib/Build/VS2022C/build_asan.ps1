@@ -93,6 +93,8 @@ Log-Message "Adding vcpkg bin directory to PATH, Setting ASAN Options..."
 $Env:PATH = "$vcpkgDir\installed\x64-windows\bin;$Env:PATH"
 $env:ASAN_OPTIONS="intercept_strtoll=false,intercept_strtod=false"
 
+Write-Host "ASAN_OPTIONS: $env:ASAN_OPTIONS"
+
 Log-Message "Running .exe tests in Testing directory..."
 Get-ChildItem -Path "$patchDir\Testing" -Filter "*.exe" -Recurse | ForEach-Object {
     Log-Message "Executing: $($_.FullName)"
