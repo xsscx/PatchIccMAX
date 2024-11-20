@@ -112,8 +112,17 @@ Get-ChildItem -Path "$patchDir\Testing" -Filter "*.exe" -Recurse | ForEach-Objec
 # === Final Steps ===
 cd Testing/
 Log-Message "Creating profiles using remote batch script..."
+
+# Define the temporary file path
 $tempFile = "$Env:TEMP\CreateAllProfiles.bat"
+
+# Download the batch script
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/development/contrib/UnitTest/CreateAltAsanProfiles.bat" -OutFile $tempFile
-Run-Command "& $tempFile; Remove-Item $tempFile"
+
+# Run the batch file in a new cmd session
+Start-Process cmd.exe -ArgumentList "/c `"$tempFile`"" -Wait
+
+# Clean up the temporary batch file
+Remove-Item $tempFile -Force
 
 Log-Message "Done: PatchIccMAX UBSAN Branch Build" "Cyan"
