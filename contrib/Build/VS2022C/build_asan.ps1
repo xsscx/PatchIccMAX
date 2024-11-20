@@ -109,7 +109,6 @@ Get-ChildItem -Path "$patchDir\Testing" -Filter "*.exe" -Recurse | ForEach-Objec
 }
 
 # === Final Steps ===
-# === Final Steps ===
 cd Testing/
 Log-Message "Creating profiles using remote batch script..."
 
