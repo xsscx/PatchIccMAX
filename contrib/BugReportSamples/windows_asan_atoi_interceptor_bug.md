@@ -1,8 +1,12 @@
-# Hoyt's Reproduction for Windows ASAN Interceptor Bug
+# Hoyt's Reproduction for Windows ASAN/UBSAN Interceptor Bug
 
-[Bug Report](https://developercommunity.visualstudio.com/t/ASAN-atol_static-interception-failure/10729662?q=asan&fTime=6m&sort=newest)
+Date: 20-Nov-2024
 
-## Host
+## Overview
+
+The Sanitizer logs indicate runtime errors preventing sanitizer functionality due to function interception failures.
+
+### Host Environment
 ```
 Microsoft Visual Studio Enterprise 2022
 Version 17.12.1
@@ -11,15 +15,69 @@ Microsoft .NET Framework
 Version 4.8.09032
 ```
 
-## Build
-
-Open Developer Powershell and Paste in the following command to Build with ASAN Logs:
-
+### Build Process
+To reproduce the issue, the following command was executed in the Developer PowerShell:
 ```
 iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/development/contrib/Build/VS2022C/build_asan.ps1").Content
 ```
 
-## Expected Output
+### Observations
+1. **Interceptor Skipping:**
+   - Several function addresses were skipped during re-interception:
+     ```
+     Address 0x7ffcda403d50 was already intercepted with result: 1. Skipping re-interception.
+     ```
+
+2. **Interceptor Failures:**
+   - ASAN failed to intercept key functions in `ntdll.dll` and `vcruntime140.dll`, including `atoll`, `strtoll`, and other memory management functions.
+     Example:
+     ```
+     ==28756==AddressSanitizer: failed to intercept 'atoll' in ntdll.dll
+     ==28756==AddressSanitizer: failed to intercept 'strtoll' in ntdll.dll
+     ```
+
+3. **Configuration Details:**
+   - Memory shadowing details indicated proper ASAN initialization but were unable to proceed due to interception failures.
+
+4. **Function Override Failures:**
+   - Both `_aligned_free_dbg` and `_msize_dbg` failed to override in `vcruntime140.dll` and `ucrtbase.dll`.
+
+## Findings
+
+### 1. General Observations
+- **ASAN and UBSAN Runtime**: 
+  - Failures were linked to the inability to override low-level functions such as `atol`.
+  - Issues occurred in multiple executables during runtime.
+- **Impact**: 
+  - Prevents effective runtime sanitization for memory and undefined behavior checks.
+
+### 2. Successful Executables
+The following executables ran successfully, providing expected output:
+- **iccApplyNamedCmm.exe**
+- **iccApplyProfiles.exe**
+- **iccFromXml.exe**
+- **iccToXml.exe**
+
+### 3. Failed Executables
+The following executables encountered runtime failures due to ASAN/UBSAN-related issues:
+
+| Executable              | Failure Location                              | Error Summary                                                                 | Stack Trace Example                                                                                       |
+|-------------------------|-----------------------------------------------|------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| **iccDumpProfile.exe**  | `sanitizer_win_interception.cpp:149`         | Failed to replace local function with sanitizer version (`__asan_wrap_atol`) | `main E:\rpppp\PatchIccMAX\Tools\CmdLine\IccDumpProfile\iccDumpProfile.cpp:343`                     |
+| **iccFromCube.exe**     | `sanitizer_win_interception.cpp:149`         | Failed to replace local function with sanitizer version (`__asan_wrap_atol`) | `std::basic_string::_Reallocate_for C:\...\xstring:2980`                                               |
+| **iccRoundTrip.exe**    | `sanitizer_win_interception.cpp:149`         | Failed to replace local function with sanitizer version (`__asan_wrap_atol`) | `main E:\rpppp\PatchIccMAX\Tools\CmdLine\IccRoundTrip\iccRoundTrip.cpp:150`                         |
+| **iccSpecSepToTiff.exe**| `sanitizer_win_interception.cpp:149`         | Failed to replace local function with sanitizer version (`__asan_wrap_atol`) | `std::_Allocate_manually_vector_aligned C:\...\xmemory:151`                                             |
+| **iccTiffDump.exe**     | `sanitizer_win_interception.cpp:149`         | Failed to replace local function with sanitizer version (`__asan_wrap_atol`) | `CTiffImg::Open(char const *) E:\...\TiffImg.cpp:271`                                                  |
+| **iccV5DspObsToV4Dsp.exe**| `sanitizer_win_interception.cpp:149`       | Failed to replace local function with sanitizer version (`__asan_wrap_atol`) | `std::_Allocate_manually_vector_aligned C:\...\xmemory:159`                                             |
+
+## Summary Analysis
+- **Sanitizer Interception**:
+  - All failures point to `sanitizer_win_interception.cpp:149`, where AddressSanitizer attempts to override local functions (e.g., `atol`) but fails.
+  - This issue is specific to the Windows platform and its sanitizer implementation.
+- **Memory Allocation Failures**:
+  - Some failures involve standard C++ STL functions like `std::basic_string` and `std::_Allocate_manually_vector_aligned`, indicating broader runtime compatibility issues.
+
+---
 
 ### ASAN Log
 
