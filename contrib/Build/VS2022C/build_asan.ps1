@@ -89,8 +89,9 @@ Ensure-DirectoryExists -Path "$patchDir\Testing"
 Run-Command "copy $vcpkgDir\installed\x64-windows\bin\*.dll $patchDir\Testing\"
 Run-Command "copy 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\bin\Hostx64\x64\clang_rt.asan_dynamic-x86_64.dll' $patchDir\Testing\"
 
-Log-Message "Adding vcpkg bin directory to PATH..."
+Log-Message "Adding vcpkg bin directory to PATH, Setting ASAN Options..."
 $Env:PATH = "$vcpkgDir\installed\x64-windows\bin;$Env:PATH"
+$env:ASAN_OPTIONS="intercept_strtoll=false,intercept_strtod=false"
 
 Log-Message "Running .exe tests in Testing directory..."
 Get-ChildItem -Path "$patchDir\Testing" -Filter "*.exe" -Recurse | ForEach-Object {
