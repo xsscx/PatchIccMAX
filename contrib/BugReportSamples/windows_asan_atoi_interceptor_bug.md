@@ -16,7 +16,6 @@ Version 4.8.09032
 Open Developer Powershell and Paste in the following command to Build with ASAN Logs:
 
 ```
-set ASAN_OPTIONS=verbosity=1
 iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/development/contrib/Build/VS2022C/build_asan.ps1").Content
 ```
 
