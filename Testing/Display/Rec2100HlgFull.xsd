@@ -1,0 +1,393 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="IccProfile">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Header">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="PreferredCMMType" />
+							<xs:element name="ProfileVersion" type="xs:decimal" />
+							<xs:element name="ProfileDeviceClass" type="xs:string" />
+							<xs:element name="DataColourSpace" type="xs:string" />
+							<xs:element name="PCS" type="xs:string" />
+							<xs:element name="CreationDateTime" type="xs:string" />
+							<xs:element name="ProfileFlags">
+								<xs:complexType>
+									<xs:attribute name="EmbeddedInFile" type="xs:boolean" use="required" />
+									<xs:attribute name="UseWithEmbeddedDataOnly" type="xs:boolean" use="required" />
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="DeviceAttributes">
+								<xs:complexType>
+									<xs:attribute name="ReflectiveOrTransparency" type="xs:string" use="required" />
+									<xs:attribute name="GlossyOrMatte" type="xs:string" use="required" />
+									<xs:attribute name="MediaPolarity" type="xs:string" use="required" />
+									<xs:attribute name="MediaColour" type="xs:string" use="required" />
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="RenderingIntent" type="xs:string" />
+							<xs:element name="PCSIlluminant">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="XYZNumber">
+											<xs:complexType>
+												<xs:attribute name="X" type="xs:decimal" use="required" />
+												<xs:attribute name="Y" type="xs:decimal" use="required" />
+												<xs:attribute name="Z" type="xs:decimal" use="required" />
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="ProfileCreator" />
+							<xs:element name="ProfileID" type="xs:unsignedByte" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Tags">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="profileDescriptionTag">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="multiLocalizedUnicodeType">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="LocalizedText">
+														<xs:complexType>
+															<xs:simpleContent>
+																<xs:extension base="xs:string">
+																	<xs:attribute name="LanguageCountry" type="xs:string" use="required" />
+																</xs:extension>
+															</xs:simpleContent>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="AToB1Tag">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="multiProcessElementType">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="MultiProcessElements">
+														<xs:complexType>
+															<xs:sequence>
+																<xs:element name="CalculatorElement">
+																	<xs:complexType>
+																		<xs:sequence>
+																			<xs:element name="Macros">
+																				<xs:complexType>
+																					<xs:sequence>
+																						<xs:element maxOccurs="unbounded" name="Macro">
+																							<xs:complexType>
+																								<xs:simpleContent>
+																									<xs:extension base="xs:double">
+																										<xs:attribute name="Name" type="xs:string" use="required" />
+																									</xs:extension>
+																								</xs:simpleContent>
+																							</xs:complexType>
+																						</xs:element>
+																					</xs:sequence>
+																				</xs:complexType>
+																			</xs:element>
+																			<xs:element name="Variables">
+																				<xs:complexType>
+																					<xs:sequence>
+																						<xs:element maxOccurs="unbounded" name="Declare">
+																							<xs:complexType>
+																								<xs:simpleContent>
+																									<xs:extension base="xs:string">
+																										<xs:attribute name="Name" type="xs:string" use="required" />
+																									</xs:extension>
+																								</xs:simpleContent>
+																							</xs:complexType>
+																						</xs:element>
+																					</xs:sequence>
+																				</xs:complexType>
+																			</xs:element>
+																			<xs:element name="SubElements">
+																				<xs:complexType>
+																					<xs:sequence>
+																						<xs:element name="MatrixElement">
+																							<xs:complexType>
+																								<xs:sequence>
+																									<xs:element name="MatrixData" type="xs:string" />
+																								</xs:sequence>
+																								<xs:attribute name="Name" type="xs:string" use="required" />
+																								<xs:attribute name="InputChannels" type="xs:unsignedByte" use="required" />
+																								<xs:attribute name="OutputChannels" type="xs:unsignedByte" use="required" />
+																							</xs:complexType>
+																						</xs:element>
+																					</xs:sequence>
+																				</xs:complexType>
+																			</xs:element>
+																			<xs:element name="MainFunction" type="xs:string" />
+																		</xs:sequence>
+																		<xs:attribute name="InputChannels" type="xs:unsignedByte" use="required" />
+																		<xs:attribute name="OutputChannels" type="xs:unsignedByte" use="required" />
+																	</xs:complexType>
+																</xs:element>
+															</xs:sequence>
+															<xs:attribute name="InputChannels" type="xs:unsignedByte" use="required" />
+															<xs:attribute name="OutputChannels" type="xs:unsignedByte" use="required" />
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="BToA1Tag">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="multiProcessElementType">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="MultiProcessElements">
+														<xs:complexType>
+															<xs:sequence>
+																<xs:element name="CalculatorElement">
+																	<xs:complexType>
+																		<xs:sequence>
+																			<xs:element name="Macros">
+																				<xs:complexType>
+																					<xs:sequence>
+																						<xs:element maxOccurs="unbounded" name="Macro">
+																							<xs:complexType>
+																								<xs:simpleContent>
+																									<xs:extension base="xs:double">
+																										<xs:attribute name="Name" type="xs:string" use="required" />
+																									</xs:extension>
+																								</xs:simpleContent>
+																							</xs:complexType>
+																						</xs:element>
+																					</xs:sequence>
+																				</xs:complexType>
+																			</xs:element>
+																			<xs:element name="Variables">
+																				<xs:complexType>
+																					<xs:sequence>
+																						<xs:element maxOccurs="unbounded" name="Declare">
+																							<xs:complexType>
+																								<xs:simpleContent>
+																									<xs:extension base="xs:string">
+																										<xs:attribute name="Name" type="xs:string" use="required" />
+																									</xs:extension>
+																								</xs:simpleContent>
+																							</xs:complexType>
+																						</xs:element>
+																					</xs:sequence>
+																				</xs:complexType>
+																			</xs:element>
+																			<xs:element name="SubElements">
+																				<xs:complexType>
+																					<xs:sequence>
+																						<xs:element name="MatrixElement">
+																							<xs:complexType>
+																								<xs:sequence>
+																									<xs:element name="MatrixData">
+																										<xs:complexType>
+																											<xs:simpleContent>
+																												<xs:extension base="xs:string">
+																													<xs:attribute name="InvertMatrix" type="xs:boolean" use="required" />
+																												</xs:extension>
+																											</xs:simpleContent>
+																										</xs:complexType>
+																									</xs:element>
+																								</xs:sequence>
+																								<xs:attribute name="Name" type="xs:string" use="required" />
+																								<xs:attribute name="InputChannels" type="xs:unsignedByte" use="required" />
+																								<xs:attribute name="OutputChannels" type="xs:unsignedByte" use="required" />
+																							</xs:complexType>
+																						</xs:element>
+																					</xs:sequence>
+																				</xs:complexType>
+																			</xs:element>
+																			<xs:element name="MainFunction" type="xs:string" />
+																		</xs:sequence>
+																		<xs:attribute name="InputChannels" type="xs:unsignedByte" use="required" />
+																		<xs:attribute name="OutputChannels" type="xs:unsignedByte" use="required" />
+																	</xs:complexType>
+																</xs:element>
+															</xs:sequence>
+															<xs:attribute name="InputChannels" type="xs:unsignedByte" use="required" />
+															<xs:attribute name="OutputChannels" type="xs:unsignedByte" use="required" />
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="customToStandardPccTag">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="multiProcessElementType">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="MultiProcessElements">
+														<xs:complexType>
+															<xs:sequence>
+																<xs:element name="MatrixElement">
+																	<xs:complexType>
+																		<xs:sequence>
+																			<xs:element name="MatrixData" type="xs:string" />
+																		</xs:sequence>
+																		<xs:attribute name="InputChannels" type="xs:unsignedByte" use="required" />
+																		<xs:attribute name="OutputChannels" type="xs:unsignedByte" use="required" />
+																	</xs:complexType>
+																</xs:element>
+															</xs:sequence>
+															<xs:attribute name="InputChannels" type="xs:unsignedByte" use="required" />
+															<xs:attribute name="OutputChannels" type="xs:unsignedByte" use="required" />
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="standardToCustomPccTag">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="multiProcessElementType">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="MultiProcessElements">
+														<xs:complexType>
+															<xs:sequence>
+																<xs:element name="MatrixElement">
+																	<xs:complexType>
+																		<xs:sequence>
+																			<xs:element name="MatrixData">
+																				<xs:complexType>
+																					<xs:simpleContent>
+																						<xs:extension base="xs:string">
+																							<xs:attribute name="InvertMatrix" type="xs:boolean" use="required" />
+																						</xs:extension>
+																					</xs:simpleContent>
+																				</xs:complexType>
+																			</xs:element>
+																		</xs:sequence>
+																		<xs:attribute name="InputChannels" type="xs:unsignedByte" use="required" />
+																		<xs:attribute name="OutputChannels" type="xs:unsignedByte" use="required" />
+																	</xs:complexType>
+																</xs:element>
+															</xs:sequence>
+															<xs:attribute name="InputChannels" type="xs:unsignedByte" use="required" />
+															<xs:attribute name="OutputChannels" type="xs:unsignedByte" use="required" />
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="spectralViewingConditionsTag">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="spectralViewingConditionsType">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="StdObserver" type="xs:string" />
+													<xs:element name="IlluminantXYZ">
+														<xs:complexType>
+															<xs:attribute name="X" type="xs:decimal" use="required" />
+															<xs:attribute name="Y" type="xs:decimal" use="required" />
+															<xs:attribute name="Z" type="xs:decimal" use="required" />
+														</xs:complexType>
+													</xs:element>
+													<xs:element name="ObserverFuncs">
+														<xs:complexType>
+															<xs:simpleContent>
+																<xs:extension base="xs:string">
+																	<xs:attribute name="start" type="xs:decimal" use="required" />
+																	<xs:attribute name="end" type="xs:decimal" use="required" />
+																	<xs:attribute name="steps" type="xs:unsignedByte" use="required" />
+																</xs:extension>
+															</xs:simpleContent>
+														</xs:complexType>
+													</xs:element>
+													<xs:element name="StdIlluminant" type="xs:string" />
+													<xs:element name="ColorTemperature" type="xs:decimal" />
+													<xs:element name="IlluminantSPD">
+														<xs:complexType>
+															<xs:simpleContent>
+																<xs:extension base="xs:string">
+																	<xs:attribute name="start" type="xs:string" use="required" />
+																	<xs:attribute name="end" type="xs:decimal" use="required" />
+																	<xs:attribute name="steps" type="xs:unsignedByte" use="required" />
+																</xs:extension>
+															</xs:simpleContent>
+														</xs:complexType>
+													</xs:element>
+													<xs:element name="SurroundXYZ">
+														<xs:complexType>
+															<xs:attribute name="X" type="xs:decimal" use="required" />
+															<xs:attribute name="Y" type="xs:decimal" use="required" />
+															<xs:attribute name="Z" type="xs:decimal" use="required" />
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="mediaWhitePointTag">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="XYZArrayType">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="XYZNumber">
+														<xs:complexType>
+															<xs:attribute name="X" type="xs:decimal" use="required" />
+															<xs:attribute name="Y" type="xs:decimal" use="required" />
+															<xs:attribute name="Z" type="xs:decimal" use="required" />
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="copyrightTag">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="multiLocalizedUnicodeType">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="LocalizedText">
+														<xs:complexType>
+															<xs:simpleContent>
+																<xs:extension base="xs:string">
+																	<xs:attribute name="LanguageCountry" type="xs:string" use="required" />
+																</xs:extension>
+															</xs:simpleContent>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
