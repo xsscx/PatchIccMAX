@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="IccProfile">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Header">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="ProfileVersion" type="xs:decimal" />
+							<xs:element name="ProfileDeviceClass" type="xs:string" />
+							<xs:element name="DataColourSpace" type="xs:string" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Tags">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element maxOccurs="unbounded" name="utf8TextType">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="TagSignature" type="xs:string" />
+										<xs:element name="TextData" type="xs:string" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="tagStructureType">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="TagSignature" type="xs:string" />
+										<xs:element name="StructureSignature" type="xs:string" />
+										<xs:element name="MemberTags">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:choice maxOccurs="unbounded">
+														<xs:element maxOccurs="unbounded" name="float32NumberType">
+															<xs:complexType>
+																<xs:sequence>
+																	<xs:element name="TagSignature" type="xs:string" />
+																	<xs:element name="Data" type="xs:string" />
+																</xs:sequence>
+															</xs:complexType>
+														</xs:element>
+														<xs:element name="segmentedCurveType">
+															<xs:complexType>
+																<xs:sequence>
+																	<xs:element name="TagSignature" type="xs:string" />
+																	<xs:element name="SegmentedCurve">
+																		<xs:complexType>
+																			<xs:sequence>
+																				<xs:element maxOccurs="unbounded" name="FormulaSegment">
+																					<xs:complexType>
+																						<xs:simpleContent>
+																							<xs:extension base="xs:string">
+																								<xs:attribute name="Start" type="xs:string" use="required" />
+																								<xs:attribute name="End" type="xs:string" use="required" />
+																								<xs:attribute name="FunctionType" type="xs:unsignedByte" use="required" />
+																							</xs:extension>
+																						</xs:simpleContent>
+																					</xs:complexType>
+																				</xs:element>
+																			</xs:sequence>
+																		</xs:complexType>
+																	</xs:element>
+																</xs:sequence>
+															</xs:complexType>
+														</xs:element>
+														<xs:element name="uInt8NumberType">
+															<xs:complexType>
+																<xs:sequence>
+																	<xs:element name="TagSignature" type="xs:string" />
+																	<xs:element name="Data" type="xs:string" />
+																</xs:sequence>
+															</xs:complexType>
+														</xs:element>
+														<xs:element name="signatureType">
+															<xs:complexType>
+																<xs:sequence>
+																	<xs:element name="TagSignature" type="xs:string" />
+																	<xs:element name="Signature" type="xs:string" />
+																</xs:sequence>
+															</xs:complexType>
+														</xs:element>
+													</xs:choice>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
