@@ -32,11 +32,11 @@ print_elapsed_time() {
 }
 
 # Start Script
-print_banner "PR105 Build Script now running.."
+print_banner "PR107 Build Script now running.."
 run_and_log echo "Logfile: $LOGFILE"
 
 # Step 0: Install Deps
-print_banner "PR105 Installing Deps that required sudo.."
+print_banner "PR107 Installing Deps that required sudo.."
 run_and_log echo "sudo apt install nlohmann-json3-dev curl git make cmake clang clang-tools libwxgtk-media3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libwxgtk3.0-gtk3-dev libwxgtk-media3.0-gtk3 libwxgtk-webview3.0-gtk3 libwxgtk3.0-gtk3 libxml2 libtiff5 libxml2-dev libtiff5-dev make cmake build-essential"
 
 # Step 1: Configuring Git user
@@ -53,9 +53,9 @@ run_and_log echo "Repository cloned and switched to DemoIccMAX directory."
 
 # Step 3: Checking out PR105
 print_banner "Step 3: Checking out PR105"
-run_and_log git fetch origin pull/105/head:pr-105 || { echo "Error: Git Fetch failed. Exiting."; exit 1; }
-run_and_log git checkout pr-105 || { echo "Error: Git checkout PR105 failed. Exiting."; exit 1; }
-run_and_log echo "PR105 checked out."
+run_and_log git fetch origin pull/107/head:pr-107 || { echo "Error: Git Fetch failed. Exiting."; exit 1; }
+run_and_log git checkout pr-107 || { echo "Error: Git checkout PR105 failed. Exiting."; exit 1; }
+run_and_log echo "PR107 checked out."
 
 # Step 4: Changing to Build directory
 print_banner "Step 4: Changing to Build directory"
@@ -76,7 +76,7 @@ run_and_log make -j$(nproc) || { echo "Error: Build failed. Exiting."; exit 1; }
 run_and_log echo "Build completed successfully."
 
 # Final Message
-print_banner "PR105 - All steps completed successfully, Build Errors will be shown above...."
+print_banner "PR107 - All steps completed successfully, Build Errors will be shown above...."
 run_and_log echo "Based on https://github.com/InternationalColorConsortium/DemoIccMAX/pull/105"
 
 # Print total elapsed time
