@@ -1,0 +1,73 @@
+name: "DemoIccMAX PR Pre-Screen Check"
+
+on:
+  pull_request:
+    branches:
+      - "master"
+  push:
+    branches:
+      - "master"
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    name: Build and Test on macOS
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    # Checkout repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Set up Git anonymous identity
+    - name: Configure Git
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+
+    # Fetch the PR branch
+    - name: Checkout Pull Request branch
+      run: |
+        git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
+        git checkout pr-${{ github.event.pull_request.number }}
+
+    # Set up CMake environment
+    - name: Configure build with CMake
+      run: |
+        mkdir -p DemoIccMAX/Build
+        cd DemoIccMAX/Build
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
+              -DCMAKE_BUILD_TYPE=Debug \
+              -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
+              -Wno-dev ..
+
+    # Build the project
+    - name: Build the project
+      run: |
+        cd DemoIccMAX/Build
+        make -j$(sysctl -n hw.ncpu)
+
+    # Run tests (if applicable)
+    - name: Run tests
+      run: |
+        cd DemoIccMAX/Build
+        ctest --output-on-failure
+
+    # Upload build artifacts for debugging
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: demoiccmax-macos-artifacts
+        path: DemoIccMAX/Build
+
+    # Report build success or failure
+    - name: Verify build and test success
+      run: |
+        if [ $? -eq 0 ]; then
+          echo "✅ Build and tests succeeded."
+        else
+          echo "❌ Build or tests failed."
+          exit 1
+        fi
