@@ -35,6 +35,10 @@ print_elapsed_time() {
 print_banner "PR105 Build Script now running.."
 run_and_log echo "Logfile: $LOGFILE"
 
+# Step 0: Install Deps
+print_banner "PR105 Installing Deps that required sudo.."
+run_and_log echo "sudo apt install nlohmann-json3-dev curl git make cmake clang clang-tools libwxgtk-media3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libwxgtk3.0-gtk3-dev libwxgtk-media3.0-gtk3 libwxgtk-webview3.0-gtk3 libwxgtk3.0-gtk3 libxml2 libtiff5 libxml2-dev libtiff5-dev make cmake build-essential"
+
 # Step 1: Configuring Git user
 print_banner "Step 1: Configuring Git user for this session"
 run_and_log git config --global user.email "github-actions@github.com" || { echo "Error: Git config failed. Exiting."; exit 1; }
