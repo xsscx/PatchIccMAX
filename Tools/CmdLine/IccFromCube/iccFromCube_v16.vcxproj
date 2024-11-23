@@ -43,7 +43,8 @@
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
     <EnableASAN>true</EnableASAN>
-    <VCToolsVersion>14.41.34120</VCToolsVersion>
+    <VCToolsVersion>
+    </VCToolsVersion>
     <EnableFuzzer>true</EnableFuzzer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
