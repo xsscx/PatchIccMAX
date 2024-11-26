@@ -1,19 +1,48 @@
 # 
-# Top Level Configuration CMakeLists.txt | DemoIccMAX Project
 # Copyright (©) 2024 The International Color Consortium. All rights reserved.
+#
+# Cmake Build System
 # 
+# Top Level Configuration | CMakeLists.txt | DemoIccMAX Project
 #
-# Last Updated: 2024-11-26 by David Hoyt
-#
-# Changes: 	Added JSON Dependency
-#						Adjusted Cross Platform Build Args
+# Changes: Troubleshoot legacy If/ELSE/THEN conditionals
+#          Refactor of Source, Project and Cmake & Other Vars
+#          Housekeeping
 #						
 # TODO: Refactor Debug, Release, Asan 
-# 			Collapse 3-tier CMakeLists.txt, Housekeeping
-#				Refactor Base Configs & logging to .mk's 
+#       Collapse 3-tier CMakeLists.txt, Housekeeping, Refactor Base Configs & logging to .mk's 
+# 
+# Last Updated: 2024-11-26 by David Hoyt
 #
 
 cmake_minimum_required(VERSION 2.8.5)
+
+if(POLICY CMP0079)
+  cmake_policy(SET CMP0079 NEW)
+endif()
+
+# Project Configuration
+project(RefIccMAX)
+set(PROJECT_UP_NAME "REFICCMAX")
+set(CMAKE_CXX_STANDARD 17)
+
+set(${PROJECT_UP_NAME}_MAJOR_VERSION 2)
+set(${PROJECT_UP_NAME}_MINOR_VERSION 1)
+set(${PROJECT_UP_NAME}_MICRO_VERSION 25)
+set(${PROJECT_UP_NAME}_VERSION
+    "${${PROJECT_UP_NAME}_MAJOR_VERSION}.${${PROJECT_UP_NAME}_MINOR_VERSION}.${${PROJECT_UP_NAME}_MICRO_VERSION}"
+)
+
+set(PROJECT_DOWN_NAME "reficcmax")
+set(PACKAGE_NAME "${PROJECT_DOWN_NAME}")
+set(PACKAGE_DESCRIPTION "The RefIccMAX project provides an open source set of libraries and tools that allow for the interaction, manipulation, and application of iccMAX-based color management profiles based on the iccMAX specification http://www.color.org/iccmax.xalter, in addition to legacy ICC profiles defined by earlier ICC specifications.")
+
+set(${PROJECT_NAME}_VERSION_MAJORMINOR
+    "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}"
+)
+
+# Define the true project root directory
+set(PROJECT_ROOT_DIR ${CMAKE_SOURCE_DIR}/../..)
 
 # Include timestamp for logs
 string(TIMESTAMP CURRENT_DATETIME "%Y-%m-%d %H:%M:%S")
@@ -115,6 +144,12 @@ option(ENABLE_TOOLS "Build tools" ON)
 option(ENABLE_SHARED_LIBS "Build dynamic link libs" ON)
 option(ENABLE_STATIC_LIBS "Build static libs" ON)
 option(ENABLE_ICCXML "Build IccXML library" ON)
+
+IF(EXISTS ${VCPKG_MANIFEST_DIR}/vcpkg.json)
+  MESSAGE(STATUS "Detected vcpkg.json at: ${VCPKG_MANIFEST_DIR}/vcpkg.json")
+ELSE()
+  MESSAGE(WARNING "No vcpkg.json file found at: ${VCPKG_MANIFEST_DIR}/vcpkg.json. Ensure dependencies are manually resolved.")
+ENDIF()
 
 IF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
   OPTION(ENABLE_INSTALL_RIM "Install files" ON)
@@ -219,114 +254,188 @@ INCLUDE_DIRECTORIES ( ${TOP_SOURCE_DIR}/IccProfLib/ )
 # external dependencies
 FIND_PROGRAM(CMAKE_AR_TMP NAMES ar)
 
-#
-# Core library
-#
-ADD_SUBDIRECTORY( IccProfLib )
-SET( TARGET_LIB_ICCPROFLIB ${TARGET_LIB} )
+# =====================================================================
+# Core Library Configuration
+# =====================================================================
+add_subdirectory(IccProfLib)
+set(TARGET_LIB_ICCPROFLIB ${TARGET_LIB})
 
-## external dependency
-IF(ENABLE_ICCXML)
-  IF(USE_SYSTEM_LIBXML2)
-    FIND_PACKAGE(LibXML2 REQUIRED)
-  ELSE()
-    FIND_PACKAGE(LibXML2)
-  ENDIF()
-  IF(LIBXML2_FOUND)
-    INCLUDE_DIRECTORIES( ${LIBXML2_INCLUDE_DIR} )
-    LINK_DIRECTORIES( ${LIBXML2_LIBRARY_DIRS} )
-    SET( HAVE_LIBXML2 1 )
-  ELSE( LIBXML2_FOUND )
-    IF(CMAKE_VERSION VERSION_GREATER 2.8.0)
-      SET( HAVE_LIBXML2 TRUE  )
-      INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/IccXML/libxml2 )
-      LINK_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/IccXML/libxml2 )
-      ADD_SUBDIRECTORY( IccXML/libxml2 )
-      SET( LIBXML2_LIBRARIES xml2-static )
-    ENDIF()
-  ENDIF(LIBXML2_FOUND)
+# =====================================================================
+# External Dependency: libxml2 (Optional, based on ENABLE_ICCXML flag)
+# =====================================================================
+if(ENABLE_ICCXML)
+  message(STATUS "Configuring ICCXML support...")
 
-  #
-  # XML library
-  #
-  ADD_SUBDIRECTORY( IccXML )
-  SET( TARGET_LIB_ICCXML ${TARGET_LIB} )
-  INCLUDE_DIRECTORIES ( ${TOP_SOURCE_DIR}/IccXML/IccLibXML/ )
-ENDIF()
+  # Find libxml2 package dynamically (vcpkg or system-installed)
+  find_package(LibXml2 REQUIRED CONFIG)
 
-# Ensure nlohmann_json is found
+  if(LIBXML2_FOUND)
+    message(STATUS "libxml2 found:")
+    message(STATUS "  - Libraries: ${LIBXML2_LIBRARIES}")
+    message(STATUS "  - Include Directory: ${LIBXML2_INCLUDE_DIR}")
+    include_directories(${LIBXML2_INCLUDE_DIR})
+    target_link_libraries(${TARGET_LIB_ICCPROFLIB} PRIVATE ${LIBXML2_LIBRARIES})
+    set(HAVE_LIBXML2 1)
+  else()
+    message(FATAL_ERROR "libxml2 is required but was not found. Ensure it is installed and discoverable.")
+  endif()
+
+  # Debugging: Log additional library path information
+  if(NOT LIBXML2_FOUND)
+    message(WARNING "libxml2 not found. Attempting manual path checks...")
+    file(GLOB LIBXML2_PATHS "${CMAKE_SOURCE_DIR}/vcpkg_installed/x64-windows/lib/*")
+    foreach(PATH ${LIBXML2_PATHS})
+      message(STATUS "Detected libxml2 path: ${PATH}")
+    endforeach()
+  endif()
+
+  # Add the IccXML library
+  add_subdirectory(IccXML)
+  set(TARGET_LIB_ICCXML ${TARGET_LIB})
+  include_directories(${TOP_SOURCE_DIR}/IccXML/IccLibXML/)
+
+else()
+  message(STATUS "ICCXML support is disabled.")
+endif()
+
+# =====================================================================
+# Debug Information for Build Configuration
+# =====================================================================
+message(STATUS "Build Configuration Summary:")
+message(STATUS "  - ICC ProfLib: ${TARGET_LIB_ICCPROFLIB}")
+if(ENABLE_ICCXML)
+  message(STATUS "  - ICCXML Enabled: ${ENABLE_ICCXML}")
+  if(HAVE_LIBXML2)
+    message(STATUS "  - libxml2 Support: Enabled")
+  else()
+    message(STATUS "  - libxml2 Support: Disabled")
+  endif()
+else()
+  message(STATUS "  - ICCXML Support: Disabled")
+endif()
+
+# =====================================================================
+# Add nlohmann_json-dependent Tools
+# =====================================================================
 find_package(nlohmann_json REQUIRED)
 message(STATUS "nlohmann_json library found: ${nlohmann_json_DIR}")
 
-IF(ENABLE_TOOLS)
-  # Verify nlohmann_json is configured properly
-  IF(nlohmann_json_DIR)
-    MESSAGE(STATUS "Found nlohmann JSON library at: ${nlohmann_json_DIR}")
+# =====================================================================
+# ENABLE_TOOLS Handling
+# =====================================================================
 
-    # Use nlohmann_json include directory
+if(ENABLE_TOOLS)
+  # Verify nlohmann_json is configured properly
+  if(nlohmann_json_DIR)
+    message(STATUS "Found nlohmann JSON library at: ${nlohmann_json_DIR}")
     include_directories(${nlohmann_json_DIR})
 
- message(STATUS "Adding IccApplyNamedCmm from: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyNamedCmm")
+message(STATUS "Adding IccApplyNamedCmm from: ${ICC_APPLY_NAMED_CMM_PATH}")
 
-# Add subdirectory for IccApplyNamedCmm
-IF(EXISTS "${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyNamedCmm")
+# =====================================================================
+# Ensure IccApplyNamedCmm is added in nlohmann_json-dependent Tools
+# =====================================================================
+set(ICC_APPLY_NAMED_CMM_PATH "${CMAKE_SOURCE_DIR}/Tools/IccApplyNamedCmm")
+
+# Add IccApplyNamedCmm
+message(STATUS "Checking IccApplyNamedCmm at: ${ICC_APPLY_NAMED_CMM_PATH}")
+if(EXISTS ${ICC_APPLY_NAMED_CMM_PATH})
+  message(STATUS "Adding IccApplyNamedCmm from: ${ICC_APPLY_NAMED_CMM_PATH}")
   add_subdirectory(
-    ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyNamedCmm
-    ${CMAKE_BINARY_DIR}/Tools/CmdLine/IccApplyNamedCmm_Build
+    ${ICC_APPLY_NAMED_CMM_PATH}
+    ${CMAKE_BINARY_DIR}/Tools/IccApplyNamedCmm_Build
   )
-  message(STATUS "Added IccApplyNamedCmm")
-ELSE()
-  message(FATAL_ERROR "Directory does not exist: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyNamedCmm")
-ENDIF()
+  message(STATUS "Successfully added IccApplyNamedCmm")
+else()
+  # Handle Directory Errors for IccApplyNamedCmm
+  message(FATAL_ERROR "Directory does not exist: ${ICC_APPLY_NAMED_CMM_PATH}")
+endif()
 
-    # Add IccApplyProfiles
-    MESSAGE(STATUS "Adding IccApplyProfiles from: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyProfiles")
-    IF(EXISTS "${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyProfiles")
-      add_subdirectory(
-        ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyProfiles
-        ${CMAKE_BINARY_DIR}/Tools/CmdLine/IccApplyProfiles_Build
-      )
-      MESSAGE(STATUS "Added IccApplyProfiles")
-    ELSE()
-      message(FATAL_ERROR "Directory does not exist: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyProfiles")
-    ENDIF()
-  ELSE()
-    MESSAGE(WARNING "nlohmann JSON library not found. Skipping Tools/IccApplyNamedCmm and Tools/IccApplyProfiles.")
-    RETURN() # Exit script for tools if dependency is not found
-  ENDIF()
 
-  # Add remaining tools
-  ADD_SUBDIRECTORY(Tools/IccDumpProfile)
-  ADD_SUBDIRECTORY(Tools/IccRoundTrip)
+# =====================================================================
+# Ensure IccApplyProfiles is added in nlohmann_json-dependent Tools
+# =====================================================================
+set(ICC_APPLY_NAMED_CMM_PATH "${CMAKE_SOURCE_DIR}/Tools/IccApplyProfiles")
 
-  # Check for TIFF library
+# Add IccApplyProfiles
+message(STATUS "Checking IccApplyProfiles at: ${ICC_APPLY_PROFILE_PATH}")
+if(EXISTS ${ICC_APPLY_NAMED_CMM_PATH})
+  message(STATUS "Adding IccApplyProfiles from: ${ICC_APPLY_PROFILE_PATH}")
+  add_subdirectory(
+    ${ICC_APPLY_NAMED_CMM_PATH}
+    ${CMAKE_BINARY_DIR}/Tools/IccApplyProfiles_Build
+  )
+  message(STATUS "Successfully added IccApplyProfiles")
+else()
+  # Handle Directory Errors for IccApplyProfiles
+  message(FATAL_ERROR "Directory does not exist: ${ICC_APPLY_PROFILES_PATH}")
+endif()
+
+
+# =====================================================================
+# Handle nlohmann JSON library not found
+# =====================================================================
+
+  else() # nlohmann_json_DIR is not set
+    message(WARNING "nlohmann JSON library not found. Skipping Tools/IccApplyNamedCmm and Tools/IccApplyProfiles.")
+    return() # Exit script for tools if dependency is not found
+  endif()
+
+# =====================================================================
+# Add Remaining Tools
+# =====================================================================
+
+  add_subdirectory(Tools/IccDumpProfile)
+  add_subdirectory(Tools/IccRoundTrip)
+
+# =====================================================================
+# Ensure tiff is found
+# =====================================================================
+
   find_package(TIFF REQUIRED)
-  if (TIFF_FOUND)
+  if(TIFF_FOUND)
     include_directories(${TIFF_INCLUDE_DIR})
     message(STATUS "TIFF library found: ${TIFF_LIBRARIES}")
-    
-    # Add TIFF-dependent tools
-#    ADD_SUBDIRECTORY(Tools/IccApplyProfiles)
-    ADD_SUBDIRECTORY(Tools/IccSpecSepToTiff)
-    ADD_SUBDIRECTORY(Tools/IccTiffDump)
+
+# =====================================================================
+# Add TIFF-dependent Tools
+# =====================================================================
+
+    message(STATUS "Adding IccSpecSepToTiff from: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccSpecSepToTiff")
+    add_subdirectory(Tools/IccSpecSepToTiff)
+    message(STATUS "Adding IccSpecSepToTiff from: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccTiffDump")
+    add_subdirectory(Tools/IccTiffDump)
   else()
+  
+# =====================================================================
+# Handle TIFF Dependency Not Found Errors
+# =====================================================================
+
     message(FATAL_ERROR "TIFF library not found. Please install libtiff-dev.")
   endif()
 
-  # Add XML-related tools
-  ADD_SUBDIRECTORY(Tools/IccFromXml)
-  ADD_SUBDIRECTORY(Tools/IccToXml)
+# =====================================================================
+# Add XML-dependent Tools
+# =====================================================================
 
+  add_subdirectory(Tools/IccFromXml)
+  add_subdirectory(Tools/IccToXml)
+
+# =====================================================================
+# Add wxWidgets
+# =====================================================================
   # Configure wxWidgets
   find_package(wxWidgets COMPONENTS core base REQUIRED)
-  if (wxWidgets_FOUND)
+  if(wxWidgets_FOUND)
     include(${wxWidgets_USE_FILE})
     message(STATUS "wxWidgets found and configured")
   else()
     message(FATAL_ERROR "wxWidgets not found. Please install it manually or via vcpkg.")
   endif()
 
-ENDIF(ENABLE_TOOLS)
+else() # ENABLE_TOOLS is OFF
+  message(STATUS "ENABLE_TOOLS is OFF. Skipping tools configuration.")
+endif()
 
 
 # Optionally add a description for the option
