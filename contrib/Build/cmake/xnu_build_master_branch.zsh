@@ -48,9 +48,6 @@ cd DemoIccMAX/ || { echo "Error: Failed to change directory to DemoIccMAX. Exiti
 run_and_log echo "Repository cloned and switched to DemoIccMAX directory."
 
 # Step 3: Revert
-print_banner "Step 3: Reverting a bad commit"
-run_and_log echo "Step 3a: Reverting 6ac1cc6"
-run_and_log git revert --no-edit b90ac3933da99179df26351c39d8d9d706ac1cc6 || { echo "Error: Git revert failed. Exiting."; exit 1; }
 run_and_log echo "master branch checked out."
 
 # Step 4: Installing Dependencies
