@@ -35,8 +35,8 @@ make -j$(nproc) 2>&1 | grep 'error:'
 ### Xcode Build
 
 ```
-cd Build/Xcode
-/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/Build/XCode/xnu_build_macos15_x86_64.zsh)"
+cd /tmp
+/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/master/contrib/Build/cmake/xnu_build_master_branch.zsh)"
 ```
 
 ## MSBuild on Windows using VS2022
