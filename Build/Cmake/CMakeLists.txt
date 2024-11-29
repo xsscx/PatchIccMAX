@@ -1,25 +1,37 @@
 # 
+# Top Level Configuration CMakeLists.txt | DemoIccMAX Project
 # Copyright (©) 2024 The International Color Consortium. All rights reserved.
-#
-# Cmake Build System
 # 
-# Top Level Configuration | CMakeLists.txt | DemoIccMAX Project
 #
-# Changes: Troubleshoot legacy If/ELSE/THEN conditionals
-#          Refactor of Source, Project and Cmake & Other Vars
-#          Housekeeping
-#						
+# Last Updated: 2024-11-29 by David Hoyt
+#
+# Changes: 	Debug bad relative path injection going outside project root
+#			Adjusted Cross Platform Build Args
+#           Added Debugging Output
+#
+#
 # TODO: Refactor Debug, Release, Asan 
-#       Collapse 3-tier CMakeLists.txt, Housekeeping, Refactor Base Configs & logging to .mk's 
-# 
-# Last Updated: 2024-11-26 by David Hoyt
+# 			Collapse 3-tier CMakeLists.txt, Housekeeping
+#				Refactor Base Configs & logging to .mk's 
 #
-
-cmake_minimum_required(VERSION 2.8.5)
-
-if(POLICY CMP0079)
-  cmake_policy(SET CMP0079 NEW)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configurations to build" FORCE)
+    set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug)
+    set_property(GLOBAL PROPERTY RELEASE_CONFIGURATIONS Release)
 endif()
+
+# Include timestamp for logs
+string(TIMESTAMP CURRENT_DATETIME "%Y-%m-%d %H:%M:%S")
+message(STATUS "##########################################################################")
+message(STATUS "## Starting Configuration for DemoIccMAX Project at ${CURRENT_DATETIME}")
+message(STATUS "##########################################################################")
+
+message(STATUS "ARCHIVE_OUTPUT_DIRECTORY: ${ARCHIVE_OUTPUT_DIRECTORY}")
+message(STATUS "LIBRARY_OUTPUT_DIRECTORY: ${LIBRARY_OUTPUT_DIRECTORY}")
+message(STATUS "RUNTIME_OUTPUT_DIRECTORY: ${RUNTIME_OUTPUT_DIRECTORY}")
+
+cmake_minimum_required(VERSION 3.5.0)
 
 # Project Configuration
 project(RefIccMAX)
@@ -43,12 +55,6 @@ set(${PROJECT_NAME}_VERSION_MAJORMINOR
 
 # Define the true project root directory
 set(PROJECT_ROOT_DIR ${CMAKE_SOURCE_DIR}/../..)
-
-# Include timestamp for logs
-string(TIMESTAMP CURRENT_DATETIME "%Y-%m-%d %H:%M:%S")
-message(STATUS "##########################################################################")
-message(STATUS "## Starting Configuration for DemoIccMAX Project at ${CURRENT_DATETIME}")
-message(STATUS "##########################################################################")
 
 # Debugging and Host System Details
 message(STATUS "### System Information ###")
@@ -121,21 +127,35 @@ else()
     message(STATUS "CI/CD Integration: Not Detected")
 endif()
 
-# Dependency Information
-message(STATUS "### Dependency Information ###")
-if(EXISTS "${CMAKE_SOURCE_DIR}/vcpkg.json")
-    message(STATUS "vcpkg Manifest Detected")
-    execute_process(COMMAND ${CMAKE_COMMAND} -P "${CMAKE_SOURCE_DIR}/scripts/vcpkg_status.cmake"
-                    OUTPUT_VARIABLE VCPKG_STATUS
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "${VCPKG_STATUS}")
-else()
-    message(STATUS "No vcpkg manifest found. Ensure dependencies are resolved manually.")
-endif()
+# Dependencies
+message(STATUS "### Dependencies ###")
+find_package(LibXml2 REQUIRED)
+find_package(nlohmann_json REQUIRED)
+find_package(TIFF REQUIRED)
 
-message(STATUS "##########################################################################")
-message(STATUS "## Continuing the Configuration at ${CURRENT_DATETIME}")
-message(STATUS "##########################################################################")
+message(STATUS "LibXml2: ${LIBXML2_LIBRARIES} (found version ${LIBXML2_VERSION})")
+message(STATUS "nlohmann_json: ${nlohmann_json_DIR} (found version ${nlohmann_json_VERSION})")
+message(STATUS "TIFF: ${TIFF_LIBRARIES} (found version ${TIFF_VERSION})")
+message(STATUS "TIFF Include Directory: ${TIFF_INCLUDE_DIR}")
+message(STATUS "")
+
+# Include Directories
+message(STATUS "### Include Directories ###")
+message(STATUS "IccProfLib: ${PROJECT_ROOT_DIR}/IccProfLib")
+message(STATUS "IccXML: ${PROJECT_ROOT_DIR}/IccXML")
+message(STATUS "")
+
+# Link Directories
+message(STATUS "### Link Directories ###")
+message(STATUS "IccProfLib: ${CMAKE_BINARY_DIR}/IccProfLib")
+message(STATUS "IccXML: ${CMAKE_BINARY_DIR}/IccXML")
+message(STATUS "/usr/local/lib")
+message(STATUS "")
+
+# Library paths for debugging
+message(STATUS "Library Path for IccProfLib: ${PROJECT_ROOT_DIR}/Build/IccProfLib")
+message(STATUS "Library Path for IccXML: ${PROJECT_ROOT_DIR}/Build/IccXML")
+message(STATUS "")
 
 include(GNUInstallDirs)
 
@@ -144,12 +164,6 @@ option(ENABLE_TOOLS "Build tools" ON)
 option(ENABLE_SHARED_LIBS "Build dynamic link libs" ON)
 option(ENABLE_STATIC_LIBS "Build static libs" ON)
 option(ENABLE_ICCXML "Build IccXML library" ON)
-
-IF(EXISTS ${VCPKG_MANIFEST_DIR}/vcpkg.json)
-  MESSAGE(STATUS "Detected vcpkg.json at: ${VCPKG_MANIFEST_DIR}/vcpkg.json")
-ELSE()
-  MESSAGE(WARNING "No vcpkg.json file found at: ${VCPKG_MANIFEST_DIR}/vcpkg.json. Ensure dependencies are manually resolved.")
-ENDIF()
 
 IF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
   OPTION(ENABLE_INSTALL_RIM "Install files" ON)
@@ -213,6 +227,8 @@ if(UNIX AND NOT APPLE AND CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
   message(STATUS "Sanitizers enabled for Debug build.")
 endif()
 
+
+message(STATUS "### Configuring Target Installation Directories ###")
 #
 # Target installation folders
 #
@@ -254,188 +270,136 @@ INCLUDE_DIRECTORIES ( ${TOP_SOURCE_DIR}/IccProfLib/ )
 # external dependencies
 FIND_PROGRAM(CMAKE_AR_TMP NAMES ar)
 
-# =====================================================================
-# Core Library Configuration
-# =====================================================================
-add_subdirectory(IccProfLib)
-set(TARGET_LIB_ICCPROFLIB ${TARGET_LIB})
+message(STATUS "### Configuring: ADD_SUBDIRECTORY( IccProfLib ) in top-level ###")
 
-# =====================================================================
-# External Dependency: libxml2 (Optional, based on ENABLE_ICCXML flag)
-# =====================================================================
-if(ENABLE_ICCXML)
-  message(STATUS "Configuring ICCXML support...")
+#
+# Core library
+#
+ADD_SUBDIRECTORY( IccProfLib )
+SET( TARGET_LIB_ICCPROFLIB ${TARGET_LIB} )
 
-  # Find libxml2 package dynamically (vcpkg or system-installed)
-  find_package(LibXml2 REQUIRED CONFIG)
+message(STATUS "### Configuring: IF(ENABLE_ICCXML) in top-level ###")
 
-  if(LIBXML2_FOUND)
-    message(STATUS "libxml2 found:")
-    message(STATUS "  - Libraries: ${LIBXML2_LIBRARIES}")
-    message(STATUS "  - Include Directory: ${LIBXML2_INCLUDE_DIR}")
-    include_directories(${LIBXML2_INCLUDE_DIR})
-    target_link_libraries(${TARGET_LIB_ICCPROFLIB} PRIVATE ${LIBXML2_LIBRARIES})
-    set(HAVE_LIBXML2 1)
-  else()
-    message(FATAL_ERROR "libxml2 is required but was not found. Ensure it is installed and discoverable.")
-  endif()
+## external dependency
+IF(ENABLE_ICCXML)
+  IF(USE_SYSTEM_LIBXML2)
+    FIND_PACKAGE(LibXML2 REQUIRED)
+  ELSE()
+    FIND_PACKAGE(LibXML2)
+  ENDIF()
+  IF(LIBXML2_FOUND)
+    INCLUDE_DIRECTORIES( ${LIBXML2_INCLUDE_DIR} )
+    LINK_DIRECTORIES( ${LIBXML2_LIBRARY_DIRS} )
+    SET( HAVE_LIBXML2 1 )
+  ELSE( LIBXML2_FOUND )
+    IF(CMAKE_VERSION VERSION_GREATER 3.5.0)
+      SET( HAVE_LIBXML2 TRUE  )
+      INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/IccXML/libxml2 )
+      LINK_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/IccXML/libxml2 )
+      ADD_SUBDIRECTORY( IccXML/libxml2 )
+      SET( LIBXML2_LIBRARIES xml2-static )
+    ENDIF()
+  ENDIF(LIBXML2_FOUND)
 
-  # Debugging: Log additional library path information
-  if(NOT LIBXML2_FOUND)
-    message(WARNING "libxml2 not found. Attempting manual path checks...")
-    file(GLOB LIBXML2_PATHS "${CMAKE_SOURCE_DIR}/vcpkg_installed/x64-windows/lib/*")
-    foreach(PATH ${LIBXML2_PATHS})
-      message(STATUS "Detected libxml2 path: ${PATH}")
-    endforeach()
-  endif()
+message(STATUS "### Configuring: ADD_SUBDIRECTORY( IccXML ) in top-level ###")
 
-  # Add the IccXML library
-  add_subdirectory(IccXML)
-  set(TARGET_LIB_ICCXML ${TARGET_LIB})
-  include_directories(${TOP_SOURCE_DIR}/IccXML/IccLibXML/)
+  #
+  # XML library
+  #
+  ADD_SUBDIRECTORY( IccXML )
+  SET( TARGET_LIB_ICCXML ${TARGET_LIB} )
+  INCLUDE_DIRECTORIES ( ${TOP_SOURCE_DIR}/IccXML/IccLibXML/ )
+ENDIF()
 
-else()
-  message(STATUS "ICCXML support is disabled.")
-endif()
+message(STATUS "### Configuring: find_package(nlohmann_json REQUIRED) in top-level ###")
 
-# =====================================================================
-# Debug Information for Build Configuration
-# =====================================================================
-message(STATUS "Build Configuration Summary:")
-message(STATUS "  - ICC ProfLib: ${TARGET_LIB_ICCPROFLIB}")
-if(ENABLE_ICCXML)
-  message(STATUS "  - ICCXML Enabled: ${ENABLE_ICCXML}")
-  if(HAVE_LIBXML2)
-    message(STATUS "  - libxml2 Support: Enabled")
-  else()
-    message(STATUS "  - libxml2 Support: Disabled")
-  endif()
-else()
-  message(STATUS "  - ICCXML Support: Disabled")
-endif()
-
-# =====================================================================
-# Add nlohmann_json-dependent Tools
-# =====================================================================
+# Ensure nlohmann_json is found
 find_package(nlohmann_json REQUIRED)
 message(STATUS "nlohmann_json library found: ${nlohmann_json_DIR}")
 
-# =====================================================================
-# ENABLE_TOOLS Handling
-# =====================================================================
-
-if(ENABLE_TOOLS)
+IF(ENABLE_TOOLS)
   # Verify nlohmann_json is configured properly
-  if(nlohmann_json_DIR)
-    message(STATUS "Found nlohmann JSON library at: ${nlohmann_json_DIR}")
+  IF(nlohmann_json_DIR)
+    MESSAGE(STATUS "Found nlohmann JSON library at: ${nlohmann_json_DIR}")
+
+    # Use nlohmann_json include directory
     include_directories(${nlohmann_json_DIR})
 
-message(STATUS "Adding IccApplyNamedCmm from: ${ICC_APPLY_NAMED_CMM_PATH}")
+ message(STATUS "Adding IccApplyNamedCmm from: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyNamedCmm")
 
-# =====================================================================
-# Ensure IccApplyNamedCmm is added in nlohmann_json-dependent Tools
-# =====================================================================
-set(ICC_APPLY_NAMED_CMM_PATH "${CMAKE_SOURCE_DIR}/Tools/IccApplyNamedCmm")
+message(STATUS "### Configuring: IccApplyNamedCmm Build Target in top-level ###")
 
-# Add IccApplyNamedCmm
-message(STATUS "Checking IccApplyNamedCmm at: ${ICC_APPLY_NAMED_CMM_PATH}")
-if(EXISTS ${ICC_APPLY_NAMED_CMM_PATH})
-  message(STATUS "Adding IccApplyNamedCmm from: ${ICC_APPLY_NAMED_CMM_PATH}")
+# Add subdirectory for IccApplyNamedCmm
+IF(EXISTS "${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyNamedCmm")
   add_subdirectory(
-    ${ICC_APPLY_NAMED_CMM_PATH}
-    ${CMAKE_BINARY_DIR}/Tools/IccApplyNamedCmm_Build
+    ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyNamedCmm
+    ${CMAKE_BINARY_DIR}/Tools/CmdLine/IccApplyNamedCmm_Build
   )
-  message(STATUS "Successfully added IccApplyNamedCmm")
-else()
-  # Handle Directory Errors for IccApplyNamedCmm
-  message(FATAL_ERROR "Directory does not exist: ${ICC_APPLY_NAMED_CMM_PATH}")
-endif()
+  message(STATUS "Added IccApplyNamedCmm")
+ELSE()
+  message(FATAL_ERROR "Directory does not exist: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyNamedCmm")
+ENDIF()
 
+message(STATUS "### Configuring: IccApplyProfiles Build Target in top-level ###")
 
-# =====================================================================
-# Ensure IccApplyProfiles is added in nlohmann_json-dependent Tools
-# =====================================================================
-set(ICC_APPLY_NAMED_CMM_PATH "${CMAKE_SOURCE_DIR}/Tools/IccApplyProfiles")
+    # Add IccApplyProfiles
+    MESSAGE(STATUS "Adding IccApplyProfiles from: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyProfiles")
+    IF(EXISTS "${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyProfiles")
+      add_subdirectory(
+        ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyProfiles
+        ${CMAKE_BINARY_DIR}/Tools/CmdLine/IccApplyProfiles_Build
+      )
+      MESSAGE(STATUS "Added IccApplyProfiles")
+    ELSE()
+      message(FATAL_ERROR "Directory does not exist: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyProfiles")
+    ENDIF()
+  ELSE()
+    MESSAGE(WARNING "nlohmann JSON library not found. Skipping Tools/IccApplyNamedCmm and Tools/IccApplyProfiles.")
+    RETURN() # Exit script for tools if dependency is not found
+  ENDIF()
 
-# Add IccApplyProfiles
-message(STATUS "Checking IccApplyProfiles at: ${ICC_APPLY_PROFILE_PATH}")
-if(EXISTS ${ICC_APPLY_NAMED_CMM_PATH})
-  message(STATUS "Adding IccApplyProfiles from: ${ICC_APPLY_PROFILE_PATH}")
-  add_subdirectory(
-    ${ICC_APPLY_NAMED_CMM_PATH}
-    ${CMAKE_BINARY_DIR}/Tools/IccApplyProfiles_Build
-  )
-  message(STATUS "Successfully added IccApplyProfiles")
-else()
-  # Handle Directory Errors for IccApplyProfiles
-  message(FATAL_ERROR "Directory does not exist: ${ICC_APPLY_PROFILES_PATH}")
-endif()
+message(STATUS "### Configuring: ADD_SUBDIRECTORY(Tools/IccDumpProfile) and ADD_SUBDIRECTORY(Tools/IccRoundTrip) in top-level ###")
+  # Add remaining tools
+  ADD_SUBDIRECTORY(Tools/IccDumpProfile)
+  ADD_SUBDIRECTORY(Tools/IccRoundTrip)
 
+message(STATUS "### Configuring: find_package(TIFF REQUIRED) in top-level ###")
 
-# =====================================================================
-# Handle nlohmann JSON library not found
-# =====================================================================
-
-  else() # nlohmann_json_DIR is not set
-    message(WARNING "nlohmann JSON library not found. Skipping Tools/IccApplyNamedCmm and Tools/IccApplyProfiles.")
-    return() # Exit script for tools if dependency is not found
-  endif()
-
-# =====================================================================
-# Add Remaining Tools
-# =====================================================================
-
-  add_subdirectory(Tools/IccDumpProfile)
-  add_subdirectory(Tools/IccRoundTrip)
-
-# =====================================================================
-# Ensure tiff is found
-# =====================================================================
-
+  # Check for TIFF library
   find_package(TIFF REQUIRED)
-  if(TIFF_FOUND)
+  if (TIFF_FOUND)
     include_directories(${TIFF_INCLUDE_DIR})
     message(STATUS "TIFF library found: ${TIFF_LIBRARIES}")
 
-# =====================================================================
-# Add TIFF-dependent Tools
-# =====================================================================
-
-    message(STATUS "Adding IccSpecSepToTiff from: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccSpecSepToTiff")
-    add_subdirectory(Tools/IccSpecSepToTiff)
-    message(STATUS "Adding IccSpecSepToTiff from: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccTiffDump")
-    add_subdirectory(Tools/IccTiffDump)
+message(STATUS "### Configuring: ADD_SUBDIRECTORY(Tools/IccSpecSepToTiff) & ADD_SUBDIRECTORY(Tools/IccTiffDump) in top-level ###")
+    
+    # Add TIFF-dependent tools
+#    ADD_SUBDIRECTORY(Tools/IccApplyProfiles)
+    ADD_SUBDIRECTORY(Tools/IccSpecSepToTiff)
+    ADD_SUBDIRECTORY(Tools/IccTiffDump)
   else()
-  
-# =====================================================================
-# Handle TIFF Dependency Not Found Errors
-# =====================================================================
-
     message(FATAL_ERROR "TIFF library not found. Please install libtiff-dev.")
   endif()
 
-# =====================================================================
-# Add XML-dependent Tools
-# =====================================================================
+message(STATUS "### Configuring: ADD_SUBDIRECTORY(Tools/IccFromXml) &  ADD_SUBDIRECTORY(Tools/IccToXml) in top-level ###")
 
-  add_subdirectory(Tools/IccFromXml)
-  add_subdirectory(Tools/IccToXml)
+  # Add XML-related tools
+  ADD_SUBDIRECTORY(Tools/IccFromXml)
+  ADD_SUBDIRECTORY(Tools/IccToXml)
 
-# =====================================================================
-# Add wxWidgets
-# =====================================================================
   # Configure wxWidgets
+  
+  message(STATUS "### Configuring: find_package(wxWidgets COMPONENTS core base REQUIRED) in top-level ###")
+  
   find_package(wxWidgets COMPONENTS core base REQUIRED)
-  if(wxWidgets_FOUND)
+  if (wxWidgets_FOUND)
     include(${wxWidgets_USE_FILE})
     message(STATUS "wxWidgets found and configured")
   else()
     message(FATAL_ERROR "wxWidgets not found. Please install it manually or via vcpkg.")
   endif()
 
-else() # ENABLE_TOOLS is OFF
-  message(STATUS "ENABLE_TOOLS is OFF. Skipping tools configuration.")
-endif()
+ENDIF(ENABLE_TOOLS)
 
 
 # Optionally add a description for the option
@@ -523,3 +487,46 @@ IF(ENABLE_INSTALL_RIM)
                 DESTINATION ${CMAKE_MODULES_INSTALL_DIR} COMPONENT dev
         )
 ENDIF(ENABLE_INSTALL_RIM)
+
+message(STATUS "Resolved Final ARCHIVE_OUTPUT_DIRECTORY: ${ARCHIVE_OUTPUT_DIRECTORY}")
+message(STATUS "Propagated TARGET_LIB: ${TARGET_LIB} to parent scope")
+
+message(STATUS "ARCHIVE_OUTPUT_DIRECTORY: ${CMAKE_BINARY_DIR}/lib/Release")
+message(STATUS "RUNTIME_OUTPUT_DIRECTORY: ${CMAKE_BINARY_DIR}/bin/Release")
+# Debugging and confirmation messages
+message(STATUS "Set ARCHIVE_OUTPUT_DIRECTORY: ${ARCHIVE_OUTPUT_DIRECTORY}")
+message(STATUS "Set LIBRARY_OUTPUT_DIRECTORY: ${LIBRARY_OUTPUT_DIRECTORY}")
+message(STATUS "Set RUNTIME_OUTPUT_DIRECTORY: ${RUNTIME_OUTPUT_DIRECTORY}")
+message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
+message(STATUS "Configured source files for ${TARGET_NAME}: ${SOURCES}")
+message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+message(STATUS "ARCHIVE_OUTPUT_DIRECTORY: ${ARCHIVE_OUTPUT_DIRECTORY}")
+# Print the source and binary directories
+message(STATUS "Top-Level CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+message(STATUS "Top-Level CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+
+# Check build type early
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+
+# Print CMake configuration types (Debug/Release)
+if(CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "CMAKE_CONFIGURATION_TYPES: ${CMAKE_CONFIGURATION_TYPES}")
+endif()
+
+# Propagate output directory setup
+set(ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+message(STATUS "ARCHIVE_OUTPUT_DIRECTORY: ${ARCHIVE_OUTPUT_DIRECTORY}")
+message(STATUS "LIBRARY_OUTPUT_DIRECTORY: ${LIBRARY_OUTPUT_DIRECTORY}")
+message(STATUS "RUNTIME_OUTPUT_DIRECTORY: ${RUNTIME_OUTPUT_DIRECTORY}")
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message(STATUS "CMAKE_CONFIGURATION_TYPES: ${CMAKE_CONFIGURATION_TYPES}")
+message(STATUS "Linker dependencies for ${TARGET_NAME}: ${CMAKE_BINARY_DIR}/lib/Release/IccProfLib2-static.lib")
+
+
+# End of configuration
+message(STATUS "## Configuration complete for ${TARGET_NAME} at ${CURRENT_DATETIME}")
