@@ -1,12 +1,10 @@
 {
   "name": "demoiccmax",
   "version": "2.1.25",
-  "builtin-baseline": "f728b64be8a56e3b9485f9e431efaf43ed6e9789",
+  "builtin-baseline": "585e13706d681261f3a8e66e43a52dfedb33fd85",
   "dependencies": [
     "wxwidgets",
-    "libtiff",
-    "curl",
-    "git",
+    "tiff",
     "libxml2",
     "nlohmann-json"
   ],
