@@ -1,19 +1,27 @@
 {
-  "name": "patchiccmax",
-  "version": "2.1.20",
-  "builtin-baseline": "0b63bdd30d6716affc6fc0caef3886ca3022dc7b",
+  "name": "demoiccmax",
+  "version": "2.1.25",
+  "builtin-baseline": "f728b64be8a56e3b9485f9e431efaf43ed6e9789",
   "dependencies": [
-    {
-      "name": "libxml2",
-      "features": ["lzma", "iconv", "zlib"]
-    },
-    {
-      "name": "tiff",
-      "features": ["jpeg", "lzma", "zip"]
-    },
+    "wxwidgets",
+    "libtiff",
+    "curl",
+    "git",
+    "libxml2",
+    "nlohmann-json"
+  ],
+  "overrides": [
     {
       "name": "wxwidgets",
-      "features": ["sound", "debug-support"]
+      "version-string": "3.2.1"
+    },
+    {
+      "name": "libtiff",
+      "version-string": "4.4.0"
+    },
+    {
+      "name": "libxml2",
+      "version-string": "2.9.14"
     }
   ]
 }
