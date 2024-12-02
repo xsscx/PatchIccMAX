@@ -178,16 +178,19 @@ make -j$(nproc) 2>&1 | grep 'error:'
 
 ```
 cmake -S ..\Cmake\ -B d -G "Visual Studio 17 2022"  -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=F:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MDd /I F:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MDd /I F:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:F:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DCMAKE_CXX_FLAGS="-fno-implicit-templates -fvisibility=hidden" -DCMAKE_C_FLAGS="-fno-implicit-templates -fvisibility=hidden" -DCMAKE_BUILD_TYPE=Release -Wno-dev --log-level=DEBUG
+cmake --build d --config Release
 ```
 
 *ninja*
 
 ```
 cmake -S ..\..\Cmake\ -B d -G "Ninja"  -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=F:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MDd /I F:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MDd /I F:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:F:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DCMAKE_CXX_FLAGS="-fno-implicit-templates -fvisibility=hidden" -DCMAKE_C_FLAGS="-fno-implicit-templates -fvisibility=hidden" -DCMAKE_BUILD_TYPE=Release -Wno-dev --log-level=DEBUG
+cmake --build d --config Release
 ```
 
 *vcpkg*
 
 ```
 cmake -S ..\Cmake\ -B build -G "Visual Studio 17 2022" -T "v143"-A x64 -DCMAKE_TOOLCHAIN_FILE=F:/test/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build d --config Release
 ```
