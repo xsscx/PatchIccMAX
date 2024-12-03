@@ -2,7 +2,7 @@
 <DEFECTS>
   <DEFECT>
     <SFA>
-      <FILEPATH>E:\rpppp\PatchIccMAX\IccProfLib\</FILEPATH>
+      <FILEPATH>E:\git-test\PatchIccMAX\IccProfLib\</FILEPATH>
       <FILENAME>IccCmm.h</FILENAME>
       <LINE>225</LINE>
       <COLUMN>2</COLUMN>
@@ -19,7 +19,7 @@
   </DEFECT>
   <DEFECT>
     <SFA>
-      <FILEPATH>E:\rpppp\PatchIccMAX\IccProfLib\</FILEPATH>
+      <FILEPATH>E:\git-test\PatchIccMAX\IccProfLib\</FILEPATH>
       <FILENAME>IccCmm.h</FILENAME>
       <LINE>225</LINE>
       <COLUMN>2</COLUMN>
@@ -1235,12 +1235,29 @@
       <COLUMN>4</COLUMN>
     </SFA>
     <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'wxGIFHandler::m_pixelCount' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <DESCRIPTION>Variable 'wxGIFHandler::m_LZBuf' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
     <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
     <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
     <FUNCLINE>34</FUNCLINE>
     <ADDITIONALINFO>
-      <targetSymbol>wxGIFHandler::m_pixelCount</targetSymbol>
+      <targetSymbol>wxGIFHandler::m_LZBuf</targetSymbol>
+    </ADDITIONALINFO>
+    <PATH></PATH>
+  </DEFECT>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>F:\test\vcpkg\installed\x64-windows\include\wx\</FILEPATH>
+      <FILENAME>imaggif.h</FILENAME>
+      <LINE>34</LINE>
+      <COLUMN>4</COLUMN>
+    </SFA>
+    <DEFECTCODE>26495</DEFECTCODE>
+    <DESCRIPTION>Variable 'wxGIFHandler::m_crntShiftState' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
+    <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
+    <FUNCLINE>34</FUNCLINE>
+    <ADDITIONALINFO>
+      <targetSymbol>wxGIFHandler::m_crntShiftState</targetSymbol>
     </ADDITIONALINFO>
     <PATH></PATH>
   </DEFECT>
@@ -1286,12 +1303,12 @@
       <COLUMN>4</COLUMN>
     </SFA>
     <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'wxGIFHandler::m_maxCode1' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <DESCRIPTION>Variable 'wxGIFHandler::m_runningBits' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
     <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
     <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
     <FUNCLINE>34</FUNCLINE>
     <ADDITIONALINFO>
-      <targetSymbol>wxGIFHandler::m_maxCode1</targetSymbol>
+      <targetSymbol>wxGIFHandler::m_runningBits</targetSymbol>
     </ADDITIONALINFO>
     <PATH></PATH>
   </DEFECT>
@@ -1303,12 +1320,12 @@
       <COLUMN>4</COLUMN>
     </SFA>
     <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'wxGIFHandler::m_runningBits' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <DESCRIPTION>Variable 'wxGIFHandler::m_maxCode1' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
     <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
     <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
     <FUNCLINE>34</FUNCLINE>
     <ADDITIONALINFO>
-      <targetSymbol>wxGIFHandler::m_runningBits</targetSymbol>
+      <targetSymbol>wxGIFHandler::m_maxCode1</targetSymbol>
     </ADDITIONALINFO>
     <PATH></PATH>
   </DEFECT>
@@ -1337,40 +1354,6 @@
       <COLUMN>4</COLUMN>
     </SFA>
     <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'wxGIFHandler::m_EOFCode' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
-    <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
-    <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
-    <FUNCLINE>34</FUNCLINE>
-    <ADDITIONALINFO>
-      <targetSymbol>wxGIFHandler::m_EOFCode</targetSymbol>
-    </ADDITIONALINFO>
-    <PATH></PATH>
-  </DEFECT>
-  <DEFECT>
-    <SFA>
-      <FILEPATH>F:\test\vcpkg\installed\x64-windows\include\wx\</FILEPATH>
-      <FILENAME>imaggif.h</FILENAME>
-      <LINE>34</LINE>
-      <COLUMN>4</COLUMN>
-    </SFA>
-    <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'wxGIFHandler::m_crntShiftState' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
-    <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
-    <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
-    <FUNCLINE>34</FUNCLINE>
-    <ADDITIONALINFO>
-      <targetSymbol>wxGIFHandler::m_crntShiftState</targetSymbol>
-    </ADDITIONALINFO>
-    <PATH></PATH>
-  </DEFECT>
-  <DEFECT>
-    <SFA>
-      <FILEPATH>F:\test\vcpkg\installed\x64-windows\include\wx\</FILEPATH>
-      <FILENAME>imaggif.h</FILENAME>
-      <LINE>34</LINE>
-      <COLUMN>4</COLUMN>
-    </SFA>
-    <DEFECTCODE>26495</DEFECTCODE>
     <DESCRIPTION>Variable 'wxGIFHandler::m_crntCode' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
     <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
     <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
@@ -1388,12 +1371,29 @@
       <COLUMN>4</COLUMN>
     </SFA>
     <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'wxGIFHandler::m_LZBuf' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <DESCRIPTION>Variable 'wxGIFHandler::m_EOFCode' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
     <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
     <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
     <FUNCLINE>34</FUNCLINE>
     <ADDITIONALINFO>
-      <targetSymbol>wxGIFHandler::m_LZBuf</targetSymbol>
+      <targetSymbol>wxGIFHandler::m_EOFCode</targetSymbol>
+    </ADDITIONALINFO>
+    <PATH></PATH>
+  </DEFECT>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>F:\test\vcpkg\installed\x64-windows\include\wx\</FILEPATH>
+      <FILENAME>imaggif.h</FILENAME>
+      <LINE>34</LINE>
+      <COLUMN>4</COLUMN>
+    </SFA>
+    <DEFECTCODE>26495</DEFECTCODE>
+    <DESCRIPTION>Variable 'wxGIFHandler::m_pixelCount' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
+    <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
+    <FUNCLINE>34</FUNCLINE>
+    <ADDITIONALINFO>
+      <targetSymbol>wxGIFHandler::m_pixelCount</targetSymbol>
     </ADDITIONALINFO>
     <PATH></PATH>
   </DEFECT>
@@ -2219,7 +2219,7 @@
   </DEFECT>
   <DEFECT>
     <SFA>
-      <FILEPATH>E:\rpppp\PatchIccMAX\Tools\wxWidget\wxProfileDump\</FILEPATH>
+      <FILEPATH>E:\git-test\PatchIccMAX\Tools\wxWidget\wxProfileDump\</FILEPATH>
       <FILENAME>wxProfileDump.cpp</FILENAME>
       <LINE>118</LINE>
       <COLUMN>0</COLUMN>
