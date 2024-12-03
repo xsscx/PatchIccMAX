@@ -1,10 +1,39 @@
 #!/bin/bash
 ##
-## Copyright (c) 2024 The International Color Consortium. All rights reserved.
+## Copyright (c) 2025 David H Hoyt LLC. All rights reserved.
 ##
-## Written by David Hoyt for ICC color.org & DemoIccMAX Project
-## Date: 24-Nov-2024
+## Written by David Hoyt 
+## Date: 15-MAR-2025 1334 EDT
+#
+# Branch: XNU
+# Intent: PROTOTYPE
+# Production: FALSE
+# Runner: TRUE
+#
+#
+# Updates: Added platform conditional
+#          Fixed globbing
+#
+# Run: /bin/sh -c "$(curl -fsSL /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/xnu/contrib/Build/cmake/build_clang_master_branch.sh)"
+# 
+#  
 ## Build Script using Clang for master branch
+
+## Build Script using Clang for master branch
+
+export CXX=clang++
+export CC=clang
+
+# Default ASAN options
+export ASAN_OPTIONS="alloc_dealloc_mismatch=1:detect_leaks=1:detect_stack_use_after_return=1:strict_string_checks=1:detect_invalid_pointer_pairs=2:halt_on_error=0:verbosity=1"
+
+# Detect if running on macOS (Darwin) and ARM64
+if [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
+    export ASAN_OPTIONS=${ASAN_OPTIONS//detect_leaks=1/detect_leaks=0}
+fi
+
+# Log the ASAN_OPTIONS value
+echo "ASAN_OPTIONS is set to: $ASAN_OPTIONS" >> asan_options.log
 
 # Define log file
 LOGFILE="build_log_$(date +%Y-%m-%d_%H-%M-%S).log"
@@ -75,9 +104,10 @@ print_banner "Step 4: Starting Build using $COMPILER...."
 cd Build/ || { echo "Error: Build directory not found. Exiting."; exit 1; }
 
 print_banner "Step 5: configuring cmake with $COMPILER"
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug \
--DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
--Wno-dev Cmake/ || { echo "Error: cmake configuration failed. Exiting."; exit 1; }
+cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" -DCMAKE_BUILD_TYPE=Debug \
+-DCMAKE_CXX_COMPILER="$COMPILER" -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
+-DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON \
+-Wno-dev Cmake/ || { echo "❌ Error: CMake configuration failed. Exiting."; exit 1; }
 
 print_banner "Step 6: running make (low-noise)"
 make -j$(nproc) >/dev/null 2>&1 || { echo "Error: Build failed. Exiting."; exit 1; }
@@ -89,7 +119,7 @@ print_banner "cd Testing/"
 cd ../Testing || { echo "Error: Testing directory not found. Exiting."; exit 1; }
 
 print_banner "Creating Profiles"
-/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles_cross_check.sh)" || { echo "Error: Profile creation failed. Exiting."; exit 1; }
+/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.sh)" || { echo "Error: Profile creation failed. Exiting."; exit 1; }
 
 print_banner "Build Project and CreateAllProfiles Done!"
 print_elapsed_time
