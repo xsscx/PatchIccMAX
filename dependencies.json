@@ -1,0 +1,49 @@
+{
+  "name": "DemoIccMAX",
+  "version": "1.0.0",
+  "description": "A project for handling ICC profiles and their transformations.",
+  "dependencies": [
+    {
+      "name": "libxml2",
+      "purpose": "Provides XML parsing and serialization for the IccXML2 library and tools.",
+      "usage": "Handles ICC profile data in XML format, enabling efficient transformation and validation.",
+      "installation": {
+        "debian": "sudo apt-get install libxml2 libxml2-dev",
+        "macos": "brew install libxml2"
+      },
+      "documentation": "http://xmlsoft.org/"
+    },
+    {
+      "name": "libtiff",
+      "purpose": "Supports TIFF image manipulation for image processing tools.",
+      "usage": "Processes ICC profiles embedded in TIFF images and extracts color profile metadata.",
+      "installation": {
+        "debian": "sudo apt-get install libtiff5 libtiff-dev",
+        "macos": "brew install libtiff"
+      },
+      "documentation": "http://www.libtiff.org/"
+    },
+    {
+      "name": "wxWidgets",
+      "purpose": "Cross-platform GUI framework for the basic profile viewer.",
+      "usage": "Renders the graphical interface for interacting with ICC profiles.",
+      "installation": {
+        "debian": "sudo apt-get install libwxgtk3.0-gtk3-dev",
+        "macos": "brew install wxwidgets"
+      },
+      "documentation": "https://www.wxwidgets.org/"
+    },
+    {
+      "name": "nlohmann-json",
+      "purpose": "C++ library for JSON parsing and serialization.",
+      "usage": "Handles JSON-based configuration and data interchange, enabling serialization and deserialization of ICC profile metadata.",
+      "installation": {
+        "debian": "sudo apt-get install nlohmann-json3-dev",
+        "macos": "brew install nlohmann-json",
+        "vcpkg": "vcpkg install nlohmann-json"
+      },
+      "alternative_installation": "Alternatively, copy json.hpp directly from the repository into your project.",
+      "documentation": "https://github.com/nlohmann/json"
+    }
+  ]
+}
