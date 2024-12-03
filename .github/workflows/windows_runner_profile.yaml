@@ -1,0 +1,32 @@
+###############################################################
+#
+## Copyright (©) 2024 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 10-DEC-2024 by David Hoyt (©)
+#
+## Intent: Poll the Device and Report
+#
+## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+###############################################################
+
+name: Windows Runner Profile
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Setup vcpkg and clone DemoIccMAX repository
+      run: |
+              iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/windows/refs/heads/main/pwsh/windev_troubleshooter.ps1").Content

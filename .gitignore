@@ -64,3 +64,4 @@ Tools/CmdLine/IccSpecSepToTiff/TiffImg.cpp
 Tools/CmdLine/IccSpecSepToTiff/TiffImg.h
 Tools/CmdLine/IccTiffDump/TiffImg.cpp
 Tools/CmdLine/IccTiffDump/TiffImg.h
+Build/win/MonitorInfo.txt
