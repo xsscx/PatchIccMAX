@@ -248,11 +248,9 @@ Testing/
 Makefile
 cmake_install.cmake
 install_manifest.txt
-compile_commands.json
 CTestTestfile.cmake
 _deps/
 CMakeUserPresets.json
-/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/CodeAnalysisResultManifest.txt
 /Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/wxProfileDump.sbr
 /Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/wxProfileDump_v22.vcxproj.FileListAbsolute.txt
 /Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump.bsc
@@ -262,7 +260,6 @@ CMakeUserPresets.json
 /msbuild.rsp
 /msbuild
 /more
-/Tools/wxWidget/wxProfileDump/vc_msw_x64/wxProfileDump/CodeAnalysisResultManifest.txt
 /signed-files.txt
 /Build/MSVC/packages/Nuget.1.3.3
 /Build/MSVC/packages/Nuget.1.3.3/chefignore
@@ -506,8 +503,13 @@ CMakeUserPresets.json
 /asan.log.9940
 /dependencies.txt
 /redacted-msbuild.binlog
-/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/vc.nativecodeanalysis.all.xml
 /Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/wxProfileDump.res
 /.gitignore
 /.gitignore
 /.gitignore
+/Tools/wxWidget/wxProfileDump/vc_msw_x64/wxProfileDump.exe.lastcodeanalysissucceeded
+/Tools/wxWidget/wxProfileDump/vc_msw_x64/wxProfileDump/wxProfileDump_v22.vcxproj.FileListAbsolute.txt
+/Tools/wxWidget/wxProfileDump/vc_msw_x64/wxProfileDump/wxProfileDump.sbr
+/Tools/wxWidget/wxProfileDump/vc_msw_x64/wxProfileDump.bsc
+/Tools/wxWidget/wxProfileDump/vc_msw_x64/wxProfileDump/CodeAnalysisResultManifest.txt
+/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/CodeAnalysisResultManifest.txt
