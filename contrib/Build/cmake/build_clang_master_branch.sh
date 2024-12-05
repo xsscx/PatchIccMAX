@@ -52,23 +52,8 @@ run_and_log git clone https://github.com/InternationalColorConsortium/DemoIccMAX
 cd DemoIccMAX/ || { echo "Error: Failed to change directory to PatchIccMAX. Exiting."; exit 1; }
 run_and_log echo "Repository cloned and switched to DemoIccMAX directory."
 
-# Step 3: Revert
-print_banner "Step 3: Reverting a bad commit"
-run_and_log echo "Step 3a: Reverting 6ac1cc6"
-run_and_log git revert --no-edit b90ac3933da99179df26351c39d8d9d706ac1cc6 || { echo "Error: Git revert failed. Exiting."; exit 1; }
-run_and_log echo "master branch checked out."
-
 # Step 4: Installing Dependencies, with conflict resolution
 print_banner "Step 4: Installing Dependencies, you will be prompted for the sudo password to continue..."
-
-# Attempt to remove conflicting packages
-echo "Removing potentially conflicting packages..."
-sudo apt-get remove -y libopencl-clang-* python3-clang-* || { echo "Error: Failed to remove conflicting packages."; exit 1; }
-
-# Update and fix any broken packages
-echo "Updating package list and fixing broken packages..."
-sudo apt-get update || { echo "Error: Failed to update packages."; exit 1; }
-sudo apt-get --fix-broken install || { echo "Error: Failed to fix broken packages."; exit 1; }
 
 # Install the necessary dependencies
 echo "Installing necessary dependencies..."
