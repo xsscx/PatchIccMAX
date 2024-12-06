@@ -1,4 +1,3 @@
-message(STATUS "Entering the Testing/ Directory and its CMakeLists.txt...")
 # Set environment variables for library paths
 set(LD_LIBRARY_PATH "${CMAKE_BINARY_DIR}/../IccProfLib:${CMAKE_BINARY_DIR}/../IccXML" CACHE STRING "Library path for ICC tools")
 message(STATUS "LD_LIBRARY_PATH set to: ${LD_LIBRARY_PATH}")
@@ -64,4 +63,3 @@ if (test_result)
 else()
     message(STATUS "Test script executed successfully:\n${test_output}")
 endif()
-message(STATUS "Exiting the Testing/ Directory and its CMakeLists.txt...")
