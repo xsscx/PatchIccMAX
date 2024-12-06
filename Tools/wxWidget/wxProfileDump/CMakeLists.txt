@@ -19,44 +19,44 @@ message(STATUS "## Entering Config for wxProfileDump in Build/Cmake/Tools/wxProf
 
 # Set Source Path
 set(SRC_PATH ../../../..)
-message(STATUS "SRC_PATH resolved as: ${SRC_PATH}")
+message(STATUS "DEBUG 1: SRC_PATH resolved as: ${SRC_PATH}")
 
 # Set Sources
 set(SOURCES ${SRC_PATH}/Tools/wxWidget/wxProfileDump/wxProfileDump.cpp)
-message(STATUS "SOURCES resolved as:")
+message(STATUS "DEBUG 2: SOURCES resolved as:")
 foreach(SOURCE_FILE IN LISTS SOURCES)
     message(STATUS "  ${SOURCE_FILE}")
 endforeach()
 
 # Set Target Name
 set(TARGET_NAME iccDumpProfileGui)
-message(STATUS "TARGET_NAME set as: ${TARGET_NAME}")
+message(STATUS "DEBUG 3: TARGET_NAME set as: ${TARGET_NAME}")
 
 # Configure wxWidgets
 set(wxWidgets_CONFIGURATION mswu)
-message(STATUS "wxWidgets configuration set to: ${wxWidgets_CONFIGURATION}")
+message(STATUS "DEBUG 4: wxWidgets configuration set to: ${wxWidgets_CONFIGURATION}")
 
 # Add Executable
-message(STATUS "Adding executable target: ${TARGET_NAME}")
+message(STATUS "DEBUG 5: Adding executable target: ${TARGET_NAME}")
 add_executable(${TARGET_NAME} ${SOURCES})
-message(STATUS "Executable target ${TARGET_NAME} added with sources:")
+message(STATUS "DEBUG 6: Executable target ${TARGET_NAME} added with sources:")
 
 foreach(SOURCE_FILE IN LISTS SOURCES)
     message(STATUS "  ${SOURCE_FILE}")
 endforeach()
 
 # Link Libraries
-message(STATUS "  Linking libraries for target ${TARGET_NAME}:")
+message(STATUS "DEBUG 7: Linking libraries for target ${TARGET_NAME}:")
 message(STATUS "  ICCProfLib Library: ${TARGET_LIB_ICCPROFLIB}")
 message(STATUS "  wxWidgets Libraries: ${wxWidgets_LIBRARIES}")
 target_link_libraries(${TARGET_NAME} ${TARGET_LIB_ICCPROFLIB} ${wxWidgets_LIBRARIES})
 
 # Install Target
 if(ENABLE_INSTALL_RIM)
-    message(STATUS "Installing target ${TARGET_NAME} to ${CMAKE_INSTALL_BINDIR}")
+    message(STATUS "DEBUG 8: Installing target ${TARGET_NAME} to ${CMAKE_INSTALL_BINDIR}")
     install(TARGETS ${TARGET_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
 else()
-    message(STATUS "Installation of target ${TARGET_NAME} is disabled (ENABLE_INSTALL_RIM is OFF).")
+    message(STATUS "DEBUG 8: Installation of target ${TARGET_NAME} is disabled (ENABLE_INSTALL_RIM is OFF).")
 endif()
 
 message(STATUS "## Exiting Config for wxProfileDump in Build/Cmake/Tools/wxProfileDump/CMakeLists.txt")

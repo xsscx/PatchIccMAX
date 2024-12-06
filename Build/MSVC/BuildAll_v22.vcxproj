@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>All</ProjectName>
+    <ProjectName>RefIccMAX</ProjectName>
     <ProjectGuid>{F70F064E-0377-484E-8F86-BEC03F35F950}</ProjectGuid>
     <RootNamespace>All</RootNamespace>
     <SccLocalPath>.</SccLocalPath>

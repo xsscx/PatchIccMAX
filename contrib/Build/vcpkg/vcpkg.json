@@ -13,15 +13,15 @@
   "overrides": [
     {
       "name": "wxwidgets",
-      "triplets": ["x64-windows", "x64-windows-static"]
+      "version": "3.2.6"
     },
     {
       "name": "libtiff",
-      "triplets": ["x64-windows", "x64-windows-static"]
+      "version": "4.7.0"
     },
     {
       "name": "libxml2",
-      "triplets": ["x64-windows", "x64-windows-static"]
+      "version": "2.11.4"
     }
   ]
 }
