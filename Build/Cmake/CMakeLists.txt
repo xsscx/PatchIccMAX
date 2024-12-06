@@ -1,36 +1,29 @@
+# 
+# Top Level DemoIccMAX Project Configuration in Build/Cmake/CMakeLists.txt
+# Copyright (©) 2024 David H Hoyt LLC | All rights reserved.
+# 
 #
-# Top Level Configuration Build/Cmake/CMakeLists.txt | DemoIccMAX Project
+# Last Updated: 05-DEC-2024 by David Hoyt (©)
 #
-# Last Updated:   2024-11-29
-# Modified by:    David Hoyt
+# Changes: 	Modified Build/Cmake/CMakelists.txt and others
+#           Added to Logging , Debugging, and CI/CD Integration
+#           Adjusted Cross Platform Build Args
+#						
+# TODO: Refactor Debug, Release, Asan 
+#       Collapse 3-tier CMakeLists.txt, Housekeeping
+#       Refactor Base Configs & logging to .mk's 
 #
-# Changes:
-#   - Remove Link of libIccXML2 on libIccProfLib2.2
-#   - Adjusted other Cross-Platform Build Arguments
-#   - General Housekeeping
-#
-# TODO:
-#   - Refactor Platform, Debug, Release, and ASAN Configurations
-#   - Collapse Multi-Tier CMakeLists.txt and General Housekeeping
-#   - Refactor Base Configurations & Logging
-#
-# =================================================================================
 
 cmake_minimum_required(VERSION 3.5.0)
 
 # Include timestamp for logs
+# Start Configuration Message
 string(TIMESTAMP CURRENT_DATETIME "%Y-%m-%d %H:%M:%S")
 message(STATUS "##########################################################################")
-message(STATUS "## Starting to Configure the DemoIccMAX Project at ${CURRENT_DATETIME}")
+message(STATUS "## Starting config in Build/Cmake/CMakeLists.txt at ${CURRENT_DATETIME}")
 message(STATUS "##########################################################################")
-
+# Verbose makefiles for debugging
 set(CMAKE_VERBOSE_MAKEFILE ON)
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configurations to build" FORCE)
-    set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug)
-    set_property(GLOBAL PROPERTY RELEASE_CONFIGURATIONS Release)
-endif()
-
 # Project Configuration
 project(RefIccMAX)
 set(PROJECT_UP_NAME "REFICCMAX")
@@ -44,18 +37,25 @@ message(STATUS "${PROJECT_UP_NAME}_MINOR_VERSION set to 1")
 set(${PROJECT_UP_NAME}_MICRO_VERSION 25)
 message(STATUS "${PROJECT_UP_NAME}_MICRO_VERSION set to 25")
 set(${PROJECT_UP_NAME}_VERSION
-    "${${PROJECT_UP_NAME}_MAJOR_VERSION}.${${PROJECT_UP_NAME}_MINOR_VERSION}.${${PROJECT_UP_NAME}_MICRO_VERSION}"
-)
-message(STATUS "${PROJECT_UP_NAME}_VERSION set to ${${PROJECT_UP_NAME}_VERSION}")
+"${${PROJECT_UP_NAME}_MAJOR_VERSION}.${${PROJECT_UP_NAME}_MINOR_VERSION}.${${PROJECT_UP_NAME}_MICRO_VERSION}")
+message(STATUS "${PROJECT_UP_NAME}_VERSION PROJECT_UP_NAME set to ${${PROJECT_UP_NAME}_VERSION}")
 set(PROJECT_DOWN_NAME "reficcmax")
 set(PACKAGE_NAME "${PROJECT_DOWN_NAME}")
+message(STATUS "${PROJECT_DOWN_NAME} PROJECT_DOWN_NAME Version set to ${${PROJECT_UP_NAME}_VERSION}")
 set(PACKAGE_DESCRIPTION "The RefIccMAX project provides an open source set of libraries and tools that allow for the interaction, manipulation, and application of iccMAX-based color management profiles based on the iccMAX specification http://www.color.org/iccmax.xalter, in addition to legacy ICC profiles defined by earlier ICC specifications.")
-set(${PROJECT_NAME}_VERSION_MAJORMINOR
-    "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}"
-)
+set(${PROJECT_NAME}_VERSION_MAJORMINOR "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}")
+
+# Configure Build Types
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configurations to build" FORCE)
+endif()
+message(STATUS "Build Configurations: ${CMAKE_CONFIGURATION_TYPES}")
 
 # Define the true project root directory
 set(PROJECT_ROOT_DIR ${CMAKE_SOURCE_DIR}/../..)
+message(STATUS "DEBUG: PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
+
+message(STATUS "##########################################################################")
 # Debugging and Host System Details
 message(STATUS "### System Information ###")
 message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
@@ -65,18 +65,26 @@ message(STATUS "System Version: ${CMAKE_SYSTEM_VERSION}")
 message(STATUS "System Processor: ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "Build Host: $ENV{COMPUTERNAME} ($ENV{USERNAME})")
 
-# Environment Information
-message(STATUS "### Environment Information ###")
-# Pretty-print the PATH environment variable with numbered entries
+# Environment Debugging
+message(STATUS "### Environment Details ###")
 if(WIN32)
-    set(PATH_SEPARATOR ";")  # Windows path separator
+    set(PATH_SEPARATOR ";")
 else()
-    set(PATH_SEPARATOR ":")  # Unix-like systems path separator
+    set(PATH_SEPARATOR ":")
 endif()
+string(REPLACE "${PATH_SEPARATOR}" ";" PATH_LIST "$ENV{PATH}")
+list(LENGTH PATH_LIST PATH_LENGTH)
+
+message(STATUS "PATH Environment Variable (${PATH_LENGTH} entries):")
+foreach(INDEX RANGE 0 [expr ${PATH_LENGTH} - 1])
+    list(GET PATH_LIST ${INDEX} PATH_ENTRY)
+    message(STATUS "[${INDEX}] ${PATH_ENTRY}")
+endforeach()
 
 # Split the PATH variable into a list
 string(REPLACE "${PATH_SEPARATOR}" ";" PATH_LIST "$ENV{PATH}")
 list(LENGTH PATH_LIST PATH_LENGTH)
+
 
 # Generate numbered output
 message(STATUS "### PATH Environment Variable ###")
@@ -85,32 +93,79 @@ foreach(INDEX RANGE 0 [expr ${PATH_LENGTH} - 1])
     message(STATUS "[${INDEX}] ${PATH_ENTRY}")
 endforeach()
 
+message(STATUS "### CMAKE_ Details ###")
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 
-# Compiler Information
 message(STATUS "### Compiler Information ###")
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
+message(STATUS "C Compiler Version: ${CMAKE_C_COMPILER_VERSION}")
+message(STATUS "Linker: ${CMAKE_LINKER}")
 
+# Debugging Information
+message(STATUS "### System Information ###")
+message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+message(STATUS "PROJECT_ROOT_DIR: ${PROJECT_SOURCE_DIR}")
+message(STATUS "System Name: ${CMAKE_SYSTEM_NAME}")
+message(STATUS "Processor: ${CMAKE_SYSTEM_PROCESSOR}")
+message(STATUS "Host: $ENV{COMPUTERNAME} ($ENV{USERNAME})")
+message(STATUS "Path Separator: ${CMAKE_PATH_SEPARATOR}")
+
+message(STATUS "## Logging Config ##")
+# Logging Configuration
+message(STATUS "### Logging Setup ###")
+set(LOGGING_ENABLED ON CACHE BOOL "Enable or disable logging")
+if(LOGGING_ENABLED)
+    add_definitions(-DLOGGING_ENABLED=1)
+    message(STATUS "Logging is enabled")
+else()
+    add_definitions(-DLOGGING_ENABLED=0)
+    message(STATUS "Logging is disabled")
+endif()
+
+message(STATUS "## Logging Debug Config ##")
+# Additional Debug Logging
+set(DEBUG_LOGGING ON CACHE BOOL "Enable or disable additional debug logging")
+if(DEBUG_LOGGING)
+    add_definitions(-DDEBUG_LOGGING=1)
+    message(STATUS "Debug logging is enabled")
+else()
+    add_definitions(-DDEBUG_LOGGING=0)
+    message(STATUS "Debug logging is disabled")
+endif()
+
+message(STATUS "##########################################################################")
+message(STATUS "## Platform-Specific Flags ##")
 # Platform-Specific Details
 if(APPLE)
     message(STATUS "### macOS Specific Details ###")
     message(STATUS "macOS SDK Path: ${CMAKE_OSX_SYSROOT}")
-    message(STATUS "Deployment Target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")    
+    message(STATUS "Deployment Target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
 
 if(WIN32)
     message(STATUS "### Windows Specific Details ###")
     message(STATUS "Windows SDK Version: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
-    if(DEFINED ENV{MSBUILD_PATH})
-        message(STATUS "MSBuild Path: $ENV{MSBUILD_PATH}")
+
+    # Check if MSBuild is available in the PATH
+    find_program(MSBUILD_EXECUTABLE NAMES msbuild)
+    if(MSBUILD_EXECUTABLE)
+        message(STATUS "MSBuild found at: ${MSBUILD_EXECUTABLE}")
     else()
-        message(WARNING "MSBuild Path is not defined in environment variables.")
+        message(WARNING "MSBuild not found in PATH. Please verify your Visual Studio installation.")
     endif()
-    message(STATUS "Linker Flags: ${CMAKE_EXE_LINKER_FLAGS}")    
+
+    # Vcpkg toolchain configuration
+    set(CMAKE_TOOLCHAIN_FILE "F:/test/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+    if(EXISTS ${CMAKE_TOOLCHAIN_FILE})
+        message(STATUS "Using Vcpkg toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
+    else()
+        message(WARNING "Vcpkg toolchain file not found. Please verify your Vcpkg installation.")
+    endif()
 endif()
 
 if(UNIX AND NOT APPLE)
@@ -122,9 +177,36 @@ if(UNIX AND NOT APPLE)
     )
     message(STATUS "Linux System Info: ${LINUX_SYSTEM_INFO}")
     message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
-    message(STATUS "Linker Flags: ${CMAKE_EXE_LINKER_FLAGS}")    
+    message(STATUS "Linker Flags: ${CMAKE_EXE_LINKER_FLAGS}")
 endif()
 
+# Cross-Platform Debugging
+message(STATUS "### Cross-Platform Debugging Details ###")
+message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Install Prefix: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "Build Generator: ${CMAKE_GENERATOR}")
+message(STATUS "Build Tool: ${CMAKE_MAKE_PROGRAM}")
+
+# Build Configuration
+message(STATUS "### Build Configuration ###")
+message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
+message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
+message(STATUS "C Flags: ${CMAKE_C_FLAGS}")
+message(STATUS "Build Type & Flags (${CMAKE_BUILD_TYPE}): ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}")
+
+# Feature Configuration
+message(STATUS "### Feature Configuration ###")
+option(ENABLE_TOOLS "Enable tool building" OFF)
+option(ENABLE_TESTS "Enable testing" OFF)
+option(ENABLE_SHARED_LIBS "Build shared libraries" ON)
+option(ENABLE_STATIC_LIBS "Build static libraries" OFF)
+
+message(STATUS "Enable Tools: ${ENABLE_TOOLS}")
+message(STATUS "Enable Tests: ${ENABLE_TESTS}")
+message(STATUS "Enable Shared Libraries: ${ENABLE_SHARED_LIBS}")
+message(STATUS "Enable Static Libraries: ${ENABLE_STATIC_LIBS}")
+
+message(STATUS "##########################################################################")
 # Cross-Platform Debugging
 message(STATUS "### Cross-Platform Debugging Details ###")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
@@ -152,7 +234,6 @@ message(STATUS "### Dependencies ###")
 find_package(LibXml2 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(TIFF REQUIRED)
-
 message(STATUS "LibXml2: ${LIBXML2_LIBRARIES} (found version ${LIBXML2_VERSION})")
 message(STATUS "nlohmann_json: ${nlohmann_json_DIR} (found version ${nlohmann_json_VERSION})")
 message(STATUS "TIFF: ${TIFF_LIBRARIES} (found version ${TIFF_VERSION})")
@@ -169,15 +250,12 @@ message(STATUS "IccProfLib: ${CMAKE_BINARY_DIR}/IccProfLib")
 message(STATUS "IccXML: ${CMAKE_BINARY_DIR}/IccXML")
 message(STATUS "/usr/local/lib")
 
-# Link Flags
-message(STATUS "Linker Flags (${CMAKE_BUILD_TYPE}): ${CMAKE_EXE_LINKER_FLAGS_${CMAKE_BUILD_TYPE}}")
-
 # Library paths for debugging
-message(STATUS "### Library Paths ###")
 message(STATUS "Library Path for IccProfLib: ${PROJECT_ROOT_DIR}/Build/IccProfLib")
 message(STATUS "Library Path for IccXML: ${PROJECT_ROOT_DIR}/Build/IccXML")
 
 # CI/CD Integration Information
+message(STATUS "##########################################################################")
 if(DEFINED ENV{CI})
     message(STATUS "### CI/CD Details ###")
     message(STATUS "CI/CD Detected: $ENV{CI}")
@@ -190,9 +268,10 @@ else()
     message(STATUS "CI/CD Integration: Not Detected")    
 endif()
 
-message(STATUS "Continuing with configuration.....")
-message(STATUS "Starting GNUInstallDirs in ${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "##########################################################################")
+message(STATUS "## Starting GNUInstallDirs ##")
 include(GNUInstallDirs)
+
 option(ENABLE_TESTS "Build tests (requires static libs)" ON)
 option(ENABLE_TOOLS "Build tools" ON)
 option(ENABLE_SHARED_LIBS "Build dynamic link libs" ON)
@@ -211,74 +290,91 @@ ELSE()
   SET(ENABLE_SHARED_LIBS OFF)
 ENDIF()
 
+message(STATUS "##########################################################################")
 message(STATUS "Enforcing Build Type in ${CMAKE_CURRENT_SOURCE_DIR}")
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 endif()
 
+message(STATUS "##########################################################################")
 message(STATUS "Setting Compiler Flags in ${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -fsanitize=address -fno-omit-frame-pointer -Wall -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 
-# Architecture determination
+# Platform-Specific Details
 if(APPLE)
-  message(STATUS "Detected platform: macOS")
-  execute_process(
-    COMMAND uname -m
-    COMMAND tr -d '\n'
-    OUTPUT_VARIABLE OSX_ARCHITECTURE
-  )
-  if("${OSX_ARCHITECTURE}" STREQUAL "arm64")
-    message(STATUS "Configuring build for ARM64 architecture.")
-    set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "macOS architecture")
-    add_compile_definitions(ARM64)
-  elseif("${OSX_ARCHITECTURE}" STREQUAL "x86_64")
-    message(STATUS "Configuring build for X86_64 architecture.")
-    set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "macOS architecture")
-  else()
-    message(FATAL_ERROR "Unsupported macOS architecture: ${OSX_ARCHITECTURE}")
-  endif()
-  message(STATUS "Final macOS Architecture: ${CMAKE_OSX_ARCHITECTURES}")
-elseif(UNIX AND NOT APPLE)
-  message(STATUS "Detected platform: Linux")
-  add_compile_options(-std=c++17 -Wall -Wextra -Wpedantic)
-  message(STATUS "Linux build: Compiler flags set to C++17 with standard warnings.")
-elseif(WIN32)
-  message(STATUS "Detected platform: Windows")
-  add_compile_options(/std:c++17 /D_WINDOWS /EHsc)
-  message(STATUS "Windows build: Compiler flags set to C++17 with MSVC-specific flags.")
-else()
-  message(FATAL_ERROR "Unsupported platform!")
+    message(STATUS "### macOS Specific Details ###")
+    message(STATUS "macOS SDK Path: ${CMAKE_OSX_SYSROOT}")
+    message(STATUS "Deployment Target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
 
-message(STATUS "Debug Configuration")
-# Debug configuration
-if(CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
-  message("-- Info: Debug build \"${CMAKE_BUILD_TYPE}\"")
-  set(DEBUG 1)
-  add_definitions(-D_DEBUG)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+if(WIN32)
+    message(STATUS "### Windows Specific Details ###")
+    message(STATUS "Windows SDK Version: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+
+    # Safely retrieve the ProgramFiles(x86) environment variable
+    execute_process(
+        COMMAND cmd /c "echo %ProgramFiles(x86)%"
+        OUTPUT_VARIABLE PROGRAMFILES_X86
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    if(PROGRAMFILES_X86 AND NOT PROGRAMFILES_X86 MATCHES "^$")
+        message(STATUS "ProgramFiles(x86): ${PROGRAMFILES_X86}")
+    else()
+        message(WARNING "ProgramFiles(x86) is not defined or could not be retrieved.")
+        set(PROGRAMFILES_X86 "")
+    endif()
+
+    # Define potential MSBuild paths
+    set(MSBUILD_PATHS
+        "${PROGRAMFILES_X86}/Microsoft Visual Studio/2022/Enterprise/MSBuild/Current/Bin"
+        "${PROGRAMFILES_X86}/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin"
+        "${PROGRAMFILES_X86}/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin"
+    )
+
+    # Find MSBuild
+    find_program(MSBUILD_EXECUTABLE NAMES MSBuild PATHS ${MSBUILD_PATHS} NO_DEFAULT_PATH)
+    if(MSBUILD_EXECUTABLE)
+        message(STATUS "MSBuild found at: ${MSBUILD_EXECUTABLE}")
+    else()
+        message(WARNING "MSBuild not found. Please verify your Visual Studio installation.")
+    endif()
 endif()
 
-message(STATUS "Sanitizer Configuration")
-# Sanitizer support (Optional, for Linux/Unix-like systems)
-if(UNIX AND NOT APPLE AND CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined -fno-omit-frame-pointer")
-  message(STATUS "Sanitizers enabled for Debug build.")
+# Platform-Specific Flags
+if(MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd /Zi /Ob0 /Od /RTC1")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD /O2 /Ob2 /DNDEBUG")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    message(STATUS "Configuring MSVC runtime and flags")
+elseif(UNIX)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -Wall -Wextra -DDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
+    message(STATUS "Configuring GCC/Clang runtime and flags")
+endif()
+
+if(UNIX AND NOT APPLE)
+    message(STATUS "### Linux/Unix Specific Details ###")
+    execute_process(
+        COMMAND uname -a
+        OUTPUT_VARIABLE LINUX_SYSTEM_INFO
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    message(STATUS "Linux System Info: ${LINUX_SYSTEM_INFO}")
+    message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
+    message(STATUS "Linker Flags: ${CMAKE_EXE_LINKER_FLAGS}")
 endif()
 
 #
 # Target installation folders
 #
-message(STATUS "Setting Target installation folders in ${CMAKE_CURRENT_SOURCE_DIR}")
 
 SET (TARGET_INCLUDE_FOLDER
     ${PROJECT_NAME}
     CACHE STRING
     "Optional folder below system include folder to install include files."
     )
-
-message(STATUS "Setting Compiler Flags in ${CMAKE_CURRENT_SOURCE_DIR}")
 
 IF(NOT CMAKE_MODULES_INSTALL_DIR)
   SET (CMAKE_MODULES_INSTALL_DIR
@@ -288,7 +384,6 @@ IF(NOT CMAKE_MODULES_INSTALL_DIR)
     )
 ENDIF(NOT CMAKE_MODULES_INSTALL_DIR)
 
-message(STATUS "Setting TARGET_PKGCONFIG_FOLDER in ${CMAKE_CURRENT_SOURCE_DIR}")
 
 SET (TARGET_PKGCONFIG_FOLDER
     "pkgconfig"
@@ -302,109 +397,55 @@ SET (TARGET_DOCUMENTATION_FOLDER
     "The folder below system prefix where to install api documentation files."
     )
 
-message(STATUS "Setting Additional CMake modules for loading libraries in ${CMAKE_CURRENT_SOURCE_DIR}")
+# additional cmake modules for loading libraries
 SET (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/Modules/")
-message(STATUS "CMAKE_MODULE_PATH set to: ${CMAKE_MODULE_PATH}")
 
-# Set top-level source directory
+
 SET( TOP_SOURCE_DIR ../.. )
-message(STATUS "TOP_SOURCE_DIR set to: ${TOP_SOURCE_DIR}")
-message(STATUS "Set TOP_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}")
-
-# Include directories for IccProfLib
 INCLUDE_DIRECTORIES ( ${TOP_SOURCE_DIR}/IccProfLib/ )
-message(STATUS "INCLUDE_DIRECTORIES set to: ${TOP_SOURCE_DIR}/IccProfLib/")
-message(STATUS "INCLUDE_DIRECTORIES set to: ${CMAKE_CURRENT_SOURCE_DIR}")
-message(STATUS "CMAKE_CURRENT_SOURCE_DIR directories set to: ${CMAKE_CURRENT_SOURCE_DIR}/IccProfLib/")
 
-
-# Cross-Platform Detection of `ar` Tool
-if(UNIX AND NOT APPLE)  # Check for Unix-like systems excluding macOS
-    find_program(CMAKE_AR_TMP NAMES ar)
-    if(CMAKE_AR_TMP)
-        message(STATUS "Cross-Platform Detection of `ar` Tool found at: ${CMAKE_AR_TMP}")
-    else()
-        message(WARNING "ar not found on the system! Ensure it is installed for static library creation.")
-    endif()
-elseif(APPLE)  # macOS-specific handling
-    message(STATUS "Skipping 'ar' detection: macOS uses libtool instead.")
-elseif(WIN32)  # Windows-specific handling
-    message(STATUS "Skipping 'ar' detection: Not applicable on Windows.")
-else()
-    message(WARNING "Unsupported platform: 'ar' detection not configured.")
-endif()
+# external dependencies
+FIND_PROGRAM(CMAKE_AR_TMP NAMES ar)
 
 #
 # Core library
 #
-# Initial configuration logging
-message(STATUS "Starting Library Configuration for IccProfLib...")
-message(STATUS "TOP_SOURCE_DIR set to: ${TOP_SOURCE_DIR}")
-message(STATUS "CMAKE_CURRENT_SOURCE_DIR set to: ${CMAKE_CURRENT_SOURCE_DIR}")
+ message(STATUS "Adding subdirectory for IccProfLib.")
+ADD_SUBDIRECTORY( IccProfLib )
+SET( TARGET_LIB_ICCPROFLIB ${TARGET_LIB} )
 
-# Adding subdirectory and handling potential errors
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/IccProfLib")
-    message(STATUS "Found subdirectory: ${CMAKE_CURRENT_SOURCE_DIR}/IccProfLib. Adding...")
-    ADD_SUBDIRECTORY(IccProfLib)
-    if(TARGET ${TARGET_LIB})
-        SET(TARGET_LIB_ICCPROFLIB ${TARGET_LIB})
-        message(STATUS "TARGET_LIB_ICCPROFLIB successfully set to: ${TARGET_LIB_ICCPROFLIB}")
-    else()
-        message(WARNING "Failed to set TARGET_LIB_ICCPROFLIB. Target ${TARGET_LIB} not found.")
-    endif()
-else()
-    message(FATAL_ERROR "Error: Subdirectory ${CMAKE_CURRENT_SOURCE_DIR}/IccProfLib does not exist.")
-endif()
-message(STATUS "Library Configuration for IccProfLib completed.")
-
-message(STATUS "Configure external dependency for LibXML2")
 ## external dependency
 IF(ENABLE_ICCXML)
-IF(USE_SYSTEM_LIBXML2)
-    MESSAGE(STATUS "USE_SYSTEM_LIBXML2 is enabled. Attempting to find the system LibXML2 package...")
+  IF(USE_SYSTEM_LIBXML2)
     FIND_PACKAGE(LibXML2 REQUIRED)
-    MESSAGE(STATUS "System LibXML2 package successfully located.")
-ELSE()
-    MESSAGE(STATUS "USE_SYSTEM_LIBXML2 is disabled. Attempting to find LibXML2 without requirement...")
+  ELSE()
     FIND_PACKAGE(LibXML2)
-ENDIF()
-
-IF(LIBXML2_FOUND)
-    MESSAGE(STATUS "LibXML2 found. Configuring include and link directories...")
-    INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-    MESSAGE(STATUS "Include directories set to: ${LIBXML2_INCLUDE_DIR}")
-    LINK_DIRECTORIES(${LIBXML2_LIBRARY_DIRS})
-    MESSAGE(STATUS "Link directories set to: ${LIBXML2_LIBRARY_DIRS}")
-    SET(HAVE_LIBXML2 1)
-    MESSAGE(STATUS "HAVE_LIBXML2 set to 1.")
-    MESSAGE(STATUS "LibXML2 configuration completed successfully.")
-
-ELSE(LIBXML2_FOUND)
-    MESSAGE(WARNING "LibXML2 not found. Checking CMake version for fallback configuration...")
+  ENDIF()
+  IF(LIBXML2_FOUND)
+    INCLUDE_DIRECTORIES( ${LIBXML2_INCLUDE_DIR} )
+    LINK_DIRECTORIES( ${LIBXML2_LIBRARY_DIRS} )
+    SET( HAVE_LIBXML2 1 )
+  ELSE( LIBXML2_FOUND )
     IF(CMAKE_VERSION VERSION_GREATER 2.8.0)
-        MESSAGE(STATUS "CMake version supports fallback. Setting up fallback LibXML2 configuration...")
-        SET(HAVE_LIBXML2 TRUE)
-        MESSAGE(STATUS "HAVE_LIBXML2 set to TRUE for fallback.")
-        INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/IccXML/libxml2)
-        MESSAGE(STATUS "Include directories set to: ${CMAKE_CURRENT_SOURCE_DIR}/IccXML/libxml2")
-        LINK_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/IccXML/libxml2)
-        MESSAGE(STATUS "Link directories set to: ${CMAKE_CURRENT_BINARY_DIR}/IccXML/libxml2")
-        ADD_SUBDIRECTORY(IccXML/libxml2)
-        MESSAGE(STATUS "Added subdirectory: ${CMAKE_CURRENT_SOURCE_DIR}/IccXML/libxml2")
-        SET(LIBXML2_LIBRARIES xml2-static)
-        MESSAGE(STATUS "LIBXML2_LIBRARIES set to: xml2-static")
- ELSE()
-        MESSAGE(WARNING "CMake version does not support fallback. LibXML2 setup skipped.")
+      SET( HAVE_LIBXML2 TRUE  )
+      INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/IccXML/libxml2 )
+      LINK_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/IccXML/libxml2 )
+      ADD_SUBDIRECTORY( IccXML/libxml2 )
+      SET( LIBXML2_LIBRARIES xml2-static )
     ENDIF()
-ENDIF()
+  ENDIF(LIBXML2_FOUND)
 
   #
   # XML library
   #
+  message(STATUS "Adding subdirectory for IccXML.")
   ADD_SUBDIRECTORY( IccXML )
   SET( TARGET_LIB_ICCXML ${TARGET_LIB} )
   INCLUDE_DIRECTORIES ( ${TOP_SOURCE_DIR}/IccXML/IccLibXML/ )
 ENDIF()
+
+message(STATUS "LibXml2 Library: ${LIBXML2_LIBRARY}")
+message(STATUS "LibXml2 Include Directory: ${LIBXML2_INCLUDE_DIR}")
 
 # Ensure nlohmann_json is found
 find_package(nlohmann_json REQUIRED)
@@ -448,9 +489,17 @@ ENDIF()
   ENDIF()
 
   # Add remaining tools
+  message(STATUS "Adding Subdirectory IccDumpProfile.")
   ADD_SUBDIRECTORY(Tools/IccDumpProfile)
+  message(STATUS "Adding Subdirectory IccDumpRoundTrip.")
   ADD_SUBDIRECTORY(Tools/IccRoundTrip)
-
+  message(STATUS "Adding Subdirectory IccFromCube.")
+  ADD_SUBDIRECTORY(Tools/IccFromCube)
+  message(STATUS "Adding Subdirectory IccV5DspObsToV4Dsp.")
+  ADD_SUBDIRECTORY(Tools/IccV5DspObsToV4Dsp)
+  message(STATUS "Adding Subdirectory IccApplyToLink.")
+  ADD_SUBDIRECTORY(Tools/IccApplyToLink)
+    
   # Check for TIFF library
   find_package(TIFF REQUIRED)
   if (TIFF_FOUND)
@@ -459,14 +508,22 @@ ENDIF()
     
     # Add TIFF-dependent tools
 #    ADD_SUBDIRECTORY(Tools/IccApplyProfiles)
+    message(STATUS "Adding subdirectory IccSpecSepToTiff.")
     ADD_SUBDIRECTORY(Tools/IccSpecSepToTiff)
+    message(STATUS "Adding Subdirectory IccTiffDump.")
     ADD_SUBDIRECTORY(Tools/IccTiffDump)
   else()
     message(FATAL_ERROR "TIFF library not found. Please install libtiff-dev.")
   endif()
 
+message(STATUS "TIFF Library: ${TIFF_LIBRARY}")
+message(STATUS "TIFF Include Directory: ${TIFF_INCLUDE_DIR}")
+message(STATUS "nlohmann_json Directory: ${nlohmann_json_DIR}")
+
   # Add XML-related tools
+  message(STATUS "Adding Subdirectory IccFromXml.")
   ADD_SUBDIRECTORY(Tools/IccFromXml)
+  message(STATUS "Adding Subdirectory IccToXml.")
   ADD_SUBDIRECTORY(Tools/IccToXml)
 
   # Configure wxWidgets
@@ -533,13 +590,16 @@ ADD_CUSTOM_TARGET( dist-bin2
     COMMAND mkdir -p ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/IccApplyNamedCmm ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccApplyProfiles ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
+    COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccApplyToLink ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccDumpProfile ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccDumpProfileGui ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/ || echo ""
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccFromXML ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
+    COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccFromCube ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccToXml ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccRoundTrip ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccSpecSepToTiff ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccTiffDump ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
+    COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccV5DspObsToV4Dsp ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/CreateAllProfiles.sh ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/RunTests.sh ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND echo tar cf - ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/ --owner user:1000 --group group:500 | gzip -9 > ../${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}.tar.gz
@@ -552,6 +612,7 @@ ADD_CUSTOM_TARGET( dist-bin2
 #
 # Misc.
 #
+
 #cmake settings for use by find_package
 CONFIGURE_FILE (
                 "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in"
@@ -566,27 +627,6 @@ IF(ENABLE_INSTALL_RIM)
         )
 ENDIF(ENABLE_INSTALL_RIM)
 
-# Summary
-message(STATUS "ARCHIVE_OUTPUT_DIRECTORY: ${ARCHIVE_OUTPUT_DIRECTORY}")
-message(STATUS "LIBRARY_OUTPUT_DIRECTORY: ${LIBRARY_OUTPUT_DIRECTORY}")
-message(STATUS "RUNTIME_OUTPUT_DIRECTORY: ${RUNTIME_OUTPUT_DIRECTORY}")
-message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
-message(STATUS "CMAKE_CONFIGURATION_TYPES: ${CMAKE_CONFIGURATION_TYPES}")
-message(STATUS "Propagated TARGET_LIB: ${TARGET_LIB} to parent scope")
-message(STATUS "ARCHIVE_OUTPUT_DIRECTORY: ${CMAKE_BINARY_DIR}/lib/Release")
-message(STATUS "RUNTIME_OUTPUT_DIRECTORY: ${CMAKE_BINARY_DIR}/bin/Release")
-message(STATUS "Set ARCHIVE_OUTPUT_DIRECTORY: ${ARCHIVE_OUTPUT_DIRECTORY}")
-message(STATUS "Set LIBRARY_OUTPUT_DIRECTORY: ${LIBRARY_OUTPUT_DIRECTORY}")
-message(STATUS "Set RUNTIME_OUTPUT_DIRECTORY: ${RUNTIME_OUTPUT_DIRECTORY}")
-message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
-message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
-message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
-message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
-message(STATUS "Configured source files for ${TARGET_NAME}: ${SOURCES}")
-message(STATUS "Resolved Final ARCHIVE_OUTPUT_DIRECTORY: ${ARCHIVE_OUTPUT_DIRECTORY}")
-message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
-message(STATUS "ARCHIVE_OUTPUT_DIRECTORY: ${ARCHIVE_OUTPUT_DIRECTORY}")
-message(STATUS "SRC_PATH: ${SRC_PATH}")
-message(STATUS "## Configuration complete for ${TARGET_NAME} at ${CURRENT_DATETIME}")
-# SET( ENV{LD_LIBRARY_PATH} "${CMAKE_BINARY_DIR}/../IccProfLib:${CMAKE_BINARY_DIR}/../IccXML" )
-MESSAGE(STATUS "++++++++++++++++++++++ END MAIN CONFIGURATION FILE +++++++++++++++++++++++")
+message(STATUS "--------------------------------------------------------------------------")
+message(STATUS "## Exiting config in Build/Cmake/CMakeLists.txt at ${CURRENT_DATETIME}")
+message(STATUS "--------------------------------------------------------------------------")
