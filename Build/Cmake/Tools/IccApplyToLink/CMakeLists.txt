@@ -1,6 +1,6 @@
 #
-# IccDumpProfile in Project_Root/Build/Cmake/Tools/IccDumpProfile/CMakeLists.txt | DemoIccMAX Project
-# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+# IccApplyToLink in Project_Root/Build/Cmake/Tools/IccApplyToLink/CMakeLists.txt | DemoIccMAX Project
+# Copyright (Â©) 2024 The International Color Consortium. All rights reserved.
 #
 # Last Updated: 02-DEC-2024 by David Hoyt
 #
@@ -9,44 +9,49 @@
 #          Improved debug output for cross-platform support
 #
 
-# Log the entry into the CMake file
-    message(STATUS "#############################################################################################")
-		message(STATUS "Entering IccDumpProfile in Project_Root/Build/Cmake/Tools/IccDumpProfile/CMakeLists.txt .....")
+message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+message(STATUS "Entering IccApplyToLink in Project_Root/Build/Cmake/Tools/IccApplyToLink/CMakeLists.txt .....")
 
 # Resolve the project root directory using CMAKE_SOURCE_DIR
 get_filename_component(PROJECT_ROOT_DIR "${CMAKE_SOURCE_DIR}/../.." ABSOLUTE)
 message(STATUS "PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
+
+# Log the CMAKE_SOURCE_DIR for debugging
 message(STATUS "CMAKE_SOURCE_DIR resolved as: ${CMAKE_SOURCE_DIR}")
 
 # Avoid re-defining the target if it already exists
-if (TARGET IccDumpProfile)
-    message(WARNING "Target 'IccDumpProfile' is already defined. Skipping target creation.")
+if (TARGET iccApplyToLink)
+    message(WARNING "Target 'iccApplyToLink' is already defined. Skipping target creation.")
     return()
 endif()
 
-message(STATUS "Defining target 'IccDumpProfile'...")
+message(STATUS "Defining target 'iccApplyToLink'...")
 
 # Define source path and file
-set(SRC_PATH "${PROJECT_ROOT_DIR}/Tools/CmdLine/IccDumpProfile")
-set(SOURCES "${SRC_PATH}/IccDumpProfile.cpp")
+set(SRC_PATH "${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyToLink")
+message(STATUS "SRC_PATH resolved as: ${SRC_PATH}")
 
+# Define source file explicitly
+set(SOURCES "${SRC_PATH}/IccApplyToLink.cpp")
+message(STATUS "Resolved source file path: ${SOURCES}")
+
+# Verify the source file exists
 if (NOT EXISTS "${SOURCES}")
-    message(FATAL_ERROR "Source file not found at: ${SOURCES}. Verify the file exists.")
+    message(FATAL_ERROR "DEBUG 5: Source file not found: ${SOURCES}. Verify the file exists and the path is correct.")
 endif()
-message(STATUS "Source file resolved as: ${SOURCES}")
+message(STATUS "Source file found at: ${SOURCES}")
 
 # Add the executable target
-set(TARGET_NAME "IccDumpProfile")
+set(TARGET_NAME "iccApplyToLink")
 add_executable(${TARGET_NAME} ${SOURCES})
 message(STATUS "Added executable target: ${TARGET_NAME}")
 
-# Include directories
+# Add include directories
 target_include_directories(${TARGET_NAME} PRIVATE
     "${PROJECT_ROOT_DIR}/IccProfLib"
 )
-message(STATUS "Added include directories for ${TARGET_NAME}")
 
-# Compiler options
+# Compiler options for Release and Debug configurations
 target_compile_options(${TARGET_NAME} PRIVATE
     /MP                           # Multi-processor compilation
     /GS                           # Enable security checks
@@ -63,11 +68,11 @@ target_compile_options(${TARGET_NAME} PRIVATE
     /MT                           # Use static runtime library
     /FC                           # Display full path in diagnostics
     /diagnostics:column           # Enable column-based diagnostics
-    $<$<CONFIG:Release>:/O2 /Ob1> # Optimization for Release builds
+    $<$<CONFIG:Release>:/O2 /Ob1 /GL /Oi>  # Optimization for Release
+    $<$<CONFIG:Debug>:/Od>                # Disable optimization for Debug
 )
-message(STATUS "Compiler options set for ${TARGET_NAME}")
 
-# Linker options
+# Define linker options
 target_link_options(${TARGET_NAME} PRIVATE
     /SUBSYSTEM:CONSOLE            # Console application
     /DYNAMICBASE:NO               # Disable ASLR
@@ -77,13 +82,12 @@ target_link_options(${TARGET_NAME} PRIVATE
     /NOLOGO                       # Suppress linker logo
     /MANIFEST                     # Enable manifest generation
     /MANIFESTUAC:"level='asInvoker' uiAccess='false'" # User access control
+    /LTCGOUT:"${CMAKE_BINARY_DIR}/Release/${TARGET_NAME}.iobj" # LTCG intermediate output
 )
-message(STATUS "Linker options set for ${TARGET_NAME}")
 
-# Link directories and required libraries
+# Link to required libraries
 set(ICCPROFLIB_DIR "${PROJECT_ROOT_DIR}/Build/win/t/IccProfLib/Release")
 target_link_directories(${TARGET_NAME} PRIVATE "${ICCPROFLIB_DIR}")
-
 target_link_libraries(${TARGET_NAME} PRIVATE
     IccProfLib2                 # The main library
     kernel32.lib user32.lib gdi32.lib
@@ -91,23 +95,20 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     shell32.lib ole32.lib oleaut32.lib
     uuid.lib odbc32.lib odbccp32.lib
 )
-message(STATUS "Linked libraries for ${TARGET_NAME}")
 
 # Set output directories
 set_target_properties(${TARGET_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_RELEASE "${PROJECT_ROOT_DIR}/Testing/Release"
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${PROJECT_ROOT_DIR}/Testing/Debug"
 )
-message(STATUS "Output directories set for ${TARGET_NAME}")
 
 # Post-build command to copy the executable to the Testing directory
 add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "$<TARGET_FILE:${TARGET_NAME}>"
-        "${PROJECT_ROOT_DIR}/Testing/$<IF:$<CONFIG:Debug>,IccDumpProfile_d.exe,IccDumpProfile.exe>"
+        "${PROJECT_ROOT_DIR}/Testing/$<IF:$<CONFIG:Debug>,iccApplyToLink_d.exe,iccApplyToLink.exe>"
     COMMENT "Copying build artifact (exe) to Testing directory..."
 )
-message(STATUS "Added post-build step for ${TARGET_NAME}")
 
 # Installation setup
 if (ENABLE_INSTALL_RIM)
@@ -122,12 +123,5 @@ endif()
 message(STATUS "CMAKE_SOURCE_DIR resolved as: ${CMAKE_SOURCE_DIR}")
 message(STATUS "PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
 
-
-message(STATUS "Exiting IccDumpProfile in Project_Root/Build/Cmake/Tools/IccDumpProfile/CMakeLists.txt")
-message(STATUS "######################################################################################")
-
-
-
-
-
-
+message(STATUS "Exiting IccApplyToLink in Project_Root/Build/Cmake/Tools/IccApplyToLink/CMakeLists.txt ......")
+message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")

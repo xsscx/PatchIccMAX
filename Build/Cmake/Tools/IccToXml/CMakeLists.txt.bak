@@ -20,7 +20,7 @@ message(STATUS "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Resolve project root directory
 get_filename_component(PROJECT_ROOT_DIR "${CMAKE_SOURCE_DIR}/../.." ABSOLUTE)
-message(STATUS "PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
+message(STATUS "DEBUG 1: PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
 
 # Define source path and file
 set(SRC_PATH "${PROJECT_ROOT_DIR}/IccXML/CmdLine/IccToXml")
@@ -28,12 +28,12 @@ set(SOURCES "${SRC_PATH}/IccToXml.cpp")
 if (NOT EXISTS "${SOURCES}")
     message(FATAL_ERROR "DEBUG: Source file not found at: ${SOURCES}. Verify the file exists.")
 endif()
-message(STATUS "Source file resolved as: ${SOURCES}")
+message(STATUS "DEBUG 2: Source file resolved as: ${SOURCES}")
 
 # Add executable target
 set(TARGET_NAME "IccToXml")
 add_executable(${TARGET_NAME} ${SOURCES})
-message(STATUS "Added executable target: ${TARGET_NAME}")
+message(STATUS "DEBUG 3: Added executable target: ${TARGET_NAME}")
 
 # Add include directories
 target_include_directories(${TARGET_NAME} PRIVATE
@@ -42,7 +42,7 @@ target_include_directories(${TARGET_NAME} PRIVATE
     "F:/test/vcpkg/installed/x64-windows/include/libxml2"
     "F:/test/vcpkg/installed/x64-windows/include"
 )
-message(STATUS "Include directories added for ${TARGET_NAME}")
+message(STATUS "DEBUG 4: Include directories added for ${TARGET_NAME}")
 
 # Add linker directories
 set(ICCPROFLIB_DIR "${PROJECT_ROOT_DIR}/Build/win/t/IccProfLib/Release")
@@ -53,7 +53,7 @@ target_link_directories(${TARGET_NAME} PRIVATE
     "${IccXML_LIB_DIR}"
     "${LIBXML2_DIR}"
 )
-message(STATUS "Linker directories added for ${TARGET_NAME}")
+message(STATUS "DEBUG 5: Linker directories added for ${TARGET_NAME}")
 
 # Link required libraries
 target_link_libraries(${TARGET_NAME} PRIVATE
@@ -65,14 +65,14 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     shell32.lib ole32.lib oleaut32.lib
     uuid.lib odbc32.lib odbccp32.lib
 )
-message(STATUS "Libraries linked for ${TARGET_NAME}")
+message(STATUS "DEBUG 6: Libraries linked for ${TARGET_NAME}")
 
 # Set output directories
 set_target_properties(${TARGET_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_RELEASE "${PROJECT_ROOT_DIR}/Testing/Release"
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${PROJECT_ROOT_DIR}/Testing/Debug"
 )
-message(STATUS "Output directories set for ${TARGET_NAME}")
+message(STATUS "DEBUG 7: Output directories set for ${TARGET_NAME}")
 
 # Add post-build step
 add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
@@ -86,15 +86,15 @@ message(STATUS "DEBUG 9: Added post-build step for ${TARGET_NAME}")
 
 
 
-message(STATUS "PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
-message(STATUS "CMAKE_SOURCE_DIR resolved as: ${CMAKE_SOURCE_DIR}")
-message(STATUS "SRC_PATH resolved as: ${SRC_PATH}")
-message(STATUS "Resolved source file path: ${SOURCES}")
-message(STATUS "Added executable target: ${TARGET_NAME}")
-message(STATUS "Added linker options for library path.")
-message(STATUS "Using explicit absolute path for ICCPROFLIB_PATH: ${ICCPROFLIB_PATH}")
-message(STATUS "Added linker options for library path: ${PROJECT_ROOT_DIR}/Build/win/t/IccProfLib/Release")
-message(STATUS "Using explicit absolute path for IccXML_LIB_DIR: ${PROJECT_ROOT_DIR}/Build/win/t/IccXML/Release")
+message(STATUS "DEBUG: PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
+message(STATUS "DEBUG: CMAKE_SOURCE_DIR resolved as: ${CMAKE_SOURCE_DIR}")
+message(STATUS "DEBUG: SRC_PATH resolved as: ${SRC_PATH}")
+message(STATUS "DEBUG: Resolved source file path: ${SOURCES}")
+message(STATUS "DEBUG: Added executable target: ${TARGET_NAME}")
+message(STATUS "DEBUG: Added linker options for library path.")
+message(STATUS "DEBUG: Using explicit absolute path for ICCPROFLIB_PATH: ${ICCPROFLIB_PATH}")
+message(STATUS "DEBUG: Added linker options for library path: ${PROJECT_ROOT_DIR}/Build/win/t/IccProfLib/Release")
+message(STATUS "DEBUG: Using explicit absolute path for IccXML_LIB_DIR: ${PROJECT_ROOT_DIR}/Build/win/t/IccXML/Release")
 message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 message(STATUS "Exiting IccToXml in Project_Root/Build/Cmake/Tools/IccToXml/CMakeLists.txt ..............")
 message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
