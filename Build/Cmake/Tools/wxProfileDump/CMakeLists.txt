@@ -1,39 +1,63 @@
-# Set up source path and target name
-SET( SRC_PATH ../../../.. )
-SET( SOURCES  ${SRC_PATH}/Tools/wxWidget/wxProfileDump/wxProfileDump.cpp )
-SET( TARGET_NAME iccDumpProfileGui )
+# 
+# Configuration for wxProfileDump in Build/Cmake/Tools/wxProfileDump/CMakeLists.txt
+# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+# 
+#
+# Last Updated: 05-DEC-2024 by David Hoyt
+#
+# Changes: 	Modified Build/Cmake/CMakelists.txt and others
+#           Added to Logging , Debugging, and CI/CD Integration
+#           Adjusted Cross Platform Build Args
+#						
+# TODO: Refactor Debug, Release, Asan 
+#       Collapse 3-tier CMakeLists.txt, Housekeeping
+#       Refactor Base Configs & logging to .mk's 
+#
 
-# Set the wxWidgets configuration
-SET(wxWidgets_CONFIGURATION mswu)
+message(STATUS "######################################################################################")
+message(STATUS "## Entering Config for wxProfileDump in Build/Cmake/Tools/wxProfileDump/CMakeLists.txt")
 
-# Add the wxProfileDump executable
-ADD_EXECUTABLE( ${TARGET_NAME} ${SOURCES} )
+# Set Source Path
+set(SRC_PATH ../../../..)
+message(STATUS "SRC_PATH resolved as: ${SRC_PATH}")
 
-# Handle platform-specific adjustments
-if(WIN32)
-  # On Windows, link against the pre-built IccProfLib
-  SET(ICCPROFLIB_PATH ${CMAKE_SOURCE_DIR}/../../IccProfLib/x64/Debug)
+# Set Sources
+set(SOURCES ${SRC_PATH}/Tools/wxWidget/wxProfileDump/wxProfileDump.cpp)
+message(STATUS "SOURCES resolved as:")
+foreach(SOURCE_FILE IN LISTS SOURCES)
+    message(STATUS "  ${SOURCE_FILE}")
+endforeach()
 
-  # Add include directories specific to wxWidgets and IccProfLib on Windows
-  include_directories(
-    ${CMAKE_SOURCE_DIR}/WXWidgets/wxWidgets-3.2.0/include
-    ${CMAKE_SOURCE_DIR}/WXWidgets/wxWidgets-3.2.0/lib/x64/vc_lib/mswd
-    ${CMAKE_SOURCE_DIR}/../../IccProfLib
-  )
+# Set Target Name
+set(TARGET_NAME iccDumpProfileGui)
+message(STATUS "TARGET_NAME set as: ${TARGET_NAME}")
 
-  # Link against pre-built IccProfLib and wxWidgets on Windows
-  target_link_libraries(${TARGET_NAME}
-    ${ICCPROFLIB_PATH}/IccProfLib.lib  # Pre-built IccProfLib
-    ${wxWidgets_LIBRARIES}             # wxWidgets libraries
-    kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib
-    shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-  )
+# Configure wxWidgets
+set(wxWidgets_CONFIGURATION mswu)
+message(STATUS "wxWidgets configuration set to: ${wxWidgets_CONFIGURATION}")
+
+# Add Executable
+message(STATUS "Adding executable target: ${TARGET_NAME}")
+add_executable(${TARGET_NAME} ${SOURCES})
+message(STATUS "Executable target ${TARGET_NAME} added with sources:")
+
+foreach(SOURCE_FILE IN LISTS SOURCES)
+    message(STATUS "  ${SOURCE_FILE}")
+endforeach()
+
+# Link Libraries
+message(STATUS "  Linking libraries for target ${TARGET_NAME}:")
+message(STATUS "  ICCProfLib Library: ${TARGET_LIB_ICCPROFLIB}")
+message(STATUS "  wxWidgets Libraries: ${wxWidgets_LIBRARIES}")
+target_link_libraries(${TARGET_NAME} ${TARGET_LIB_ICCPROFLIB} ${wxWidgets_LIBRARIES})
+
+# Install Target
+if(ENABLE_INSTALL_RIM)
+    message(STATUS "Installing target ${TARGET_NAME} to ${CMAKE_INSTALL_BINDIR}")
+    install(TARGETS ${TARGET_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
 else()
-  # For non-Windows systems, link normally
-  TARGET_LINK_LIBRARIES(${TARGET_NAME} ${TARGET_LIB_ICCPROFLIB} ${wxWidgets_LIBRARIES})
+    message(STATUS "Installation of target ${TARGET_NAME} is disabled (ENABLE_INSTALL_RIM is OFF).")
 endif()
 
-# Optional installation
-IF(ENABLE_INSTALL_RIM)
-  INSTALL(TARGETS ${TARGET_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
-ENDIF()
+message(STATUS "## Exiting Config for wxProfileDump in Build/Cmake/Tools/wxProfileDump/CMakeLists.txt")
+message(STATUS "#####################################################################################")
