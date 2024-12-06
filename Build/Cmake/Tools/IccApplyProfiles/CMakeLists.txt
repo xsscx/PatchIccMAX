@@ -13,62 +13,24 @@
 #				Refactor Base Configs & logging to .mk's 
 #
 
-cmake_minimum_required(VERSION 3.5)
-project(iccApplyProfiles)
+# Check if the target is already defined before adding it
+IF(NOT TARGET iccApplyProfiles)
+  # Define the source path relative to this file
+  SET(SRC_PATH ../../../..)
+  SET(SOURCES ${SRC_PATH}/Tools/CmdLine/IccApplyProfiles/iccApplyProfiles.cpp)
+  SET(TARGET_NAME iccApplyProfiles)
 
-# Set C++ standard
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  # Define the executable target
+  ADD_EXECUTABLE(${TARGET_NAME} ${SOURCES})
 
-# Ensure architecture compatibility on macOS
-# if(APPLE)
-#  set(CMAKE_OSX_ARCHITECTURES "x86_64")
-# endif()
+  # Link the necessary libraries to the target
+  TARGET_LINK_LIBRARIES(${TARGET_NAME} ${TARGET_LIB_ICCPROFLIB})
 
-# Locate required libraries
-find_package(nlohmann_json REQUIRED)
-find_package(TIFF REQUIRED)
-
-# Debugging information for located packages
-message(STATUS "TIFF include directory: ${TIFF_INCLUDE_DIR}")
-message(STATUS "TIFF libraries: ${TIFF_LIBRARIES}")
-message(STATUS "nlohmann_json library found: ${nlohmann_json_DIR}")
-
-# Define source files for iccApplyProfiles
-set(SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/iccApplyProfiles.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../IccCommon/IccJsonUtil.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../IccCommon/IccCmmConfig.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/TiffImg.cpp
-)
-
-# Define the executable
-add_executable(iccApplyProfiles ${SOURCES})
-
-# Include directories
-target_include_directories(iccApplyProfiles PRIVATE
-  ${CMAKE_SOURCE_DIR}/../../../IccProfLib  # Custom ICC profile library
-  ${CMAKE_SOURCE_DIR}/../../../IccXML     # Custom XML processing library
-  ${TIFF_INCLUDE_DIR}                     # Include libtiff headers
-)
-
-# Link directories (if required)
-target_link_directories(iccApplyProfiles PRIVATE
-  ${CMAKE_SOURCE_DIR}/../../../Build/IccProfLib
-  ${CMAKE_SOURCE_DIR}/../../../Build/IccXML
-)
-
-# Link libraries
-target_link_libraries(iccApplyProfiles PRIVATE
-  IccProfLib2                         # Custom ICC profile library
-  IccXML2                             # Custom XML processing library
-  nlohmann_json::nlohmann_json        # JSON processing library
-  ${TIFF_LIBRARIES}                   # libtiff
-)
-
-# Compiler options
-target_compile_options(iccApplyProfiles PRIVATE)
-
-# Linker options
-target_link_options(iccApplyProfiles PRIVATE)
-
+  # Optional: Install the executable if enabled
+  IF(ENABLE_INSTALL_RIM)
+    INSTALL(TARGETS ${TARGET_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
+  ENDIF()
+ELSE()
+  # Log a warning if the target already exists
+  MESSAGE(WARNING "Target ${TARGET_NAME} already exists. Skipping duplicate addition.")
+ENDIF()
