@@ -32,7 +32,7 @@ set(SRC_PATH "${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyToLink")
 message(STATUS "SRC_PATH resolved as: ${SRC_PATH}")
 
 # Define source file explicitly
-set(SOURCES "${SRC_PATH}/IccApplyToLink.cpp")
+set(SOURCES "${SRC_PATH}/iccApplyToLink.cpp")
 message(STATUS "Resolved source file path: ${SOURCES}")
 
 # Verify the source file exists
