@@ -1,6 +1,6 @@
 {
   "name": "DemoIccMAX",
-  "version": "1.0.0",
+  "version": "2.1.25",
   "description": "A project for handling ICC profiles and their transformations.",
   "dependencies": [
     {
@@ -8,8 +8,13 @@
       "purpose": "Provides XML parsing and serialization for the IccXML2 library and tools.",
       "usage": "Handles ICC profile data in XML format, enabling efficient transformation and validation.",
       "installation": {
+        "vcpkg": "vcpkg install libxml2",
         "debian": "sudo apt-get install libxml2 libxml2-dev",
-        "macos": "brew install libxml2"
+        "macos": "brew install libxml2",
+        "visual_studio": {
+          "version": "2022",
+          "instructions": "Ensure Vcpkg is configured for Visual Studio and install via the integrated Vcpkg tooling."
+        }
       },
       "documentation": "http://xmlsoft.org/"
     },
@@ -18,8 +23,13 @@
       "purpose": "Supports TIFF image manipulation for image processing tools.",
       "usage": "Processes ICC profiles embedded in TIFF images and extracts color profile metadata.",
       "installation": {
+        "vcpkg": "vcpkg install tiff",
         "debian": "sudo apt-get install libtiff5 libtiff-dev",
-        "macos": "brew install libtiff"
+        "macos": "brew install libtiff",
+        "visual_studio": {
+          "version": "2022",
+          "instructions": "Ensure Vcpkg is set up with Visual Studio for Windows builds."
+        }
       },
       "documentation": "http://www.libtiff.org/"
     },
@@ -28,8 +38,13 @@
       "purpose": "Cross-platform GUI framework for the basic profile viewer.",
       "usage": "Renders the graphical interface for interacting with ICC profiles.",
       "installation": {
+        "vcpkg": "vcpkg install wxwidgets",
         "debian": "sudo apt-get install libwxgtk3.0-gtk3-dev",
-        "macos": "brew install wxwidgets"
+        "macos": "brew install wxwidgets",
+        "visual_studio": {
+          "version": "2022",
+          "instructions": "Install wxWidgets via Vcpkg in Visual Studio or use wxWidgets source from its official website."
+        }
       },
       "documentation": "https://www.wxwidgets.org/"
     },
@@ -38,12 +53,34 @@
       "purpose": "C++ library for JSON parsing and serialization.",
       "usage": "Handles JSON-based configuration and data interchange, enabling serialization and deserialization of ICC profile metadata.",
       "installation": {
+        "vcpkg": "vcpkg install nlohmann-json",
         "debian": "sudo apt-get install nlohmann-json3-dev",
         "macos": "brew install nlohmann-json",
-        "vcpkg": "vcpkg install nlohmann-json"
+        "alternative_installation": "Copy json.hpp directly from the repository into your project."
       },
-      "alternative_installation": "Alternatively, copy json.hpp directly from the repository into your project.",
       "documentation": "https://github.com/nlohmann/json"
     }
-  ]
+  ],
+  "instructions": {
+    "vcpkg": {
+      "description": "Install all dependencies using Vcpkg by running the following command:",
+      "command": "vcpkg install --triplet x64-windows",
+      "notes": "Ensure that Vcpkg is configured with your environment. For Visual Studio, follow Microsoft's official documentation to integrate Vcpkg with Visual Studio."
+    },
+    "classic": {
+      "description": "Manually install dependencies using package managers like apt, brew, or source downloads.",
+      "platforms": {
+        "debian": "Use apt to install each dependency as specified in the 'installation' field.",
+        "macos": "Use brew to install each dependency as specified in the 'installation' field."
+      }
+    },
+    "visual_studio": {
+      "description": "Install dependencies via Vcpkg using Visual Studio's integrated tools.",
+      "steps": [
+        "Ensure that Vcpkg is integrated with Visual Studio (check Tools > Options > Vcpkg).",
+        "Run 'vcpkg integrate install' if not already set up.",
+        "Install dependencies via the Vcpkg Console or directly in your project settings."
+      ]
+    }
+  }
 }
