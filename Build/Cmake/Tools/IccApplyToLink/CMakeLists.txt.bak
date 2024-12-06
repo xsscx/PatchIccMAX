@@ -11,6 +11,7 @@
 
 message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 message(STATUS "Entering IccApplyToLink in Project_Root/Build/Cmake/Tools/IccApplyToLink/CMakeLists.txt .....")
+message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
 # Resolve the project root directory using CMAKE_SOURCE_DIR
 get_filename_component(PROJECT_ROOT_DIR "${CMAKE_SOURCE_DIR}/../.." ABSOLUTE)
@@ -120,8 +121,8 @@ endif()
 
 
 # Final debug messages
-message(STATUS "CMAKE_SOURCE_DIR resolved as: ${CMAKE_SOURCE_DIR}")
-message(STATUS "PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
-
+message(STATUS "DEBUG 9: CMAKE_SOURCE_DIR resolved as: ${CMAKE_SOURCE_DIR}")
+message(STATUS "DEBUG 10: PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
+message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 message(STATUS "Exiting IccApplyToLink in Project_Root/Build/Cmake/Tools/IccApplyToLink/CMakeLists.txt ......")
 message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
