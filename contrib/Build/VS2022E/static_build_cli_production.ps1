@@ -23,7 +23,8 @@ git clone https://github.com/microsoft/vcpkg.git
 cd vcpkg
 .\bootstrap-vcpkg.bat
 .\vcpkg.exe integrate install
-.\vcpkg.exe install libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
+Write-Host "Installing required libraries (libxml2, tiff, wxwidgets) for x64-windows-static..."
+.\vcpkg.exe install egl-registry:x64-windows-static vcpkg-cmake:x64-windows-static vcpkg-cmake-config:x64-windows-static nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
 cd \testing
 Write-Host "Clone PatchIccMAX"
 git clone https://github.com/xsscx/PatchIccMAX.git
