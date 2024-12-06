@@ -1,6 +1,6 @@
 #
 # IccDumpProfile in Project_Root/Build/Cmake/Tools/IccDumpProfile/CMakeLists.txt | DemoIccMAX Project
-# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+# Copyright (Â©) 2024 The International Color Consortium. All rights reserved.
 #
 # Last Updated: 02-DEC-2024 by David Hoyt
 #
@@ -28,7 +28,7 @@ message(STATUS "Defining target 'IccDumpProfile'...")
 
 # Define source path and file
 set(SRC_PATH "${PROJECT_ROOT_DIR}/Tools/CmdLine/IccDumpProfile")
-set(SOURCES "${SRC_PATH}/IccDumpProfile.cpp")
+set(SOURCES "${SRC_PATH}/iccDumpProfile.cpp")
 
 if (NOT EXISTS "${SOURCES}")
     message(FATAL_ERROR "Source file not found at: ${SOURCES}. Verify the file exists.")
