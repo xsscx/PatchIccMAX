@@ -1,9 +1,100 @@
-SET( SRC_PATH ../../../.. )
-SET( SOURCES  ${SRC_PATH}/IccXML/CmdLine/IccToXml/IccToXml.cpp )
-SET( TARGET_NAME iccToXml )
+#
+# IccToXml in Project_Root/Build/Cmake/Tools/IccToXml/CMakeLists.txt | DemoIccMAX Project
+# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+#
+# Last Updated: 02-DEC-2024 by David Hoyt
+#
+# Changes: Modified Cmake Configuration at top and project level
+#          Added explicit linker paths
+#          Improved debug output for cross-platform support
+#
+#
+# TODO: Configure proper verbose flags for cmake config
+#
+#
+#
 
-ADD_EXECUTABLE( ${TARGET_NAME} ${SOURCES} )
-TARGET_LINK_LIBRARIES( ${TARGET_NAME} ${TARGET_LIB_ICCXML} )
-IF(ENABLE_INSTALL_RIM)
-  INSTALL (TARGETS ${TARGET_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
-ENDIF(ENABLE_INSTALL_RIM)
+message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+message(STATUS "Entering IccToXml in Project_Root/Build/Cmake/Tools/IccToXml/CMakeLists.txt .............")
+message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+# Resolve project root directory
+get_filename_component(PROJECT_ROOT_DIR "${CMAKE_SOURCE_DIR}/../.." ABSOLUTE)
+message(STATUS "PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
+
+# Define source path and file
+set(SRC_PATH "${PROJECT_ROOT_DIR}/IccXML/CmdLine/IccToXml")
+set(SOURCES "${SRC_PATH}/IccToXml.cpp")
+if (NOT EXISTS "${SOURCES}")
+    message(FATAL_ERROR "DEBUG: Source file not found at: ${SOURCES}. Verify the file exists.")
+endif()
+message(STATUS "Source file resolved as: ${SOURCES}")
+
+# Add executable target
+set(TARGET_NAME "IccToXml")
+add_executable(${TARGET_NAME} ${SOURCES})
+message(STATUS "Added executable target: ${TARGET_NAME}")
+
+# Add include directories
+target_include_directories(${TARGET_NAME} PRIVATE
+    "${PROJECT_ROOT_DIR}/IccProfLib"
+    "${PROJECT_ROOT_DIR}/IccXML/IccLibXml"
+    "F:/test/vcpkg/installed/x64-windows/include/libxml2"
+    "F:/test/vcpkg/installed/x64-windows/include"
+)
+message(STATUS "Include directories added for ${TARGET_NAME}")
+
+# Add linker directories
+set(ICCPROFLIB_DIR "${PROJECT_ROOT_DIR}/Build/win/t/IccProfLib/Release")
+set(IccXML_LIB_DIR "${PROJECT_ROOT_DIR}/Build/win/t/Release")
+set(LIBXML2_DIR "F:/test/vcpkg/installed/x64-windows/lib")
+target_link_directories(${TARGET_NAME} PRIVATE
+    "${ICCPROFLIB_DIR}"
+    "${IccXML_LIB_DIR}"
+    "${LIBXML2_DIR}"
+)
+message(STATUS "Linker directories added for ${TARGET_NAME}")
+
+# Link required libraries
+target_link_libraries(${TARGET_NAME} PRIVATE
+    IccProfLib2
+    IccXML2
+    libxml2.lib
+    kernel32.lib user32.lib gdi32.lib
+    winspool.lib comdlg32.lib advapi32.lib
+    shell32.lib ole32.lib oleaut32.lib
+    uuid.lib odbc32.lib odbccp32.lib
+)
+message(STATUS "Libraries linked for ${TARGET_NAME}")
+
+# Set output directories
+set_target_properties(${TARGET_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${PROJECT_ROOT_DIR}/Testing/Release"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${PROJECT_ROOT_DIR}/Testing/Debug"
+)
+message(STATUS "Output directories set for ${TARGET_NAME}")
+
+# Add post-build step
+add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:${TARGET_NAME}>"
+        "${PROJECT_ROOT_DIR}/Testing/$<IF:$<CONFIG:Debug>,IccToXml_d.exe,IccToXml.exe>"
+    COMMENT "Copying build artifact (exe) to Testing directory..."
+)
+message(STATUS "DEBUG 9: Added post-build step for ${TARGET_NAME}")
+
+
+
+
+message(STATUS "PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
+message(STATUS "CMAKE_SOURCE_DIR resolved as: ${CMAKE_SOURCE_DIR}")
+message(STATUS "SRC_PATH resolved as: ${SRC_PATH}")
+message(STATUS "Resolved source file path: ${SOURCES}")
+message(STATUS "Added executable target: ${TARGET_NAME}")
+message(STATUS "Added linker options for library path.")
+message(STATUS "Using explicit absolute path for ICCPROFLIB_PATH: ${ICCPROFLIB_PATH}")
+message(STATUS "Added linker options for library path: ${PROJECT_ROOT_DIR}/Build/win/t/IccProfLib/Release")
+message(STATUS "Using explicit absolute path for IccXML_LIB_DIR: ${PROJECT_ROOT_DIR}/Build/win/t/IccXML/Release")
+message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+message(STATUS "Exiting IccToXml in Project_Root/Build/Cmake/Tools/IccToXml/CMakeLists.txt ..............")
+message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")

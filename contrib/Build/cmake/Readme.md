@@ -1,14 +1,10 @@
-# [contrib/](https://github.com/InternationalColorConsortium/DemoIccMAX/tree/master/contrib)
+# [contrib/Build/Cmake/](https://github.com/InternationalColorConsortium/DemoIccMAX/tree/master/contrib/Build/cmake)
 
-Last Updated: 02-DEC-2024 by David Hoyt | [@h02332](https://x.com/h02332)
+Last Updated: 06-DEC-2024 by David Hoyt | [@h02332](https://x.com/h02332)
 
 **Data** is ***Code***
 
 The [contrib/](https://github.com/InternationalColorConsortium/DemoIccMAX/tree/master/contrib) directory provides examples, tools, and scripts for building, testing, and running ICC profile-related functionality across different platforms. It also includes helper scripts and automated workflows designed to streamline the development process for the Community.
-
-## Build Instructions
-
-The Project code currently compiles on Unix & Windows out of the box using **Clang**, **MSVC** and **GNU** C++ with the instructions provided below.
 
 ### **Clang** Build 
 
@@ -74,19 +70,35 @@ Expecting 204 .icc color profiles...
 Manually complete the Clone, Patch & Build process shown below on Ubuntu:
 
 ```
-#### Clone the DemoIccMAX repository
+## **GNU C++** Build Instructions
+
+### Clone the DemoIccMAX repository and PR111
 git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
 cd DemoIccMAX
-
-# Clone the PatchIccMAX repository to a directory outside the DemoIccMAX repo
-git clone https://github.com/xsscx/PatchIccMAX.git ../PatchIccMAX
-cd ../PatchIccMAX
-git checkout development
-cd -
+git fetch origin pull/111/head:pr-111
+git checkout pr-111
 
 # Apply the GCC Patch from the PatchIccMAX repository
 # TODO: Analyze Scoping Issue, Fix Template, Re: GNU C++ Strict Checks vs Clang
-git apply ../PatchIccMAX/contrib/patches/pr109-ubuntu-5.15.153.1-microsoft-standard-WSL2-patch.txt
+
+# Save the diff as a patch file
+cat <<EOF > gnu_cpp_pr111.patch
+diff --git a/Tools/CmdLine/IccCommon/IccJsonUtil.cpp b/Tools/CmdLine/IccCommon/IccJsonUtil.cpp
+index 78a78cf..fcf0c6a 100644
+--- a/Tools/CmdLine/IccCommon/IccJsonUtil.cpp
++++ b/Tools/CmdLine/IccCommon/IccJsonUtil.cpp
+@@ -94,7 +94,6 @@ template <typename T>
+ }
+
+ // Explicit template instantiations
+-template bool jsonToValue<int>(const json&, int&);
+ template std::string arrayToJson<icUInt8Number>(icUInt8Number*, int);
+ template std::string arrayToJson<icUInt16Number>(icUInt16Number*, int);
+ template std::string arrayToJson<icUInt32Number>(icUInt32Number*, int);
+EOF
+
+# Apply the patch
+git apply gnu_cpp_pr111.patch
 
 # Verify the patch was applied successfully
 git status
@@ -132,8 +144,8 @@ IccFromXml built with IccProfLib Version 2.2.5, IccLibXML Version 2.2.5
 ## Reproduction Hosts
 
 ```
+Darwin Kernel Version 24.1.0: Thu Oct 10 21:05:14 PDT 2024; root:xnu-11215.41.3~2/RELEASE_ARM64_T8103 arm64
 Darwin Kernel Version 24.1.0: Thu Oct 10 21:02:27 PDT 2024; root:xnu-11215.41.3~2/RELEASE_X86_64 x86_64
-24.1.0 Darwin Kernel Version 24.1.0: Thu Oct 10 21:05:14 PDT 2024; root:xnu-11215.41.3~2/RELEASE_ARM64_T8103 arm64
 5.15.153.1-microsoft-standard-WSL2 #1 SMP Fri Mar 29 23:14:13 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux
 Microsoft Windows 11 Pro 10.0.26100 26100 & VisualStudio/17.12.1
 ```

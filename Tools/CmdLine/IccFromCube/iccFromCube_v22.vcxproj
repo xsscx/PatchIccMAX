@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>iccV5DspObsToV4Dsp</ProjectName>
-    <ProjectGuid>{A6858D8F-E1C7-44FD-B8DB-2D1700B73950}</ProjectGuid>
-    <RootNamespace>iccV5DspObsToV4Dsp</RootNamespace>
+    <ProjectName>iccFromCube</ProjectName>
+    <ProjectGuid>{E4936351-C35F-4E77-BDD1-71C4CD7E4808}</ProjectGuid>
+    <RootNamespace>iccFromCube</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -39,9 +39,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -98,7 +98,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
-      <TypeLibraryName>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.tlb</TypeLibraryName>
+      <TypeLibraryName>$(Platform)\$(Configuration)/iccFromCube.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
@@ -109,7 +109,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeaderOutputFile>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>$(Platform)\$(Configuration)/iccFromCube.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>$(Platform)\$(Configuration)/</AssemblerListingLocation>
       <ObjectFileName>$(Platform)\$(Configuration)/</ObjectFileName>
       <ProgramDataBaseFileName>$(Platform)\$(Configuration)/</ProgramDataBaseFileName>
@@ -123,9 +123,9 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.exe</OutputFile>
+      <OutputFile>$(Platform)\$(Configuration)/iccFromCube.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ProgramDatabaseFile>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(Platform)\$(Configuration)/iccFromCube.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
@@ -134,12 +134,12 @@
       <AdditionalDependencies>IccProfLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.exe ..\..\..\Testing\iccV5DspObsToV4Dsp.exe</Command>
+      <Command>copy $(Platform)\$(Configuration)\iccFromCube.exe ..\..\..\Testing\iccFromCube.exe</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
-      <TypeLibraryName>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.tlb</TypeLibraryName>
+      <TypeLibraryName>$(Platform)\$(Configuration)/iccFromCube.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
@@ -148,7 +148,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeaderOutputFile>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>$(Platform)\$(Configuration)/iccFromCube.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>$(Platform)\$(Configuration)/</AssemblerListingLocation>
       <ObjectFileName>$(Platform)\$(Configuration)/</ObjectFileName>
       <ProgramDataBaseFileName>$(Platform)\$(Configuration)/</ProgramDataBaseFileName>
@@ -163,10 +163,10 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.exe</OutputFile>
+      <OutputFile>$(Platform)\$(Configuration)/iccFromCube.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(Platform)\$(Configuration)/iccFromCube.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
@@ -175,15 +175,15 @@
       <AdditionalDependencies>IccProfLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.exe ..\..\..\Testing\iccV5DspObsToV4Dsp_d.exe
-copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.pdb ..\..\..\Testing
+      <Command>copy $(Platform)\$(Configuration)\iccFromCube.exe ..\..\..\Testing\iccFromCube_d.exe
+copy $(Platform)\$(Configuration)\iccFromCube.pdb ..\..\..\Testing
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
       <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.tlb</TypeLibraryName>
+      <TypeLibraryName>$(Platform)\$(Configuration)/iccFromCube.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
@@ -194,7 +194,7 @@ copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.pdb ..\..\..\Testing
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeaderOutputFile>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>$(Platform)\$(Configuration)/iccFromCube.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>$(Platform)\$(Configuration)/</AssemblerListingLocation>
       <ObjectFileName>$(Platform)\$(Configuration)/</ObjectFileName>
       <ProgramDataBaseFileName>$(Platform)\$(Configuration)/</ProgramDataBaseFileName>
@@ -208,9 +208,9 @@ copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.pdb ..\..\..\Testing
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.exe</OutputFile>
+      <OutputFile>$(Platform)\$(Configuration)/iccFromCube.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ProgramDatabaseFile>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(Platform)\$(Configuration)/iccFromCube.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
@@ -219,13 +219,13 @@ copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.pdb ..\..\..\Testing
       <AdditionalDependencies>IccProfLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.exe ..\..\..\Testing\iccV5DspObsToV4Dsp.exe</Command>
+      <Command>copy $(Platform)\$(Configuration)\iccFromCube.exe ..\..\..\Testing\iccFromCube.exe</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
       <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.tlb</TypeLibraryName>
+      <TypeLibraryName>$(Platform)\$(Configuration)/iccFromCube.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
@@ -234,7 +234,7 @@ copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.pdb ..\..\..\Testing
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeaderOutputFile>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>$(Platform)\$(Configuration)/iccFromCube.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>$(Platform)\$(Configuration)/</AssemblerListingLocation>
       <ObjectFileName>$(Platform)\$(Configuration)/</ObjectFileName>
       <ProgramDataBaseFileName>$(Platform)\$(Configuration)/</ProgramDataBaseFileName>
@@ -249,10 +249,10 @@ copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.pdb ..\..\..\Testing
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.exe</OutputFile>
+      <OutputFile>$(Platform)\$(Configuration)/iccFromCube.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(Platform)\$(Configuration)/iccV5DspObsToV4Dsp.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(Platform)\$(Configuration)/iccFromCube.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
@@ -261,13 +261,13 @@ copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.pdb ..\..\..\Testing
       <AdditionalDependencies>IccProfLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.exe ..\..\..\Testing\iccV5DspObsToV4Dsp_d.exe
-copy $(Platform)\$(Configuration)\iccV5DspObsToV4Dsp.pdb ..\..\..\Testing
+      <Command>copy $(Platform)\$(Configuration)\iccFromCube.exe ..\..\..\Testing\iccFromCube_d.exe
+copy $(Platform)\$(Configuration)\iccFromCube.pdb ..\..\..\Testing
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="iccV5DspObsToV4Dsp.cpp">
+    <ClCompile Include="iccFromCube.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>

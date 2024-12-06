@@ -1,13 +1,67 @@
-SET( ENV{LD_LIBRARY_PATH} "${CMAKE_BINARY_DIR}/../IccProfLib:${CMAKE_BINARY_DIR}/../IccXML" )
-EXECUTE_PROCESS( COMMAND ls -l ${CMAKE_BINARY_DIR}/../IccProfLib ${CMAKE_BINARY_DIR}/../IccXML )
-EXECUTE_PROCESS( COMMAND cp -av ${CMAKE_BINARY_DIR}/../Tools/IccFromXml/iccFromXml ${CMAKE_CURRENT_LIST_DIR}/../../../Testing/iccFromXML)
-EXECUTE_PROCESS( COMMAND cp -av ${CMAKE_BINARY_DIR}/../Tools/IccToXml/iccToXml ${CMAKE_CURRENT_LIST_DIR}/../../../Testing/)
-EXECUTE_PROCESS( COMMAND cp -av ${CMAKE_BINARY_DIR}/../Tools/IccApplyNamedCmm/iccApplyNamedCmm ${CMAKE_CURRENT_LIST_DIR}/../../../Testing/IccApplyNamedCmm)
-EXECUTE_PROCESS( COMMAND cp -av ${CMAKE_BINARY_DIR}/../Tools/IccApplyProfiles/iccApplyProfiles ${CMAKE_CURRENT_LIST_DIR}/../../../Testing/)
-EXECUTE_PROCESS( COMMAND cp -av ${CMAKE_BINARY_DIR}/../Tools/IccDumpProfile/iccDumpProfile ${CMAKE_CURRENT_LIST_DIR}/../../../Testing/)
-EXECUTE_PROCESS( COMMAND cp -av ${CMAKE_BINARY_DIR}/../Tools/IccRoundTrip/iccRoundTrip ${CMAKE_CURRENT_LIST_DIR}/../../../Testing/)
-EXECUTE_PROCESS( COMMAND cp -av ${CMAKE_BINARY_DIR}/../Tools/IccSpecSepToTiff/iccSpecSepToTiff ${CMAKE_CURRENT_LIST_DIR}/../../../Testing/)
-EXECUTE_PROCESS( COMMAND cp -av ${CMAKE_BINARY_DIR}/../Tools/IccTiffDump/iccTiffDump ${CMAKE_CURRENT_LIST_DIR}/../../../Testing/)
-EXECUTE_PROCESS( COMMAND cp -av ${CMAKE_BINARY_DIR}/../Tools/wxProfileDump/iccDumpProfileGui ${CMAKE_CURRENT_LIST_DIR}/../../../Testing/ || echo "")
-EXECUTE_PROCESS( COMMAND echo "run ${CMAKE_BINARY_DIR}/../../Build/Cmake/Testing/test.sh")
-EXECUTE_PROCESS( COMMAND ${CMAKE_CURRENT_LIST_DIR}/../../../Build/Cmake/Testing/test.sh ${CMAKE_CURRENT_LIST_DIR}/../../../Testing)
+message(STATUS "Entering the Testing/ Directory and its CMakeLists.txt...")
+# Set environment variables for library paths
+set(LD_LIBRARY_PATH "${CMAKE_BINARY_DIR}/../IccProfLib:${CMAKE_BINARY_DIR}/../IccXML" CACHE STRING "Library path for ICC tools")
+message(STATUS "LD_LIBRARY_PATH set to: ${LD_LIBRARY_PATH}")
+
+# Log existence of required directories
+message(STATUS "Checking existence of required directories...")
+execute_process(COMMAND ls -l ${CMAKE_BINARY_DIR}/../IccProfLib ${CMAKE_BINARY_DIR}/../IccXML
+                RESULT_VARIABLE result
+                OUTPUT_VARIABLE output
+                ERROR_VARIABLE errors)
+if (result)
+    message(FATAL_ERROR "Required directories not found: ${errors}")
+else()
+    message(STATUS "Required directories found:\n${output}")
+endif()
+
+# Helper function for copying tools
+function(copy_tool source target)
+    message(STATUS "Copying tool from ${source} to ${target}...")
+    execute_process(COMMAND cp -av "${source}" "${target}"
+                    RESULT_VARIABLE copy_result
+                    OUTPUT_VARIABLE copy_output
+                    ERROR_VARIABLE copy_errors)
+    if (copy_result)
+        message(WARNING "Failed to copy ${source} to ${target}: ${copy_errors}")
+    else()
+        message(STATUS "Successfully copied ${source} to ${target}")
+    endif()
+endfunction()
+
+# Define the tools and their target locations
+set(TOOLS
+    "IccFromXml/iccFromXml"
+    "IccToXml/iccToXml"
+    "IccApplyNamedCmm/iccApplyNamedCmm"
+    "IccApplyProfiles/iccApplyProfiles"
+    "IccToLink/iccToLink"
+    "IccDumpProfile/iccDumpProfile"
+    "IccFromCube/iccFromCube"
+    "IccRoundTrip/iccRoundTrip"
+    "IccSpecSepToTiff/iccSpecSepToTiff"
+    "IccTiffDump/iccTiffDump"
+    "IccV5DspObsToV4Dsp/iccV5DspObsToV4Dsp"
+    "wxProfileDump/iccDumpProfileGui"
+)
+
+# Iterate over the tools and copy them
+foreach(tool ${TOOLS})
+    set(SOURCE "${CMAKE_BINARY_DIR}/../Tools/${tool}")
+    set(TARGET "${CMAKE_CURRENT_LIST_DIR}/../../../Testing/${tool}")
+    copy_tool(${SOURCE} ${TARGET})
+endforeach()
+
+# Run the testing script
+set(TEST_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../../../Build/Cmake/Testing/test.sh")
+message(STATUS "Running test script: ${TEST_SCRIPT}...")
+execute_process(COMMAND "${TEST_SCRIPT}" "${CMAKE_CURRENT_LIST_DIR}/../../../Testing"
+                RESULT_VARIABLE test_result
+                OUTPUT_VARIABLE test_output
+                ERROR_VARIABLE test_errors)
+if (test_result)
+    message(WARNING "Test script execution failed: ${test_errors}")
+else()
+    message(STATUS "Test script executed successfully:\n${test_output}")
+endif()
+message(STATUS "Exiting the Testing/ Directory and its CMakeLists.txt...")
