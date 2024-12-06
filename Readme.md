@@ -5,12 +5,27 @@ Welcome to Hoyt's Development Branch of the DemoIccMAX Project where I focus on 
 The [Development Branch](https://github.com/xsscx/PatchIccMAX/tree/development/) provides updated documentation, additional scripts, and modernized build instructions to supplement the legacy documentation of the DemoIccMAX project. The contrib/ directory provides updated examples and verified instructions to ensure a smooth experience with modern build systems and environments.
 
 ### Build Status | Development Branch
-| Build OS & Device Info           | Build   |  Install  | IDE | CLI |
-| -------------------------------- | ------------- | ------------- | ------------- | ------------- |
-| macOS 15 X86_64       | ✅          | ✅          |     ✅          |   ✅          |
-| macOS 15 arm  | ✅          | ✅          | ✅  | ✅          |
-| Ubuntu WSL   | ✅          | ✅          |    ✅     | ✅          |
-| Windows 11  | ✅          | ✅          | ✅   | ✅          |
+
+| **Tool or Library**         | **Windows** | **macOS** | **Linux** | **WSL2** |
+|-----------------------------|-------------|-----------|-----------|----------|
+| iccApplyNamedCmm            | ✅          | ✅        | ✅        | ✅       |
+| iccApplyProfiles            | ✅          | ✅        | ✅        | ✅       |
+| iccApplyToLink              | ✅          | ✅        | ✅        | ✅       |
+| iccDumpProfile              | ✅          | ✅        | ✅        | ✅       |
+| iccFromCube                 | ✅          | ✅        | ✅        | ✅       |
+| iccFromXml                  | ✅          | ✅        | ✅        | ✅       |
+| iccToXml                    | ✅          | ✅        | ✅        | ✅       |
+| iccRoundTrip                | ✅          | ✅        | ✅        | ✅       |
+| iccSpecSepToTiff            | ✅          | ✅        | ✅        | ✅       |
+| iccTiffDump                 | ✅          | ✅        | ✅        | ✅       |
+| IccV5DspObsToV4Dsp          | ✅          | ✅        | ✅        | ✅       |
+| wxProfileDump               | ✅          | ✅        | ✅        | ✅       |
+| libIccProfLib2              | ✅          | ✅        | ✅        | ✅       |
+| libIccProfLib2_DLL          | ✅          | ✅        | ✅        | ✅       |
+| libIccProfLib2_CRTDLL       | ✅          | ✅        | ✅        | ✅       |
+| libIccXML2                  | ✅          | ✅        | ✅        | ✅       |
+| libIccXML2_CRTDLL           | ✅          | ✅        | ✅        | ✅       |
+| DemoIccMAXCmm               | ✅          | ✅        | ✅        | ✅       |
 
 
 # Automated Builds
