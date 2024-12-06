@@ -1,6 +1,6 @@
 # 
 # IccDumpProfile CMakeLists.txt | DemoIccMAX Project
-# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+# Copyright (Â©) 2024 The International Color Consortium. All rights reserved.
 # 
 #
 # Last Updated: 03-DEC-2024 by David Hoyt
@@ -24,15 +24,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Set Architecture (x86_64 Only)
-#set(CMAKE_OSX_ARCHITECTURES "x86_64")
+# set(CMAKE_OSX_ARCHITECTURES "x86_64")
 
 # Source Files
 set(SOURCES
-  iccFromCube.cpp
+  iccDumpProfile.cpp
 )
 
 # Add Executable
-add_executable(iccFromCube ${SOURCES})
+add_executable(iccDumpProfile ${SOURCES})
 
 # Find macOS SDK Path
 # execute_process(COMMAND xcrun --show-sdk-path OUTPUT_VARIABLE MACOS_SDK_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -51,7 +51,7 @@ link_directories(
 )
 
 # Link Libraries
-target_link_libraries(iccFromCube
+target_link_libraries(iccDumpProfile
   IccProfLib2
   IccXML2
 )
@@ -60,7 +60,7 @@ target_link_libraries(iccFromCube
 target_compile_options(iccDumpProfile PRIVATE)
 
 # Additional Linker Flags
-target_link_options(iccFromCube PRIVATE
+target_link_options(iccDumpProfile PRIVATE
   -L${CMAKE_SOURCE_DIR}/../../../Build/IccProfLib
   -L${CMAKE_SOURCE_DIR}/../../../Build/IccXML
 )
