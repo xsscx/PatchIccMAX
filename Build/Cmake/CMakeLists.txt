@@ -1,19 +1,22 @@
 ############################################################################## 
 ## Top Level DemoIccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
 ##############################################################################
-# 
-#          Copyright (©) 2024 David H Hoyt LLC | All rights reserved.
-# 
-# Last Updated: 06-DEC-2024 at 1230Z by David Hoyt (©)
-#
-# Changes: 	Modified Build/Cmake/CMakelists.txt and others
-#           Added to Logging , Debugging, and CI/CD Integration
-#           Adjusted Cross Platform Build Args
-#						
-# TODO: Refactor Debug, Release, Asan 
-#       Collapse 3-tier CMakeLists.txt, Housekeeping
-#       Refactor Base Configs & logging to .mk's 
-#
+## 
+##          Copyright (©) 2024 David H Hoyt LLC | All rights reserved.
+## 
+## Last Updated: 06-DEC-2024 at 1230Z by David Hoyt (©)
+##
+## Changes: 	Modified Build/Cmake/CMakelists.txt and others
+##           Added to Logging , Debugging, and CI/CD Integration
+##           Adjusted Cross Platform Build Args
+##						
+## TODO: Refactor Debug, Release, Asan 
+##       Collapse 3-tier CMakeLists.txt, Housekeeping
+##       Refactor Base Configs & logging to .mk's 
+##
+##############################################################################
+## Top Level DemoIccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
+##############################################################################
 
 cmake_minimum_required(VERSION 3.5.0)
 
