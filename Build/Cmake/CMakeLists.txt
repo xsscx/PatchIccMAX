@@ -1,9 +1,10 @@
-#
-# Top Level DemoIccMAX Project Configuration in Build/Cmake/CMakeLists.txt
-# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+############################################################################## 
+## Top Level DemoIccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
+##############################################################################
 # 
-#
-# Last Updated: 05-DEC-2024 by David Hoyt
+#          Copyright (©) 2024 David H Hoyt LLC | All rights reserved.
+# 
+# Last Updated: 06-DEC-2024 at 1230Z by David Hoyt (©)
 #
 # Changes: 	Modified Build/Cmake/CMakelists.txt and others
 #           Added to Logging , Debugging, and CI/CD Integration
