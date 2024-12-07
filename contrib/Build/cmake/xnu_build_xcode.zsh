@@ -86,4 +86,4 @@ if ((static_libs_count > 0)); then
     done
 fi
 
-log_message "Binary analysis completed. Logs written to $log_file."
+log_message "Build Project, Profiles and Report. Logs written to $log_file."
