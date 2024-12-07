@@ -12,7 +12,8 @@ cd PatchIccMAX
 git checkout xnu
 cd Build/XCode
 cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release -DENABLE_TOOLS=ON  -Wno-dev ../Cmake/ -G "Xcode" -DCMAKE_VERBOSE_MAKEFILE=ON -Wdev -Werror=dev -DENABLE_STATIC_LIBS=ON -DCMAKE_VERBOSE_MAKEFILE=ON
-xcodebuild -target ALL_BUILD -configuration "Release" 
+xcodebuild -target ALL_BUILD -configuration "Release"
+/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/xnu/contrib/UnitTest/xnu_build_report_summary.zsh)" 
 ```
 
 ## Expected Output
