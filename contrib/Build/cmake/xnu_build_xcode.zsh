@@ -21,7 +21,7 @@ export CXX=clang++
 # change to ../Testing/ dir
 cd ../Testing/
 # Build ICC Profiles
-/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.sh)"
+/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.zsh)"
 
 # Initialize counters and arrays
 total_files=0
