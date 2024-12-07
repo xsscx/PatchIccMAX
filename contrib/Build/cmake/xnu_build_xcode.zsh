@@ -16,10 +16,8 @@
 
 # Set Clang++
 export CXX=clang++
-# change to /tmp dir
-cd /tmp
 # Build Project
-/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/Build/cmake/xnu_build_master_branch.zsh)"
+/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/Build/cmake/xnu_build_master_branch.zsh)"
 # change to ../Testing/ dir
 cd ../Testing/
 # Build ICC Profiles
