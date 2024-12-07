@@ -77,9 +77,8 @@ if ((static_libs_count > 0)); then
     done
 fi
 
- find IccProfLib IccXML Tools -type f \( -name '*.dylib' -o -name '*.a' -o -perm +111 \) -exec sh -c '
-  file="{}";
-  printf "File: %s\nType: %s\nDeps:\n%s\n\n" "$file" "$(file "$file")" "$(otool -L "$file" 2>/dev/null | sed "1d" | awk '\''{print "    " $0}'\'')"
-' \;
+log_message "Link List of Dynamic Libraries:"
+
+find IccProfLib IccXML Tools -type f \( -name '*.dylib' -o -name '*.a' -o -perm +111 \) -exec sh -c 'file="{}";printf "File: %s\nType: %s\nDeps:\n%s\n\n" "$file" "$(file "$file")" "$(otool -L "$file" 2>/dev/null | sed "1d" | awk '\''{print "    " $0}'\'')"' \;
 
 log_message "Build Project, Profiles and Report. Logs written to $log_file."
