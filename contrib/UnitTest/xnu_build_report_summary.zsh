@@ -14,13 +14,6 @@
 #
 #
 
-git clone https://github.com/xsscx/PatchIccMAX.git
-cd PatchIccMAX
-git checkout xnu
-cd Build/XCode
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release -DENABLE_TOOLS=ON  -Wno-dev ../Cmake/ -G "Xcode" -DCMAKE_VERBOSE_MAKEFILE=ON -Wdev -Werror=dev -DENABLE_STATIC_LIBS=ON -DCMAKE_VERBOSE_MAKEFILE=ON
-xcodebuild -target ALL_BUILD -configuration "Release"
-
 # Initialize counters and arrays
 total_files=0
 executables_count=0
