@@ -14,52 +14,60 @@
 #
 #
 
+#!/bin/bash
+
 # Initialize counters and arrays
 total_files=0
 executables_count=0
 dynamic_libs_count=0
 static_libs_count=0
+
 executables=()
 dynamic_libs=()
 static_libs=()
-log_file="binary_summary_$(date +%Y%m%d_%H%M%S).log"
+
+log_file="binary_analysis_$(date +%Y%m%d_%H%M%S).log"
+echo "Binary Analysis Report - $(date)" > "$log_file"
 
 # Log function
 log_message() {
     echo "$(date): $1" | tee -a "$log_file"
 }
 
-# Start processing
+# Process each file and classify
 log_message "Starting binary analysis for ./Tools, ./IccXML, and ./IccProfLib"
 
-# Find all relevant files
-find ./Tools ./IccXML ./IccProfLib -type f \( -name "*.dylib" -o -name "*.a" -o -perm +111 \) | while read -r binary; do
-    if file "$binary" | grep -q "Mach-O 64-bit executable"; then
+while IFS= read -r line; do
+    binary=$(echo "$line" | awk -F: '{print $1}')
+    file_type=$(echo "$line" | awk -F: '{print $2}')
+
+    ((total_files++))
+
+    if echo "$file_type" | grep -q "executable"; then
         executables+=("$binary")
         ((executables_count++))
-    elif file "$binary" | grep -q "Mach-O 64-bit dynamically linked shared library"; then
+    elif echo "$file_type" | grep -q "dynamically linked shared library"; then
         dynamic_libs+=("$binary")
         ((dynamic_libs_count++))
-    elif file "$binary" | grep -q "current ar archive"; then
+    elif echo "$file_type" | grep -q "current ar archive"; then
         static_libs+=("$binary")
         ((static_libs_count++))
     fi
-    ((total_files++))
-done
+done < <(find ./Tools ./IccXML ./IccProfLib -type f \( -path './bin-temp' -o -path './CMakeFiles' \) -prune -o -perm +111 -exec file {} \; | grep -i "Mach-O" | grep -vE './bin-temp|./CMakeFiles')
 
-# Summary
+# Generate summary
 log_message ""
 log_message "Summary Report"
 log_message "--------------"
-log_message "Total Files Found: $total_files"
+log_message "Total Mach-O Files: $total_files"
 log_message "Executables Found: $executables_count"
 log_message "Dynamic Libraries Found: $dynamic_libs_count"
 log_message "Static Libraries Found: $static_libs_count"
 
 if ((executables_count > 0)); then
     log_message "List of Executables:"
-    for executable in "${executables[@]}"; do
-        log_message "  $executable"
+    for exe in "${executables[@]}"; do
+        log_message "  $exe"
     done
 fi
 
@@ -72,8 +80,8 @@ fi
 
 if ((static_libs_count > 0)); then
     log_message "List of Static Libraries:"
-    for static_lib in "${static_libs[@]}"; do
-        log_message "  $static_lib"
+    for static in "${static_libs[@]}"; do
+        log_message "  $static"
     done
 fi
 
