@@ -14,8 +14,6 @@
 #
 #
 
-#!/bin/bash
-
 # Initialize counters and arrays
 total_files=0
 executables_count=0
