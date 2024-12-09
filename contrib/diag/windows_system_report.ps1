@@ -138,14 +138,6 @@ if (Get-Command node -ErrorAction SilentlyContinue) {
     AddToReport -Tool "Node.js & npm" -Status "Not Found" -Details "Node.js and npm are not installed or not in PATH."
 }
 
-# Check Python
-if (Get-Command python -ErrorAction SilentlyContinue) {
-    $pythonVersion = python --version 2>&1 | Out-String
-    AddToReport -Tool "Python" -Status "Found" -Details "Version: $pythonVersion"
-} else {
-    AddToReport -Tool "Python" -Status "Not Found" -Details "Python is not installed or not in PATH."
-}
-
 # Check Git
 if (Get-Command git -ErrorAction SilentlyContinue) {
     $gitVersion = git --version 2>&1 | Out-String
@@ -165,8 +157,6 @@ if (Get-Command cmake -ErrorAction SilentlyContinue) {
 # Final Report
 Write-Host "`n=== Developer Tools Report ===`n" -ForegroundColor Cyan
 $Report | Format-Table -AutoSize -Property Tool, Status, Details
-
-
 
 # Collect system summary information
 $os = Get-CimInstance Win32_OperatingSystem
