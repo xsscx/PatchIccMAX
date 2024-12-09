@@ -48,7 +48,7 @@ jobs:
         if (Test-Path "$buildDir\PatchIccMAX") {
             Write-Host "PatchIccMAX repository already exists. Pulling latest changes..."
             cd "$buildDir\PatchIccMAX"
-            git pull
+            iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/diag/windows_system_report.ps1").Content
         } else {
             Write-Host "Cloning PatchIccMAX repository..."
             git clone https://github.com/xsscx/PatchIccMAX.git PatchIccMAX
