@@ -3,9 +3,10 @@ name: "GNU scan-build"
 on:
   workflow_dispatch:
   pull_request:
+    # Sequence of patterns matched against refs/heads
     branches:
       - master
-      - development
+      - developer
       - xnu
       - msvc
 
