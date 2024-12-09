@@ -138,22 +138,6 @@ if (Get-Command node -ErrorAction SilentlyContinue) {
     AddToReport -Tool "Node.js & npm" -Status "Not Found" -Details "Node.js and npm are not installed or not in PATH."
 }
 
-# Check Git
-if (Get-Command git -ErrorAction SilentlyContinue) {
-    $gitVersion = git --version 2>&1 | Out-String
-    AddToReport -Tool "Git" -Status "Found" -Details "Version: $gitVersion"
-} else {
-    AddToReport -Tool "Git" -Status "Not Found" -Details "Git is not installed or not in PATH."
-}
-
-# Check CMake
-if (Get-Command cmake -ErrorAction SilentlyContinue) {
-    $cmakeVersion = cmake --version 2>&1 | Out-String
-    AddToReport -Tool "CMake" -Status "Found" -Details "Version: $cmakeVersion"
-} else {
-    AddToReport -Tool "CMake" -Status "Not Found" -Details "CMake is not installed or not in PATH."
-}
-
 # Final Report
 Write-Host "`n=== Developer Tools Report ===`n" -ForegroundColor Cyan
 $Report | Format-Table -AutoSize -Property Tool, Status, Details
