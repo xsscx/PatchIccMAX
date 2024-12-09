@@ -65,7 +65,7 @@ Processor: $($proc.Name)
 "@
 
 # Output the collected system summary to a text file
-$output | Out-File -FilePath "C:\tmp\system_info.txt"
+$output | Out-File -FilePath "system_info.txt"
 
 # Output summary to the console
 Write-Host $output
