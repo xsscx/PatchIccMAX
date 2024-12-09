@@ -91,7 +91,7 @@ function AddToReport {
 # Check vcpkg
 if (Get-Command vcpkg -ErrorAction SilentlyContinue) {
     $vcpkgVersion = vcpkg --version 2>&1 | Out-String
-    $vcpkgPackages = vcpkg list 2>&1 | Out-String
+    # $vcpkgPackages = vcpkg list 2>&1 | Out-String
     AddToReport -Tool "vcpkg" -Status "Found" -Details "Version: $vcpkgVersion`nPackages:`n$vcpkgPackages"
 } else {
     AddToReport -Tool "vcpkg" -Status "Not Found" -Details "vcpkg is not installed or not in PATH."
