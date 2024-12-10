@@ -50,15 +50,7 @@ jobs:
         # Integrate vcpkg and install dependencies
         Write-Host "Installing dependencies via vcpkg..."
         .\vcpkg.exe integrate install
-        .\vcpkg.exe install `
-          nlohmann-json:x64-windows `
-          nlohmann-json:x64-windows-static `
-          libxml2:x64-windows `
-          tiff:x64-windows `
-          wxwidgets:x64-windows `
-          libxml2:x64-windows-static `
-          tiff:x64-windows-static `
-          wxwidgets:x64-windows-static
+        .\vcpkg.exe install  nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
 
         # Clone DemoIccMAX repository
         Write-Host "Cloning DemoIccMAX repository..."
