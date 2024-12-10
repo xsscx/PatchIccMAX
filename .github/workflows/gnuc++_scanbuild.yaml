@@ -1,4 +1,4 @@
-name: "GNU scan-build"
+name: "GNUC++ ScanBuild"
 
 on:
   workflow_dispatch:
