@@ -1,11 +1,11 @@
-name: Windows Latest
+name: Windows60
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: windows-latest
 
     env:
       BuildConfiguration: Debug
@@ -14,9 +14,6 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1
 
     - name: Setup vcpkg and clone DemoIccMAX repository
       run: |
@@ -81,6 +78,7 @@ jobs:
         } else {
             Write-Host "Solution file exists at: $solutionPath"
         }
+
         # Build the project using the dynamically located MSBuild
         $msbuildPath = "${{ steps.msbuild-locate.outputs['msbuild-path'] }}"
         $buildDir = "${{ env.BUILD_DIR }}\PatchIccMAX"
