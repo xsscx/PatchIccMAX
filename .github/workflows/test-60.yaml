@@ -1,43 +1,56 @@
-name: Windows60
+name: Win50
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-latest
-
-    env:
-      BuildConfiguration: Debug
-      BUILD_DIR: ${{ github.workspace }}/builds  # Ensure 'builds' directory exists
+    runs-on: self-hosted
 
     steps:
+    # Step 1: Checkout the repository
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Setup directories and initialize vcpkg
+    # Step 2: Setup MSBuild
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    # Step 3: Setup environment and build DemoIccMAX
+    - name: Setup and Build DemoIccMAX
       run: |
-        $buildDir = Join-Path $env:RUNNER_TEMP "build"
-        $vcpkgDir = Join-Path $buildDir "vcpkg"
-        $outputDir = Join-Path $env:RUNNER_TEMP "output"
+        Write-Host "============================= Starting DemoIccMAX Master Branch Build =============================" -ForegroundColor Green
+        Write-Host "Copyright (c) 2024 The International Color Consortium. All rights reserved." -ForegroundColor Green
+        Write-Host "For more information on the International Color Consortium see URL https://color.org" -ForegroundColor Green
 
-        # Create necessary directories
-        New-Item -ItemType Directory -Path $buildDir -Force
-        New-Item -ItemType Directory -Path $outputDir -Force
+        # Set up directories and environment variables
+        $env:VSCMD_ARG_HOST_ARCH = "x64"
+        $env:VSCMD_ARG_TGT_ARCH = "x64"
+        $optDir = "C:\test"
+        $vcpkgDir = "$optDir\vcpkg"
+        $patchDir = "$optDir\DemoIccMAX"
 
-        # Clone vcpkg if not already present
-        if (-Not (Test-Path "$vcpkgDir\.git")) {
-            Write-Host "Cloning vcpkg..."
-            git clone https://github.com/microsoft/vcpkg.git $vcpkgDir
-            & "$vcpkgDir\bootstrap-vcpkg.bat"
+        # Setup git config for anonymous use
+        git config --global user.email "you@example.com"
+        git config --global user.name "Your Name"
+
+        # Create directories
+        if (-Not (Test-Path $optDir)) {
+            New-Item -ItemType Directory -Path $optDir
         }
 
-        # Install required libraries
-        Write-Host "Installing libraries via vcpkg..."
-        & "$vcpkgDir\vcpkg.exe" install `
-          egl-registry:x64-windows-static `
-          vcpkg-cmake:x64-windows-static `
-          vcpkg-cmake-config:x64-windows-static `
+        # Clone and bootstrap vcpkg
+        Write-Host "Cloning vcpkg repository..."
+        cd $optDir
+        git clone https://github.com/microsoft/vcpkg.git
+        cd $vcpkgDir
+        Write-Host "Bootstrapping vcpkg..."
+        .\bootstrap-vcpkg.bat
+
+        # Integrate vcpkg and install dependencies
+        Write-Host "Installing dependencies via vcpkg..."
+        .\vcpkg.exe integrate install
+        .\vcpkg.exe install `
           nlohmann-json:x64-windows `
           nlohmann-json:x64-windows-static `
           libxml2:x64-windows `
@@ -45,82 +58,81 @@ jobs:
           wxwidgets:x64-windows `
           libxml2:x64-windows-static `
           tiff:x64-windows-static `
-          wxwidgets:x64-windows-static `
-          --debug
-        Write-Host "vcpkg libraries installed successfully."
+          wxwidgets:x64-windows-static
 
-    - name: Clone PatchIccMAX repository
-      run: |
-        $repoDir = Join-Path $env:RUNNER_TEMP "PatchIccMAX"
-        if (-Not (Test-Path "$repoDir\.git")) {
-            Write-Host "Cloning PatchIccMAX repository..."
-            git clone https://github.com/xsscx/PatchIccMAX.git $repoDir
-        } else {
-            Write-Host "PatchIccMAX repository already exists. Pulling latest changes..."
-            cd $repoDir
-            git pull
-        }
-        cd $repoDir
-        git checkout master
+        # Clone DemoIccMAX repository
+        Write-Host "Cloning DemoIccMAX repository..."
+        cd $optDir
+        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+        cd $patchDir
 
-        # Verify directory structure
-        if (-Not (Test-Path "$repoDir\Build\MSVC")) {
-            Write-Error "Expected directory structure missing: $repoDir\Build\MSVC"
-            exit 1
-        }
+        # Fix library paths
+        Write-Host "Fixups for libraries..."
+        copy "$vcpkgDir\installed\x64-windows\lib\tiff.lib" "$vcpkgDir\installed\x64-windows\lib\libtiff.lib"
+        copy "$vcpkgDir\installed\x64-windows-static\lib\tiff.lib" "$vcpkgDir\installed\x64-windows-static\lib\libtiff.lib"
 
-    - name: Locate MSBuild using vswhere
-      id: msbuild-locate
-      run: |
-        $msbuildPath = & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe"
-        if (-Not $msbuildPath) {
-            Write-Error "MSBuild.exe not found."
-            exit 1
-        } else {
-            Write-Host "MSBuild found at: $msbuildPath"
-            echo "::set-output name=msbuild-path::$msbuildPath"
-        }
-
-    - name: Build the project using MSBuild
-      run: |
-        $repoDir = Join-Path $env:RUNNER_TEMP "PatchIccMAX"
-        $solutionPath = Join-Path $repoDir "Build\MSVC\BuildAll_v22.sln"
-        if (-Not (Test-Path $solutionPath)) {
-            Write-Error "Solution file does not exist: $solutionPath"
-            exit 1
-        }
-
-        $msbuildPath = "${{ steps.msbuild-locate.outputs['msbuild-path'] }}"
-        & $msbuildPath $solutionPath `
+        # Build individual .vcxproj files
+        Write-Host "Building individual projects..."
+        $projects = @(
+          "IccXML\IccLibXML\IccLibXML_CRTDLL_v22.vcxproj",
+          "IccXML\IccLibXML\IccLibXML_v22.vcxproj",
+          "IccProfLib\IccProfLib_CRTDLL_v22.vcxproj",
+          "IccProfLib\IccProfLib_DLL_v22.vcxproj",
+          "IccProfLib\IccProfLib_v22.vcxproj",
+          "IccXML\CmdLine\IccFromXml\IccFromXml_v22.vcxproj",
+          "IccXML\CmdLine\IccToXml\IccToXml_v22.vcxproj",
+          "Tools\CmdLine\IccApplyNamedCmm\iccApplyNamedCmm_v22.vcxproj",
+          "Tools\CmdLine\IccApplyToLink\iccApplyToLink_v16.vcxproj",
+          "Tools\CmdLine\IccDumpProfile\iccDumpProfile_v22.vcxproj",
+          "Tools\CmdLine\IccFromCube\iccFromCube_v16.vcxproj",
+          "Tools\CmdLine\IccRoundTrip\iccRoundTrip_v22.vcxproj",
+          "Tools\CmdLine\IccV5DspObsToV4Dsp\IccV5DspObsToV4Dsp_v22.vcxproj",
+          "Tools\Winnt\DemoIccMAXCmm\DemoIccMAXCmm_v22.vcxproj",
+          "Tools\CmdLine\IccApplyProfiles\iccApplyProfiles_v22.vcxproj",
+          "Tools\CmdLine\IccTiffDump\iccTiffDump_v22.vcxproj",
+          "Tools\CmdLine\IccSpecSepToTiff\iccSpecSepToTiff_v22.vcxproj"
+        )
+        foreach ($project in $projects) {
+          $projectPath = Join-Path $patchDir $project
+          msbuild $projectPath `
             /m `
-            /p:Configuration=${{ env.BuildConfiguration }} `
+            /p:Configuration=Release `
             /p:Platform=x64 `
-            /p:AdditionalIncludeDirectories="$env:RUNNER_TEMP\vcpkg\installed\x64-windows\include" `
-            /p:AdditionalLibraryDirectories="$env:RUNNER_TEMP\vcpkg\installed\x64-windows\lib" `
-            /p:CLToolAdditionalOptions="/fsanitize=address /Zi /Od /DDEBUG /W4" `
-            /p:LinkToolAdditionalOptions="/fsanitize=address /DEBUG /INCREMENTAL:NO"
-
-    - name: Copy build artifacts to output directory
-      run: |
-        $repoDir = Join-Path $env:RUNNER_TEMP "PatchIccMAX"
-        $outputDir = Join-Path $env:RUNNER_TEMP "output"
-        $files = Get-ChildItem -Path $repoDir -Recurse -Include *.exe, *.dll, *.lib
-        foreach ($file in $files) {
-            Copy-Item -Path $file.FullName -Destination $outputDir -Force
+            /p:AdditionalIncludeDirectories="$vcpkgDir\installed\x64-windows\include" `
+            /p:AdditionalLibraryDirectories="$vcpkgDir\installed\x64-windows-static\lib" `
+            /p:CLToolAdditionalOptions="/MT /Zi /Od /DDEBUG /W4" `
+            /p:LinkToolAdditionalOptions="/NODEFAULTLIB:msvcrt /LTCG /OPT:REF /INCREMENTAL:NO"
         }
 
-    - name: List files in the output directory
-      run: |
-        Get-ChildItem -Path "$env:RUNNER_TEMP/output"
+        # Copy DLLs and libraries for testing
+        Write-Host "Copying DLLs and libraries for testing..."
+        cd "$patchDir\Testing"
+        copy "$vcpkgDir\installed\x64-windows\lib\*.dll" .
+        copy "$vcpkgDir\installed\x64-windows-static\lib\*.lib" .
 
+        # Run .exe files
+        Write-Host "Running .exe files..."
+        Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
+
+        # Run CreateAllProfiles.bat
+        Write-Host "Running CreateAllProfiles.bat..."
+        $tempFile = "$env:TEMP\CreateAllProfiles.bat"
+        iwr -Uri "https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.bat" -OutFile $tempFile
+        & $tempFile
+        Remove-Item $tempFile
+
+        Write-Host "============================= Build Completed =============================" -ForegroundColor Green
+
+    # Step 4: Upload build artifacts
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: PatchIccMAX-Build-Artifacts
-        path: $env:RUNNER_TEMP/output
+        name: Build-Artifacts
+        path: C:\test\DemoIccMAX
 
+    # Step 5: Upload logs
     - name: Upload build logs
       uses: actions/upload-artifact@v3
       with:
-        name: PatchIccMAX-Build-Logs
+        name: Build-Logs
         path: ${{ github.workspace }}/logs
