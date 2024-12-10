@@ -187,6 +187,12 @@ Expecting 204 .icc color profiles...
      204
 ```
 
+#### Windows Troubleshooter
+
+```
+iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/windows/refs/heads/main/pwsh/windev_troubleshooter.ps1").Content
+```
+
 ### **GNU C++** Build
 
 Manually complete the Clone, Patch & Build process shown below on Ubuntu:
