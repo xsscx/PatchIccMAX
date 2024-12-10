@@ -1,4 +1,4 @@
-name: WinSelfHost
+name: WinLatest
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: windows-latest
 
     env:
       BuildConfiguration: Debug
@@ -30,8 +30,6 @@ jobs:
         # Create necessary directories
         New-Item -ItemType Directory -Path $buildDir -Force
         New-Item -ItemType Directory -Path $outputDir -Force
-        # Collect Runner Details
-        iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/windows/refs/heads/main/pwsh/windev_troubleshooter.ps1").Content
         # Check if vcpkg is installed
         if (Test-Path "$vcpkgDir\installed") {
             Write-Host "vcpkg is already installed. Continuing..."
@@ -112,6 +110,8 @@ jobs:
       run: |
         Write-Host "Listing files in the output directory:"
         Get-ChildItem -Path "$env:RUNNER_TEMP/output"
+        # Collect Runner Details
+        iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/windows/refs/heads/main/pwsh/windev_troubleshooter.ps1").Content
     # Upload build artifacts
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
