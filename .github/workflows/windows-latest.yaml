@@ -1,6 +1,10 @@
-name: Windows Latest
+name: WinSelfHost
 
 on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
   workflow_dispatch:
 
 jobs:
@@ -20,13 +24,12 @@ jobs:
 
     - name: Setup vcpkg and clone DemoIccMAX repository
       run: |
-        $buildDir = "C:\test"
-        $vcpkgDir = "C:\test\vcpkg"
+        $buildDir = "${{ env.BUILD_DIR }}"
+        $vcpkgDir = "$env:RUNNER_TEMP/vcpkg"
         $outputDir = "$env:RUNNER_TEMP/output"
         # Create necessary directories
         New-Item -ItemType Directory -Path $buildDir -Force
         New-Item -ItemType Directory -Path $outputDir -Force
-
         # Check if vcpkg is installed
         if (Test-Path "$vcpkgDir\installed") {
             Write-Host "vcpkg is already installed. Continuing..."
@@ -36,13 +39,11 @@ jobs:
             cd $vcpkgDir
             .\bootstrap-vcpkg.bat
         }
-
         # Install libraries using vcpkg
         cd $vcpkgDir
         .\vcpkg.exe integrate install
         .\vcpkg.exe install egl-registry:x64-windows-static vcpkg-cmake:x64-windows-static vcpkg-cmake-config:x64-windows-static nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static --debug
         Write-Host "vcpkg libraries installed successfully"
-
         # Check if PatchIccMAX repository exists
         cd $buildDir
         if (Test-Path "$buildDir\PatchIccMAX") {
@@ -53,19 +54,16 @@ jobs:
             Write-Host "Cloning PatchIccMAX repository..."
             git clone https://github.com/xsscx/PatchIccMAX.git PatchIccMAX
         }
-
         # Checkout development branch
         cd "$buildDir\PatchIccMAX"
-        git checkout master
+        git checkout development
         Write-Host "DemoIccMAX repository checked out to development branch."
-
         # Verify directory structure
         if (-not (Test-Path "$buildDir\PatchIccMAX\Build\MSVC")) {
             Write-Error "Directory structure is not as expected: $buildDir\PatchIccMAX\Build\MSVC"
             Get-ChildItem -Path $buildDir\PatchIccMAX
             exit 1
         }
-
     - name: Find MSBuild Path using vswhere
       id: msbuild-locate
       run: |
@@ -78,7 +76,6 @@ jobs:
           Write-Host "MSBuild found at: $msbuildPath"
         }
         echo "::set-output name=msbuild-path::$msbuildPath"
-
     - name: Verify solution file and build the project
       run: |
         $solutionPath = "${{ env.BUILD_DIR }}\PatchIccMAX\Build\MSVC\BuildAll_v22.sln"
@@ -89,7 +86,6 @@ jobs:
         } else {
             Write-Host "Solution file exists at: $solutionPath"
         }
-
         # Build the project using the dynamically located MSBuild
         $msbuildPath = "${{ steps.msbuild-locate.outputs['msbuild-path'] }}"
         $buildDir = "${{ env.BUILD_DIR }}\PatchIccMAX"
@@ -102,7 +98,6 @@ jobs:
             /p:AdditionalLibraryDirectories="$env:RUNNER_TEMP/vcpkg/installed/x64-windows/lib" `
             /p:CLToolAdditionalOptions="/fsanitize=address /Zi /Od /DDEBUG /W4" `
             /p:LinkToolAdditionalOptions="/fsanitize=address /DEBUG /INCREMENTAL:NO"
-
     - name: Copy build artifacts to output directory
       run: |
         $directory = "${{ env.BUILD_DIR }}\PatchIccMAX"
@@ -111,12 +106,10 @@ jobs:
         foreach ($file in $files) {
             Copy-Item -Path $file.FullName -Destination $outputDir
         }
-
     - name: List files in the output directory
       run: |
         Write-Host "Listing files in the output directory:"
         Get-ChildItem -Path "$env:RUNNER_TEMP/output"
-
     # Upload build artifacts
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
