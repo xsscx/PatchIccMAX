@@ -86,6 +86,12 @@ iwr -Uri "https://xss.cx/2024/10/26/signed/DemoIccMAXCmm.dll" -OutFile ".\DemoIc
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/HelperScripts/Install-RefIccMAX.reg" -OutFile "$env:TEMP\Install-RefIccMAX.reg"; Start-Process reg.exe -ArgumentList "import $env:TEMP\Install-RefIccMAX.reg" -Wait; Remove-Item "$env:TEMP\Install-RefIccMAX.reg" -Force
 ```
 
+#### Windows Troubleshooter
+
+```
+iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/windows/refs/heads/main/pwsh/windev_troubleshooter.ps1").Content
+```
+
 ## Subdirectories and Files in contrib/
 
 ### [Workflows](contrib/.github/workflows)
