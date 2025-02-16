@@ -40,10 +40,10 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libxml2 libxml2-dev libtiff5 libtiff5-dev nlohmann-json3-dev build-essential \
-            cmake clang clang-tools libwxgtk3.0-gtk3-dev wx-common \
-            libopencl-clang-dev curl git llvm
+          # sudo apt-get install -y \
+          #  libxml2 libxml2-dev libtiff5 libtiff5-dev nlohmann-json3-dev build-essential \
+          #  cmake clang clang-tools libwxgtk3.0-gtk3-dev wx-common \
+          #  libopencl-clang-dev curl git llvm
           uname -a               # Kernel and system information
           cat /etc/os-release    # OS release details
           gcc -v                 # GCC version and configuration
