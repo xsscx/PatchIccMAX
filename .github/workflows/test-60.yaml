@@ -1,9 +1,9 @@
 ###############################################################
 #
-## Copyright (©) 2024 David H Hoyt. All rights reserved.
+## Copyright (Â©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 10-DEC-2024 by David Hoyt (©)
+## Last Updated: 10-DEC-2024 by David Hoyt (Â©)
 #
 ## Intent: Poll the Device and Report
 #
@@ -19,7 +19,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: windows-latest
 
     steps:
     # Step 1: Checkout the repository
