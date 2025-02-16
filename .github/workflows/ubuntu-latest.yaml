@@ -27,7 +27,7 @@ jobs:
     steps:
     # Checkout repository
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     # Set up Git anonymous identity
     - name: Set up Git anonymous identity
