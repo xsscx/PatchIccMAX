@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2024-2025. David H Hoyt LLC. All rights reserved.
 #
-# Last Updated: 10-FEB-2025 by David Hoyt | h02332
+# Last Updated: 16-FEB-2025 at 0730 EST by David Hoyt | h02332
 #
 # Intent:
 #   This script polls the macOS device, retrieves system and development environment
@@ -18,7 +18,7 @@
 #
 # Usage:
 #   Run this script in a terminal with:
-#     ./device_report.zsh
+#     /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/xnu/contrib/UnitTest/xnu_checks.zsh)"
 #
 
 ### System Information ###
