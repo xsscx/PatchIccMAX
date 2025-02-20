@@ -1,0 +1,141 @@
+name: WinRunner11
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      BuildConfiguration: Debug
+      BUILD_DIR: ${{ github.workspace }}\builds
+      VCPKG_DIR: ${{ runner.temp }}\vcpkg
+      OUTPUT_DIR: ${{ runner.temp }}\output
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Setup vcpkg and Clone PatchIccMAX
+      shell: pwsh
+      run: |
+        # Create necessary directories
+        New-Item -ItemType Directory -Path "${{ env.BUILD_DIR }}" -Force | Out-Null
+        New-Item -ItemType Directory -Path "${{ env.OUTPUT_DIR }}" -Force | Out-Null
+
+        # Setup vcpkg
+        if (!(Test-Path "${{ env.VCPKG_DIR }}\installed")) {
+            Write-Host "vcpkg not found. Cloning and bootstrapping..."
+            git clone https://github.com/microsoft/vcpkg.git "${{ env.VCPKG_DIR }}"
+            & "${{ env.VCPKG_DIR }}\bootstrap-vcpkg.bat"
+        } else {
+            Write-Host "✅ vcpkg is already installed."
+        }
+
+        # Install dependencies
+        & "${{ env.VCPKG_DIR }}\vcpkg.exe" integrate install
+        & "${{ env.VCPKG_DIR }}\vcpkg.exe" install `
+          egl-registry:x64-windows-static `
+          vcpkg-cmake:x64-windows-static `
+          vcpkg-cmake-config:x64-windows-static `
+          nlohmann-json:x64-windows `
+          nlohmann-json:x64-windows-static `
+          libxml2:x64-windows `
+          tiff:x64-windows `
+          wxwidgets:x64-windows `
+          libxml2:x64-windows-static `
+          tiff:x64-windows-static `
+          wxwidgets:x64-windows-static --debug
+        Write-Host "✅ vcpkg libraries installed successfully."
+
+        # Clone or update PatchIccMAX
+        $repoPath = "${{ env.BUILD_DIR }}\PatchIccMAX"
+        if (Test-Path "$repoPath") {
+            Write-Host "✅ PatchIccMAX repository found. Pulling latest changes..."
+            cd "$repoPath"
+            git pull
+        } else {
+            Write-Host "Cloning PatchIccMAX repository..."
+            git clone https://github.com/xsscx/PatchIccMAX.git "$repoPath"
+        }
+        
+        # Checkout development branch
+        cd "$repoPath"
+        git checkout development
+        Write-Host "✅ Checked out to development branch."
+
+        # Verify expected structure
+        if (-not (Test-Path "$repoPath\Build\MSVC")) {
+            Write-Error "❌ Expected directory not found: $repoPath\Build\MSVC"
+            exit 1
+        }
+
+    - name: Find MSBuild Path using vswhere
+      id: msbuild-locate
+      shell: pwsh
+      run: |
+        $vswherePath = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+        $msbuildPath = & $vswherePath -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
+        if (-not $msbuildPath) {
+          Write-Error "❌ MSBuild.exe not found."
+          exit 1
+        } else {
+          Write-Host "✅ MSBuild found at: $msbuildPath"
+        }
+        echo "msbuild-path=$msbuildPath" >> $env:GITHUB_ENV
+
+    - name: Verify Solution File and Build
+      shell: pwsh
+      run: |
+        $solutionPath = "${{ env.BUILD_DIR }}\PatchIccMAX\Build\MSVC\BuildAll_v22.sln"
+        if (!(Test-Path $solutionPath)) {
+            Write-Error "❌ Solution file not found: $solutionPath"
+            exit 1
+        }
+        Write-Host "✅ Solution file exists at: $solutionPath"
+
+        # Run MSBuild
+        $msbuildPath = "${{ env.msbuild-path }}"
+        & $msbuildPath $solutionPath `
+          /m `
+          /p:Configuration=${{ env.BuildConfiguration }} `
+          /p:Platform=x64 `
+          /p:AdditionalIncludeDirectories="${{ env.VCPKG_DIR }}\installed\x64-windows\include" `
+          /p:AdditionalLibraryDirectories="${{ env.VCPKG_DIR }}\installed\x64-windows\lib" `
+          /p:CLToolAdditionalOptions="/fsanitize=address /Zi /Od /DDEBUG /W4" `
+          /p:LinkToolAdditionalOptions="/fsanitize=address /DEBUG /INCREMENTAL:NO"
+
+    - name: Copy Build Artifacts to Output Directory
+      shell: pwsh
+      run: |
+        $sourceDir = "${{ env.BUILD_DIR }}\PatchIccMAX"
+        $outputDir = "${{ env.OUTPUT_DIR }}"
+        Get-ChildItem -Path $sourceDir -Recurse -Include *.exe, *.dll, *.lib | ForEach-Object {
+            Copy-Item -Path $_.FullName -Destination $outputDir
+        }
+
+    - name: List Files in Output Directory
+      shell: pwsh
+      run: |
+        Write-Host "🔍 Listing files in output directory:"
+        Get-ChildItem -Path "${{ env.OUTPUT_DIR }}"
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: PatchIccMAX-Build-Artifacts
+        path: ${{ env.OUTPUT_DIR }}
+
+    - name: Upload Build Logs (Optional)
+      uses: actions/upload-artifact@v3
+      with:
+        name: PatchIccMAX-Build-Logs
+        path: ${{ github.workspace }}/logs
