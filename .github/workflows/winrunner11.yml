@@ -131,13 +131,13 @@ jobs:
         Get-ChildItem -Path "$env:RUNNER_TEMP\output"
 
     - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: PatchIccMAX-Build-Artifacts
         path: $env:RUNNER_TEMP\output
 
     - name: Upload Build Logs (Optional)
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: PatchIccMAX-Build-Logs
         path: ${{ github.workspace }}/logs
