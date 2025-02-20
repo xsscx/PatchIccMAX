@@ -3,7 +3,7 @@
 ## Copyright (©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 19-FEB-2025 2102 EST by David Hoyt (©)
+## Last Updated: 19-FEB-2025 2110 EST by David Hoyt (©)
 #
 ## Intent: Poll the Device and Report
 #
@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "XNU Latest"
+name: "XNU Scan-Build Master"
 
 on:
   workflow_dispatch:
