@@ -3,7 +3,7 @@
 ## Copyright (©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 19-FEB-2025 2051 EST by David Hoyt (©)
+## Last Updated: 19-FEB-2025 2055 EST by David Hoyt (©)
 #
 ## Intent: Poll the Device and Report
 #
@@ -35,37 +35,42 @@ jobs:
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
 
-    # Clone the DemoIccMAX repository and install dependencies
+    # Clone DemoIccMAX & Install Dependencies
     - name: Clone DemoIccMAX & Install Dependencies
       run: |
         git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
         cd DemoIccMAX
-        brew install nlohmann-json libxml2 wxwidgets libtiff llvm
+        brew install nlohmann-json libxml2 wxwidgets libtiff llvm lld
 
-        # Ensure LLVM and scan-build are available
-        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.zshrc
-        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bashrc
-        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bash_profile
+        # Ensure LLVM is correctly linked
+        brew link --force llvm || true
+
+        # Set correct paths for LLVM
+        echo 'export PATH="/opt/homebrew/opt/llvm/bin:$PATH"' >> ~/.bash_profile
+        echo 'export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"' >> ~/.bash_profile
+        echo 'export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"' >> ~/.bash_profile
         source ~/.bash_profile
-        scan-build --version || { echo "❌ scan-build not found after installation"; exit 1; }
+
+        # Verify scan-build installation
+        /opt/homebrew/opt/llvm/bin/scan-build --version || { echo "❌ scan-build not found after installation"; exit 1; }
 
     # Configure the build with CMake (with scan-build)
     - name: Configure Build with CMake & scan-build
       run: |
-        export PATH="/usr/local/opt/llvm/bin:$PATH"
+        export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
         mkdir -p DemoIccMAX/Build
         cd DemoIccMAX/Build
-        scan-build cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
+        /opt/homebrew/opt/llvm/bin/scan-build cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
                          -DCMAKE_BUILD_TYPE=Debug \
                          -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
                          -Wno-dev Cmake/
 
-    # Static Analysis using scan-build
+    # Run Static Analysis using scan-build
     - name: Run Static Analysis with scan-build
       run: |
-        export PATH="/usr/local/opt/llvm/bin:$PATH"
+        export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
         cd DemoIccMAX/Build
-        scan-build -o scan-results make -j$(sysctl -n hw.ncpu)
+        /opt/homebrew/opt/llvm/bin/scan-build -o scan-results make -j$(sysctl -n hw.ncpu)
 
     # Upload scan-build results as an artifact
     - name: Upload scan-build Report
