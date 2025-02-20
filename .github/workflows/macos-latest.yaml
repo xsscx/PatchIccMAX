@@ -3,7 +3,7 @@
 ## Copyright (©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 19-FEB-2025 2046 EST by David Hoyt (©)
+## Last Updated: 19-FEB-2025 2051 EST by David Hoyt (©)
 #
 ## Intent: Poll the Device and Report
 #
@@ -42,9 +42,17 @@ jobs:
         cd DemoIccMAX
         brew install nlohmann-json libxml2 wxwidgets libtiff llvm
 
+        # Ensure LLVM and scan-build are available
+        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.zshrc
+        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bashrc
+        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bash_profile
+        source ~/.bash_profile
+        scan-build --version || { echo "❌ scan-build not found after installation"; exit 1; }
+
     # Configure the build with CMake (with scan-build)
     - name: Configure Build with CMake & scan-build
       run: |
+        export PATH="/usr/local/opt/llvm/bin:$PATH"
         mkdir -p DemoIccMAX/Build
         cd DemoIccMAX/Build
         scan-build cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
@@ -55,6 +63,7 @@ jobs:
     # Static Analysis using scan-build
     - name: Run Static Analysis with scan-build
       run: |
+        export PATH="/usr/local/opt/llvm/bin:$PATH"
         cd DemoIccMAX/Build
         scan-build -o scan-results make -j$(sysctl -n hw.ncpu)
 
@@ -87,3 +96,4 @@ jobs:
           echo "❌ Build Failed"
           exit 1
         fi
+
