@@ -3,7 +3,7 @@
 ## Copyright (©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 10-DEC-2024 by David Hoyt (©)
+## Last Updated: 19-FEB-2025 2046 EST by David Hoyt (©)
 #
 ## Intent: Poll the Device and Report
 #
@@ -35,38 +35,51 @@ jobs:
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
 
-    # Fetch the specific PR branch
-    - name: Clone the DemoIccMAX repository
+    # Clone the DemoIccMAX repository and install dependencies
+    - name: Clone DemoIccMAX & Install Dependencies
       run: |
         git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
         cd DemoIccMAX
-        brew install nlohmann-json libxml2 wxwidgets libtiff
+        brew install nlohmann-json libxml2 wxwidgets libtiff llvm
 
-    # Configure the build with CMake
-    - name: Configure the build with CMake
+    # Configure the build with CMake (with scan-build)
+    - name: Configure Build with CMake & scan-build
       run: |
         mkdir -p DemoIccMAX/Build
         cd DemoIccMAX/Build
-        cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
-              -DCMAKE_BUILD_TYPE=Debug \
-              -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
-              -Wno-dev Cmake/
+        scan-build cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
+                         -DCMAKE_BUILD_TYPE=Debug \
+                         -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
+                         -Wno-dev Cmake/
 
-    # Build the project using CMake
+    # Static Analysis using scan-build
+    - name: Run Static Analysis with scan-build
+      run: |
+        cd DemoIccMAX/Build
+        scan-build -o scan-results make -j$(sysctl -n hw.ncpu)
+
+    # Upload scan-build results as an artifact
+    - name: Upload scan-build Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: scan-build-report
+        path: DemoIccMAX/Build/scan-results
+
+    # Build the project using CMake (without scan-build)
     - name: Build project with CMake
       run: |
         cd DemoIccMAX/Build
         make -j$(sysctl -n hw.ncpu)
 
     # Upload built binaries as artifacts
-    - name: Upload build artifacts
+    - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: main_ci_macos build
         path: DemoIccMAX/Build
 
     # Check build success
-    - name: Check build success
+    - name: Check Build Success
       run: |
         if [ $? -eq 0 ]; then
           echo "✅ Build Succeeded"
