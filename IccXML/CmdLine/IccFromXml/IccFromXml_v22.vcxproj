@@ -195,6 +195,7 @@ copy $(Platform)\$(Configuration)\iccFromXml.pdb ..\..\..\Testing
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>IccProfLib.lib;IccLibXml.lib;libxml2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -211,6 +212,9 @@ copy $(Platform)\$(Configuration)\iccFromXml.pdb ..\..\..\Testing
     <PostBuildEvent>
       <Command>copy $(Platform)\$(Configuration)\iccFromXml.exe ..\..\..\Testing\iccFromXml.exe</Command>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="IccFromXml.cpp">

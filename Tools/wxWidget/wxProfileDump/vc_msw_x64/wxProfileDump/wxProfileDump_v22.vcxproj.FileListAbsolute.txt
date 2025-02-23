@@ -1,3 +1,5 @@
+C:\Github\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_msw_x64\wxProfileDump.exe.lastcodeanalysissucceeded
+C:\Github\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_msw_x64\wxProfileDump\NativeCodeAnalysis.read.1.tlog
 C:\Github\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_msw_x64\wxProfileDump\wxProfil.945B59E2.Up2Date
 C:\Github\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_msw_x64\wxmsw32u_core_vc_x64_custom.dll
 C:\Github\PatchIccMAX\Tools\wxWidget\wxProfileDump\vc_msw_x64\wxbase32u_vc_x64_custom.dll
