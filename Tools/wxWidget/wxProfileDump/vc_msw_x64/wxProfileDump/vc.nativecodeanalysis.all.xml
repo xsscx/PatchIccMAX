@@ -6,12 +6,12 @@
       <COLUMN>2</COLUMN>
     </SFA>
     <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'CIccCreateNamedColorXformHint::csPcs' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <DESCRIPTION>Variable 'CIccCreateNamedColorXformHint::csDevice' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
     <FUNCTION>CIccCreateNamedColorXformHint::{ctor}</FUNCTION>
     <DECORATED>??0CIccCreateNamedColorXformHint@@QEAA@XZ</DECORATED>
     <FUNCLINE>225</FUNCLINE>
     <ADDITIONALINFO>
-      <targetSymbol>CIccCreateNamedColorXformHint::csPcs</targetSymbol>
+      <targetSymbol>CIccCreateNamedColorXformHint::csDevice</targetSymbol>
     </ADDITIONALINFO>
     <PATH></PATH>
   </DEFECT><DEFECT>
@@ -22,12 +22,12 @@
       <COLUMN>2</COLUMN>
     </SFA>
     <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'CIccCreateNamedColorXformHint::csDevice' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <DESCRIPTION>Variable 'CIccCreateNamedColorXformHint::csPcs' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
     <FUNCTION>CIccCreateNamedColorXformHint::{ctor}</FUNCTION>
     <DECORATED>??0CIccCreateNamedColorXformHint@@QEAA@XZ</DECORATED>
     <FUNCLINE>225</FUNCLINE>
     <ADDITIONALINFO>
-      <targetSymbol>CIccCreateNamedColorXformHint::csDevice</targetSymbol>
+      <targetSymbol>CIccCreateNamedColorXformHint::csPcs</targetSymbol>
     </ADDITIONALINFO>
     <PATH></PATH>
   </DEFECT><DEFECT>
@@ -381,28 +381,12 @@
       <COLUMN>4</COLUMN>
     </SFA>
     <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'wxGIFHandler::m_runningBits' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <DESCRIPTION>Variable 'wxGIFHandler::m_pixelCount' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
     <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
     <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
     <FUNCLINE>34</FUNCLINE>
     <ADDITIONALINFO>
-      <targetSymbol>wxGIFHandler::m_runningBits</targetSymbol>
-    </ADDITIONALINFO>
-    <PATH></PATH>
-  </DEFECT><DEFECT>
-    <SFA>
-      <FILEPATH>C:\test\vcpkg\installed\x64-windows\include\wx\</FILEPATH>
-      <FILENAME>imaggif.h</FILENAME>
-      <LINE>34</LINE>
-      <COLUMN>4</COLUMN>
-    </SFA>
-    <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'wxGIFHandler::m_EOFCode' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
-    <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
-    <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
-    <FUNCLINE>34</FUNCLINE>
-    <ADDITIONALINFO>
-      <targetSymbol>wxGIFHandler::m_EOFCode</targetSymbol>
+      <targetSymbol>wxGIFHandler::m_pixelCount</targetSymbol>
     </ADDITIONALINFO>
     <PATH></PATH>
   </DEFECT><DEFECT>
@@ -429,44 +413,28 @@
       <COLUMN>4</COLUMN>
     </SFA>
     <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'wxGIFHandler::m_LZBuf' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
-    <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
-    <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
-    <FUNCLINE>34</FUNCLINE>
-    <ADDITIONALINFO>
-      <targetSymbol>wxGIFHandler::m_LZBuf</targetSymbol>
-    </ADDITIONALINFO>
-    <PATH></PATH>
-  </DEFECT><DEFECT>
-    <SFA>
-      <FILEPATH>C:\test\vcpkg\installed\x64-windows\include\wx\</FILEPATH>
-      <FILENAME>imaggif.h</FILENAME>
-      <LINE>34</LINE>
-      <COLUMN>4</COLUMN>
-    </SFA>
-    <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'wxGIFHandler::m_crntCode' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
-    <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
-    <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
-    <FUNCLINE>34</FUNCLINE>
-    <ADDITIONALINFO>
-      <targetSymbol>wxGIFHandler::m_crntCode</targetSymbol>
-    </ADDITIONALINFO>
-    <PATH></PATH>
-  </DEFECT><DEFECT>
-    <SFA>
-      <FILEPATH>C:\test\vcpkg\installed\x64-windows\include\wx\</FILEPATH>
-      <FILENAME>imaggif.h</FILENAME>
-      <LINE>34</LINE>
-      <COLUMN>4</COLUMN>
-    </SFA>
-    <DEFECTCODE>26495</DEFECTCODE>
     <DESCRIPTION>Variable 'wxGIFHandler::m_runningCode' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
     <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
     <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
     <FUNCLINE>34</FUNCLINE>
     <ADDITIONALINFO>
       <targetSymbol>wxGIFHandler::m_runningCode</targetSymbol>
+    </ADDITIONALINFO>
+    <PATH></PATH>
+  </DEFECT><DEFECT>
+    <SFA>
+      <FILEPATH>C:\test\vcpkg\installed\x64-windows\include\wx\</FILEPATH>
+      <FILENAME>imaggif.h</FILENAME>
+      <LINE>34</LINE>
+      <COLUMN>4</COLUMN>
+    </SFA>
+    <DEFECTCODE>26495</DEFECTCODE>
+    <DESCRIPTION>Variable 'wxGIFHandler::m_LZBuf' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
+    <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
+    <FUNCLINE>34</FUNCLINE>
+    <ADDITIONALINFO>
+      <targetSymbol>wxGIFHandler::m_LZBuf</targetSymbol>
     </ADDITIONALINFO>
     <PATH></PATH>
   </DEFECT><DEFECT>
@@ -509,12 +477,44 @@
       <COLUMN>4</COLUMN>
     </SFA>
     <DEFECTCODE>26495</DEFECTCODE>
-    <DESCRIPTION>Variable 'wxGIFHandler::m_pixelCount' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <DESCRIPTION>Variable 'wxGIFHandler::m_crntCode' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
     <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
     <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
     <FUNCLINE>34</FUNCLINE>
     <ADDITIONALINFO>
-      <targetSymbol>wxGIFHandler::m_pixelCount</targetSymbol>
+      <targetSymbol>wxGIFHandler::m_crntCode</targetSymbol>
+    </ADDITIONALINFO>
+    <PATH></PATH>
+  </DEFECT><DEFECT>
+    <SFA>
+      <FILEPATH>C:\test\vcpkg\installed\x64-windows\include\wx\</FILEPATH>
+      <FILENAME>imaggif.h</FILENAME>
+      <LINE>34</LINE>
+      <COLUMN>4</COLUMN>
+    </SFA>
+    <DEFECTCODE>26495</DEFECTCODE>
+    <DESCRIPTION>Variable 'wxGIFHandler::m_runningBits' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
+    <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
+    <FUNCLINE>34</FUNCLINE>
+    <ADDITIONALINFO>
+      <targetSymbol>wxGIFHandler::m_runningBits</targetSymbol>
+    </ADDITIONALINFO>
+    <PATH></PATH>
+  </DEFECT><DEFECT>
+    <SFA>
+      <FILEPATH>C:\test\vcpkg\installed\x64-windows\include\wx\</FILEPATH>
+      <FILENAME>imaggif.h</FILENAME>
+      <LINE>34</LINE>
+      <COLUMN>4</COLUMN>
+    </SFA>
+    <DEFECTCODE>26495</DEFECTCODE>
+    <DESCRIPTION>Variable 'wxGIFHandler::m_EOFCode' is uninitialized. Always initialize a member variable (type.6).</DESCRIPTION>
+    <FUNCTION>wxGIFHandler::{ctor}</FUNCTION>
+    <DECORATED>??0wxGIFHandler@@QEAA@XZ</DECORATED>
+    <FUNCLINE>34</FUNCLINE>
+    <ADDITIONALINFO>
+      <targetSymbol>wxGIFHandler::m_EOFCode</targetSymbol>
     </ADDITIONALINFO>
     <PATH></PATH>
   </DEFECT><DEFECT>
