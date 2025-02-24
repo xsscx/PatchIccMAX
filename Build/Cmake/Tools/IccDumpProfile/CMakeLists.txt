@@ -1,40 +1,52 @@
+#########################################################################################
+# Configuration for wxProfileDump in Build/Cmake/Tools/wxProfileDump/CMakeLists.txt
+# Copyright (�) 2024-2025 David H Hoyt LLC. All rights reserved.
 #
-# IccDumpProfile in Project_Root/Build/Cmake/Tools/IccDumpProfile/CMakeLists.txt | DemoIccMAX Project
-# Copyright (©) 2024 David H Hoyt LLC. All rights reserved.
+# Last Updated: 17-MAR-2025 0947 EDT by David Hoyt
 #
-# Last Updated: 06-DEC-2024 by David Hoyt (©)
+# Changes:  Adjusted cross platform conditionals
+#           Improved dependency linking and error handling
+#           Adjusted cross-platform build args
 #
-# Changes: Modified Build/Cmake/CMakelists.txt
-#          Added explicit linker paths
-#          Improved debug output for cross-platform support
+# TODO: Refactor Debug, Release, Asan 
+#       Collapse 3-tier CMakeLists.txt, Housekeeping
+#       Refactor Base Configs & logging to .mk's
 #
-
-# Log the entry into the CMake file
-    message(STATUS "#############################################################################################")
-		message(STATUS "Entering IccDumpProfile in Project_Root/Build/Cmake/Tools/IccDumpProfile/CMakeLists.txt .....")
+#
+#
+#
+#
+#
+#########################################################################################
 
 # Define the project
-project(IccDumpProfile)
+project(iccDumpProfile)
 
 # Define target name
-set(TARGET_NAME "IccDumpProfile")
+set(TARGET_NAME "iccDumpProfile")
 
 # Determine project root and source paths
 get_filename_component(PROJECT_ROOT_DIR "${CMAKE_SOURCE_DIR}/../.." ABSOLUTE)
 set(SRC_PATH "${PROJECT_ROOT_DIR}/Tools/CmdLine/IccDumpProfile")
-set(SOURCES "${SRC_PATH}/iccDumpProfile.cpp")
+set(ICCPROFLIB_PATH "${PROJECT_ROOT_DIR}/IccProfLib")
+set(SOURCES
+    "${SRC_PATH}/iccDumpProfile.cpp"
+    "${ICCPROFLIB_PATH}/IccUtil.cpp"
+)
 
-# Ensure source file exists
-if (NOT EXISTS "${SOURCES}")
-    message(FATAL_ERROR "Source file not found at: ${SOURCES}. Verify the file exists.")
-endif()
+# Ensure source files exist
+foreach(SOURCE ${SOURCES})
+    if (NOT EXISTS "${SOURCE}")
+        message(FATAL_ERROR "Source file not found at: ${SOURCE}. Verify the file exists.")
+    endif()
+endforeach()
 
 # Add executable target
 add_executable(${TARGET_NAME} ${SOURCES})
 
 # Include directories
 target_include_directories(${TARGET_NAME} PRIVATE
-    "${PROJECT_ROOT_DIR}/IccProfLib"
+    "${ICCPROFLIB_PATH}"
 )
 
 # Platform-specific options
@@ -97,5 +109,4 @@ else()
     message(STATUS "Installation disabled for '${TARGET_NAME}'.")
 endif()
 
-message(STATUS "Exiting IccDumpProfile in Project_Root/Build/Cmake/Tools/IccDumpProfile/CMakeLists.txt")
-message(STATUS "######################################################################################")
+message(STATUS "")

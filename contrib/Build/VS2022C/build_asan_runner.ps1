@@ -1,11 +1,11 @@
 # ========================== PatchIccMAX ASAN Branch Build Script for VS2022 Community ==========================
 # © 2024-2025 David H Hoyt LLC. All rights reserved.
 #
-# Date: 15-MAR-2025 1245 EDT by David Hoyt
+# Date: 15-MAR-2025 1252 EDT by David Hoyt
 #
 #
 #
-# Run via pwsh: iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/msvc/contrib/Build/VS2022C/build_asan.ps1").Content
+# Run via pwsh: iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/msvc/contrib/Build/VS2022C/build_asan_runner.ps1").Content
 #
 #
 # Intent: Automate build, integration, and testing for the PatchIccMAX ASAN branch using Visual Studio 2022
@@ -60,7 +60,7 @@ function Run-Command {
 Log-Message "Starting PatchIccMAX ASAN Branch Build for VS2022 Community" "Green"
 
 # === Environment Setup ===
-Log-Message "Set up build directories, code page, vcpkg command line location and environment variables...."
+Log-Message "Setting up directories and environment variables..."
 chcp 65001
 $Env:VSCMD_ARG_HOST_ARCH = "x64"
 $Env:VSCMD_ARG_TGT_ARCH = "x64"
@@ -95,7 +95,7 @@ Run-Command "msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configurat
 Log-Message "Setting up testing environment..."
 Ensure-DirectoryExists -Path "$patchDir\Testing"
 Run-Command "copy $vcpkgDir\installed\x64-windows\bin\*.dll $patchDir\Testing\"
-Run-Command "copy 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64\clang_rt.asan_dynamic-x86_64.dll' $patchDir\Testing\"
+# Run-Command "copy 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64\clang_rt.asan_dynamic-x86_64.dll' $patchDir\Testing\"
 Log-Message "Fixups for libs"
 
 Log-Message "Adding vcpkg bin directory to PATH, Setting ASAN Options..."
@@ -106,52 +106,5 @@ Write-Host "ASAN_OPTIONS: $env:ASAN_OPTIONS"
 
 copy C:\test\vcpkg\installed\x64-windows\lib\tiff.lib C:\test\vcpkg\installed\x64-windows\lib\libtiff.lib
 Run-Command "msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configuration=Asan /p:Platform=x64 /p:AdditionalIncludeDirectories="$vcpkgDir\installed\x64-windows\include" /p:AdditionalLibraryDirectories="$vcpkgDir\installed\x64-windows\lib" /p:CLToolAdditionalOptions="/fsanitize=address /O2 /W4" /p:LinkToolAdditionalOptions="/fsanitize=address /INCREMENTAL:NO" msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configuration=Asan /p:Platform=x64 /p:AdditionalIncludeDirectories="$vcpkgDir\installed\x64-windows\include" /p:AdditionalLibraryDirectories="$vcpkgDir\installed\x64-windows\lib" /p:CLToolAdditionalOptions="/fsanitize=address /O2 /W4" /p:LinkToolAdditionalOptions="/fsanitize=address /INCREMENTAL:NO"  /verbosity:diagnostic /bl  /noconlog /flp:v=diag /p:LinkToolAdditionalOptions="/DYNAMICBASE /HIGHENTROPYVA /NXCOMPAT /GUARD:CF /GUARD:EH /SAFESEH /FIXED:NO" /t:Clean,Build"
-
-# === Final Steps ===
-cd Testing/
-Log-Message "Creating profiles using remote batch script..."
-
-# Define the temporary file path
-$tempFile = "$Env:TEMP\CreateAllProfiles.bat"
-
-# Download the batch script
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/development/contrib/UnitTest/CreateAltAsanProfiles.bat" -OutFile $tempFile
-
-# Run the batch file in a new cmd session
-Start-Process cmd.exe -ArgumentList "/c `"$tempFile`"" -Wait
-
-# Clean up the temporary batch file
-Remove-Item $tempFile -Force
-
-# Run Tests
-Write-Host "Running RunTests.bat from local"
-.\RunTests.bat
-
-# Collect .icc profile information
-$profiles = Get-ChildItem -Path . -Filter "*.icc" -Recurse -File
-$totalCount = $profiles.Count
-
-# Group profiles by directory
-$groupedProfiles = $profiles | Group-Object { $_.Directory.FullName }
-
-# Generate Summary Report
-Write-Host "`n========================="
-Write-Host " ICC Profile Report"
-Write-Host "========================="
-
-# Print count per subdirectory
-foreach ($group in $groupedProfiles) {
-    Write-Host ("{0}: {1} .icc profiles" -f $group.Name, $group.Count)
-}
-
-Write-Host "`nTotal .icc profiles found: $totalCount"
-Write-Host "=========================`n"
-
-[System.Environment]::SetEnvironmentVariable(
-    "Path",
-    "C:\test\vcpkg\installed\x64-windows\debug\bin;C:\test\vcpkg\installed\x64-windows\debug\lib;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64;" +
-    [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User),
-    [System.EnvironmentVariableTarget]::User
-)
 
 Log-Message "Done with PatchIccMAX ASAN Branch Build" "Cyan"

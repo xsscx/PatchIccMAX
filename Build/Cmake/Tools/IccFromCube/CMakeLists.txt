@@ -1,9 +1,10 @@
+#########################################################################################
 # 
 # IccFromCube CMakeLists.txt | DemoIccMAX Project
-# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+# Copyright (©) 2024-2025 David H Hoyt LLC. All rights reserved.
 # 
 #
-# Last Updated: 02-DEC-2024 by David Hoyt
+# Last Updated: 17-MAR-2025 1014 EDT by David Hoyt
 #
 # Changes: 	Modified Build/Cmake/CMakelists.txt and others
 #           Added IccFromCubeProject
@@ -14,6 +15,9 @@
 # 			Collapse 3-tier CMakeLists.txt, Housekeeping
 #				Refactor Base Configs & logging to .mk's 
 #
+#
+#
+#########################################################################################
 
 # Check if the target is already defined before adding it
 IF(NOT TARGET iccFromCube)
