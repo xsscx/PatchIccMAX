@@ -78,13 +78,13 @@ Log-Message "Cloning and bootstrapping vcpkg..."
 Run-Command "git clone https://github.com/microsoft/vcpkg.git $vcpkgDir"
 Run-Command "cd $vcpkgDir; .\bootstrap-vcpkg.bat"
 Run-Command "cd $vcpkgDir; .\vcpkg.exe integrate install"
-Run-command ".\vcpkg.exe install nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static"
-
+Run-Command ".\vcpkg.exe install nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static"
 
 # === PatchIccMAX Setup ===
 Log-Message "Cloning PatchIccMAX repository..."
 Run-Command "git clone https://github.com/xsscx/PatchIccMAX.git $patchDir"
 Run-Command "cd $patchDir; git checkout msvc"
+Run-Command "copy "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64\clang_rt.asan_dynamic-x86_64.dll" C:\test\PatchIccMAX\Testing"
 
 Log-Message "Building PatchIccMAX using MSBuild with ASAN..."
 Run-Command "msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configuration=Asan /p:Platform=x64 /p:AdditionalIncludeDirectories="$vcpkgDir\installed\x64-windows\include" /p:AdditionalLibraryDirectories="$vcpkgDir\installed\x64-windows\lib" /p:CLToolAdditionalOptions="/fsanitize=address /O2 /W4" /p:LinkToolAdditionalOptions="/fsanitize=address /INCREMENTAL:NO" /t:Clean,Build"
