@@ -1,8 +1,8 @@
 @echo off
 echo =========================================================
-echo     Welcome to the DemoIccMAX Profile Creation Script
-echo     Copyright (C) 2024 Internation Color Consortium
-echo     Author: David Hoyt dhoyt@hoyt.net  29-Oct-2024
+echo     Welcome to the IccMAX Profile Creation Script
+echo     Copyright (C) 2024-2025 International Color Consortium
+echo     Author: David Hoyt  23-FEB-2025 1246 EST
 echo =========================================================
 
 title ICC DemoIccMAX - Profile Creation Script

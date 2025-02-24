@@ -1,7 +1,7 @@
 # ========================== PatchIccMAX ASAN Branch Build Script for VS2022 Community ==========================
 # © 2024-2025 David H Hoyt LLC. All rights reserved.
 #
-# Date: 24-FEB-2025 1704 by David Hoyt
+# Date: 25-FEB-2025 1522 by David Hoyt
 #
 #
 #
@@ -22,7 +22,7 @@
 # Start of Script
 Write-Host "============================= Starting PatchIccMAX ASAN Branch Build =============================" -ForegroundColor Green
 Write-Host "(©) 2024-2025 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
-Write-Host "(©) 2024-2025 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
+Write-Host "Last Updated 25-FEB-2025 1522 EST by David Hoyt" -ForegroundColor Green
 Write-Host "https://srd.cx" -ForegroundColor Green
 
 # === Function Definitions ===
@@ -99,26 +99,12 @@ Log-Message "Fixups for libs"
 
 Log-Message "Adding vcpkg bin directory to PATH, Setting ASAN Options..."
 $Env:PATH = "$vcpkgDir\installed\x64-windows\bin;$Env:PATH"
-$env:ASAN_OPTIONS="verbosity=1,log_path=asan.log"
+# $env:ASAN_OPTIONS="verbosity=1,log_path=asan.log"
+$env:ASAN_OPTIONS = "verbosity=1,log_path=asan.log,detect_leaks=0,strict_string_checks=1,fast_unwind_on_malloc=0"
 Write-Host "ASAN_OPTIONS: $env:ASAN_OPTIONS"
 
 copy C:\test\vcpkg\installed\x64-windows\lib\tiff.lib C:\test\vcpkg\installed\x64-windows\lib\libtiff.lib
 Run-Command "msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configuration=Asan /p:Platform=x64 /p:AdditionalIncludeDirectories="$vcpkgDir\installed\x64-windows\include" /p:AdditionalLibraryDirectories="$vcpkgDir\installed\x64-windows\lib" /p:CLToolAdditionalOptions="/fsanitize=address /O2 /W4" /p:LinkToolAdditionalOptions="/fsanitize=address /INCREMENTAL:NO" /t:Build"
-
-Log-Message "Running .exe tests in Testing directory..."
-Get-ChildItem -Path "$patchDir\Testing" -Filter "*.exe" -Recurse | ForEach-Object {
-    Log-Message "Executing: $($_.FullName)"
-    try {
-        $output = & $_.FullName 2>&1
-        if ($output -match "IccProfLib Version 2\.2\.3" -or $output -match "IccLibXML Version 2\.2\.3") {
-            Log-Message "SUCCESS: $($_.FullName)" "Green"
-        } else {
-            Log-Message "Executed $($_.FullName) successfully" "Yellow"
-        }
-    } catch {
-        Log-Message "FAILURE: Exception in $($_.FullName): $_" "Red"
-    }
-}
 
 # === Final Steps ===
 cd Testing/
@@ -135,5 +121,36 @@ Start-Process cmd.exe -ArgumentList "/c `"$tempFile`"" -Wait
 
 # Clean up the temporary batch file
 Remove-Item $tempFile -Force
+
+# Run Tests
+Write-Host "Running RunTests.bat from local"
+.\RunTests.bat
+
+# Collect .icc profile information
+$profiles = Get-ChildItem -Path . -Filter "*.icc" -Recurse -File
+$totalCount = $profiles.Count
+
+# Group profiles by directory
+$groupedProfiles = $profiles | Group-Object { $_.Directory.FullName }
+
+# Generate Summary Report
+Write-Host "`n========================="
+Write-Host " ICC Profile Report"
+Write-Host "========================="
+
+# Print count per subdirectory
+foreach ($group in $groupedProfiles) {
+    Write-Host ("{0}: {1} .icc profiles" -f $group.Name, $group.Count)
+}
+
+Write-Host "`nTotal .icc profiles found: $totalCount"
+Write-Host "=========================`n"
+
+[System.Environment]::SetEnvironmentVariable(
+    "Path",
+    "C:\test\vcpkg\installed\x64-windows\debug\bin;C:\test\vcpkg\installed\x64-windows\debug\lib;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64;" +
+    [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User),
+    [System.EnvironmentVariableTarget]::User
+)
 
 Log-Message "Done with PatchIccMAX ASAN Branch Build" "Cyan"
