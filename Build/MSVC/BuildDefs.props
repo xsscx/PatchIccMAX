@@ -14,8 +14,8 @@
 	<LIBTIFF_LIBDIR>$(VendorTreeDir)\libtiff\tiff-4.0.3\libtiff</LIBTIFF_LIBDIR>
 	<LIBTIFF_LIBDIRx64>$(VendorTreeDir)\libtiff\tiff-4.0.3\libtiffx64</LIBTIFF_LIBDIRx64>
 	<LIBXML2>$(VendorTreeDir)\libxml2\libxml2-2.8.0</LIBXML2>
-	<WXVER>30</WXVER>
-	<WXWIN>$(VendorTreeDir)\WXWidgets\wxWidgets-3.0.2</WXWIN>
+	<WXVER>32u</WXVER>
+	<WXWIN>$(VendorTreeDir)\WXWidgets\wxWidgets-3.2.0</WXWIN>
     <ZLIB>$(VendorTreeDir)\ZLib\zlib-1.2.8</ZLIB>
     <ZLIBLIB>$(VendorTreeDir)\ZLib\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibStatRelease</ZLIBLIB>
   </PropertyGroup>
