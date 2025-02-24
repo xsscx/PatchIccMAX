@@ -78,15 +78,8 @@ Log-Message "Cloning and bootstrapping vcpkg..."
 Run-Command "git clone https://github.com/microsoft/vcpkg.git $vcpkgDir"
 Run-Command "cd $vcpkgDir; .\bootstrap-vcpkg.bat"
 Run-Command "cd $vcpkgDir; .\vcpkg.exe integrate install"
+Run-command ".\vcpkg.exe install nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static"
 
-Log-Message "Installing dependencies (this may take time)..."
-$vcpkgPackages = @(
-    "libxml2:x64-windows", "tiff:x64-windows", "wxwidgets:x64-windows",
-    "libxml2:x64-windows-static", "tiff:x64-windows-static", "wxwidgets:x64-windows-static"
-)
-foreach ($package in $vcpkgPackages) {
-    Run-Command ".\vcpkg.exe install $package"
-}
 
 # === PatchIccMAX Setup ===
 Log-Message "Cloning PatchIccMAX repository..."
