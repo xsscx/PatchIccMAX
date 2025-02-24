@@ -1,16 +1,23 @@
+############################################################################## 
 #
 # IccApplyToLink in Project_Root/Build/Cmake/Tools/IccApplyToLink/CMakeLists.txt | DemoIccMAX Project
-# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+# Copyright (©) 2024-2025 David H Hoyt LLC. All rights reserved.
 #
-# Last Updated: 02-DEC-2024 by David Hoyt
+# Last Updated: 17-MAR-2025 1012 EDT by David Hoyt
 #
 # Changes: Modified Build/Cmake/CMakelists.txt
-#          Added explicit linker paths
+#          Added explicit linker paths, Reduced Noise
 #          Improved debug output for cross-platform support
 #
-
-message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-message(STATUS "Entering IccApplyToLink in Project_Root/Build/Cmake/Tools/IccApplyToLink/CMakeLists.txt .....")
+#
+#
+#
+#
+#
+#
+#
+#
+############################################################################## 
 
 # Define the project
 project(iccApplyToLink)
@@ -118,6 +125,4 @@ endif()
 # Final debug messages
 message(STATUS "CMAKE_SOURCE_DIR resolved as: ${CMAKE_SOURCE_DIR}")
 message(STATUS "PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
-
-message(STATUS "Exiting IccApplyToLink in Project_Root/Build/Cmake/Tools/IccApplyToLink/CMakeLists.txt ......")
-message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+message(STATUS "")

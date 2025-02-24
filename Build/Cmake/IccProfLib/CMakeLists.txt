@@ -1,20 +1,23 @@
+##################################################################################
+## IccProfLib2 Project Configuration in Build/Cmake/CMakeLists.txt              ##
+##################################################################################
 # 
-# IccProfLib2 Configuration CMakeLists.txt | DemoIccMAX Project
-# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+#
+# Copyright (Â©) 2024-2025 David H Hoyt LLC. All rights reserved.
 # 
 #
-# Last Updated: 04-DEC-2024 by David Hoyt
+# Last Updated: 18-MAR-2025 0936 EDT by David Hoyt
 #
-#
-#
-#
-#
-#
-#
-#
-
-message(STATUS "#######################################################################")
-message(STATUS "## Configuring the IccProfLib2 in Build/Cmake/IccProfLib/CMakelists.txt")
+# Changes:  Lower Noise Level
+#           Fixups for Iconv and Headers
+#           PASS: Generators, Code Analysis & Insight, x64-MinSizeRel & x64-Debug
+#						
+# TODO: Refactor Debug, Release, Asan 
+#       Housekeeping, Unix & Windows now Build from Cmake
+#       Refactor Base Configs & logging to .mk's 
+##################################################################################
+## IccProfLib2 Project Configuration in Build/Cmake/CMakeLists.txt              ##
+##################################################################################
 
 # Define the target name
 set(TARGET_NAME IccProfLib2)
@@ -107,64 +110,134 @@ endif()
 # Add the sources to the library
 set(SOURCES ${CFILES})
 
-# Platform-specific settings for macOS
-if (APPLE)
+# Debug: Print sources list
+message(STATUS "Configuring library: ${TARGET_NAME}")
+# message(STATUS "Source files included in ${TARGET_NAME}:")
+# foreach(SRC_FILE ${SOURCES})
+#     message(STATUS "  -> ${SRC_FILE}")
+# endforeach()
+
+# Include platform-specific dependencies
+if(APPLE)
     include_directories(/Developer/Headers/FlatCarbon)
     find_library(CARBON_LIBRARY Carbon)
     find_library(IOKIT_LIBRARY IOKit)
     mark_as_advanced(CARBON_LIBRARY IOKIT_LIBRARY)
     set(EXTRA_LIBS_CS ${CARBON_LIBRARY} ${IOKIT_LIBRARY})
+elseif(WIN32)
+    find_library(USER32_LIBRARY User32)
+    find_library(GDI32_LIBRARY Gdi32)
+    set(EXTRA_LIBS_CS ${USER32_LIBRARY} ${GDI32_LIBRARY})
+elseif(UNIX AND NOT APPLE)
+    find_package(Threads REQUIRED)
+    set(EXTRA_LIBS_CS ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-# Build shared library
+# Check for vcpkg installation
+if(DEFINED ENV{VCPKG_ROOT})
+    set(VCPKG_INCLUDE_DIR "$ENV{VCPKG_ROOT}/installed/x64-windows/include")
+    message(STATUS "Using vcpkg from: $ENV{VCPKG_ROOT}")
+else()
+    set(VCPKG_INCLUDE_DIR "")
+    message(STATUS "vcpkg not found, falling back to system includes")
+endif()
+
+# Find required packages
+find_package(Iconv REQUIRED)
+find_package(LibXml2 REQUIRED)
+
+
+# Build shared library (target creation should be inside the conditional, but properties are already set)
 if (ENABLE_SHARED_LIBS)
+    message(STATUS "Configuring SHARED library: ${TARGET_NAME}")
+    
     add_library(${TARGET_NAME} SHARED ${SOURCES})
-    set_target_properties(${TARGET_NAME}
-        PROPERTIES VERSION ${${PROJECT_UP_NAME}_VERSION}
-                   SOVERSION ${${PROJECT_UP_NAME}_MAJOR_VERSION}
+
+    set_target_properties(${TARGET_NAME} PROPERTIES
+        VERSION ${${PROJECT_UP_NAME}_VERSION}
+        SOVERSION ${${PROJECT_UP_NAME}_MAJOR_VERSION}
     )
+
+# Ensure the target is defined before adding include directories
+target_include_directories(IccProfLib2 PRIVATE
+    "$ENV{VCPKG_ROOT}/installed/x64-windows/include"
+    "$ENV{VCPKG_ROOT}/installed/x64-windows/include/libxml2"
+    "$ENV{VCPKG_ROOT}/installed/x64-windows/include/libxml"
+)
+
+    message(STATUS "[DEBUG] Shared Library Output Properties:")
+    message(STATUS "  RUNTIME: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    message(STATUS "  LIBRARY: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+    message(STATUS "  ARCHIVE: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+
     target_link_libraries(${TARGET_NAME} ${EXTRA_LIBS} ${EXTRA_LIBS_CS})
+
     if (ENABLE_INSTALL_RIM)
         install(TARGETS ${TARGET_NAME}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         )
+        message(STATUS "Installed SHARED library: ${TARGET_NAME}")
     endif()
+else()
+    message(STATUS "SHARED library disabled (ENABLE_SHARED_LIBS is OFF)")
 endif()
 
 # Build static library
-if (ENABLE_STATIC_LIBS)
+if(ENABLE_STATIC_LIBS)
+    message(STATUS "Configuring STATIC library: ${TARGET_NAME}-static")
+    
     add_library(${TARGET_NAME}-static STATIC ${SOURCES})
-    target_link_libraries(${TARGET_NAME}-static ${EXTRA_LIBS} ${EXTRA_LIBS_CS})
-    if (ENABLE_INSTALL_RIM)
+    
+    target_include_directories(${TARGET_NAME}-static PRIVATE
+        ${VCPKG_INCLUDE_DIR}
+        /usr/include
+        /usr/local/include
+        /opt/homebrew/include
+    )
+    
+    message(STATUS "[DEBUG] Static Library Output Properties:")
+    message(STATUS "  RUNTIME: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    message(STATUS "  LIBRARY: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+    message(STATUS "  ARCHIVE: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+
+find_library(LIBICONV_LIBRARY NAMES iconv libiconv PATHS "${VCPKG_ROOT}/installed/x64-windows/lib")
+find_path(LIBICONV_INCLUDE_DIR NAMES iconv.h PATHS "${VCPKG_ROOT}/installed/x64-windows/include")
+
+if (LIBICONV_LIBRARY AND LIBICONV_INCLUDE_DIR)
+    message(STATUS "Found libiconv: ${LIBICONV_LIBRARY}, includes at ${LIBICONV_INCLUDE_DIR}")
+else()
+    message(FATAL_ERROR "libiconv not found! Ensure vcpkg is installed correctly.")
+endif()
+
+target_include_directories(${TARGET_NAME} PRIVATE ${LIBICONV_INCLUDE_DIR})
+# target_link_libraries(${TARGET_NAME} PRIVATE ${LIBICONV_LIBRARY})
+
+
+    target_link_libraries(${TARGET_NAME}-static ${EXTRA_LIBS} ${EXTRA_LIBS_CS} Iconv::Iconv LibXml2::LibXml2)
+    
+    if(ENABLE_INSTALL_RIM)
         install(TARGETS ${TARGET_NAME}-static
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         )
+        message(STATUS "Installed STATIC library: ${TARGET_NAME}-static")
     endif()
+else()
+    message(STATUS "STATIC library disabled (ENABLE_STATIC_LIBS is OFF)")
 endif()
 
 # Set the library name for other projects
-if (ENABLE_SHARED_LIBS)
+if(ENABLE_SHARED_LIBS)
     set(TARGET_LIB ${TARGET_NAME})
+    message(STATUS "[DEBUG] Using SHARED library target: ${TARGET_NAME}")
 else()
     set(TARGET_LIB ${TARGET_NAME}-static)
+    message(STATUS "[DEBUG] Using STATIC library target: ${TARGET_NAME}-static")
 endif()
 set(TARGET_LIB ${TARGET_LIB} PARENT_SCOPE)
-
-message(STATUS "PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
-message(STATUS "CMAKE_SOURCE_DIR resolved as: ${CMAKE_SOURCE_DIR}")
-message(STATUS "SRC_PATH resolved as: ${SRC_PATH}")
-message(STATUS "Resolved source file paths:")
-string(REPLACE ";" "\n" SOURCES_PRETTY_PRINTED "${SOURCES}")
-foreach(SOURCE_FILE IN LISTS SOURCES)
-    message(STATUS "  ${SOURCE_FILE}")
-endforeach()
-
 
 message(STATUS "Added executable target: ${TARGET_NAME}")
 message(STATUS "Using explicit absolute path for ICCPROFLIB_PATH: ${ICCPROFLIB_PATH}")
 message(STATUS "Added linker options for library path.")
-
-message(STATUS "## Exiting the IccProfLib2 Project in Build/Cmake/IccProfLib/CMakelists.txt")
-message(STATUS "###########################################################################")
+message(STATUS "")

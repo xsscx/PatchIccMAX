@@ -1,176 +1,226 @@
 ############################################################################## 
-## Top Level DemoIccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
+## Top Level IccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
 ##############################################################################
 ## 
-##          Copyright (©) 2024 David H Hoyt LLC | All rights reserved.
+##          Copyright (©) 2024-2025 David H Hoyt LLC | All rights reserved.
 ## 
-## Last Updated: 06-DEC-2024 at 1230Z by David Hoyt (©)
+##          Last Updated: 17-MAR-2025 at 1153 EDT by David Hoyt (©)
 ##
-## Changes: 	Modified Build/Cmake/CMakelists.txt and others
-##           Added to Logging , Debugging, and CI/CD Integration
-##           Adjusted Cross Platform Build Args
+## Changes:  wrapped logging and platform conditions
+##           msbuild checks needs attention, vcpkg integration 
+##           Cmake Builds Tested on Win, Unix, macOS x64 | MinRelSize + Debug
 ##						
 ## TODO: Refactor Debug, Release, Asan 
 ##       Collapse 3-tier CMakeLists.txt, Housekeeping
 ##       Refactor Base Configs & logging to .mk's 
 ##
+##
 ##############################################################################
-## Top Level DemoIccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
+## Top Level IccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
 ##############################################################################
 
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.14)
 
 # Include timestamp for logs
-# Start Configuration Message
 string(TIMESTAMP CURRENT_DATETIME "%Y-%m-%d %H:%M:%S")
 message(STATUS "##########################################################################")
 message(STATUS "## Starting config in Build/Cmake/CMakeLists.txt at ${CURRENT_DATETIME}")
 message(STATUS "")
 
-# Verbose makefiles for debugging
-set(CMAKE_VERBOSE_MAKEFILE ON)
+# Verbose and Debug Mode Handling
+option(VERBOSE_OUTPUT "Enable verbose output messages" OFF)
+option(DEBUG_MODE "Enable debug mode" OFF)
 
-macro(pretty_debug MESSAGE_TITLE MESSAGE_VALUE)
+if(DEBUG_MODE)
+    if(NOT CMAKE_CONFIGURATION_TYPES)
+        set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build" FORCE)
+    endif()
+    add_compile_definitions(DEBUG_MODE)
+    set(CMAKE_VERBOSE_MAKEFILE OFF)
+else()
+    set(CMAKE_VERBOSE_MAKEFILE OFF)
+endif()
+
+# Function for Debug Messages
+function(pretty_debug MESSAGE_TITLE MESSAGE_VALUE)
     message(STATUS "##########################################################################")
     message(STATUS "### ${MESSAGE_TITLE}")
     message(STATUS "### Value: ${MESSAGE_VALUE}")
     message(STATUS "##########################################################################")
-endmacro()
+endfunction()
+
+# Function for Project Messages
+function(project_message msg)
+    if(VERBOSE_OUTPUT OR DEBUG_MODE)
+        message(STATUS "${msg}")
+    endif()
+endfunction()
+
+# Configure Build Types for Multi-Config Generators
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+    if(CMAKE_GENERATOR MATCHES "Multi-Config")
+        set(CMAKE_CONFIGURATION_TYPES "Debug;Release;MinSizeRel;RelWithDebInfo" CACHE STRING "Configurations to build" FORCE)
+    else()
+        set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+    endif()
+endif()
+project_message("Build Configurations: ${CMAKE_CONFIGURATION_TYPES}")
 
 # Project Configuration
-project(RefIccMAX)
-set(PROJECT_UP_NAME "REFICCMAX")
-message(STATUS "Set PROJECT_UP_NAME to '${PROJECT_UP_NAME}'.")
+project(RefIccMAX VERSION 2.1.25 LANGUAGES CXX)
+message(STATUS "Project Name: ${PROJECT_NAME}")
+message(STATUS "Project Version: ${PROJECT_VERSION}")
 
+# Enforce Modern C++ Standard
 set(CMAKE_CXX_STANDARD 17)
-message(STATUS "Set CMAKE_CXX_STANDARD to ${CMAKE_CXX_STANDARD}.")
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+message(STATUS "Using C++ Standard: ${CMAKE_CXX_STANDARD}")
 
-set(${PROJECT_UP_NAME}_MAJOR_VERSION 2)
-message(STATUS "${PROJECT_UP_NAME}_MAJOR_VERSION set to 2")
-set(${PROJECT_UP_NAME}_MINOR_VERSION 1)
-message(STATUS "${PROJECT_UP_NAME}_MINOR_VERSION set to 1")
-set(${PROJECT_UP_NAME}_MICRO_VERSION 25)
-message(STATUS "${PROJECT_UP_NAME}_MICRO_VERSION set to 25")
-
-set(${PROJECT_UP_NAME}_VERSION
-"${${PROJECT_UP_NAME}_MAJOR_VERSION}.${${PROJECT_UP_NAME}_MINOR_VERSION}.${${PROJECT_UP_NAME}_MICRO_VERSION}")
-message(STATUS "${PROJECT_UP_NAME}_VERSION PROJECT_UP_NAME set to ${${PROJECT_UP_NAME}_VERSION}")
-
+# Package Configuration
+set(PROJECT_UP_NAME "REFICCMAX")
 set(PROJECT_DOWN_NAME "reficcmax")
 set(PACKAGE_NAME "${PROJECT_DOWN_NAME}")
-message(STATUS "${PROJECT_DOWN_NAME} PROJECT_DOWN_NAME Version set to ${${PROJECT_UP_NAME}_VERSION}")
-
+message(STATUS "Package Name: ${PACKAGE_NAME}")
 set(PACKAGE_DESCRIPTION "The RefIccMAX project provides an open source set of libraries and tools that allow for the interaction, manipulation, and application of iccMAX-based color management profiles based on the iccMAX specification http://www.color.org/iccmax.xalter, in addition to legacy ICC profiles defined by earlier ICC specifications.")
 set(${PROJECT_NAME}_VERSION_MAJORMINOR "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}")
 
-# Configure Build Types
+# Suppressed message outputs unless debugging
+project_message("${PROJECT_UP_NAME}_VERSION set to ${${PROJECT_UP_NAME}_VERSION}")
+
+# Build Configurations
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
     set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configurations to build" FORCE)
 endif()
-message(STATUS "Build Configurations: ${CMAKE_CONFIGURATION_TYPES}")
+project_message("Build Configurations: ${CMAKE_CONFIGURATION_TYPES}")
 
 # Define the true project root directory
 set(PROJECT_ROOT_DIR ${CMAKE_SOURCE_DIR}/../..)
 message(STATUS "PROJECT_ROOT_DIR resolved as: ${PROJECT_ROOT_DIR}")
 message(STATUS "")
 
-# CI/CD Integration Information
-if(DEFINED ENV{CI})
+# CI/CD Integration Information (Conditional Logging)
+if(DEFINED ENV{CI} AND (VERBOSE_OUTPUT OR DEBUG_MODE))
     message(STATUS "### CI/CD Details ###")
     message(STATUS "CI/CD Detected: $ENV{CI}")
     message(STATUS "Build Number: $ENV{BUILD_NUMBER}")
     message(STATUS "Branch: $ENV{BRANCH_NAME}")
     message(STATUS "Commit: $ENV{GIT_COMMIT}")
     message(STATUS "Pipeline URL: $ENV{CI_PIPELINE_URL}")
-    
-else()
+elseif(VERBOSE_OUTPUT OR DEBUG_MODE)
     message(STATUS "CI/CD Integration: Not Detected")    
 endif()
-message(STATUS "")
 
-# Debugging and Host System Details
-message(STATUS "### System Information ###")
-message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
-message(STATUS "PROJECT_ROOT_DIR is resolved as: ${PROJECT_ROOT_DIR}")
-message(STATUS "System Name: ${CMAKE_SYSTEM_NAME}")
-message(STATUS "System Version: ${CMAKE_SYSTEM_VERSION}")
-message(STATUS "System Processor: ${CMAKE_SYSTEM_PROCESSOR}")
-message(STATUS "Build Host: $ENV{COMPUTERNAME} ($ENV{USERNAME})")
-
-message(STATUS "")
-# Environment Debugging
-message(STATUS "### Environment Details ###")
-if(WIN32)
-    set(PATH_SEPARATOR ";")
-else()
-    set(PATH_SEPARATOR ":")
+# Debugging and Host System Details (Conditional Logging)
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "### System Information ###")
+    message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+    if(DEFINED PROJECT_ROOT_DIR)
+        message(STATUS "PROJECT_ROOT_DIR is resolved as: ${PROJECT_ROOT_DIR}")
+    endif()
+    message(STATUS "System Name: ${CMAKE_SYSTEM_NAME}")
+    message(STATUS "System Version: ${CMAKE_SYSTEM_VERSION}")
+    message(STATUS "System Processor: ${CMAKE_SYSTEM_PROCESSOR}")
+    if(DEFINED ENV{COMPUTERNAME} AND DEFINED ENV{USERNAME})
+        message(STATUS "Build Host: $ENV{COMPUTERNAME} ($ENV{USERNAME})")
+    endif()
 endif()
-string(REPLACE "${PATH_SEPARATOR}" ";" PATH_LIST "$ENV{PATH}")
-list(LENGTH PATH_LIST PATH_LENGTH)
-message(STATUS "Path Separator: ${CMAKE_PATH_SEPARATOR}")
-message(STATUS "PATH Environment Variable (${PATH_LENGTH} entries):")
-foreach(INDEX RANGE 0 [expr ${PATH_LENGTH} - 1])
-    list(GET PATH_LIST ${INDEX} PATH_ENTRY)
-    message(STATUS "[${INDEX}] ${PATH_ENTRY}")
-endforeach()
 
-# Split the PATH variable into a list
-string(REPLACE "${PATH_SEPARATOR}" ";" PATH_LIST "$ENV{PATH}")
-list(LENGTH PATH_LIST PATH_LENGTH)
-
-# Generate numbered output
-message(STATUS "### PATH Environment Variable ###")
-foreach(INDEX RANGE 0 [expr ${PATH_LENGTH} - 1])
-    list(GET PATH_LIST ${INDEX} PATH_ENTRY)
-    message(STATUS "[${INDEX}] ${PATH_ENTRY}")
-endforeach()
-message(STATUS "")
-message(STATUS "### CMAKE_ Details ###")
-message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
-message(STATUS "")
-message(STATUS "### Compiler Information ###")
-message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
-message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
-message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
-message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
-message(STATUS "C Compiler Version: ${CMAKE_C_COMPILER_VERSION}")
-message(STATUS "Linker: ${CMAKE_LINKER}")
 message(STATUS "")
 
-# Logging Configuration
-message(STATUS "## Logging Config ##")
+# Environment Debugging (Conditional Logging)
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "### Environment Details ###")
+    if(WIN32)
+        set(PATH_SEPARATOR ";")
+    else()
+        set(PATH_SEPARATOR ":")
+    endif()
+    string(REPLACE "${PATH_SEPARATOR}" ";" PATH_LIST "$ENV{PATH}")
+    list(LENGTH PATH_LIST PATH_LENGTH)
+    message(STATUS "Path Separator: ${CMAKE_PATH_SEPARATOR}")
+    message(STATUS "PATH Environment Variable (${PATH_LENGTH} entries):")
+    foreach(INDEX RANGE 0 [expr ${PATH_LENGTH} - 1])
+        list(GET PATH_LIST ${INDEX} PATH_ENTRY)
+        message(STATUS "[${INDEX}] ${PATH_ENTRY}")
+    endforeach()
+endif()
+
+# Split the PATH variable into a list (Conditional Logging)
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "### PATH Environment Variable ###")
+    foreach(INDEX RANGE 0 [expr ${PATH_LENGTH} - 1])
+        list(GET PATH_LIST ${INDEX} PATH_ENTRY)
+        message(STATUS "[${INDEX}] ${PATH_ENTRY}")
+    endforeach()
+endif()
+
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "")
+    message(STATUS "### CMAKE_ Details ###")
+    message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+    message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+    message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+endif()
+
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "")
+    message(STATUS "### Compiler Information ###")
+    message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
+    message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
+    message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
+    message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
+    message(STATUS "C Compiler Version: ${CMAKE_C_COMPILER_VERSION}")
+    message(STATUS "Linker: ${CMAKE_LINKER}")
+endif()
+
+# Logging Configuration (Conditional Output)
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "## Logging Config ##")
+endif()
 set(LOGGING_ENABLED ON CACHE BOOL "Enable or disable logging")
 if(LOGGING_ENABLED)
     add_definitions(-DLOGGING_ENABLED=1)
-    message(STATUS "Logging is enabled")
+    if(VERBOSE_OUTPUT OR DEBUG_MODE)
+        message(STATUS "Logging is enabled")
+    endif()
 else()
     add_definitions(-DLOGGING_ENABLED=0)
-    message(STATUS "Logging is disabled")
+    if(VERBOSE_OUTPUT OR DEBUG_MODE)
+        message(STATUS "Logging is disabled")
+    endif()
 endif()
-message(STATUS "")
 
-# Additional Debug Logging
-message(STATUS "## Logging Debug Config ##")
+# Additional Debug Logging (Conditional Output)
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "## Logging Debug Config ##")
+endif()
 set(DEBUG_LOGGING ON CACHE BOOL "Enable or disable additional debug logging")
 if(DEBUG_LOGGING)
     add_definitions(-DDEBUG_LOGGING=1)
-    message(STATUS "Debug logging is enabled")
+    if(VERBOSE_OUTPUT OR DEBUG_MODE)
+        message(STATUS "Debug logging is enabled")
+    endif()
 else()
     add_definitions(-DDEBUG_LOGGING=0)
-    message(STATUS "Debug logging is disabled")
+    if(VERBOSE_OUTPUT OR DEBUG_MODE)
+        message(STATUS "Debug logging is disabled")
+    endif()
 endif()
 message(STATUS "")
-message(STATUS "## Platform-Specific Flags ##")
+
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "## Platform-Specific Flags ##")
+endif()
+
 # Platform-Specific Details
-if(APPLE)
+if(APPLE AND (VERBOSE_OUTPUT OR DEBUG_MODE))
     message(STATUS "### macOS Specific Details ###")
     message(STATUS "macOS SDK Path: ${CMAKE_OSX_SYSROOT}")
     message(STATUS "Deployment Target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
 
-if(WIN32)
+if(WIN32 AND (VERBOSE_OUTPUT OR DEBUG_MODE))
     message(STATUS "### Windows Specific Details ###")
     message(STATUS "Windows SDK Version: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
 
@@ -183,7 +233,7 @@ if(WIN32)
     endif()
 
     # Vcpkg toolchain configuration
-    set(CMAKE_TOOLCHAIN_FILE "F:/test/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+    set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
     if(EXISTS ${CMAKE_TOOLCHAIN_FILE})
         message(STATUS "Using Vcpkg toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
     else()
@@ -191,7 +241,7 @@ if(WIN32)
     endif()
 endif()
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND (VERBOSE_OUTPUT OR DEBUG_MODE))
     message(STATUS "### Linux/Unix Specific Details ###")
     execute_process(
         COMMAND uname -a
@@ -202,52 +252,46 @@ if(UNIX AND NOT APPLE)
     message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
     message(STATUS "Linker Flags: ${CMAKE_EXE_LINKER_FLAGS}")
 endif()
-message(STATUS "")
 
-# Cross-Platform Debugging
-message(STATUS "### Cross-Platform Debugging Details ###")
-message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "Install Prefix: ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "Build Generator: ${CMAKE_GENERATOR}")
-message(STATUS "Build Tool: ${CMAKE_MAKE_PROGRAM}")
-message(STATUS "")
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "")
+endif()
 
-# Build Configuration
-message(STATUS "### Build Configuration ###")
-message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
-message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
-message(STATUS "C Flags: ${CMAKE_C_FLAGS}")
-message(STATUS "Build Type & Flags (${CMAKE_BUILD_TYPE}): ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}")
-message(STATUS "")
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "### Cross-Platform Debugging Details ###")
+    message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
+    message(STATUS "Install Prefix: ${CMAKE_INSTALL_PREFIX}")
+    message(STATUS "Build Generator: ${CMAKE_GENERATOR}")
+    message(STATUS "Build Tool: ${CMAKE_MAKE_PROGRAM}")
+    message(STATUS "")
+endif()
 
-# Feature Configuration
-message(STATUS "### Feature Configuration ###")
+# Feature Configuration (Conditional Logging)
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "### Feature Configuration ###")
+endif()
 option(ENABLE_TOOLS "Enable tool building" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
 option(ENABLE_SHARED_LIBS "Build shared libraries" ON)
 option(ENABLE_STATIC_LIBS "Build static libraries" OFF)
-message(STATUS "Enable Tools: ${ENABLE_TOOLS}")
-message(STATUS "Enable Tests: ${ENABLE_TESTS}")
-message(STATUS "Enable Shared Libraries: ${ENABLE_SHARED_LIBS}")
-message(STATUS "Enable Static Libraries: ${ENABLE_STATIC_LIBS}")
-message(STATUS "")
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "Enable Tools: ${ENABLE_TOOLS}")
+    message(STATUS "Enable Tests: ${ENABLE_TESTS}")
+    message(STATUS "Enable Shared Libraries: ${ENABLE_SHARED_LIBS}")
+    message(STATUS "Enable Static Libraries: ${ENABLE_STATIC_LIBS}")
+    message(STATUS "")
+endif()
 
-# Build Configuration
-message(STATUS "### Build Configuration ###")
-message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
-message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
-message(STATUS "C Flags: ${CMAKE_C_FLAGS}")
-message(STATUS "Build Type & Flags (${CMAKE_BUILD_TYPE}): ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}")
-message(STATUS "")
-
-# Features Enabled/Disabled
-message(STATUS "### Feature Configuration ###")
-message(STATUS "Enable Tools: ${ENABLE_TOOLS}")
-message(STATUS "Enable Tests: ${ENABLE_TESTS}")
-message(STATUS "Enable Shared Libraries: ${ENABLE_SHARED_LIBS}")
-message(STATUS "Enable Static Libraries: ${ENABLE_STATIC_LIBS}")
-message(STATUS "")
+# Build Type Details (Conditional Logging)
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "### Build Type ###")
+    message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
+    message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
+    message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
+    message(STATUS "C Flags: ${CMAKE_C_FLAGS}")
+    message(STATUS "Build Type & Flags (${CMAKE_BUILD_TYPE}): ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}")
+    message(STATUS "")
+endif()
 
 # Dependencies
 message(STATUS "### Dependencies ###")
@@ -292,6 +336,18 @@ if(TIFF_FOUND)
     message(STATUS "  TIFF Version: ${TIFF_VERSION}")
 else()
     message(FATAL_ERROR "TIFF not found. Please install libtiff-dev.")
+endif()
+message(STATUS "")
+
+# Find and log PNG
+message(STATUS "Checking for PNG...")
+find_package(PNG REQUIRED)
+if(PNG_FOUND)
+message(STATUS "  PNG Library: ${PNG_LIBRARIES} (found version ${PNG_VERSION})")
+message(STATUS "  PNG Include Directory: ${PNG_INCLUDE_DIRS}")
+message(STATUS "  PNG Version: ${PNG_VERSION}")
+else()
+    message(FATAL_ERROR "PNG not found. Please install libpng-dev.")
 endif()
 message(STATUS "")
 
@@ -343,19 +399,25 @@ endif()
 
 message(STATUS "")
 message(STATUS "Setting Compiler Flags ")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -fsanitize=address -fno-omit-frame-pointer -Wall -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
+message(STATUS "")
 
-# Platform-Specific Details
-if(APPLE)
+if(VERBOSE_OUTPUT OR DEBUG_MODE)
+    message(STATUS "## Platform-Specific Details ##")
+endif()
+
+if(APPLE AND (VERBOSE_OUTPUT OR DEBUG_MODE))
     message(STATUS "### macOS Specific Details ###")
     message(STATUS "macOS SDK Path: ${CMAKE_OSX_SYSROOT}")
     message(STATUS "Deployment Target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
 
 if(WIN32)
-    message(STATUS "### Windows Specific Details ###")
-    message(STATUS "Windows SDK Version: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+    if(VERBOSE_OUTPUT OR DEBUG_MODE)
+        message(STATUS "### Windows Specific Details ###")
+        message(STATUS "Windows SDK Version: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+    endif()
 
     # Safely retrieve the ProgramFiles(x86) environment variable
     execute_process(
@@ -365,7 +427,9 @@ if(WIN32)
     )
 
     if(PROGRAMFILES_X86 AND NOT PROGRAMFILES_X86 MATCHES "^$")
-        message(STATUS "ProgramFiles(x86): ${PROGRAMFILES_X86}")
+        if(VERBOSE_OUTPUT OR DEBUG_MODE)
+            message(STATUS "ProgramFiles(x86): ${PROGRAMFILES_X86}")
+        endif()
     else()
         message(WARNING "ProgramFiles(x86) is not defined or could not be retrieved.")
         set(PROGRAMFILES_X86 "")
@@ -373,7 +437,7 @@ if(WIN32)
 
     # Define potential MSBuild paths
     set(MSBUILD_PATHS
-        "${PROGRAMFILES_X86}/Microsoft Visual Studio/2022/Enterprise/MSBuild/Current/Bin"
+        "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/MSBuild/Current/Bin"
         "${PROGRAMFILES_X86}/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin"
         "${PROGRAMFILES_X86}/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin"
     )
@@ -381,7 +445,9 @@ if(WIN32)
     # Find MSBuild
     find_program(MSBUILD_EXECUTABLE NAMES MSBuild PATHS ${MSBUILD_PATHS} NO_DEFAULT_PATH)
     if(MSBUILD_EXECUTABLE)
-        message(STATUS "MSBuild found at: ${MSBUILD_EXECUTABLE}")
+        if(VERBOSE_OUTPUT OR DEBUG_MODE)
+            message(STATUS "MSBuild found at: ${MSBUILD_EXECUTABLE}")
+        endif()
     else()
         message(WARNING "MSBuild not found. Please verify your Visual Studio installation.")
     endif()
@@ -510,7 +576,7 @@ IF(ENABLE_TOOLS)
 IF(EXISTS "${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyNamedCmm")
   add_subdirectory(
     ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyNamedCmm
-    ${CMAKE_BINARY_DIR}/Tools/CmdLine/IccApplyNamedCmm_Build
+    ${CMAKE_BINARY_DIR}/Tools/IccApplyNamedCmm
   )
   message(STATUS "Added IccApplyNamedCmm")
 ELSE()
@@ -522,7 +588,7 @@ ENDIF()
     IF(EXISTS "${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyProfiles")
       add_subdirectory(
         ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyProfiles
-        ${CMAKE_BINARY_DIR}/Tools/CmdLine/IccApplyProfiles_Build
+        ${CMAKE_BINARY_DIR}/Tools/IccApplyProfiles
       )
       MESSAGE(STATUS "Added IccApplyProfiles")
     ELSE()
@@ -557,6 +623,21 @@ add_tool_subdirectory("Tools/IccRoundTrip")
 add_tool_subdirectory("Tools/IccFromCube")
 add_tool_subdirectory("Tools/IccV5DspObsToV4Dsp")
 add_tool_subdirectory("Tools/IccApplyToLink")
+
+# Add PNG Tools
+
+# Check for PNG library
+find_package(PNG REQUIRED)
+
+if (PNG_FOUND)
+    include_directories(${PNG_INCLUDE_DIRS})
+    message(STATUS "PNG library found: ${PNG_LIBRARIES}")
+
+    message(STATUS "Adding Subdirectory IccPngDump.")
+    ADD_SUBDIRECTORY(Tools/IccPngDump)
+else()
+    message(FATAL_ERROR "PNG library not found. Please install libpng-dev.")
+endif()
 
 # Check for TIFF library with logging
 message(STATUS "Checking for TIFF library...")
@@ -611,6 +692,15 @@ message(STATUS "Configuring ${PROJECT_SUBDIRECTORY}...")
 add_subdirectory(${PROJECT_SUBDIRECTORY})
 message(STATUS "Successfully added subdirectory: ${PROJECT_SUBDIRECTORY}")
 
+# Define project-specific subdirectory
+set(PROJECT_SUBDIRECTORY "Tools/DemoIccMAXCmm")
+
+# Log and add the subdirectory
+message(STATUS "Configuring ${PROJECT_SUBDIRECTORY}...")
+add_subdirectory(${PROJECT_SUBDIRECTORY})
+add_dependencies(iccMAXCmm IccProfLib2-static)
+message(STATUS "Successfully added subdirectory: ${PROJECT_SUBDIRECTORY}")
+
 # Configure wxWidgets with detailed logging
 message(STATUS "### Configuring wxWidgets ###")
 
@@ -627,6 +717,8 @@ if(wxWidgets_FOUND)
         message(STATUS "    ${LIBRARY}")
     endforeach()
     include(${wxWidgets_USE_FILE})
+    message(STATUS "Adding Subdirectory wxProfiledump.")
+    ADD_SUBDIRECTORY(Tools/wxProfileDump)
     message(STATUS "wxWidgets configuration completed successfully.")
 else()
     message(FATAL_ERROR "wxWidgets not found. Please install it manually or via vcpkg.")
@@ -695,6 +787,7 @@ ADD_CUSTOM_TARGET( dist-bin2
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccRoundTrip ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccSpecSepToTiff ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccTiffDump ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
+    COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccPngDump ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccV5DspObsToV4Dsp ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/CreateAllProfiles.sh ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/RunTests.sh ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/

@@ -1,20 +1,23 @@
+##################################################################################
+## IccXML Project Configuration in Build/Cmake/IccXML/CMakeLists.txt            ##
+##################################################################################
 # 
-# IccXML2 Configuration CMakeLists.txt | DemoIccMAX Project
-# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+# IccXML Project Configuration CMakeLists.txt | IccMAX Project
+# Copyright (Â©) 2024-2025 David H Hoyt LLC. All rights reserved.
 # 
 #
-# Last Updated: 04-DEC-2024 by David Hoyt
+# Last Updated: 18-MAR-2025 093* EDT by David Hoyt
 #
-#
-#
-#
-#
-#
-#
-#
-
-message(STATUS "##########################################################################")
-message(STATUS "## Entering the IccXML2 Project in Build/Cmake/IccXML/CMakelists.txt")
+# Changes:  Lower Noise Level
+#           Fixups for Iconv and Headers
+#           PASS: Generators, Code Analysis & Insight, x64-MinSizeRel & x64-Debug
+#						
+# TODO: Refactor Debug, Release, Asan 
+#       Housekeeping, Unix & Windows now Build from Cmake
+#       Refactor Base Configs & logging to .mk's 
+##################################################################################
+## IccXML Project Configuration in Build/Cmake/IccXML/CMakeLists.txt            ##
+##################################################################################
 
 SET(TARGET_NAME IccXML2)
 
@@ -34,8 +37,7 @@ SET(CFILES
 SET(INCLUDE_DIRS
     ${SRC_PATH}/IccProfLib
     ${SRC_PATH}/IccXML/IccLibXML
-    C:/libxml2/libxml2-2.8.0/include
-    C:/iconv/iconv-1.9.2/include
+    C:/test/vcpkg/installed/x64-windows/include
 )
 INCLUDE_DIRECTORIES(${INCLUDE_DIRS})
 
@@ -54,6 +56,27 @@ SET_TARGET_PROPERTIES(${TARGET_NAME}
     ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release
     LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release
 )
+
+# Ensure the target is defined before adding include directories
+target_include_directories(${TARGET_NAME} PRIVATE
+    "$ENV{VCPKG_ROOT}/installed/x64-windows/include"
+    "$ENV{VCPKG_ROOT}/installed/x64-windows/include/libxml2"
+    "$ENV{VCPKG_ROOT}/installed/x64-windows/include/libxml"
+)
+
+    message(STATUS "[DEBUG] Shared Library Output Properties:")
+    message(STATUS "  RUNTIME: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    message(STATUS "  LIBRARY: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+    message(STATUS "  ARCHIVE: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+
+find_library(LIBICONV_LIBRARY NAMES iconv libiconv PATHS "${VCPKG_ROOT}/installed/x64-windows/lib")
+find_path(LIBICONV_INCLUDE_DIR NAMES iconv.h PATHS "${VCPKG_ROOT}/installed/x64-windows/include")
+
+if (LIBICONV_LIBRARY AND LIBICONV_INCLUDE_DIR)
+    message(STATUS "Found libiconv: ${LIBICONV_LIBRARY}, includes at ${LIBICONV_INCLUDE_DIR}")
+else()
+    message(FATAL_ERROR "libiconv not found! Ensure vcpkg is installed correctly.")
+endif() 
 
 # Generate .def file for symbol exports if necessary
 if (WIN32)
@@ -77,12 +100,12 @@ IF(ENABLE_INSTALL_RIM)
 ENDIF()
 
 # Debugging Information
-MESSAGE(STATUS "Project root resolved as ${PROJECT_ROOT_DIR}")
+# MESSAGE(STATUS "Project root resolved as ${PROJECT_ROOT_DIR}")
 # Pretty-print the resolved C file paths
-message(STATUS "Resolved C file paths:")
-foreach(C_FILE IN LISTS CFILES)
-    message(STATUS "  ${C_FILE}")
-endforeach()
+# message(STATUS "Resolved C file paths:")
+# foreach(C_FILE IN LISTS CFILES)
+#     message(STATUS "  ${C_FILE}")
+# endforeach()
 
 MESSAGE(STATUS "Include directories:")
 FOREACH(DIR ${INCLUDE_DIRS})
@@ -133,5 +156,4 @@ else()
     message(STATUS "  No .def file specified.")
 endif()
 
-message(STATUS "## Exiting the IccXML2 Project in Build/Cmake/IccXML/CMakelists.txt")
-message(STATUS "##########################################################################")
+message(STATUS "")
