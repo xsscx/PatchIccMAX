@@ -1,12 +1,12 @@
 #
-# IccToXml in Project_Root/Build/Cmake/Tools/IccToXml/CMakeLists.txt | DemoIccMAX Project
-# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+# IccToXml in Project_Root/Build/Cmake/Tools/IccToXml/CMakeLists.txt | IccMAX Project
+# Copyright (?) 2024-2025 David H Hoyt LLC. All rights reserved.
 #
-# Last Updated: 02-DEC-2024 by David Hoyt
+# Last Updated: 11-MAR-2025 0819 EDT by David Hoyt
 #
 # Changes: Modified Cmake Configuration at top and project level
-#          Added explicit linker paths
-#          Improved debug output for cross-platform support
+#          Added explicit linker paths, Hardcoded for Testing
+#          ** UNIX ONLY TESTING VERSION ***
 #
 #
 # TODO: Configure proper verbose flags for cmake config
@@ -59,12 +59,7 @@ message(STATUS "Linker directories added for ${TARGET_NAME}")
 target_link_libraries(${TARGET_NAME} PRIVATE
     IccProfLib2
     IccXML2
-    libxml2.lib
-    kernel32.lib user32.lib gdi32.lib
-    winspool.lib comdlg32.lib advapi32.lib
-    shell32.lib ole32.lib oleaut32.lib
-    uuid.lib odbc32.lib odbccp32.lib
-)
+    ${TARGET_LIB_ICCXML} )
 message(STATUS "Libraries linked for ${TARGET_NAME}")
 
 # Set output directories
@@ -73,15 +68,6 @@ set_target_properties(${TARGET_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${PROJECT_ROOT_DIR}/Testing/Debug"
 )
 message(STATUS "Output directories set for ${TARGET_NAME}")
-
-# Add post-build step
-add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_FILE:${TARGET_NAME}>"
-        "${PROJECT_ROOT_DIR}/Testing/$<IF:$<CONFIG:Debug>,IccToXml_d.exe,IccToXml.exe>"
-    COMMENT "Copying build artifact (exe) to Testing directory..."
-)
-message(STATUS "DEBUG 9: Added post-build step for ${TARGET_NAME}")
 
 
 

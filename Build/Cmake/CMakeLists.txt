@@ -1,21 +1,21 @@
 ############################################################################## 
-## Top Level DemoIccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
+## Top Level IccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
 ##############################################################################
 ## 
-##          Copyright (©) 2024 David H Hoyt LLC | All rights reserved.
+##          Copyright (©) 2024-2025 David H Hoyt LLC | All rights reserved.
 ## 
-## Last Updated: 06-DEC-2024 at 1230Z by David Hoyt (©)
+## Last Updated: 14-MAR-2025 at 1031 EDT by David Hoyt (©)
 ##
-## Changes: 	Modified Build/Cmake/CMakelists.txt and others
-##           Added to Logging , Debugging, and CI/CD Integration
-##           Adjusted Cross Platform Build Args
+## Changes:  Refactored Build/Cmake/DemoIccMAXCmm/CmakeLists.txt
+##           Added to conditions, require dep
+##           Cmake Builds Tested on Win, Unix, macOS x64 | MinRelSize + Debug
 ##						
 ## TODO: Refactor Debug, Release, Asan 
 ##       Collapse 3-tier CMakeLists.txt, Housekeeping
 ##       Refactor Base Configs & logging to .mk's 
 ##
 ##############################################################################
-## Top Level DemoIccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
+## Top Level IccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
 ##############################################################################
 
 cmake_minimum_required(VERSION 3.5.0)
@@ -183,7 +183,7 @@ if(WIN32)
     endif()
 
     # Vcpkg toolchain configuration
-    set(CMAKE_TOOLCHAIN_FILE "F:/test/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+    set(CMAKE_TOOLCHAIN_FILE "C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
     if(EXISTS ${CMAKE_TOOLCHAIN_FILE})
         message(STATUS "Using Vcpkg toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
     else()
@@ -294,6 +294,10 @@ else()
     message(FATAL_ERROR "TIFF not found. Please install libtiff-dev.")
 endif()
 message(STATUS "")
+
+find_package(PNG REQUIRED)
+message(STATUS "PNG: ${PNG_LIBRARIES} (found version ${PNG_VERSION})")
+message(STATUS "PNG Include Directory: ${PNG_INCLUDE_DIRS}")
 
 # Include Directories Section
 message(STATUS "### Include Directories ###")
@@ -558,6 +562,21 @@ add_tool_subdirectory("Tools/IccFromCube")
 add_tool_subdirectory("Tools/IccV5DspObsToV4Dsp")
 add_tool_subdirectory("Tools/IccApplyToLink")
 
+# Add PNG Tools
+
+# Check for PNG library
+find_package(PNG REQUIRED)
+
+if (PNG_FOUND)
+    include_directories(${PNG_INCLUDE_DIRS})
+    message(STATUS "PNG library found: ${PNG_LIBRARIES}")
+
+    message(STATUS "Adding Subdirectory IccPngDump.")
+    ADD_SUBDIRECTORY(Tools/IccPngDump)
+else()
+    message(FATAL_ERROR "PNG library not found. Please install libpng-dev.")
+endif()
+
 # Check for TIFF library with logging
 message(STATUS "Checking for TIFF library...")
 find_package(TIFF REQUIRED)
@@ -609,6 +628,15 @@ set(PROJECT_SUBDIRECTORY "Tools/IccToXml")
 # Log and add the subdirectory
 message(STATUS "Configuring ${PROJECT_SUBDIRECTORY}...")
 add_subdirectory(${PROJECT_SUBDIRECTORY})
+message(STATUS "Successfully added subdirectory: ${PROJECT_SUBDIRECTORY}")
+
+# Define project-specific subdirectory
+set(PROJECT_SUBDIRECTORY "Tools/DemoIccMAXCmm")
+
+# Log and add the subdirectory
+message(STATUS "Configuring ${PROJECT_SUBDIRECTORY}...")
+add_subdirectory(${PROJECT_SUBDIRECTORY})
+add_dependencies(DemoIccMAXCmm IccProfLib2-static)
 message(STATUS "Successfully added subdirectory: ${PROJECT_SUBDIRECTORY}")
 
 # Configure wxWidgets with detailed logging
@@ -695,6 +723,7 @@ ADD_CUSTOM_TARGET( dist-bin2
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccRoundTrip ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccSpecSepToTiff ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccTiffDump ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
+    COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccPngDump ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccV5DspObsToV4Dsp ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/CreateAllProfiles.sh ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/RunTests.sh ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/

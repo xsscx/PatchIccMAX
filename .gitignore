@@ -58,37 +58,3 @@ Build/XCode/libxml/*.h*
 **/x64/**
 **/Win32/**
 
-
-# copied code
-Tools/CmdLine/IccSpecSepToTiff/TiffImg.cpp
-Tools/CmdLine/IccSpecSepToTiff/TiffImg.h
-Tools/CmdLine/IccTiffDump/TiffImg.cpp
-Tools/CmdLine/IccTiffDump/TiffImg.h
-/Testing/CalcTest/report.txt
-/Testing/HDR/test.bat
-/Testing/mcs/Flexo-CMYKOGP/4ChanSelect-MID.icc
-/Testing/mcs/Flexo-CMYKOGP/7ChanSelect-MID.icc
-/Testing/mcs/Flexo-CMYKOGP/CGYK-SelectMID.icc
-/Testing/mcs/Flexo-CMYKOGP/CMPK-SelectMID.icc
-/Testing/mcs/Flexo-CMYKOGP/CMYK-SelectMID.icc
-/Testing/mcs/Flexo-CMYKOGP/CMYKOGP-MVIS-Smooth.icc
-/Testing/mcs/Flexo-CMYKOGP/OMYK-SelectMID.icc
-/Testing/output/iccdumpprofile
-/Testing/allo.bat
-/Testing/cr.bat
-/Testing/oo.bat
-/Testing/oo.ps1
-/Testing/test.bat
-/vcpkg_installed
-/Tools/wxWidget/wxProfileDump/vc_mswd/wxProfileDump/wxProfileDump.nativecodeanalysis.sarif
-/Tools/wxWidget/wxProfileDump/vc_mswd/wxProfileDump/wxProfileDump.nativecodeanalysis.xml
-/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/vc.nativecodeanalysis.all.xml
-/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/wxprofiledump.cpp.json
-/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/wxProfileDump.sbr
-/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/wxProfileDump.xdc
-/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump/wxProfileDump_v22.vcxproj.FileListAbsolute.txt
-/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump.bsc
-/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump.exe.lastcodeanalysissucceeded
-/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump.map
-/Tools/wxWidget/wxProfileDump/vc_mswd_x64/wxProfileDump.xml
-/Tools/wxWidget/wxProfileDump/wxProfileDump.aps

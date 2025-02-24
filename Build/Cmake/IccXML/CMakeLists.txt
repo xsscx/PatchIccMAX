@@ -1,6 +1,6 @@
 # 
 # IccXML2 Configuration CMakeLists.txt | DemoIccMAX Project
-# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+# Copyright (Â©) 2024 The International Color Consortium. All rights reserved.
 # 
 #
 # Last Updated: 04-DEC-2024 by David Hoyt
@@ -34,8 +34,6 @@ SET(CFILES
 SET(INCLUDE_DIRS
     ${SRC_PATH}/IccProfLib
     ${SRC_PATH}/IccXML/IccLibXML
-    C:/libxml2/libxml2-2.8.0/include
-    C:/iconv/iconv-1.9.2/include
 )
 INCLUDE_DIRECTORIES(${INCLUDE_DIRS})
 
