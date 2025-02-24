@@ -22,6 +22,7 @@
 # Start of Script
 Write-Host "============================= Starting PatchIccMAX ASAN Branch Build =============================" -ForegroundColor Green
 Write-Host "(©) 2024-2025 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
+Write-Host "(©) 2024-2025 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
 Write-Host "https://srd.cx" -ForegroundColor Green
 
 # === Function Definitions ===
@@ -86,6 +87,7 @@ Run-Command "git clone https://github.com/xsscx/PatchIccMAX.git $patchDir"
 Run-Command "cd $patchDir; git checkout msvc"
 
 Log-Message "Building PatchIccMAX using MSBuild with ASAN..."
+copy C:\test\vcpkg\installed\x64-windows\lib\tiff.lib C:\test\vcpkg\installed\x64-windows\lib\libtiff.lib
 Run-Command "msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configuration=Asan /p:Platform=x64 /p:AdditionalIncludeDirectories="$vcpkgDir\installed\x64-windows\include" /p:AdditionalLibraryDirectories="$vcpkgDir\installed\x64-windows\lib" /p:CLToolAdditionalOptions="/fsanitize=address /O2 /W4" /p:LinkToolAdditionalOptions="/fsanitize=address /INCREMENTAL:NO" /t:Clean,Build"
 
 # === Testing ===
@@ -94,15 +96,14 @@ Ensure-DirectoryExists -Path "$patchDir\Testing"
 Run-Command "copy $vcpkgDir\installed\x64-windows\bin\*.dll $patchDir\Testing\"
 Run-Command "copy 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64\clang_rt.asan_dynamic-x86_64.dll' $patchDir\Testing\"
 Log-Message "Fixups for libs"
-copy C:\test\vcpkg\installed\x64-windows\lib\tiff.lib C:\test\vcpkg\installed\x64-windows\lib\libtiff.lib
-copy C:\test\vcpkg\installed\x64-windows-static\lib\tiff.lib C:\test\vcpkg\installed\x64-windows-static\lib\libtiff.lib
-copy C:\test\vcpkg\installed\x64-windows-static\lib\tiff.lib C:\test\vcpkg\installed\x64-windows-static\lib\libtiff.lib
-copy C:\test\vcpkg\installed\x64-windows\lib\tiff.lib C:\test\vcpkg\installed\x64-windows\lib\libtiff.lib
 
 Log-Message "Adding vcpkg bin directory to PATH, Setting ASAN Options..."
 $Env:PATH = "$vcpkgDir\installed\x64-windows\bin;$Env:PATH"
 $env:ASAN_OPTIONS="verbosity=1,log_path=asan.log"
 Write-Host "ASAN_OPTIONS: $env:ASAN_OPTIONS"
+
+copy C:\test\vcpkg\installed\x64-windows\lib\tiff.lib C:\test\vcpkg\installed\x64-windows\lib\libtiff.lib
+Run-Command "msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configuration=Asan /p:Platform=x64 /p:AdditionalIncludeDirectories="$vcpkgDir\installed\x64-windows\include" /p:AdditionalLibraryDirectories="$vcpkgDir\installed\x64-windows\lib" /p:CLToolAdditionalOptions="/fsanitize=address /O2 /W4" /p:LinkToolAdditionalOptions="/fsanitize=address /INCREMENTAL:NO" /t:Build"
 
 Log-Message "Running .exe tests in Testing directory..."
 Get-ChildItem -Path "$patchDir\Testing" -Filter "*.exe" -Recurse | ForEach-Object {
