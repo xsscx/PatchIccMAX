@@ -84,7 +84,6 @@ Run-Command ".\vcpkg.exe install nlohmann-json:x64-windows nlohmann-json:x64-win
 Log-Message "Cloning PatchIccMAX repository..."
 Run-Command "git clone https://github.com/xsscx/PatchIccMAX.git $patchDir"
 Run-Command "cd $patchDir; git checkout msvc"
-Run-Command "copy "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64\clang_rt.asan_dynamic-x86_64.dll" C:\test\PatchIccMAX\Testing"
 
 Log-Message "Building PatchIccMAX using MSBuild with ASAN..."
 Run-Command "msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configuration=Asan /p:Platform=x64 /p:AdditionalIncludeDirectories="$vcpkgDir\installed\x64-windows\include" /p:AdditionalLibraryDirectories="$vcpkgDir\installed\x64-windows\lib" /p:CLToolAdditionalOptions="/fsanitize=address /O2 /W4" /p:LinkToolAdditionalOptions="/fsanitize=address /INCREMENTAL:NO" /t:Clean,Build"
@@ -93,11 +92,10 @@ Run-Command "msbuild /m /maxcpucount .\Build\MSVC\BuildAll_v22.sln /p:Configurat
 Log-Message "Setting up testing environment..."
 Ensure-DirectoryExists -Path "$patchDir\Testing"
 Run-Command "copy $vcpkgDir\installed\x64-windows\bin\*.dll $patchDir\Testing\"
-Run-Command "copy 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\bin\Hostx64\x64\clang_rt.asan_dynamic-x86_64.dll' $patchDir\Testing\"
+Run-Command "copy 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64\clang_rt.asan_dynamic-x86_64.dll' $patchDir\Testing\"
 Log-Message "Fixups for libs"
 Run-Command  "copy C:\test\vcpkg\installed\x64-windows\lib\tiff.lib C:\test\vcpkg\installed\x64-windows\lib\libtiff.lib"
 Run-Command  "copy C:\test\vcpkg\installed\x64-windows-static\lib\tiff.lib C:\test\vcpkg\installed\x64-windows-static\lib\libtiff.lib" 
-
 
 Log-Message "Adding vcpkg bin directory to PATH, Setting ASAN Options..."
 $Env:PATH = "$vcpkgDir\installed\x64-windows\bin;$Env:PATH"
