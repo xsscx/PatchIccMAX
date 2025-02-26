@@ -24,7 +24,7 @@ Write-Host "============================= Starting PatchIccMAX ASAN Branch Build
 Write-Host "(©) 2024-2025 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
 Write-Host "Last Updated 25-FEB-2025 1522 EST by David Hoyt" -ForegroundColor Green
 Write-Host "https://srd.cx" -ForegroundColor Green
-
+set MSBUILDDEBUGENGINE=1
 # === Function Definitions ===
 
 function Log-Message {
