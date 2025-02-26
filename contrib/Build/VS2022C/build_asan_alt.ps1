@@ -60,7 +60,7 @@ Log-Message "(©) 2024-2025 David H Hoyt LLC. All rights reserved."
 Log-Message "Last Updated: 25-FEB-2025 1522 EST by David Hoyt"
 Log-Message "https://srd.cx"
 Log-Message "======================================================================="
-
+set MSBUILDDEBUGENGINE=1
 # === Environment Setup ===
 Log-Message "Setting up directories and environment variables..."
 $Env:VSCMD_ARG_HOST_ARCH = "x64"
