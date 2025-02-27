@@ -3,7 +3,7 @@
 #
 # Copyright (c) 2024-2025 David H Hoyt LLC. All rights reserved.
 # Author: David Hoyt
-# Date: 26-FEB-2025 1547 EST by David Hoyt
+# Date: 27-FEB-2025 0923 EST by David Hoyt
 # Run via pwsh: iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/msvc/contrib/Build/VS2022C/asan-link-dep-report.ps1").Content
 #
 # ============================================================
@@ -11,11 +11,7 @@
 # Start of Script
 Write-Host "============================= Starting DemoIccMAX Master Branch Build =============================" -ForegroundColor Green
 Write-Host "Copyright (c) 2024-2025  2024-2025 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
-Write-Host "Last Updated: 26-FEB-2025 1547 EST by David H Hoyt LLC" -ForegroundColor Green
-
-# PowerShell Script: Dependency Analysis with Logging & HTML Report
-
-# PowerShell Script: Dependency Analysis with Logging & HTML Report
+Write-Host "Last Updated: 27-FEB-2025 0923 EST by David H Hoyt LLC" -ForegroundColor Green
 
 $logFile = "dependency_analysis.log"
 $htmlReport = "dependency_report.html"
