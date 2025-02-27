@@ -15,6 +15,8 @@ Write-Host "Last Updated: 26-FEB-2025 1547 EST by David H Hoyt LLC" -ForegroundC
 
 # PowerShell Script: Dependency Analysis with Logging & HTML Report
 
+# PowerShell Script: Dependency Analysis with Logging & HTML Report
+
 $logFile = "dependency_analysis.log"
 $htmlReport = "dependency_report.html"
 $msbuildLog = "msbuild.log"
@@ -99,8 +101,8 @@ $executables = Get-ChildItem -Path $paths -Recurse -Include *.exe
 
 # Process Each Executable
 foreach ($exe in $executables) {
-    Write-Output "Checking: $($exe.FullName)" | Tee-Object -FilePath $logFile -Append
-    $dependencies = link /dump /dependents $exe.FullName 2>&1 | 
+    Write-Output "Checking: $($exe)" | Tee-Object -FilePath $logFile -Append
+    $dependencies = link /dump /dependents $exe 2>&1 | 
         Select-String -NotMatch ".data|.pdata|.reloc|.rsrc|.text|.INTR|.WEAK|.debug|.00cfg|.tls|.CRT|.bss|.chks64|.drectve|.rtc|.voltbl|.comment|.gfids|.eh_fram|.rsrc$|.stab"
     
     if ($dependencies) {
@@ -110,7 +112,7 @@ foreach ($exe in $executables) {
     }
     
     # Append to HTML Report
-    $reportContent += "<tr><td>$exe.FullName</td><td>$dependencyList</td></tr>"
+    $reportContent += "<tr><td>$exe</td><td>$dependencyList</td></tr>"
 }
 
 # Include Links to Build Files
