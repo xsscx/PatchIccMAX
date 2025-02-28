@@ -37,9 +37,17 @@ jobs:
         shell: pwsh
         run: |
           # Define paths
-          $buildDir = "${{ env.BUILD_DIR }}"
+          $buildDir = "D:\a\PatchIccMAX\PatchIccMAX/builds"
           $vcpkgDir = "$RUNNER_TEMP/vcpkg"
-          $cacheDir = Resolve-Path "${{ github.workspace }}/vcpkg_cache"
+          $cacheDir = "D:\a\PatchIccMAX\PatchIccMAX\vcpkg_cache"
+
+          # Ensure the vcpkg_cache directory exists
+          if (-not (Test-Path $cacheDir)) {
+              New-Item -ItemType Directory -Path $cacheDir -Force
+          }
+
+          # Resolve absolute path after ensuring it exists
+          $cacheDir = Resolve-Path $cacheDir
 
           # Ensure absolute path formatting for vcpkg binary caching
           if ($cacheDir -match '^\\\\\?\\') {
@@ -48,7 +56,6 @@ jobs:
 
           # Create necessary directories
           New-Item -ItemType Directory -Path $buildDir -Force
-          New-Item -ItemType Directory -Path $cacheDir -Force
 
           # Clone vcpkg if not cached
           if (-not (Test-Path "$vcpkgDir\installed")) {
