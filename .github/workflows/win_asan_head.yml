@@ -15,13 +15,7 @@
 name: Win_Asan_PR116
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-  workflow_dispatch:
+  workflow_dispatch: # Manual trigger only
 
 jobs:
   build:
