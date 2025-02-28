@@ -33,18 +33,29 @@ jobs:
         New-Item -ItemType Directory -Path "${{ env.BUILD_DIR }}" -Force | Out-Null
         New-Item -ItemType Directory -Path "$OUTPUT_DIR" -Force | Out-Null
 
-        # Setup vcpkg
-        if (!(Test-Path "$VCPKG_DIR\installed")) {
-            Write-Host "vcpkg not found. Cloning and bootstrapping..."
-            git clone https://github.com/microsoft/vcpkg.git "$VCPKG_DIR"
+# Clone vcpkg repository and bootstrap
+Write-Host "Cloning vcpkg repository..."
+cd $optDir
+git clone https://github.com/microsoft/vcpkg.git
+cd $vcpkgDir
+Write-Host "Bootstrapping vcpkg..."
+.\bootstrap-vcpkg.bat
+
+# Integrate vcpkg and install dependencies
+Write-Host "Integrating vcpkg..."
+
+        .\vcpkg.exe integrate install
+Write-Host "Installing required libraries (libxml2, tiff, wxwidgets) for x64-windows-static..."
+.\vcpkg.exe install nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
+
+
             & "$VCPKG_DIR\bootstrap-vcpkg.bat"
         } else {
             Write-Host "✅ vcpkg is already installed."
         }
 
         
-        .\vcpkg.exe integrate install
-        .\vcpkg.exe install nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
+
         Write-Host "✅ vcpkg libraries installed successfully."
 
         # Clone or update PatchIccMAX
