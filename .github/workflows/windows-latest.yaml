@@ -3,7 +3,7 @@
 ## Copyright (©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 10-DEC-2024 by David Hoyt (©)
+## Last Updated: 28-FEB-2025 by David Hoyt (©)
 #
 ## Intent: Poll the Device and Report
 #
@@ -70,7 +70,7 @@ jobs:
         }
         # Checkout master branch
         cd "$buildDir\PatchIccMAX"
-        git checkout main
+        git checkout msvc
         Write-Host "DemoIccMAX repository checked out to development branch."
         # Verify directory structure
         if (-not (Test-Path "$buildDir\PatchIccMAX\Build\MSVC")) {
