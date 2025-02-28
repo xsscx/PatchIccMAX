@@ -39,13 +39,18 @@ jobs:
           # Define paths
           $buildDir = "${{ env.BUILD_DIR }}"
           $vcpkgDir = "$RUNNER_TEMP/vcpkg"
-          $cacheDir = "${{ github.workspace }}/vcpkg_cache"
+          $cacheDir = Resolve-Path "${{ github.workspace }}/vcpkg_cache"
+
+          # Ensure absolute path formatting for vcpkg binary caching
+          if ($cacheDir -match '^\\\\\?\\') {
+              $cacheDir = $cacheDir.Substring(4)  # Remove \\?\ prefix for compatibility
+          }
 
           # Create necessary directories
           New-Item -ItemType Directory -Path $buildDir -Force
           New-Item -ItemType Directory -Path $cacheDir -Force
 
-          # Check and clone vcpkg if not cached
+          # Clone vcpkg if not cached
           if (-not (Test-Path "$vcpkgDir\installed")) {
               git clone https://github.com/microsoft/vcpkg.git $vcpkgDir
               cd $vcpkgDir
@@ -54,21 +59,21 @@ jobs:
               Write-Host "vcpkg is already installed."
           }
 
-          # Enable vcpkg binary caching
+          # Enable vcpkg binary caching with correct absolute path
           $env:VCPKG_DEFAULT_BINARY_CACHE = $cacheDir
           Write-Host "Using vcpkg cache directory: $cacheDir"
 
-          # Install required libraries with caching
+          # Install required libraries
           & "$vcpkgDir\vcpkg.exe" integrate install
           & "$vcpkgDir\vcpkg.exe" install `
               nlohmann-json:x64-windows nlohmann-json:x64-windows-static `
               libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows `
               libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static `
-              --binarysource=clear --binarysource=files,$cacheDir,readwrite --debug
+              --binarysource=clear --binarysource="files,$cacheDir,readwrite" --debug
 
           Write-Host "vcpkg libraries installed successfully."
 
-      - name: Clone DemoIccMAX repository and verify structure
+      - name: Clone PatchIccMAX repository and verify structure
         shell: pwsh
         run: |
           $buildDir = "${{ env.BUILD_DIR }}"
