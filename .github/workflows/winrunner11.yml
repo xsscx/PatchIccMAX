@@ -42,20 +42,9 @@ jobs:
             Write-Host "✅ vcpkg is already installed."
         }
 
-        # Install dependencies
-        & "$VCPKG_DIR\vcpkg.exe" integrate install
-        & "$VCPKG_DIR\vcpkg.exe" install `
-          egl-registry:x64-windows-static `
-          vcpkg-cmake:x64-windows-static `
-          vcpkg-cmake-config:x64-windows-static `
-          nlohmann-json:x64-windows `
-          nlohmann-json:x64-windows-static `
-          libxml2:x64-windows `
-          tiff:x64-windows `
-          wxwidgets:x64-windows `
-          libxml2:x64-windows-static `
-          tiff:x64-windows-static `
-          wxwidgets:x64-windows-static --debug
+        
+        .\vcpkg.exe integrate install
+        .\vcpkg.exe install nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
         Write-Host "✅ vcpkg libraries installed successfully."
 
         # Clone or update PatchIccMAX
