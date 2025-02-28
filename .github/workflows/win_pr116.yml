@@ -90,7 +90,7 @@ jobs:
               Write-Host "PatchIccMAX repository cloned."
           }
           cd "$buildDir\PatchIccMAX"
-          git checkout pr116
+          git checkout msvc
           Write-Host "PatchIccMAX repository checked out to pr116 branch."
           if (-not (Test-Path "$buildDir\PatchIccMAX\Build\MSVC")) {
               Write-Error "Directory structure is not as expected: $buildDir\PatchIccMAX\Build\MSVC"
