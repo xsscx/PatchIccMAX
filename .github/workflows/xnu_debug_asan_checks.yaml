@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "XNU Debug Asan"
+name: "Asan 2"
 
 on:
   workflow_dispatch: # Manual trigger only
@@ -63,15 +63,25 @@ jobs:
           cd ../Testing
           /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.sh)" || { echo "Error: Profile creation failed. Exiting."; exit 1; }
           /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/RunTests_asan.sh)" || { echo "Error: Profile creation failed. Exiting."; exit 1; }
-          ls -tla                
+          ls -tla
+          # Count number of ICCs that exist to confirm
+          echo "Expecting 204 .icc color profiles..."
+          if [ "$1" != "clean" ]
+           then
+          echo -n "ICC file count.. : "
+	         find . -iname "*.icc" | wc -l
+            else
+	         echo -n "ICC files after a clean: "
+	        find . -iname "*.icc" | wc -l
+         fi                
       # Check build success
       - name: Check build success
         run: |
           echo "Checking build success..."
           if [ $? -eq 0 ]; then
-            echo "✅ Build Succeeded"
+            echo "? Build Succeeded"
           else
-            echo "❌ Build Failed"
+            echo "? Build Failed"
             exit 1
           fi
       # Upload built binaries as artifacts
