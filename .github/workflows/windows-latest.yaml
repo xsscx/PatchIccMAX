@@ -70,7 +70,7 @@ jobs:
         }
         # Checkout master branch
         cd "$buildDir\PatchIccMAX"
-        git checkout maain
+        git checkout main
         Write-Host "DemoIccMAX repository checked out to development branch."
         # Verify directory structure
         if (-not (Test-Path "$buildDir\PatchIccMAX\Build\MSVC")) {
