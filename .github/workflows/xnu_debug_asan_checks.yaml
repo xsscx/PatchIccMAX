@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "Asan 2"
+name: "Asan2"
 
 on:
   workflow_dispatch: # Manual trigger only
