@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "XNU Debug Asan 2"
+name: "Asan 2"
 
 on:
   workflow_dispatch: # Manual trigger only
