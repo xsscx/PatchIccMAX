@@ -29,7 +29,7 @@ jobs:
 
     - name: Setup vcpkg and clone DemoIccMAX repository
       run: |
-       iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/msvc/contrib/Build/VS2022C/build_asan.ps1").Content
+       iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/msvc/contrib/Build/VS2022C/build_asan_runner.ps1").Content
 #       iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/msvc/contrib/Build/VS2022C/build_asan_alt.ps1").Content
 #       iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/msvc/contrib/Build/VS2022C/build_asan_alt.ps1").Content
 #       iex (iwr -Uri "https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/Build/VS2022C/build.ps1").Content
