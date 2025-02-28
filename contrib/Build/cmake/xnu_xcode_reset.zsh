@@ -3,7 +3,7 @@
 # Copyright (c) 2025. International Color Consortium. All rights reserved.
 # Copyright (c) 2024. David H Hoyt LLC. All rights reserved.
 #
-# Last Updated: 16-FEB-2025 at 1422 EST by David Hoyt | h02332
+# Last Updated: 06-MAR-2025 at 0729 EST by David Hoyt | h02332
 #
 # Intent:
 #   This script is to be run from Project_Root/Build/
@@ -16,7 +16,7 @@
 #
 # Usage:
 #   Run this script in a terminal with:
-#     /bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/xnu/contrib/Build/cmake/xnu_xcode_reset.zsh)"
+#     /bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/Build/cmake/xnu_xcode_reset.zsh)"
 #
 
 # Display startup banner
