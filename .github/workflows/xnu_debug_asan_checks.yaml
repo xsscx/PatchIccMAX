@@ -1,0 +1,82 @@
+###############################################################
+#
+## Copyright (©) 2024 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 28-FEB-2025 by David Hoyt (©)
+#
+## Intent: Poll the Device and Report
+#
+## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+###############################################################
+
+name: "XNU Debug Asan"
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+jobs:
+  build-macos:
+    name: Build Master Branch
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up Git anonymous identity
+      - name: Set up Git anonymous identity
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+      # Fetch the specific PR branch and install dependencies
+      - name: Clone repository and install dependencies
+        run: |
+          echo "Cloning repository and installing dependencies..."
+          git clone https://github.com/xsscx/PatchIccMAX.git
+          cd PatchIccMAX
+          git checkout master
+          echo "Installing Homebrew packages..."
+          brew install nlohmann-json libxml2 wxwidgets libtiff || echo "Some dependencies might already be installed."
+      # Configure the build with CMake
+      - name: Configure the build with CMake
+        run: |
+          echo "Configuring build with CMake..."
+          mkdir -p PatchIccMAX/Build
+          cd PatchIccMAX/Build
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
+                -DCMAKE_BUILD_TYPE=Debug \
+                -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
+                -Wno-dev Cmake/
+      # Build the project using CMake
+      - name: Build project with CMake
+        run: |
+          echo "Building project..."
+          cd PatchIccMAX/Build
+          make -j$(sysctl -n hw.ncpu)
+          find . -type f \( \( -perm -111 \) -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -exec ls -lh {} \;
+          cd ../Testing
+          /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.sh)" || { echo "Error: Profile creation failed. Exiting."; exit 1; }
+          /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/RunTests_asan.sh)" || { echo "Error: Profile creation failed. Exiting."; exit 1; }
+          ls -tla                
+      # Check build success
+      - name: Check build success
+        run: |
+          echo "Checking build success..."
+          if [ $? -eq 0 ]; then
+            echo "✅ Build Succeeded"
+          else
+            echo "❌ Build Failed"
+            exit 1
+          fi
+      # Upload built binaries as artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: main_ci_macos_build
+          path: PatchIccMAX/Build
