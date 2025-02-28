@@ -3,8 +3,15 @@
 ## Intent: Unit Test of RunTests.sh for Asan Builds
 ##
 ## Written by David Hoyt for ICC color.org & DemoIccMAX Project
-## Date: 27-FEB-2025 2215 EST
+## Date: 28-FEB-2025 1253 EST
 ##
+#
+#
+#
+# RUN: ASAN_OPTIONS=detect_stack_use_after_return=1 /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/RunTests_asan.sh)"
+#
+#
+#
 
 if ! command -v ../Build/Tools/CmdLine/IccApplyNamedCmm_Build/iccApplyNamedCmm   # print which executable is being used
 then
