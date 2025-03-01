@@ -77,7 +77,8 @@ jobs:
               libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows `
               libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static `
               --binarysource=clear --binarysource="files,$cacheDir,readwrite" --debug
-
+          copy $RUNNER_TEMP/vcpkg/installed/x64-windows/lib/tiff.lib $RUNNER_TEMP/vcpkg/installed/x64-windows/lib/libtiff.lib
+          copy $RUNNER_TEMP/vcpkg/installed/x64-windows-static/lib/tiff.lib $RUNNER_TEMP/vcpkg/installed/x64-windows-static/lib/libtiff.lib
           Write-Host "vcpkg libraries installed successfully."
 
       - name: Clone PatchIccMAX repository and verify structure
