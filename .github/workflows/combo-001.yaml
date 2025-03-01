@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "UbuXnu CI Min"
+name: "UbuXnu CI Mi2n"
 
 on:
   workflow_dispatch:
