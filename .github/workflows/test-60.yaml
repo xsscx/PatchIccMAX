@@ -131,14 +131,14 @@ jobs:
 
     # Step 4: Upload build artifacts
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Build-Artifacts
         path: C:\test\DemoIccMAX
 
     # Step 5: Upload logs
     - name: Upload build logs
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Build-Logs
         path: ${{ github.workspace }}/logs
