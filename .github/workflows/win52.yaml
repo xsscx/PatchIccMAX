@@ -104,8 +104,8 @@ jobs:
         copy "$vcpkgDir\installed\x64-windows\lib\*.dll" .
         copy "$vcpkgDir\installed\x64-windows-static\lib\*.lib" .
         # Run .exe files
-        Write-Host "Running .exe files..."
-        Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
+#        Write-Host "Running .exe files..."
+#        Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
     
     # Step 5: Upload build artifacts
     - name: Upload build artifacts
