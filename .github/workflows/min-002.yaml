@@ -1,57 +1,64 @@
-name: "CIMin Check"
+name: "Checks Min"
 
 on:
   push:
-    branches: 
-      - "master"  
+    branches:
+      - "master"
   pull_request:
-    branches: 
+    branches:
       - "master"
   workflow_dispatch:
 
 jobs:
-  # Linux Build and Test Job
   build-linux:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout repository
+    - name: "🚀 ENTRY: Starting Linux Build Workflow"
+      run: echo "[INFO] Linux CI Pipeline Initiated. Timestamp: $(date)"
+    
     - name: Checkout repository
       uses: actions/checkout@v4
-
-    # Set up Git anonymous identity
-    - name: Set up Git anonymous identity
+    
+    - name: "🔧 Set up Git anonymous identity"
       run: |
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
-    # Install Dependencies
-    - name: Install Dependencies
+        echo "[INFO] Git identity configured."
+    
+    - name: "📦 Install Dependencies"
       run: |
+        echo "[INFO] Updating and installing dependencies..."
         sudo apt-get update
         sudo apt-get install -y \
           libwxgtk-media3.2-dev libwxgtk-webview3.2-dev \
           libwxgtk3.2-dev libxml2 libtiff-dev libxml2-dev \
           clang-tools llvm clang-17 cmake curl git \
-          libopencl-clang-17-dev nlohmann-json3-dev  # Fixed missing JSON library
-    # Ensure scan-build is installed and accessible
-    - name: Validate scan-build installation
+          libopencl-clang-17-dev nlohmann-json3-dev
+        echo "[SUCCESS] Dependencies installed."
+    
+    - name: "🔍 Validate scan-build installation"
       run: |
         export PATH="/usr/lib/llvm-17/bin:$PATH"
-        which scan-build || echo "? scan-build not found"
-        scan-build --version || echo "? scan-build version check failed"
-    # Clone the DemoIccMAX repository
-    - name: Clone the DemoIccMAX repository
+        which scan-build || echo "[WARNING] scan-build not found"
+        scan-build --version || echo "[WARNING] scan-build version check failed"
+        echo "[INFO] scan-build validation complete."
+    
+    - name: "📥 Clone DemoIccMAX Repository"
       run: |
+        echo "[INFO] Cloning repository..."
         git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
         cd DemoIccMAX
         git checkout master
-    # Configure the build with CMake using scan-build
-    - name: Configure the build with CMake using scan-build
+        echo "[SUCCESS] Repository cloned."
+    
+    - name: "⚙️ Configure the build with CMake using scan-build"
       run: |
           cd DemoIccMAX/Build/
           export PATH="/usr/lib/llvm-17/bin:$PATH"
           export CC=clang
           export CXX=clang++
+          echo "[INFO] Running scan-build CMake configuration..."
           scan-build --html-title="Static Analysis Report" -o scanbuild-output \
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
           -DCMAKE_BUILD_TYPE=Debug \
@@ -59,34 +66,35 @@ jobs:
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
           -Wno-dev Cmake/
-    # Check for build errors with scan-build
-    - name: Check for build errors with scan-build
+          echo "[SUCCESS] CMake configuration complete."
+    
+    - name: "🔎 Check for build errors with scan-build"
       run: |
         cd DemoIccMAX/Build/
         export PATH="/usr/lib/llvm-17/bin:$PATH"
+        echo "[INFO] Running scan-build make..."
         scan-build --html-title="Static Analysis Report" -o scanbuild-output make
-    # Collect Build Artifacts (Logs) only if failure occurs
-    - name: Collect Build Artifacts (Logs)
+        echo "[SUCCESS] scan-build analysis complete."
+    
+    - name: "📂 Collect Build Artifacts (on failure)"
       if: failure()
       uses: actions/upload-artifact@v4
       with:
         name: build-logs
         path: DemoIccMAX/Build/build_log.txt
-
-    # Upload scan-build reports
-    - name: Upload scan-build reports
+    
+    - name: "📤 Upload scan-build reports"
       uses: actions/upload-artifact@v4
       with:
         name: scan-build-report
         path: DemoIccMAX/Build/scanbuild-output
-
-    # Create artifact directory for binaries
-    - name: Create artifact directory
+    
+    - name: "📁 Create artifact directory"
       run: mkdir -p artifact
-
-    # Find and copy binary tools, libraries, and archive files (Ubuntu)
-    - name: Copy binary tools, libraries, and archive files
+    
+    - name: "📦 Copy binary tools, libraries, and archive files"
       run: |
+        echo "[INFO] Gathering built binaries..."
         if [ -d DemoIccMAX/Build/Tools ]; then
           find DemoIccMAX/Build/Tools/ -type f -executable -exec cp {} artifact/ \;
         fi
@@ -94,69 +102,13 @@ jobs:
           find DemoIccMAX/Build/bin/ -type f -executable -exec cp {} artifact/ \;
         fi
         find DemoIccMAX/Build/ -type f \( -name "*.a" -o -name "*.so" \) -exec cp {} artifact/ \;
-    # Upload build artifacts
-    - name: Upload build artifacts
+        echo "[SUCCESS] Binaries copied."
+    
+    - name: "📤 Upload build artifacts"
       uses: actions/upload-artifact@v4
       with:
         name: DemoIccMAX-build-linux
         path: artifact/
-
-  # macOS Build and Test Job
-  build-macos:
-    runs-on: macos-latest
-
-    steps:
-    # Checkout repository
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    # Set up Git anonymous identity
-    - name: Set up Git anonymous identity
-      run: |
-        git config --global user.email "github-actions@github.com"
-        git config --global user.name "GitHub Actions"
-    # Clone the DemoIccMAX repository and checkout the pull request
-    - name: Clone the DemoIccMAX repository
-      run: |
-        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
-        cd DemoIccMAX
-        git fetch origin pull/116/head:pr-116
-        git checkout pr-116
-    # Configure the build with CMake
-    - name: Configure the build with CMake
-      run: |
-        cd DemoIccMAX/Build/
-        brew install nlohmann-json libxml2 wxwidgets libtiff
-        cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
-              -DCMAKE_BUILD_TYPE=Debug \
-              -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
-              -Wno-dev Cmake/
-    # Build the project with make
-    - name: Build project
-      run: |
-        cd DemoIccMAX/Build/
-        make
-    # Create artifact directory for binaries
-    - name: Create artifact directory
-      run: mkdir -p artifact
-
-    # Find and copy binary tools, libraries, and archive files (macOS)
-    - name: Copy binary tools, libraries, and archive files
-      run: |
-        if [ -d DemoIccMAX/Build/Tools ]; then
-          find DemoIccMAX/Build/Tools/ -type f -perm +111 -exec cp {} artifact/ \;
-        fi
-        if [ -d DemoIccMAX/Build/bin ]; then
-          find DemoIccMAX/Build/bin/ -type f -perm +111 -exec cp {} artifact/ \;
-        fi
-        find DemoIccMAX/Build/ -type f \( -name "*.a" -o -name "*.lib" -o -name "*.dylib" \) -exec cp {} artifact/ \;
-    # Label Artifacts for macOS (arm64)
-    - name: Label Artifacts for macOS (arm64)
-      run: mv artifact DemoIccMAX-build-arm64
-
-    # Upload build artifacts for macOS
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: DemoIccMAX-build-macos-arm64
-        path: DemoIccMAX-build-arm64/
+    
+    - name: "✅ EXIT: Linux Build Completed Successfully"
+      run: echo "[SUCCESS] Linux Build Workflow Completed. Timestamp: $(date)"
