@@ -1,4 +1,4 @@
-name: "UbunScanBuild"
+name: "gnu-x86_64-release-scan"
 
 on:
   push:
