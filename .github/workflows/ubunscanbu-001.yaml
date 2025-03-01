@@ -79,8 +79,8 @@ jobs:
       - name: Configure the build with scan-build
         run: |
           cd DemoIccMAX/Build
-          export CC=clang
-          export CXX=clang++
+          # export CC=clang
+          # export CXX=clang++
           export PATH="/usr/lib/llvm-17/bin:$PATH"
           echo "⚙️ Configuring build..."
           scan-build cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release -Wno-dev Cmake/
