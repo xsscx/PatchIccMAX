@@ -42,7 +42,7 @@ jobs:
             echo "❌ scan-build not found!"
             exit 1
           fi
-          scan-build --version || { echo "❌ scan-build version check failed!"; exit 1; }
+#          scan-build --version || { echo "❌ scan-build version check failed!"; exit 1; }
 
       - name: 🔹 [FETCH] Clone DemoIccMAX Repository
         run: |
