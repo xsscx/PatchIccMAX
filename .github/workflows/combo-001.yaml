@@ -15,12 +15,6 @@
 name: "UbuXnu CI Min"
 
 on:
-  push:
-    branches: 
-      - "master"  
-  pull_request:
-    branches: 
-      - "master"
   workflow_dispatch:
 
 jobs:
