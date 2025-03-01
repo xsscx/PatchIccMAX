@@ -3,7 +3,7 @@
 ## Copyright (©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 16-FEB-2025 at 1933 EST by David Hoyt (©)
+## Last Updated: 01-MAR-2025 at 0828 EST by David Hoyt (©)
 #
 ## Intent: Poll the Device and Report
 #
@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "gnuc++ scan-build"
+name: "Ubu debug-x64-scan-build"
 
 on:
   push:
