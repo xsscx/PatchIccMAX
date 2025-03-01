@@ -3,7 +3,7 @@
 ## Copyright (©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 01-MAR-2025 0854 EST by David Hoyt (©)
+## Last Updated: 01-MAR-2025 0838 EST by David Hoyt (©)
 #
 ## Intent: Poll the Device and Report
 #
@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "XNU debug-arm64-scan-asan"
+name: "xnu-arm64-master-debug-scan"
 
 on:
   workflow_dispatch:
