@@ -9,7 +9,6 @@ jobs:
 
     steps:
     - name: "🚀 ENTRY: Starting Linux Build Workflow"
-      run: echo "[INFO] Linux CI Pipeline Initiated. Timestamp: $(date)"
     
     - name: Checkout repository
       uses: actions/checkout@v4
