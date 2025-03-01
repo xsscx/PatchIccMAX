@@ -1,0 +1,171 @@
+name: "Combo CI Min"
+
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "master"
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔹 [INIT] Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔹 [INIT] Set Up Git Identity
+        run: |
+          echo "🟢 Setting up Git identity..."
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: 🔹 [PREP] Install Dependencies
+        run: |
+          echo "🟢 Updating package lists..."
+          sudo apt-get update -qq
+          echo "🟢 Installing required dependencies..."
+          sudo apt-get install -y \
+            libwxgtk-media3.2-dev libwxgtk-webview3.2-dev \
+            libwxgtk3.2-dev libxml2 libtiff-dev libxml2-dev \
+            clang-tools llvm clang-17 cmake curl git \
+            libopencl-clang-17-dev nlohmann-json3-dev
+
+      - name: 🔹 [CHECK] Validate scan-build Installation
+        run: |
+          echo "🟢 Checking scan-build availability..."
+          export PATH="/usr/lib/llvm-17/bin:$PATH"
+          if ! which scan-build; then
+            echo "❌ scan-build not found!"
+            exit 1
+          fi
+          scan-build --version || { echo "❌ scan-build version check failed!"; exit 1; }
+
+      - name: 🔹 [FETCH] Clone DemoIccMAX Repository
+        run: |
+          echo "🟢 Cloning DemoIccMAX..."
+          git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+          cd DemoIccMAX
+          git checkout master
+
+      - name: 🔹 [BUILD] Configure with CMake & scan-build
+        run: |
+          echo "🟢 Configuring build..."
+          cd DemoIccMAX/Build/
+          export PATH="/usr/lib/llvm-17/bin:$PATH"
+          export CC=clang
+          export CXX=clang++
+          scan-build --html-title="Static Analysis Report" -o scanbuild-output \
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
+          -Wno-dev Cmake/
+
+      - name: 🔹 [BUILD] Compile & Analyze with scan-build
+        run: |
+          echo "🟢 Running scan-build..."
+          cd DemoIccMAX/Build/
+          export PATH="/usr/lib/llvm-17/bin:$PATH"
+          scan-build --html-title="Static Analysis Report" -o scanbuild-output make
+
+      - name: 🛑 [FAILURE HANDLING] Collect Build Logs (if failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: DemoIccMAX/Build/build_log.txt
+
+      - name: 📊 [REPORT] Upload scan-build Analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: scan-build-report
+          path: DemoIccMAX/Build/scanbuild-output
+
+      - name: 📁 [EXPORT] Prepare Build Artifacts
+        run: |
+          echo "🟢 Creating artifact directory..."
+          mkdir -p artifact
+          if [ -d DemoIccMAX/Build/Tools ]; then
+            echo "🟢 Copying executable tools..."
+            find DemoIccMAX/Build/Tools/ -type f -executable -exec cp {} artifact/ \;
+          fi
+          if [ -d DemoIccMAX/Build/bin ]; then
+            echo "🟢 Copying executables from bin/..."
+            find DemoIccMAX/Build/bin/ -type f -
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: 🔹 [INIT] Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔹 [INIT] Set Up Git Identity
+        run: |
+          echo "🟢 Configuring Git user..."
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: 🔹 [FETCH] Clone DemoIccMAX Repository (PR 116)
+        run: |
+          echo "🟢 Cloning DemoIccMAX..."
+          git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+          cd DemoIccMAX
+          git fetch origin pull/116/head:pr-116
+          git checkout pr-116
+
+      - name: 🔹 [PREP] Install Dependencies
+        run: |
+          echo "🟢 Installing required dependencies..."
+          brew install nlohmann-json libxml2 wxwidgets libtiff
+          echo "✅ Dependency installation complete."
+
+      - name: 🔹 [BUILD] Configure with CMake
+        run: |
+          echo "🟢 Configuring build..."
+          cd DemoIccMAX/Build/
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
+                -DCMAKE_BUILD_TYPE=Debug \
+                -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
+                -Wno-dev Cmake/
+
+      - name: 🔹 [BUILD] Compile with Make
+        run: |
+          echo "🟢 Running make build..."
+          cd DemoIccMAX/Build/
+          make
+
+      - name: 🛑 [FAILURE HANDLING] Collect Build Logs (if failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-macos
+          path: DemoIccMAX/Build/build_log.txt
+
+      - name: 📁 [EXPORT] Prepare Build Artifacts
+        run: |
+          echo "🟢 Creating artifact directory..."
+          mkdir -p artifact
+          echo "🟢 Copying executable tools..."
+          if [ -d DemoIccMAX/Build/Tools ]; then
+            find DemoIccMAX/Build/Tools/ -type f -perm +111 -exec cp {} artifact/ \;
+          fi
+          if [ -d DemoIccMAX/Build/bin ]; then
+            find DemoIccMAX/Build/bin/ -type f -perm +111 -exec cp {} artifact/ \;
+          fi
+          echo "🟢 Copying libraries and archive files..."
+          find DemoIccMAX/Build/ -type f \( -name "*.a" -o -name "*.lib" -o -name "*.dylib" \) -exec cp {} artifact/ \;
+
+      - name: 📌 [LABEL] Rename Artifacts for macOS (arm64)
+        run: mv artifact DemoIccMAX-build-arm64
+
+      - name: 📤 [EXPORT] Upload macOS Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DemoIccMAX-build-macos-arm64
+          path: DemoIccMAX-build-arm64/
