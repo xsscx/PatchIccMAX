@@ -3,7 +3,7 @@
 ## Copyright (©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 01-MAR-2025 0738 EST by David Hoyt (©)
+## Last Updated: 01-MAR-2025 0742 EST by David Hoyt (©)
 #
 ## Intent: Poll the Device and Report
 #
@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "Unix C/C++ CI Workflow"
+name: "Ubu CI Min"
 
 on:
   push:
