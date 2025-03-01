@@ -92,7 +92,7 @@ jobs:
           mkdir -p artifact
           if [ -d DemoIccMAX/Build/Tools ]; then
             echo "🟢 Copying executable tools..."
-            find DemoIccMAX/Build/Tools/ -type f -executable -exec cp {} artifact/ \;
+            find DemoIccMAX/Build/ -type f \( -name "*.a" -o -name "*.so" \) -exec cp {} artifact/ \;
           fi
           if [ -d DemoIccMAX/Build/bin ]; then
             echo "🟢 Copying executables from bin/..."
