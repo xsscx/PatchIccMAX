@@ -73,31 +73,42 @@ jobs:
           export PATH="/usr/lib/llvm-17/bin:$PATH"
           scan-build --html-title="Static Analysis Report" -o scanbuild-output make
 
-      - name: 🛑 [FAILURE HANDLING] Collect Build Logs (if failure)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-logs
-          path: DemoIccMAX/Build/build_log.txt
+    # Collect Build Artifacts (Logs) only if failure occurs
+    - name: Collect Build Artifacts (Logs)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs
+        path: DemoIccMAX/Build/build_log.txt
 
-      - name: 📊 [REPORT] Upload scan-build Analysis
-        uses: actions/upload-artifact@v4
-        with:
-          name: scan-build-report
-          path: DemoIccMAX/Build/scanbuild-output
+    # Upload scan-build reports
+    - name: Upload scan-build reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: scan-build-report
+        path: DemoIccMAX/Build/scanbuild-output
 
-      - name: 📁 [EXPORT] Prepare Build Artifacts
-        run: |
-          echo "🟢 Creating artifact directory..."
-          mkdir -p artifact
-          if [ -d DemoIccMAX/Build/Tools ]; then
-            echo "🟢 Copying executable tools..."
-            find DemoIccMAX/Build/ -type f \( -name "*.a" -o -name "*.so" \) -exec cp {} artifact/ \;
-          fi
-          if [ -d DemoIccMAX/Build/bin ]; then
-            echo "🟢 Copying executables from bin/..."
-            find DemoIccMAX/Build/bin/ -type f -
+    # Create artifact directory for binaries
+    - name: Create artifact directory
+      run: mkdir -p artifact
 
+    # Find and copy binary tools, libraries, and archive files (Ubuntu)
+    - name: Copy binary tools, libraries, and archive files
+      run: |
+        if [ -d DemoIccMAX/Build/Tools ]; then
+          find DemoIccMAX/Build/Tools/ -type f -executable -exec cp {} artifact/ \;
+        fi
+        if [ -d DemoIccMAX/Build/bin ]; then
+          find DemoIccMAX/Build/bin/ -type f -executable -exec cp {} artifact/ \;
+        fi
+        find DemoIccMAX/Build/ -type f \( -name "*.a" -o -name "*.so" \) -exec cp {} artifact/ \;
+    # Upload build artifacts
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: DemoIccMAX-build-linux
+        path: artifact/
+        
   build-macos:
     runs-on: macos-latest
 
