@@ -49,6 +49,14 @@ jobs:
           cd "$WORK_DIR"
           pwd
           ls
+          copy C:\test\vcpkg\installed\x64-windows\lib\wxmsw32u_core.lib C:\test\vcpkg\installed\x64-windows\lib\wxmsw30_core.lib
+          copy C:\test\vcpkg\installed\x64-windows\lib\wxbase32u.lib C:\test\vcpkg\installed\x64-windows\lib\wxbase30.lib
+          copy C:\test\vcpkg\installed\x64-windows\lib\tiff.lib C:\test\vcpkg\installed\x64-windows\lib\wxtiff.lib
+          copy C:\test\vcpkg\installed\x64-windows\lib\turbojpeg.lib C:\test\vcpkg\installed\x64-windows\lib\wxjpeg.lib
+          copy C:\test\vcpkg\installed\x64-windows\lib\libpng16.lib C:\test\vcpkg\installed\x64-windows\lib\wxpng.lib
+          copy C:\test\vcpkg\installed\x64-windows\lib\zlib.lib C:\test\vcpkg\installed\x64-windows\lib\wxzlib.lib
+          copy C:\test\vcpkg\installed\x64-windows\lib\pcre2-32.lib C:\test\vcpkg\installed\x64-windows\lib\wxregex.lib
+          copy C:\test\vcpkg\installed\x64-windows\lib\libexpat.lib C:\test\vcpkg\installed\x64-windows\lib\wxexpat.lib
           msbuild /m /p:Configuration=Release /p:Platform=x64 "Build\MSVC\BuildAll_v22.sln"
         shell: pwsh
 
