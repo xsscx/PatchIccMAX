@@ -1,4 +1,4 @@
-name: "gnu-x86_64-release-scan"
+name: "ubu-gnu-x86_64-release-scan"
 
 on:
   push:
