@@ -1,4 +1,4 @@
-name: "SBubu001"
+name: "clang-x86_64-release-scan"
 
 on:
   push:
