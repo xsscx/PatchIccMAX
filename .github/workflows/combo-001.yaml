@@ -1,53 +1,67 @@
-name: "Combo CI Min"
+###############################################################
+#
+## Copyright (©) 2024 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 01-MAR-2025 0742 EST by David Hoyt (©)
+#
+## Intent: Poll the Device and Report
+#
+## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+###############################################################
+
+name: "Ubu CI Min"
 
 on:
+  push:
+    branches: 
+      - "master"  
+  pull_request:
+    branches: 
+      - "master"
   workflow_dispatch:
 
 jobs:
+  # Linux Build and Test Job
   build-linux:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🔹 [INIT] Checkout Repository
-        uses: actions/checkout@v4
+    # Checkout repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: 🔹 [INIT] Set Up Git Identity
-        run: |
-          echo "🟢 Setting up Git identity..."
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "GitHub Actions"
-
-      - name: 🔹 [PREP] Install Dependencies
-        run: |
-          echo "🟢 Updating package lists..."
-          sudo apt-get update -qq
-          echo "🟢 Installing required dependencies..."
-          sudo apt-get install -y \
-            libwxgtk-media3.2-dev libwxgtk-webview3.2-dev \
-            libwxgtk3.2-dev libxml2 libtiff-dev libxml2-dev \
-            clang-tools llvm clang-17 cmake curl git \
-            libopencl-clang-17-dev nlohmann-json3-dev
-
-      - name: 🔹 [CHECK] Validate scan-build Installation
-        run: |
-          echo "🟢 Checking scan-build availability..."
-          export PATH="/usr/lib/llvm-17/bin:$PATH"
-          if ! which scan-build; then
-            echo "❌ scan-build not found!"
-            exit 1
-          fi
-#          scan-build --version || { echo "❌ scan-build version check failed!"; exit 1; }
-
-      - name: 🔹 [FETCH] Clone DemoIccMAX Repository
-        run: |
-          echo "🟢 Cloning DemoIccMAX..."
-          git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
-          cd DemoIccMAX
-          git checkout master
-
-      - name: 🔹 [BUILD] Configure with CMake & scan-build
-        run: |
-          echo "🟢 Configuring build..."
+    # Set up Git anonymous identity
+    - name: Set up Git anonymous identity
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+    # Install Dependencies
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libwxgtk-media3.2-dev libwxgtk-webview3.2-dev \
+          libwxgtk3.2-dev libxml2 libtiff-dev libxml2-dev \
+          clang-tools llvm clang-17 cmake curl git \
+          libopencl-clang-17-dev nlohmann-json3-dev  # Fixed missing JSON library
+    # Ensure scan-build is installed and accessible
+    - name: Validate scan-build installation
+      run: |
+        export PATH="/usr/lib/llvm-17/bin:$PATH"
+        which scan-build || echo "? scan-build not found"
+        scan-build --version || echo "? scan-build version check failed"
+    # Clone the DemoIccMAX repository
+    - name: Clone the DemoIccMAX repository
+      run: |
+        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+        cd DemoIccMAX
+        git checkout master
+    # Configure the build with CMake using scan-build
+    - name: Configure the build with CMake using scan-build
+      run: |
           cd DemoIccMAX/Build/
           export PATH="/usr/lib/llvm-17/bin:$PATH"
           export CC=clang
@@ -59,14 +73,12 @@ jobs:
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
           -Wno-dev Cmake/
-
-      - name: 🔹 [BUILD] Compile & Analyze with scan-build
-        run: |
-          echo "🟢 Running scan-build..."
-          cd DemoIccMAX/Build/
-          export PATH="/usr/lib/llvm-17/bin:$PATH"
-          scan-build --html-title="Static Analysis Report" -o scanbuild-output make
-
+    # Check for build errors with scan-build
+    - name: Check for build errors with scan-build
+      run: |
+        cd DemoIccMAX/Build/
+        export PATH="/usr/lib/llvm-17/bin:$PATH"
+        scan-build --html-title="Static Analysis Report" -o scanbuild-output make
     # Collect Build Artifacts (Logs) only if failure occurs
     - name: Collect Build Artifacts (Logs)
       if: failure()
@@ -102,75 +114,63 @@ jobs:
       with:
         name: DemoIccMAX-build-linux
         path: artifact/
-        
+
+  # macOS Build and Test Job
   build-macos:
     runs-on: macos-latest
 
     steps:
-      - name: 🔹 [INIT] Checkout Repository
-        uses: actions/checkout@v4
+    # Checkout repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: 🔹 [INIT] Set Up Git Identity
-        run: |
-          echo "🟢 Configuring Git user..."
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "GitHub Actions"
+    # Set up Git anonymous identity
+    - name: Set up Git anonymous identity
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+    # Clone the DemoIccMAX repository and checkout the pull request
+    - name: Clone the DemoIccMAX repository
+      run: |
+        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+        cd DemoIccMAX
+        git fetch origin pull/116/head:pr-116
+        git checkout pr-116
+    # Configure the build with CMake
+    - name: Configure the build with CMake
+      run: |
+        cd DemoIccMAX/Build/
+        brew install nlohmann-json libxml2 wxwidgets libtiff
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
+              -DCMAKE_BUILD_TYPE=Debug \
+              -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
+              -Wno-dev Cmake/
+    # Build the project with make
+    - name: Build project
+      run: |
+        cd DemoIccMAX/Build/
+        make
+    # Create artifact directory for binaries
+    - name: Create artifact directory
+      run: mkdir -p artifact
 
-      - name: 🔹 [FETCH] Clone DemoIccMAX Repository (PR 116)
-        run: |
-          echo "🟢 Cloning DemoIccMAX..."
-          git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
-          cd DemoIccMAX
-          git fetch origin pull/116/head:pr-116
-          git checkout pr-116
+    # Find and copy binary tools, libraries, and archive files (macOS)
+    - name: Copy binary tools, libraries, and archive files
+      run: |
+        if [ -d DemoIccMAX/Build/Tools ]; then
+          find DemoIccMAX/Build/Tools/ -type f -perm +111 -exec cp {} artifact/ \;
+        fi
+        if [ -d DemoIccMAX/Build/bin ]; then
+          find DemoIccMAX/Build/bin/ -type f -perm +111 -exec cp {} artifact/ \;
+        fi
+        find DemoIccMAX/Build/ -type f \( -name "*.a" -o -name "*.lib" -o -name "*.dylib" \) -exec cp {} artifact/ \;
+    # Label Artifacts for macOS (arm64)
+    - name: Label Artifacts for macOS (arm64)
+      run: mv artifact DemoIccMAX-build-arm64
 
-      - name: 🔹 [PREP] Install Dependencies
-        run: |
-          echo "🟢 Installing required dependencies..."
-          brew install nlohmann-json libxml2 wxwidgets libtiff
-          echo "✅ Dependency installation complete."
-
-      - name: 🔹 [BUILD] Configure with CMake
-        run: |
-          echo "🟢 Configuring build..."
-          cd DemoIccMAX/Build/
-          cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
-                -DCMAKE_BUILD_TYPE=Debug \
-                -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
-                -Wno-dev Cmake/
-
-      - name: 🔹 [BUILD] Compile with Make
-        run: |
-          echo "🟢 Running make build..."
-          cd DemoIccMAX/Build/
-          make
-
-      - name: 🛑 [FAILURE HANDLING] Collect Build Logs (if failure)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-logs-macos
-          path: DemoIccMAX/Build/build_log.txt
-
-      - name: 📁 [EXPORT] Prepare Build Artifacts
-        run: |
-          echo "🟢 Creating artifact directory..."
-          mkdir -p artifact
-          echo "🟢 Copying executable tools..."
-          if [ -d DemoIccMAX/Build/Tools ]; then
-            find DemoIccMAX/Build/Tools/ -type f -perm +111 -exec cp {} artifact/ \;
-          fi
-          if [ -d DemoIccMAX/Build/bin ]; then
-            find DemoIccMAX/Build/bin/ -type f -perm +111 -exec cp {} artifact/ \;
-          fi
-          echo "🟢 Copying libraries and archive files..."
-          find DemoIccMAX/Build/ -type f \( -name "*.a" -o -name "*.lib" -o -name "*.dylib" \) -exec cp {} artifact/ \;
-
-      - name: 📌 [LABEL] Rename Artifacts for macOS (arm64)
-        run: mv artifact DemoIccMAX-build-arm64
-
-      - name: 📤 [EXPORT] Upload macOS Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: DemoIccMAX-build-macos-arm64
-          path: DemoIccMAX-build-arm64/
+    # Upload build artifacts for macOS
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: DemoIccMAX-build-macos-arm64
+        path: DemoIccMAX-build-arm64/
