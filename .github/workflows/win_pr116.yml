@@ -141,7 +141,7 @@ jobs:
               /p:Configuration=Debug `
               /p:Platform=x64 `
               /p:AdditionalIncludeDirectories="$RUNNER_TEMP/vcpkg/installed/x64-windows/include" `
-              /p:AdditionalLibraryDirectories="$RUNNER_TEMP/vcpkg/installed/x64-windows/lib" `
+              /p:AdditionalLibraryDirectories="$RUNNER_TEMP/vcpkg/installed/x64-windows/debug/lib"`
               /p:CLToolAdditionalOptions="/fsanitize=address /Zi /Od /DDEBUG /W4" `
               /p:LinkToolAdditionalOptions="/fsanitize=address /DEBUG /INCREMENTAL:NO"
 
