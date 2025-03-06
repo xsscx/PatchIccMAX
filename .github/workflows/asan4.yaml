@@ -1,0 +1,85 @@
+name: Asan4
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Cache vcpkg Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}\vcpkg
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+      - name: Setup vcpkg
+        run: |
+          $VCPKG_DIR = "${{ runner.temp }}\vcpkg"
+          if (!(Test-Path "$VCPKG_DIR")) {
+            pwd
+            git clone https://github.com/microsoft/vcpkg.git "$VCPKG_DIR"
+            cd "$VCPKG_DIR"
+            pwd
+            .\bootstrap-vcpkg.bat
+            pwd
+            .\vcpkg.exe integrate install
+            pwd
+            dir
+            .\vcpkg.exe install nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
+            pwd
+          }
+        shell: pwsh
+
+      - name: Build Project
+        run: |
+          pwd
+          ls
+          $WORK_DIR = "${{ github.workspace }}\"
+          pwd
+          ls
+          cd "$WORK_DIR"
+          pwd
+          ls
+          copy $VCPKG_DIR\installed\x64-windows\lib\wxmsw32u_core.lib $VCPKG_DIR\installed\x64-windows\lib\wxmsw30_core.lib
+          copy $VCPKG_DIR\installed\x64-windows\lib\wxbase32u.lib $VCPKG_DIR\installed\x64-windows\lib\wxbase30.lib
+          copy $VCPKG_DIR\installed\x64-windows\lib\tiff.lib $VCPKG_DIR\installed\x64-windows\lib\wxtiff.lib
+          copy $VCPKG_DIR\installed\x64-windows\lib\turbojpeg.lib $VCPKG_DIR\installed\x64-windows\lib\wxjpeg.lib
+          copy $VCPKG_DIR\installed\x64-windows\lib\libpng16.lib $VCPKG_DIR\installed\x64-windows\lib\wxpng.lib
+          copy $VCPKG_DIR\installed\x64-windows\lib\zlib.lib $VCPKG_DIR\installed\x64-windows\lib\wxzlib.lib
+          copy $VCPKG_DIR\installed\x64-windows\lib\pcre2-32.lib $VCPKG_DIR\installed\x64-windows\lib\wxregex.lib
+          copy $VCPKG_DIR\installed\x64-windows\lib\libexpat.lib $VCPKG_DIR\installed\x64-windows\lib\wxexpat.lib
+          msbuild /m /p:Configuration=Release /p:Platform=x64 "Build\MSVC\BuildAll_v22.sln"
+        shell: pwsh
+
+      - name: Run Tests
+        run: |
+          pwd
+          ls
+          $WORK_DIR = "${{ runner.workspace }}\DemoIccMAX"
+          pwd
+          cd "$WORK_DIR\Testing"
+          pwd
+          .\CreateProfiles.bat
+          .\RunTests.bat
+        shell: pwsh
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DemoIccMAX-Binaries
+          path: "${{ runner.workspace }}/DemoIccMAX/Build/MSVC/x64/Release/*"
+
+      - name: Upload ICC Profiles
+        uses: actions/upload-artifact@v4
+        with:
+          name: ICC-Profiles
+          path: "${{ runner.workspace }}/DemoIccMAX/Testing/*.icc"
