@@ -1,0 +1,155 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 28-MAR-2025 1800 EDT by David Hoyt (©)
+#
+## Intent: XNU-Runner-Checks
+#
+## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: "XNU-Runner-Checks"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    name: Build PR120-Unit-Test
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Git anonymous identity
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+
+    - name: Clone the DemoIccMAX repository
+      run: |
+        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+        cd DemoIccMAX
+        git fetch origin pull/120/head:pr-120
+        git checkout pr-120
+        brew install nlohmann-json libxml2 wxwidgets libtiff libpng
+
+    - name: Configure the build with CMake (strict + logged)
+      run: |
+        mkdir -p DemoIccMAX/Build
+        cd DemoIccMAX/Build
+        sudo rm -rf /Library/Frameworks/Mono.framework/Headers/png.h
+        export CXX=clang++
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable"  -Wno-dev -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON  -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON Cmake/ > ../../configure.log 2>&1
+
+    - name: Build and Run Test Suite
+      run: |
+        cd DemoIccMAX/Build
+        make -j$(sysctl -n hw.ncpu)
+        cd ../Testing
+        echo "=== Running CI Stub Test Harness ==="
+        wget https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr120/contrib/UnitTest/iccMAX-cicd-build-checks.sh
+        bash iccMAX-cicd-build-checks.sh > ../test-suite.log 2>&1 || echo "Tests failed, continuing to upload logs."
+        echo "========= CI STUB TESTS COMPLETE ========="
+
+    - name: Upload configure log
+      uses: actions/upload-artifact@v4
+      with:
+        name: cmake-configure-log
+        path: DemoIccMAX/configure.log
+
+    - name: Upload build log
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-log
+        path: DemoIccMAX/build.log
+
+    - name: Upload test suite log
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-suite-log
+        path: DemoIccMAX/test-suite.log
+
+    - name: Generate ASAN Markdown Report
+      shell: bash
+      run: |
+        mkdir -p DemoIccMAX/contrib/scripts
+        cat <<'EOF' > DemoIccMAX/contrib/scripts/generate_asan_report.zsh
+        #!/bin/zsh
+        LOG_FILE="DemoIccMAX/test-suite.log"
+        OUT_FILE="DemoIccMAX/ASAN_Report.md"
+        TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
+
+        echo "# 🔬 PR ASAN Post-Build Diagnostic Report" > $OUT_FILE
+        echo "" >> $OUT_FILE
+        echo "**Generated:** $(basename $LOG_FILE)  " >> $OUT_FILE
+        echo "**Date:** $TIMESTAMP  " >> $OUT_FILE
+        echo "" >> $OUT_FILE
+        echo "---" >> $OUT_FILE
+        echo "" >> $OUT_FILE
+
+        heap_ovf=$(grep -c "heap-buffer-overflow" $LOG_FILE)
+        stack_ovf=$(grep -c "stack-buffer-overflow" $LOG_FILE)
+        use_after_free=$(grep -c "use-after-free" $LOG_FILE)
+        segv=$(grep -i -c "null pointer\|SEGV" $LOG_FILE)
+        double_free=$(grep -c "double-free" $LOG_FILE)
+        failures=$(grep -i -c "fail\|error" $LOG_FILE)
+
+        cat <<EOM >> $OUT_FILE
+        ## 🧠 Summary of Findings
+
+        | Type                   | Count | Status             |
+        |------------------------|-------|--------------------|
+        | 🔥 Heap Buffer Overflow | $heap_ovf     | $( (( $heap_ovf > 0 )) && echo "❗ Requires Fix" || echo "✅" ) |
+        | Stack Buffer Overflow  | $stack_ovf     | $( (( $stack_ovf > 0 )) && echo "❗" || echo "✅" ) |
+        | Use-After-Free         | $use_after_free     | $( (( $use_after_free > 0 )) && echo "❗" || echo "✅" ) |
+        | Null Pointer / SIGSEGV | $segv     | $( (( $segv > 0 )) && echo "❗" || echo "✅" ) |
+        | Double-Free            | $double_free     | $( (( $double_free > 0 )) && echo "❗" || echo "✅" ) |
+        | General Test Failures  | $failures     | $( (( $failures > 0 )) && echo "⚠️ Investigate" || echo "✅" ) |
+
+        ---
+        EOM
+
+        if grep -q "SUMMARY: AddressSanitizer" $LOG_FILE; then
+          echo "## 🧵 First ASAN Traceback" >> $OUT_FILE
+          echo "" >> $OUT_FILE
+          echo '```' >> $OUT_FILE
+          awk '/ERROR: AddressSanitizer/,/==[0-9]+==ABORTING/' $LOG_FILE | head -n 80 >> $OUT_FILE
+          echo '```' >> $OUT_FILE
+          echo "" >> $OUT_FILE
+        fi
+        EOF
+
+        chmod +x DemoIccMAX/contrib/scripts/generate_asan_report.zsh
+        zsh DemoIccMAX/contrib/scripts/generate_asan_report.zsh
+
+    - name: Upload ASAN Markdown Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: ASAN_Report
+        path: DemoIccMAX/ASAN_Report.md
+
+    - name: Check build and test success (log only)
+      run: |
+        echo "=== Analyzing test-suite.log for issues (non-blocking) ==="
+        if grep -q "AddressSanitizer" DemoIccMAX/test-suite.log; then
+          echo "::warning file=DemoIccMAX/test-suite.log::AddressSanitizer error(s) detected."
+        fi
+        if grep -qi "error\|fail" DemoIccMAX/test-suite.log; then
+          echo "::warning file=DemoIccMAX/test-suite.log::Detected error or failure in test output."
+        fi
+        echo "✅ Build & Tests Completed (Errors recorded, job passed)"
