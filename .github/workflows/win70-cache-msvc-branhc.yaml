@@ -1,0 +1,95 @@
+name: W70-msvc-cache
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: 🔹 [INIT] Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔹 [INIT] Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      - name: 🔹 [CACHE] Restore vcpkg Cache
+        uses: actions/cache@v3
+        with:
+          path: C:\test\vcpkg
+          key: Win70-${{ runner.os }}-${{ hashFiles('**/vcpkg.json', '**/bootstrap-vcpkg.bat') }}
+          restore-keys: |
+            Win70-${{ runner.os }}-
+      - name: 🔹 [SETUP] Environment & Build Preparation
+        shell: pwsh
+        run: |
+          Write-Host "============================= Starting PatchIccMAX MSVC Branch Build =============================" -ForegroundColor Green
+          Write-Host "© 2024-2025 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
+          Write-Host "🔹 Setting up environment variables..."
+          $env:VSCMD_ARG_HOST_ARCH = "x64"
+          $env:VSCMD_ARG_TGT_ARCH = "x64"
+          $optDir = "C:\test"
+          $vcpkgDir = "$optDir\vcpkg"
+          $patchDir = "$optDir\PatchIccMAX"
+          # Setup git config
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"
+          # Ensure base directories exist
+          if (-Not (Test-Path $optDir)) { 
+              New-Item -ItemType Directory -Path $optDir | Out-Null
+          }
+          # Validate vcpkg exists, else clone & bootstrap
+          if (-Not (Test-Path "$vcpkgDir\vcpkg.exe")) {
+              Write-Host "🔹 vcpkg not found. Cloning and bootstrapping..."
+              cd $optDir
+              Remove-Item -Recurse -Force $vcpkgDir -ErrorAction Ignore
+              git clone https://github.com/microsoft/vcpkg.git
+              cd $vcpkgDir
+              Write-Host "🔹 Bootstrapping vcpkg..."
+              .\bootstrap-vcpkg.bat
+          }
+          # Ensure vcpkg is ready
+          if (-Not (Test-Path "$vcpkgDir\vcpkg.exe")) {
+              Write-Host "❌ ERROR: vcpkg.exe missing even after bootstrap!" -ForegroundColor Red
+              exit 1
+          }
+          Write-Host "🔹 Installing dependencies via vcpkg..."
+          cd $vcpkgDir
+          .\vcpkg.exe integrate install
+          .\vcpkg.exe install nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
+      - name: 🔹 [FETCH] Clone DemoIccMAX Repository
+        shell: pwsh
+        run: |
+          $patchDir = "C:\test\PatchIccMAX"
+          Write-Host "🔹 Cloning PatchIccMAX repository..."
+          cd C:\test
+          if (Test-Path $patchDir) {
+              Remove-Item -Recurse -Force $patchDir -ErrorAction Ignore
+          }
+          git clone https://github.com/xsscx/PatchIccMAX.git
+          Write-Host "🔹 Changing Dir to PatchIccMAX/"          
+          cd $patchDir
+          Write-Host "🔹 Checking out msvc branch"
+          git checkout msvc
+          Write-Host "🔹 Changing Dir to Build/Cmake/"
+          cd Build/Cmake/
+          Write-Host "🔹 Running cmake config"
+          cmake -S .  -B .  -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release  -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON
+          Write-Host "🔹 Building Release"
+          cmake --build .  --config Release -- /m /maxcpucount:32
+          Write-Host "🔹 Repository structure:"
+          Get-ChildItem -Recurse -Force
+          pwd
+          Write-Host "============================= Runner for msvc branch completed =============================" -ForegroundColor Green
+      - name: 📤 [UPLOAD] Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-Artifacts
+          path: C:\test\DemoIccMAX
+
+      - name: 📤 [UPLOAD] Build Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-Logs
+          path: ${{ github.workspace }}/logs

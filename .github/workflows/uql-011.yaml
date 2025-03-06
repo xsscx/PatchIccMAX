@@ -1,10 +1,21 @@
-name: UQL11
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 07-MAR-2025 1342 EST by David Hoyt (©)
+#
+## Intent: CodeQL
+#
+## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+###############################################################
+
+name: CodeQL
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 permissions:
   contents: write
@@ -20,14 +31,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Verify Workflow Exists
-        run: |
-          if [ ! -f ".github/workflows/uql-009.yaml" ]; then
-            echo "ERROR: Code scanning workflow file missing!"
-            exit 1
-          fi
-        working-directory: .
 
       - name: Initialize the CodeQL tools
         uses: github/codeql-action/init@v3
