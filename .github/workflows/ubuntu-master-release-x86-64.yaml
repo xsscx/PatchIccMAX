@@ -1,26 +1,20 @@
 ###############################################################
 #
-## Copyright (©) 2024 David H Hoyt. All rights reserved.
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 06-MAR-2025 at 0833 EST by David Hoyt (©)
+## Last Updated: 07-MAR-2025 at 1130 EST by David Hoyt (©)
 #
-## Intent: Poll the Device and Report
+## Intent: ubuntu-x86_64-master-release
 #
 ## TODO: Refactor for all Windows & UNIX Device Reporting
 #
 #
 ###############################################################
 
-name: "ubuntu-master-release-x86_64"
+name: "ubuntu-x86_64-master-release"
 
 on:
-  push:
-    branches:
-      - "master"
-  pull_request:
-    branches:
-      - "master"
   workflow_dispatch:
 
 jobs:

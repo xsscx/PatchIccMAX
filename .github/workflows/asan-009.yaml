@@ -1,4 +1,18 @@
-name: "Asan 9"
+###############################################################
+#
+## Copyright (©) 2024 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 07-MAR-2025 1315 EST by David Hoyt (©)
+#
+## Intent: xnu-arm64-debug-asan
+#
+## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+###############################################################
+
+name: "xnu-arm64-debug-asan"
 
 on:
   workflow_dispatch: # Manual trigger only

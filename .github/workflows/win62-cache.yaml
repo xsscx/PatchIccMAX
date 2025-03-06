@@ -1,0 +1,122 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 07-MAR-2025 0948 EST by David Hoyt (©)
+#
+## Intent:  Win62-cache
+#
+## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+###############################################################
+
+name: Win62-cache
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: 🔹 [INIT] Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔹 [INIT] Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      - name: 🔹 [CACHE] Restore vcpkg Cache
+        uses: actions/cache@v3
+        with:
+          path: C:\test\vcpkg
+          key: Win53-${{ runner.os }}-${{ hashFiles('**/vcpkg.json', '**/bootstrap-vcpkg.bat') }}
+          restore-keys: |
+            Win53-${{ runner.os }}-
+
+      - name: 🔹 [SETUP] Environment & Build Preparation
+        shell: pwsh
+        run: |
+          Write-Host "============================= Starting DemoIccMAX Master Branch Build =============================" -ForegroundColor Green
+          Write-Host "© 2024-2025 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
+          $env:VSCMD_ARG_HOST_ARCH = "x64"
+          $env:VSCMD_ARG_TGT_ARCH = "x64"
+          $env:OPT_DIR = "C:\test"
+          $env:VCPKG_DIR = "$env:OPT_DIR\vcpkg"
+          $env:PATCH_DIR = "$env:OPT_DIR\DemoIccMAX"
+          Write-Host "🔹 Setting up Git user info..."
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"
+          if (-Not (Test-Path $env:OPT_DIR)) { New-Item -ItemType Directory -Path $env:OPT_DIR | Out-Null }
+          if (-Not (Test-Path "$env:VCPKG_DIR\vcpkg.exe")) {
+              Write-Host "🔹 vcpkg not found. Cloning and bootstrapping..."
+              Remove-Item -Recurse -Force $env:VCPKG_DIR -ErrorAction Ignore
+              git clone https://github.com/microsoft/vcpkg.git $env:VCPKG_DIR
+              cd $env:VCPKG_DIR
+              Write-Host "🔹 Bootstrapping vcpkg..."
+              .\bootstrap-vcpkg.bat
+          }
+          if (-Not (Test-Path "$env:VCPKG_DIR\vcpkg.exe")) {
+              Write-Host "❌ ERROR: vcpkg.exe missing even after bootstrap!" -ForegroundColor Red
+              exit 1
+          }
+          Write-Host "🔹 Installing dependencies via vcpkg..."
+          cd $env:VCPKG_DIR
+          .\vcpkg.exe integrate install
+          .\vcpkg.exe install nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
+
+      - name: 🔹 [FETCH] Clone DemoIccMAX Repository
+        shell: pwsh
+        run: |
+          Write-Host "🔹 Cloning DemoIccMAX repository..."
+          # if (Test-Path $env:PATCH_DIR) { Remove-Item -Recurse -Force $env:PATCH_DIR -ErrorAction Ignore }
+          git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git $env:PATCH_DIR
+          cd $env:PATCH_DIR
+          Write-Host "🔹 Repository structure:"
+          Get-ChildItem -Recurse -Force
+
+      - name: 🔹 [BUILD] Compile Projects
+        shell: pwsh
+        run: |
+          Write-Host "🔹 Starting MSBuild Compilation..." -ForegroundColor Yellow
+          $projects = Get-ChildItem -Path "$env:PATCH_DIR" -Recurse -Filter "*.vcxproj" | ForEach-Object { $_.FullName }
+          foreach ($project in $projects) {
+              Write-Host "🔹 Building: $project"
+              msbuild /m /maxcpucount "$project" /p:Configuration=Release /p:Platform=x64 /p:AdditionalIncludeDirectories="$env:VCPKG_DIR\installed\x64-windows\include" /p:AdditionalLibraryDirectories="$env:VCPKG_DIR\installed\x64-windows-static\lib" /p:CLToolAdditionalOptions="/MT /Zi /Od /DDEBUG /W4" /p:LinkToolAdditionalOptions="/NODEFAULTLIB:msvcrt /LTCG /OPT:REF /INCREMENTAL:NO"
+          }
+
+      - name: 🔹 [PROFILE CREATION & TESTING]
+        shell: pwsh
+        run: |
+          Write-Host "🔹 Copying DLLs and libraries for testing..."
+          Copy-Item "$env:VCPKG_DIR\installed\x64-windows\lib\*.dll" -Destination $env:PATCH_DIR
+          Copy-Item "$env:VCPKG_DIR\installed\x64-windows-static\lib\*.lib" -Destination $env:PATCH_DIR
+          Write-Host "🔹 Fetching and running profile generation script..."
+          $tempFile = "$Env:TEMP\CreateAllProfiles.bat"
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.bat" -OutFile $tempFile
+          Start-Process cmd.exe -ArgumentList "/c `"$tempFile`"" -Wait
+          Remove-Item $tempFile -Force
+          Write-Host "🔹 Running automated tests..."
+          Set-Location "$env:PATCH_DIR"
+          .\RunTests.bat
+          Write-Host "🔹 Collecting ICC profile information..."
+          $profiles = Get-ChildItem -Path $env:PATCH_DIR -Filter "*.icc" -Recurse -File
+          Write-Host "Total ICC Profiles Created: $($profiles.Count)"
+          $groupedProfiles = $profiles | Group-Object { $_.Directory.FullName }
+          foreach ($group in $groupedProfiles) {
+              Write-Host ("{0}: {1} .icc profiles" -f $group.Name, $group.Count)
+          }
+
+      - name: 📤 [UPLOAD] Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-Artifacts
+          path: ${{ env.PATCH_DIR }}
+
+      - name: 📤 [UPLOAD] Build Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-Logs
+          path: ${{ github.workspace }}/logs
