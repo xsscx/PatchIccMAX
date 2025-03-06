@@ -76,7 +76,9 @@ jobs:
           }
           git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
           cd $patchDir
-          checkout msvc
+          git checkout msvc
+          pwd
+          dir
 
       - name: 🔹 [FIX] Adjust Library Paths
         shell: pwsh
