@@ -1,0 +1,84 @@
+###############################################################
+#
+## Copyright (©) 2024 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 25-MAR-2025 1710 EDT by David Hoyt (©)
+#
+## Intent:PR119-Unit-Test
+#
+## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+###############################################################
+
+name: "PR119-Unit-Test"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    name: Build PR119-Unit-Test
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Git anonymous identity
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+    - name: Clone the DemoIccMAX repository
+      run: |
+        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+        cd DemoIccMAX
+        git fetch origin pull/119/head:pr-119
+        git checkout pr-119
+        brew install nlohmann-json libxml2 wxwidgets libtiff libpng
+    - name: Configure the build with CMake (strict + logged)
+      run: |
+        mkdir -p DemoIccMAX/Build
+        cd DemoIccMAX/Build
+        export CXX=clang++
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable"               -Wno-dev               -DENABLE_TOOLS=ON               -DENABLE_SHARED_LIBS=ON               -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON Cmake/ > ../../configure.log 2>&1
+    - name: Build and Run Test Suite
+      run: |
+        set -euo pipefail
+        cd DemoIccMAX/Build
+        make -j$(sysctl -n hw.ncpu) > ../build.log 2>&1
+        cd ../Testing
+        echo "=== Running CI Stub Test Harness ==="
+        bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr119/contrib/UnitTest/iccMAX-cicd-build-checks.sh)" > ../bug.log 2>&1 || echo "Tests failed, continuing to upload logs."
+        echo "========= CI STUB TESTS COMPLETE ========="
+    - name: Upload configure log
+      uses: actions/upload-artifact@v4
+      with:
+        name: cmake-configure-log
+        path: DemoIccMAX/configure.log
+
+    - name: Upload build log
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-log
+        path: DemoIccMAX/build.log
+
+    - name: Upload test suite log
+      uses: actions/upload-artifact@v4
+      with:
+        name: bug-log
+        path: DemoIccMAX/bug.log
+
+    - name: Check build and test success (log only)
+      run: |
+        echo "=== Analyzing bug.log for issues (non-blocking) ==="
+        if grep -q "AddressSanitizer" DemoIccMAX/bug.log; then
+          echo "::warning file=DemoIccMAX/bug.log::AddressSanitizer error(s) detected."
+        fi
+        if grep -qi "error\|fail" DemoIccMAX/bug.log; then
+          echo "::warning file=DemoIccMAX/bug.log::Detected error or failure in test output."
+        fi
+        echo "✅ Build & Tests Completed (Errors recorded, job passed)"
