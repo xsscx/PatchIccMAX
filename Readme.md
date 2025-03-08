@@ -23,16 +23,15 @@
 ### Runner Output
 
 - [PR116 Doxygen Refresh](https://xss.cx/public/docs/DemoIccMAX/)
+- [Release Downloads](https://github.com/xsscx/PatchIccMAX/releases)
 
 [![CodeQL](https://github.com/xsscx/PatchIccMAX/actions/workflows/uql-011.yaml/badge.svg)](https://github.com/xsscx/PatchIccMAX/actions/workflows/uql-011.yaml)
 [![pr116-ubuntu-clang-scan](https://github.com/xsscx/PatchIccMAX/actions/workflows/pr116-ubuntu-clang-scan-build.yaml/badge.svg)](https://github.com/xsscx/PatchIccMAX/actions/workflows/pr116-ubuntu-clang-scan-build.yaml)
 [![pr116-xnu-debug-asan](https://github.com/xsscx/PatchIccMAX/actions/workflows/pr116-xnu-debug-asan.yaml/badge.svg)](https://github.com/xsscx/PatchIccMAX/actions/workflows/pr116-xnu-debug-asan.yaml)
 [![xnu-x86_64-debug-asan](https://github.com/xsscx/PatchIccMAX/actions/workflows/asan-10.yaml/badge.svg)](https://github.com/xsscx/PatchIccMAX/actions/workflows/asan-10.yaml)
-[![xnu-x86_64-debug-asan](https://github.com/xsscx/PatchIccMAX/actions/workflows/asan-10.yaml/badge.svg)](https://github.com/xsscx/PatchIccMAX/actions/workflows/asan-10.yaml)
 [![xnu-arm64-master-release](https://github.com/xsscx/PatchIccMAX/actions/workflows/macos-latest.yaml/badge.svg)](https://github.com/xsscx/PatchIccMAX/actions/workflows/macos-latest.yaml)
 [![win-x64-master-release](https://github.com/xsscx/PatchIccMAX/actions/workflows/win60-cache.yaml/badge.svg)](https://github.com/xsscx/PatchIccMAX/actions/workflows/win60-cache.yaml)
 [![ubuntu-x86_64-master-release](https://github.com/xsscx/PatchIccMAX/actions/workflows/ubuntu-master-release-x86-64.yaml/badge.svg)](https://github.com/xsscx/PatchIccMAX/actions/workflows/ubuntu-master-release-x86-64.yaml)
-
 
 
 ---
