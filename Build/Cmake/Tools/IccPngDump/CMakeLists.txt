@@ -2,7 +2,7 @@
 # IccToXml in Project_Root/Build/Cmake/Tools/IccPngDump/CMakeLists.txt | DemoIccMAX Project
 # Copyright (©) 2024-2025 David H Hoyt LLC. All rights reserved.
 #
-# Last Updated: 08-MAR-2025 by David Hoyt
+# Last Updated: 08-MAR-2025 1305 EST by David Hoyt
 #
 # Changes: Modified Cmake Configuration at top and project level
 #          Added explicit linker paths
@@ -59,10 +59,10 @@ target_link_libraries(${TARGET_NAME} ${TARGET_LIB_ICCPROFLIB} ${PNG_LIBRARY})
 message(STATUS "Libraries linked for ${TARGET_NAME}")
 
 # Set output directories
-set_target_properties(${TARGET_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${PROJECT_ROOT_DIR}/Testing/Release"  
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${PROJECT_ROOT_DIR}/Testing/Debug"
-)
+# set_target_properties(${TARGET_NAME} PROPERTIES
+#    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${PROJECT_ROOT_DIR}/Testing/Release"
+#    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${PROJECT_ROOT_DIR}/Testing/Debug"
+# )
 message(STATUS "Output directories set for ${TARGET_NAME}")
 
 # Optional installation rule
