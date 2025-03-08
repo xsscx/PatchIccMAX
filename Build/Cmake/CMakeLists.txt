@@ -1,18 +1,22 @@
-# 
-# Top Level Configuration CMakeLists.txt | DemoIccMAX Project
-# Copyright (©) 2024 The International Color Consortium. All rights reserved.
+##############################################################################
+## Top Level IccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
+##############################################################################
+# Copyright (©) 2024-2025 David H Hoyt LLC
 # 
 #
-# Last Updated: 02-DEC-2024 by David Hoyt
+# Last Updated: 08-MAR-2025 1229 EST by David Hoyt
 #
-# Changes: 	Modified Build/Cmake/CMakelists.txt and others
-#           Added to CMakelists.txt: IccFromCubeProject, IccV5DspObsToV4Dsp, IccApplyTolink
+# Changes:  Modified Build/Cmake/CMakelists.txt and others
+#           Added to CMakelists.txt: IccPngDump
 #           Adjusted Cross Platform Build Args
 #						
 # TODO: Refactor Debug, Release, Asan 
 #       Collapse 3-tier CMakeLists.txt, Housekeeping
 #       Refactor Base Configs & logging to .mk's 
 #
+##############################################################################
+## Top Level IccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
+##############################################################################
 
 cmake_minimum_required(VERSION 3.5.0)
 
@@ -20,7 +24,7 @@ cmake_minimum_required(VERSION 3.5.0)
 # Start Configuration Message
 string(TIMESTAMP CURRENT_DATETIME "%Y-%m-%d %H:%M:%S")
 message(STATUS "##########################################################################")
-message(STATUS "## Starting to Configure the DemoIccMAX Project at ${CURRENT_DATETIME}")
+message(STATUS "## Starting to Configure the IccMAX Project at ${CURRENT_DATETIME}")
 message(STATUS "##########################################################################")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -155,10 +159,14 @@ message(STATUS "### Dependencies ###")
 find_package(LibXml2 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(TIFF REQUIRED)
+find_package(PNG REQUIRED)
+
 message(STATUS "LibXml2: ${LIBXML2_LIBRARIES} (found version ${LIBXML2_VERSION})")
 message(STATUS "nlohmann_json: ${nlohmann_json_DIR} (found version ${nlohmann_json_VERSION})")
 message(STATUS "TIFF: ${TIFF_LIBRARIES} (found version ${TIFF_VERSION})")
 message(STATUS "TIFF Include Directory: ${TIFF_INCLUDE_DIR}")
+message(STATUS "PNG: ${PNG_LIBRARIES} (found version ${PNG_VERSION})")
+message(STATUS "PNG Include Directory: ${PNG_INCLUDE_DIRS}")
 
 # Include Directories
 message(STATUS "### Include Directories ###")
@@ -375,7 +383,7 @@ ENDIF()
         ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyProfiles
         ${CMAKE_BINARY_DIR}/Tools/CmdLine/IccApplyProfiles_Build
       )
-      MESSAGE(STATUS "Added IccApplyProfiles")
+      MESSAGE(STATUS "Added IccApplyProfiles.")
     ELSE()
       message(FATAL_ERROR "Directory does not exist: ${PROJECT_ROOT_DIR}/Tools/CmdLine/IccApplyProfiles")
     ENDIF()
@@ -401,8 +409,23 @@ ENDIF()
   if (TIFF_FOUND)
     include_directories(${TIFF_INCLUDE_DIR})
     message(STATUS "TIFF library found: ${TIFF_LIBRARIES}")
-    
-    # Add TIFF-dependent tools
+
+# Add PNG Tools
+
+# Check for PNG library
+find_package(PNG REQUIRED)
+
+if (PNG_FOUND)
+    include_directories(${PNG_INCLUDE_DIRS})
+    message(STATUS "PNG library found: ${PNG_LIBRARIES}")
+
+    message(STATUS "Adding Subdirectory IccPngDump.")
+    ADD_SUBDIRECTORY(Tools/IccPngDump)
+else()
+    message(FATAL_ERROR "PNG library not found. Please install libpng-dev.")
+endif()
+
+# Add TIFF-dependent tools
 #    ADD_SUBDIRECTORY(Tools/IccApplyProfiles)
     message(STATUS "Adding subdirectory IccSpecSepToTiff.")
     ADD_SUBDIRECTORY(Tools/IccSpecSepToTiff)
@@ -490,6 +513,7 @@ ADD_CUSTOM_TARGET( dist-bin2
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccToXml ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccRoundTrip ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccSpecSepToTiff ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
+    COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccTiffDump ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccTiffDump ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccV5DspObsToV4Dsp ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/CreateAllProfiles.sh ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
