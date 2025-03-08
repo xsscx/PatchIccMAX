@@ -4,9 +4,9 @@
 ## 
 ##          Copyright (©) 2024 David H Hoyt LLC | All rights reserved.
 ## 
-## Last Updated: 06-DEC-2024 at 1230Z by David Hoyt (©)
+## Last Updated: 08-MAR-2025 at 1305 EST by David Hoyt (©)
 ##
-## Changes: 	Modified Build/Cmake/CMakelists.txt and others
+## Changes:  Modified Build/Cmake/CMakelists.txt and Added iccPngdump
 ##           Added to Logging , Debugging, and CI/CD Integration
 ##           Adjusted Cross Platform Build Args
 ##						
@@ -295,6 +295,10 @@ else()
 endif()
 message(STATUS "")
 
+find_package(PNG REQUIRED)
+message(STATUS "PNG: ${PNG_LIBRARIES} (found version ${PNG_VERSION})")
+message(STATUS "PNG Include Directory: ${PNG_INCLUDE_DIRS}")
+
 # Include Directories Section
 message(STATUS "### Include Directories ###")
 message(STATUS "  IccProfLib: ${PROJECT_ROOT_DIR}/IccProfLib")
@@ -557,6 +561,21 @@ add_tool_subdirectory("Tools/IccRoundTrip")
 add_tool_subdirectory("Tools/IccFromCube")
 add_tool_subdirectory("Tools/IccV5DspObsToV4Dsp")
 add_tool_subdirectory("Tools/IccApplyToLink")
+
+# Add PNG Tools
+
+# Check for PNG library
+find_package(PNG REQUIRED)
+
+if (PNG_FOUND)
+    include_directories(${PNG_INCLUDE_DIRS})
+    message(STATUS "PNG library found: ${PNG_LIBRARIES}")
+
+    message(STATUS "Adding Subdirectory IccPngDump.")
+    ADD_SUBDIRECTORY(Tools/IccPngDump)
+else()
+    message(FATAL_ERROR "PNG library not found. Please install libpng-dev.")
+endif()
 
 # Check for TIFF library with logging
 message(STATUS "Checking for TIFF library...")
