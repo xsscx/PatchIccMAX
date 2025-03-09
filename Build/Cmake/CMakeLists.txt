@@ -1,19 +1,19 @@
 ##############################################################################
-## Top Level DemoIccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
+## Top Level IccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
 ##############################################################################
 # 
 # Top Level Configuration CMakeLists.txt | IccMAX Project
 # Copyright (©) 2024-2025 David H Hoyt LLC. All rights reserved.
 # 
 #
-# Last Updated: 09-MAR-2025 1300 EDT by David Hoyt
+# Last Updated: 09-MAR-2025 1543 EDT by David Hoyt
 #
-# Changes:  Modified Build/Cmake/CMakelists.txt and others
+# Changes: 	Modified Build/Cmake/CMakelists.txt and others
 #           Added to CMakelists.txt: iccPngDump
 #           Adjusted Cross Platform Build Args
 #						
 # TODO: Refactor Debug, Release, Asan 
-#       Collapse 3-tier CMakeLists.txt, Housekeeping
+#       Housekeeping, Unix & Windows now Build from Cmake
 #       Refactor Base Configs & logging to .mk's 
 ##############################################################################
 ## Top Level IccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
@@ -164,6 +164,10 @@ message(STATUS "LibXml2: ${LIBXML2_LIBRARIES} (found version ${LIBXML2_VERSION})
 message(STATUS "nlohmann_json: ${nlohmann_json_DIR} (found version ${nlohmann_json_VERSION})")
 message(STATUS "TIFF: ${TIFF_LIBRARIES} (found version ${TIFF_VERSION})")
 message(STATUS "TIFF Include Directory: ${TIFF_INCLUDE_DIR}")
+
+find_package(PNG REQUIRED)
+message(STATUS "PNG: ${PNG_LIBRARIES} (found version ${PNG_VERSION})")
+message(STATUS "PNG Include Directory: ${PNG_INCLUDE_DIRS}")
 
 # Include Directories
 message(STATUS "### Include Directories ###")
@@ -400,7 +404,22 @@ ENDIF()
   ADD_SUBDIRECTORY(Tools/IccV5DspObsToV4Dsp)
   message(STATUS "Adding Subdirectory IccApplyToLink.")
   ADD_SUBDIRECTORY(Tools/IccApplyToLink)
-    
+  
+# Add PNG Tools
+
+# Check for PNG library
+find_package(PNG REQUIRED)
+
+if (PNG_FOUND)
+    include_directories(${PNG_INCLUDE_DIRS})
+    message(STATUS "PNG library found: ${PNG_LIBRARIES}")
+
+    message(STATUS "Adding Subdirectory IccPngDump.")
+    ADD_SUBDIRECTORY(Tools/IccPngDump)
+else()
+    message(FATAL_ERROR "PNG library not found. Please install libpng-dev.")
+endif()
+  
   # Check for TIFF library
   find_package(TIFF REQUIRED)
   if (TIFF_FOUND)
@@ -422,11 +441,14 @@ ENDIF()
   ADD_SUBDIRECTORY(Tools/IccFromXml)
   message(STATUS "Adding Subdirectory IccToXml.")
   ADD_SUBDIRECTORY(Tools/IccToXml)
+#   message(STATUS "Adding Subdirectory iccDumpProfilegui.")
+#  ADD_SUBDIRECTORY(Tools/wxProfileDump)
 
-  # Configure wxWidgets
+#  # Configure wxWidgets
   find_package(wxWidgets COMPONENTS core base REQUIRED)
   if (wxWidgets_FOUND)
     include(${wxWidgets_USE_FILE})
+    ADD_SUBDIRECTORY(Tools/wxProfileDump)
     message(STATUS "wxWidgets found and configured")
   else()
     message(FATAL_ERROR "wxWidgets not found. Please install it manually or via vcpkg.")
