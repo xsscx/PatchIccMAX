@@ -2,7 +2,7 @@
 # Configuration for wxProfileDump in Build/Cmake/Tools/wxProfileDump/CMakeLists.txt
 # Copyright (©) 2024-2025 David H Hoyt LLC. All rights reserved.
 #
-# Last Updated: 09-MAR-2025 1545 EDT by David Hoyt
+# Last Updated: 09-MAR-2025 1553 EDT by David Hoyt
 #
 # Changes:  Modified Build/Cmake/CMakeLists.txt and others
 #           Improved dependency linking and error handling
@@ -27,7 +27,9 @@ message(STATUS "Sources:")
 
 add_executable(${TARGET_NAME} ${SOURCES})
 set_target_properties(${TARGET_NAME} PROPERTIES WIN32_EXECUTABLE ON)
-
+message(STATUS "  Linking libraries for target ${TARGET_NAME}:")
+message(STATUS "  ICCProfLib Library: ${TARGET_LIB_ICCPROFLIB}")
+message(STATUS "  wxWidgets Libraries: ${wxWidgets_LIBRARIES}")
 target_link_libraries(${TARGET_NAME} PRIVATE ${TARGET_LIB_ICCPROFLIB} ${wxWidgets_LIBRARIES})
 
 if(ENABLE_INSTALL_RIM)
