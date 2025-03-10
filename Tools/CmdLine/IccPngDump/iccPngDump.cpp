@@ -2,8 +2,9 @@
  *  @file iccPngDump.cpp
  *  @brief IccMAX PNG Dump Utility
  *  @author David Hoyt
- *  @date 08 MAR 2025
- *  @version 2.0.1
+ *  @date 10 MAR 2025
+ *  @time 1924 EDT
+ *  @version 2.0.3
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,6 +39,15 @@
 #include "IccUtil.h"
 #include "IccDefs.h"
 #include "IccProfLibVer.h"
+
+// #define MEMORY_LEAK_CHECK to enable C RTL memory leak checking (slow!)
+#define MEMORY_LEAK_CHECK
+
+#if defined(_WIN32) || defined(WIN32)
+#include <crtdbg.h>
+#elif __GLIBC__
+#include <mcheck.h>
+#endif
 
 #pragma mark - Traps
 
@@ -119,7 +129,8 @@ void PrintIccProfileInfo(const unsigned char *pProfMem, unsigned int nLen, const
  */
 int main(int argc, char* argv[]) {
     printf("[INFO] Starting iccPngDump...\n");
-
+    printf("Built with IccProfLib version " ICCPROFLIBVER "\n");
+    printf("Built with LibPNG version %s\n", PNG_LIBPNG_VER_STRING);
     // Ensure correct number of arguments
     if (argc < 2) {
         Usage();
