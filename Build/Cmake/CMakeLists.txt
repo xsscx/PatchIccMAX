@@ -6,10 +6,10 @@
 # Copyright (©) 2024-2025 David H Hoyt LLC. All rights reserved.
 # 
 #
-# Last Updated: 10-MAR-2025 1214 EDT by David Hoyt
+# Last Updated: 10-MAR-2025 1902 EDT by David Hoyt
 #
-# Changes: 	Modified Build/Cmake/CMakelists.txt and others
-#           Added to CMakelists.txt: iccPngDump, DemoIccMAXCmm
+# Changes:  Modified Build/Cmake/CMakelists.txt and others
+#           Added to CMakelists.txt: iccPngDump,DemoIccMAXCmm
 #           Adjusted Cross Platform Build Args
 #						
 # TODO: Refactor Debug, Release, Asan 
@@ -19,7 +19,6 @@
 ## Top Level IccMAX Project Configuration in Build/Cmake/CMakeLists.txt ##
 ##############################################################################
 
-cmake_minimum_required(VERSION 3.5.0)
 
 # Include timestamp for logs
 # Start Configuration Message
@@ -28,35 +27,33 @@ message(STATUS "################################################################
 message(STATUS "## Starting to Configure the IccMAX Project at ${CURRENT_DATETIME}")
 message(STATUS "##########################################################################")
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configurations to build" FORCE)
-    set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug)
-    set_property(GLOBAL PROPERTY RELEASE_CONFIGURATIONS Release)
-endif()
+cmake_minimum_required(VERSION 3.15)
 
 # Project Configuration
-project(RefIccMAX)
-set(PROJECT_UP_NAME "REFICCMAX")
-message(STATUS "Set PROJECT_UP_NAME to '${PROJECT_UP_NAME}'.")
+project(RefIccMAX VERSION 2.1.25 LANGUAGES CXX)
+
+# Set C++ Standard
 set(CMAKE_CXX_STANDARD 17)
-message(STATUS "Set CMAKE_CXX_STANDARD to ${CMAKE_CXX_STANDARD}.")
-set(${PROJECT_UP_NAME}_MAJOR_VERSION 2)
-message(STATUS "${PROJECT_UP_NAME}_MAJOR_VERSION set to 2")
-set(${PROJECT_UP_NAME}_MINOR_VERSION 1)
-message(STATUS "${PROJECT_UP_NAME}_MINOR_VERSION set to 1")
-set(${PROJECT_UP_NAME}_MICRO_VERSION 25)
-message(STATUS "${PROJECT_UP_NAME}_MICRO_VERSION set to 25")
-set(${PROJECT_UP_NAME}_VERSION
-    "${${PROJECT_UP_NAME}_MAJOR_VERSION}.${${PROJECT_UP_NAME}_MINOR_VERSION}.${${PROJECT_UP_NAME}_MICRO_VERSION}"
-)
-message(STATUS "${PROJECT_UP_NAME}_VERSION set to ${${PROJECT_UP_NAME}_VERSION}")
-set(PROJECT_DOWN_NAME "reficcmax")
-set(PACKAGE_NAME "${PROJECT_DOWN_NAME}")
-set(PACKAGE_DESCRIPTION "The RefIccMAX project provides an open source set of libraries and tools that allow for the interaction, manipulation, and application of iccMAX-based color management profiles based on the iccMAX specification http://www.color.org/iccmax.xalter, in addition to legacy ICC profiles defined by earlier ICC specifications.")
-set(${PROJECT_NAME}_VERSION_MAJORMINOR
-    "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}"
-)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Set Default Build Type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose build type: Debug, Release, Asan" FORCE)
+endif()
+
+# Verbose build only in Debug mode
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_VERBOSE_MAKEFILE ON)
+endif()
+
+# Package Metadata
+set(PACKAGE_NAME "reficcmax")
+set(PACKAGE_DESCRIPTION "The RefIccMAX project provides an open-source set of libraries and tools for ICC profile manipulation based on the iccMAX specification.")
+
+# Output Version Information
+message(STATUS "Configuring ${PROJECT_NAME} v${PROJECT_VERSION}")
+message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
+
 
 # Define the true project root directory
 set(PROJECT_ROOT_DIR ${CMAKE_SOURCE_DIR}/../..)
@@ -106,31 +103,36 @@ message(STATUS "")
 # Platform-Specific Details
 if(APPLE)
     message(STATUS "### macOS Specific Details ###")
-    message(STATUS "macOS SDK Path: ${CMAKE_OSX_SYSROOT}")
-    message(STATUS "Deployment Target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")    
+    message(STATUS "SDK Path: ${CMAKE_OSX_SYSROOT}")
+    message(STATUS "Deployment Target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
 
 if(WIN32)
-    message(STATUS "### Windows Specific Details ###")
-    message(STATUS "Windows SDK Version: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
     if(DEFINED ENV{MSBUILD_PATH})
         message(STATUS "MSBuild Path: $ENV{MSBUILD_PATH}")
     else()
-        message(WARNING "MSBuild Path is not defined in environment variables.")
+        message(WARNING "MSBuild Path is not set. Run 'Get-ChildItem -Path \"C:\\Program Files\\Microsoft Visual Studio\" -Recurse -Filter \"MSBuild.exe\"' in PowerShell to find it.")
     endif()
-    message(STATUS "Linker Flags: ${CMAKE_EXE_LINKER_FLAGS}")    
 endif()
+
 
 if(UNIX AND NOT APPLE)
     message(STATUS "### Linux/Unix Specific Details ###")
-    execute_process(
-        COMMAND uname -a
-        OUTPUT_VARIABLE LINUX_SYSTEM_INFO
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    message(STATUS "Linux System Info: ${LINUX_SYSTEM_INFO}")
-    message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
-    message(STATUS "Linker Flags: ${CMAKE_EXE_LINKER_FLAGS}")    
+
+    # Capture system info
+    execute_process(COMMAND uname -a OUTPUT_VARIABLE SYSTEM_INFO OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND lsb_release -d OUTPUT_VARIABLE DISTRO_INFO ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    message(STATUS "System Info: ${SYSTEM_INFO}")
+    
+    if(DISTRO_INFO)
+        message(STATUS "Distribution: ${DISTRO_INFO}")
+    else()
+        message(WARNING "lsb_release not found, skipping distribution detection.")
+    endif()
+
+    message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER} (${CMAKE_CXX_COMPILER_ID} v${CMAKE_CXX_COMPILER_VERSION})")
+    message(STATUS "Linker Flags: ${CMAKE_EXE_LINKER_FLAGS}")
 endif()
 
 # Cross-Platform Debugging
@@ -142,47 +144,58 @@ message(STATUS "Build Tool: ${CMAKE_MAKE_PROGRAM}")
 
 # Build Configuration
 message(STATUS "### Build Configuration ###")
-message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
-message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
-message(STATUS "C Flags: ${CMAKE_C_FLAGS}")
-message(STATUS "Build Type & Flags (${CMAKE_BUILD_TYPE}): ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}")
+message(STATUS "C++ Flags (Global): ${CMAKE_CXX_FLAGS}")
+message(STATUS "C Flags (Global): ${CMAKE_C_FLAGS}")
 
-# Features Enabled/Disabled
+# Per-Build-Type Flags
+string(TOUPPER "${CMAKE_BUILD_TYPE}" UPPER_BUILD_TYPE)
+if(DEFINED CMAKE_CXX_FLAGS_${UPPER_BUILD_TYPE})
+    message(STATUS "C++ Flags (${CMAKE_BUILD_TYPE}): ${CMAKE_CXX_FLAGS_${UPPER_BUILD_TYPE}}")
+else()
+    message(WARNING "No specific C++ flags set for build type '${CMAKE_BUILD_TYPE}'")
+endif()
+
+# Feature Configuration
 message(STATUS "### Feature Configuration ###")
 message(STATUS "Enable Tools: ${ENABLE_TOOLS}")
 message(STATUS "Enable Tests: ${ENABLE_TESTS}")
-message(STATUS "Enable Shared Libraries: ${ENABLE_SHARED_LIBS}")
+message(STATUS "Enable Shared Libraries: ${BUILD_SHARED_LIBS}")
 message(STATUS "Enable Static Libraries: ${ENABLE_STATIC_LIBS}")
 
 # Dependencies
 message(STATUS "### Dependencies ###")
+
 find_package(LibXml2 REQUIRED)
+message(STATUS "LibXml2: ${LIBXML2_LIBRARIES} (Version: ${LIBXML2_VERSION})")
+
 find_package(nlohmann_json REQUIRED)
+message(STATUS "nlohmann_json: ${nlohmann_json_DIR} (Version: ${nlohmann_json_VERSION})")
+
 find_package(TIFF REQUIRED)
-message(STATUS "LibXml2: ${LIBXML2_LIBRARIES} (found version ${LIBXML2_VERSION})")
-message(STATUS "nlohmann_json: ${nlohmann_json_DIR} (found version ${nlohmann_json_VERSION})")
-message(STATUS "TIFF: ${TIFF_LIBRARIES} (found version ${TIFF_VERSION})")
-message(STATUS "TIFF Include Directory: ${TIFF_INCLUDE_DIR}")
+message(STATUS "TIFF: ${TIFF_LIBRARIES} (Version: ${TIFF_VERSION})")
+message(STATUS "TIFF Include Directory: ${TIFF_INCLUDE_DIRS}")
 
 find_package(PNG REQUIRED)
-message(STATUS "PNG: ${PNG_LIBRARIES} (found version ${PNG_VERSION})")
+message(STATUS "PNG: ${PNG_LIBRARIES} (Version: ${PNG_VERSION})")
 message(STATUS "PNG Include Directory: ${PNG_INCLUDE_DIRS}")
+
 
 # Include Directories
 message(STATUS "### Include Directories ###")
-message(STATUS "IccProfLib: ${PROJECT_ROOT_DIR}/IccProfLib")
-message(STATUS "IccXML: ${PROJECT_ROOT_DIR}/IccXML")
+message(STATUS "IccProfLib: ${CMAKE_SOURCE_DIR}/IccProfLib")
+message(STATUS "IccXML: ${CMAKE_SOURCE_DIR}/IccXML")
+message(STATUS "PNG: ${PNG_INCLUDE_DIRS}")
 
 # Link Directories
 message(STATUS "### Link Directories ###")
 message(STATUS "IccProfLib: ${CMAKE_BINARY_DIR}/IccProfLib")
 message(STATUS "IccXML: ${CMAKE_BINARY_DIR}/IccXML")
-message(STATUS "/usr/local/lib")
+message(STATUS "System Library Path: /usr/local/lib")
 
 # Library paths for debugging
-message(STATUS "Library Path for IccProfLib: ${PROJECT_ROOT_DIR}/Build/IccProfLib")
-message(STATUS "Library Path for IccXML: ${PROJECT_ROOT_DIR}/Build/IccXML")
+message(STATUS "Library Path for IccProfLib: ${CMAKE_BINARY_DIR}/IccProfLib")
+message(STATUS "Library Path for IccXML: ${CMAKE_BINARY_DIR}/IccXML")
 
 # CI/CD Integration Information
 if(DEFINED ENV{CI})
@@ -192,70 +205,100 @@ if(DEFINED ENV{CI})
     message(STATUS "Branch: $ENV{BRANCH_NAME}")
     message(STATUS "Commit: $ENV{GIT_COMMIT}")
     message(STATUS "Pipeline URL: $ENV{CI_PIPELINE_URL}")
-    
 else()
     message(STATUS "CI/CD Integration: Not Detected")    
 endif()
 
-message(STATUS "Starting GNUInstallDirs.")
+# Install Directories and GNUInstallDirs
+message(STATUS "Initializing GNUInstallDirs.")
 include(GNUInstallDirs)
 
+# Build Options
 option(ENABLE_TESTS "Build tests (requires static libs)" ON)
 option(ENABLE_TOOLS "Build tools" ON)
-option(ENABLE_SHARED_LIBS "Build dynamic link libs" ON)
-option(ENABLE_STATIC_LIBS "Build static libs" ON)
+option(ENABLE_SHARED_LIBS "Build dynamic link libraries" ON)
+option(ENABLE_STATIC_LIBS "Build static libraries" ON)
 option(ENABLE_ICCXML "Build IccXML library" ON)
 
-IF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-  OPTION(ENABLE_INSTALL_RIM "Install files" ON)
-ELSE()
-  MESSAGE( "-- RefIccMAX: compile as subproject - skip install (ENABLE_INSTALL_RIM=OFF)" )
-  # disable install and build of shared libs for fallback subproject
-  IF(NOT ENABLE_INSTALL_RIM)
-    SET(ENABLE_INSTALL_RIM OFF)
-  ENDIF(NOT ENABLE_INSTALL_RIM)
-  SET(ENABLE_STATIC_LIBS ON)
-  SET(ENABLE_SHARED_LIBS OFF)
-ENDIF()
-
-message(STATUS "Enforcing Build Type in ${CMAKE_CURRENT_SOURCE_DIR}")
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+# Configure Install Behavior
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+    option(ENABLE_INSTALL_RIM "Install files" ON)
+else()
+    message(STATUS "Compiling RefIccMAX as a subproject - skipping installation (ENABLE_INSTALL_RIM=OFF)")
+    set(ENABLE_INSTALL_RIM OFF)
+    set(ENABLE_STATIC_LIBS ON)
+    set(ENABLE_SHARED_LIBS OFF)
 endif()
 
+# Enforce Build Type
+message(STATUS "Enforcing Build Type in ${CMAKE_CURRENT_SOURCE_DIR}")
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+endif()
+
+# Compiler Flags
 message(STATUS "Setting Compiler Flags in ${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -fsanitize=address -fno-omit-frame-pointer -Wall -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 
-# Architecture determination
+# Architecture and Platform Detection
 if(APPLE)
-  message(STATUS "Detected platform: macOS")
-  execute_process(
-    COMMAND uname -m
-    COMMAND tr -d '\n'
-    OUTPUT_VARIABLE OSX_ARCHITECTURE
-  )
-  if("${OSX_ARCHITECTURE}" STREQUAL "arm64")
-    message(STATUS "Configuring build for ARM64 architecture.")
-    set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "macOS architecture")
-    add_compile_definitions(ARM64)
-  elseif("${OSX_ARCHITECTURE}" STREQUAL "x86_64")
-    message(STATUS "Configuring build for X86_64 architecture.")
-    set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "macOS architecture")
-  else()
-    message(FATAL_ERROR "Unsupported macOS architecture: ${OSX_ARCHITECTURE}")
-  endif()
-  message(STATUS "Final macOS Architecture: ${CMAKE_OSX_ARCHITECTURES}")
+    message(STATUS "Detected platform: macOS")
+
+    execute_process(
+        COMMAND uname -m
+        OUTPUT_VARIABLE OSX_ARCHITECTURE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    if(OSX_ARCHITECTURE STREQUAL "arm64")
+        message(STATUS "Configuring build for ARM64 architecture.")
+        set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "macOS architecture")
+        add_compile_definitions(ARM64)
+    elseif(OSX_ARCHITECTURE STREQUAL "x86_64")
+        message(STATUS "Configuring build for X86_64 architecture.")
+        set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "macOS architecture")
+    else()
+        message(FATAL_ERROR "Unsupported macOS architecture: ${OSX_ARCHITECTURE}")
+    endif()
+
+    message(STATUS "Final macOS Architecture: ${CMAKE_OSX_ARCHITECTURES}")
+
 elseif(UNIX AND NOT APPLE)
-  message(STATUS "Detected platform: Linux")
-  add_compile_options(-std=c++17 -Wall -Wextra -Wpedantic)
-  message(STATUS "Linux build: Compiler flags set to C++17 with standard warnings.")
+    message(STATUS "Detected platform: Linux")
+
+    execute_process(
+        COMMAND uname -m
+        OUTPUT_VARIABLE LINUX_ARCHITECTURE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    message(STATUS "Configuring build for ${LINUX_ARCHITECTURE} architecture.")
+    add_compile_options(-std=c++17 -Wall -Wextra -Wpedantic)
+    add_compile_definitions(PLATFORM_LINUX)
+
+    message(STATUS "Linux build: Compiler flags set to C++17 with standard warnings.")
+
 elseif(WIN32)
-  message(STATUS "Detected platform: Windows")
-  add_compile_options(/std:c++17 /D_WINDOWS /EHsc)
-  message(STATUS "Windows build: Compiler flags set to C++17 with MSVC-specific flags.")
+    message(STATUS "Detected platform: Windows")
+
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(WINDOWS_ARCH "x64")
+    elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+        set(WINDOWS_ARCH "x86")
+    else()
+        set(WINDOWS_ARCH "unknown")
+    endif()
+
+    message(STATUS "Configuring build for Windows (${WINDOWS_ARCH})")
+
+    add_compile_options(/std:c++17 /D_WINDOWS /EHsc)
+    add_compile_definitions(PLATFORM_WINDOWS)
+
+    message(STATUS "Windows build: Compiler flags set to C++17 with MSVC-specific flags.")
+
 else()
-  message(FATAL_ERROR "Unsupported platform!")
+    message(FATAL_ERROR "Unsupported platform detected!")
 endif()
 
 message(STATUS "Debug Configuration")
@@ -318,9 +361,10 @@ FIND_PROGRAM(CMAKE_AR_TMP NAMES ar)
 #
 # Core library
 #
-  message(STATUS "Adding subdirectory for IccProfLib.")
+message(STATUS "Adding subdirectory for IccProfLib.")
 ADD_SUBDIRECTORY( IccProfLib )
 SET( TARGET_LIB_ICCPROFLIB ${TARGET_LIB} )
+
 
 ## external dependency
 IF(ENABLE_ICCXML)
