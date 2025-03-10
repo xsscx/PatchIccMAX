@@ -6,7 +6,7 @@
 # Copyright (©) 2024-2025 David H Hoyt LLC. All rights reserved.
 # 
 #
-# Last Updated: 09-MAR-2025 1543 EDT by David Hoyt
+# Last Updated: 09-MAR-2025 2012 EDT by David Hoyt
 #
 # Changes: 	Modified Build/Cmake/CMakelists.txt and others
 #           Added to CMakelists.txt: iccPngDump
@@ -25,7 +25,7 @@ cmake_minimum_required(VERSION 3.5.0)
 # Start Configuration Message
 string(TIMESTAMP CURRENT_DATETIME "%Y-%m-%d %H:%M:%S")
 message(STATUS "##########################################################################")
-message(STATUS "## Starting to Configure the DemoIccMAX Project at ${CURRENT_DATETIME}")
+message(STATUS "## Starting to Configure the IccMAX Project at ${CURRENT_DATETIME}")
 message(STATUS "##########################################################################")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -453,6 +453,9 @@ endif()
   else()
     message(FATAL_ERROR "wxWidgets not found. Please install it manually or via vcpkg.")
   endif()
+
+    message(STATUS "Adding Subdirectory DemoIccMAXCmm.")
+    ADD_SUBDIRECTORY(Tools/DemoIccMAXCmm)
 
 ENDIF(ENABLE_TOOLS)
 
