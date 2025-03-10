@@ -6,7 +6,7 @@
 # Copyright (©) 2024-2025 David H Hoyt LLC. All rights reserved.
 # 
 #
-# Last Updated: 10-MAR-2025 1326 EDT by David Hoyt
+# Last Updated: 10-MAR-2025 1848 EDT by David Hoyt
 #
 # Changes:  Modified Build/Cmake/CMakelists.txt and others
 #           Added to CMakelists.txt: iccPngDump,DemoIccMAXCmm
@@ -119,70 +119,83 @@ MESSAGE(STATUS "[EXIT] Finished installing headers for: ${TARGET_NAME}")
 
 ENDIF(ENABLE_INSTALL_RIM)
 
-MESSAGE(STATUS "[ENTRY] Configuring libraries for: ${TARGET_NAME}")
+message(STATUS "[ENTRY] Configuring libraries for: ${TARGET_NAME}")
 
-SET(SOURCES ${CFILES})
+set(SOURCES ${CFILES})
 
-IF(APPLE)
-   MESSAGE(STATUS "Detected Apple system, setting up Carbon and IOKit dependencies...")
-   INCLUDE_DIRECTORIES(/Developer/Headers/FlatCarbon)
-   FIND_LIBRARY(CARBON_LIBRARY Carbon)
-   FIND_LIBRARY(IOKIT_LIBRARY IOKit)
-   MARK_AS_ADVANCED(CARBON_LIBRARY)
-   MARK_AS_ADVANCED(IOKIT_LIBRARY)
-   SET(EXTRA_LIBS_CS ${CARBON_LIBRARY} ${IOKIT_LIBRARY})
-   MESSAGE(STATUS "Apple dependencies configured: ${EXTRA_LIBS_CS}")
-ENDIF(APPLE)
+# Apple-specific dependencies
+if(APPLE)
+    message(STATUS "Detected Apple system, setting up Carbon and IOKit dependencies...")
+    include_directories(/Developer/Headers/FlatCarbon)
+    find_library(CARBON_LIBRARY Carbon)
+    find_library(IOKIT_LIBRARY IOKit)
+    mark_as_advanced(CARBON_LIBRARY IOKIT_LIBRARY)
+    set(EXTRA_LIBS_CS ${CARBON_LIBRARY} ${IOKIT_LIBRARY})
+    message(STATUS "Apple dependencies configured: ${EXTRA_LIBS_CS}")
+endif()
 
-IF(ENABLE_SHARED_LIBS)
-  MESSAGE(STATUS "Creating shared library: ${TARGET_NAME}")
-  ADD_LIBRARY(${TARGET_NAME} SHARED ${SOURCES})
-  SET_TARGET_PROPERTIES(${TARGET_NAME}
-    PROPERTIES VERSION ${${PROJECT_UP_NAME}_VERSION}
-               SOVERSION ${${PROJECT_UP_NAME}_MAJOR_VERSION})
-  
-  TARGET_LINK_LIBRARIES(${TARGET_NAME} ${EXTRA_LIBS} ${EXTRA_LIBS_CS})
-  
-  IF(ENABLE_INSTALL_RIM)
-    MESSAGE(STATUS "Installing shared library: ${TARGET_NAME}")
-    INSTALL(TARGETS ${TARGET_NAME}
+# Shared Library Configuration
+if(ENABLE_SHARED_LIBS)
+    message(STATUS "Creating shared library: ${TARGET_NAME}")
+    add_library(${TARGET_NAME} SHARED ${SOURCES})
+
+    set_target_properties(${TARGET_NAME} PROPERTIES
+        VERSION ${${PROJECT_UP_NAME}_VERSION}
+        SOVERSION ${${PROJECT_UP_NAME}_MAJOR_VERSION}
+    )
+
+    target_link_libraries(${TARGET_NAME} PRIVATE ${EXTRA_LIBS} ${EXTRA_LIBS_CS})
+
+    if(ENABLE_INSTALL_RIM)
+        message(STATUS "Installing shared library: ${TARGET_NAME}")
+        install(TARGETS ${TARGET_NAME}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-  ENDIF(ENABLE_INSTALL_RIM)
-ENDIF(ENABLE_SHARED_LIBS)
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+    endif()
+endif()
 
-IF(ENABLE_STATIC_LIBS)
-  MESSAGE(STATUS "Creating static library: ${TARGET_NAME}-static")
-  ADD_LIBRARY(${TARGET_NAME}-static STATIC ${SOURCES})
-  TARGET_LINK_LIBRARIES(${TARGET_NAME}-static ${EXTRA_LIBS} ${EXTRA_LIBS_CS})
+# Static Library Configuration
+if(ENABLE_STATIC_LIBS)
+    message(STATUS "Creating static library: ${TARGET_NAME}-static")
+    add_library(${TARGET_NAME}-static STATIC ${SOURCES})
 
-  IF(WIN32)
-    ADD_CUSTOM_COMMAND(
-      TARGET ${TARGET_NAME}-static POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy
+    set_target_properties(${TARGET_NAME}-static PROPERTIES
+        OUTPUT_NAME "${TARGET_NAME}"
+    )
+
+    target_link_libraries(${TARGET_NAME}-static PRIVATE ${EXTRA_LIBS} ${EXTRA_LIBS_CS})
+
+    if(WIN32)
+add_custom_command(
+    TARGET ${TARGET_NAME}-static POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
         "$<TARGET_FILE:${TARGET_NAME}-static>"
         "${CMAKE_BINARY_DIR}/IccProfLib/Release/IccProfLib2.lib"
-      COMMENT "Renaming IccProfLib2-static.lib to IccProfLib2.lib for Windows"
-    )
-  ENDIF()
+    COMMENT "Copying IccProfLib2-static.lib to IccProfLib2.lib for Windows"
+)
 
-  IF(ENABLE_INSTALL_RIM)
-    MESSAGE(STATUS "Installing static library: ${TARGET_NAME}-static")
-    INSTALL(TARGETS ${TARGET_NAME}-static
+    endif()
+
+    if(ENABLE_INSTALL_RIM)
+        message(STATUS "Installing static library: ${TARGET_NAME}-static")
+        install(TARGETS ${TARGET_NAME}-static
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-  ENDIF(ENABLE_INSTALL_RIM)
-ENDIF(ENABLE_STATIC_LIBS)
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+    endif()
+endif()
 
-IF(ENABLE_SHARED_LIBS)
-  SET(TARGET_LIB ${TARGET_NAME})
-ELSE(ENABLE_SHARED_LIBS)
-  SET(TARGET_LIB ${TARGET_NAME}-static)
-ENDIF(ENABLE_SHARED_LIBS)
+# Set the primary library target
+if(ENABLE_SHARED_LIBS)
+    set(TARGET_LIB ${TARGET_NAME})
+else()
+    set(TARGET_LIB ${TARGET_NAME}-static)
+endif()
 
-SET(TARGET_LIB ${TARGET_LIB} PARENT_SCOPE)
+set(TARGET_LIB ${TARGET_LIB} PARENT_SCOPE)
 
 MESSAGE(STATUS "Final library output:")
 MESSAGE(STATUS "  Debug: ${CMAKE_BINARY_DIR}/bin/Debug/${TARGET_LIB}")
