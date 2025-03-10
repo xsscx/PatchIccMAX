@@ -1,3 +1,30 @@
+##############################################################################
+## Project Level IccProfLib2Project Configuration in Build/Cmake/CMakeLists.txt ##
+##############################################################################
+# 
+# Top Level Configuration CMakeLists.txt | IccMAX Project
+# Copyright (©) 2024-2025 David H Hoyt LLC. All rights reserved.
+# 
+#
+# Last Updated: 10-MAR-2025 1326 EDT by David Hoyt
+#
+# Changes:  Modified Build/Cmake/CMakelists.txt and others
+#           Added to CMakelists.txt: iccPngDump,DemoIccMAXCmm
+#           Adjusted Cross Platform Build Args
+#						
+# TODO: Refactor Debug, Release, Asan 
+#       Housekeeping, Unix & Windows now Build from Cmake
+#       Refactor Base Configs & logging to .mk's 
+##################################################################################
+## Project Level IccrRofLb2 Project Configuration in Build/Cmake/CMakeLists.txt ##
+##################################################################################
+
+
+message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+message(STATUS "Entering IccProfLib2 in Project_Root/Build/CmakeIccProfLib/CMakeLists.txt ...................")
+message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+
 SET( TARGET_NAME IccProfLib2)
 
 SET( SRC_PATH ../../.. )
@@ -80,56 +107,92 @@ IF(ENABLE_INSTALL_RIM)
     ${SRC_PATH}/IccProfLib/IccXformFactory.h
     ${SRC_PATH}/IccProfLib/icProfileHeader.h
   )
-  INSTALL( FILES
-	     ${HEADERS_PUBLIC}
-	     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${TARGET_INCLUDE_FOLDER}/${TARGET_NAME} )
+MESSAGE(STATUS "[ENTRY] Installing headers for: ${TARGET_NAME}")
+
+INSTALL(FILES
+    ${HEADERS_PUBLIC}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${TARGET_INCLUDE_FOLDER}/${TARGET_NAME}
+)
+
+MESSAGE(STATUS "Headers installed to: ${CMAKE_INSTALL_INCLUDEDIR}/${TARGET_INCLUDE_FOLDER}/${TARGET_NAME}")
+MESSAGE(STATUS "[EXIT] Finished installing headers for: ${TARGET_NAME}")
+
 ENDIF(ENABLE_INSTALL_RIM)
 
-SET( SOURCES ${CFILES} )
+MESSAGE(STATUS "[ENTRY] Configuring libraries for: ${TARGET_NAME}")
+
+SET(SOURCES ${CFILES})
 
 IF(APPLE)
-   INCLUDE_DIRECTORIES ( /Developer/Headers/FlatCarbon )
-   FIND_LIBRARY( CARBON_LIBRARY Carbon )
-   FIND_LIBRARY( IOKIT_LIBRARY IOKit )
-   MARK_AS_ADVANCED( CARBON_LIBRARY )
-   MARK_AS_ADVANCED( IOKIT_LIBRARY )
+   MESSAGE(STATUS "Detected Apple system, setting up Carbon and IOKit dependencies...")
+   INCLUDE_DIRECTORIES(/Developer/Headers/FlatCarbon)
+   FIND_LIBRARY(CARBON_LIBRARY Carbon)
+   FIND_LIBRARY(IOKIT_LIBRARY IOKit)
+   MARK_AS_ADVANCED(CARBON_LIBRARY)
+   MARK_AS_ADVANCED(IOKIT_LIBRARY)
    SET(EXTRA_LIBS_CS ${CARBON_LIBRARY} ${IOKIT_LIBRARY})
-ENDIF (APPLE)
+   MESSAGE(STATUS "Apple dependencies configured: ${EXTRA_LIBS_CS}")
+ENDIF(APPLE)
 
 IF(ENABLE_SHARED_LIBS)
-  ADD_LIBRARY( ${TARGET_NAME} SHARED ${SOURCES} )
-  SET_TARGET_PROPERTIES( ${TARGET_NAME}
+  MESSAGE(STATUS "Creating shared library: ${TARGET_NAME}")
+  ADD_LIBRARY(${TARGET_NAME} SHARED ${SOURCES})
+  SET_TARGET_PROPERTIES(${TARGET_NAME}
     PROPERTIES VERSION ${${PROJECT_UP_NAME}_VERSION}
-             SOVERSION ${${PROJECT_UP_NAME}_MAJOR_VERSION}
-                     )
-  TARGET_LINK_LIBRARIES (
-               ${TARGET_NAME}
-               ${EXTRA_LIBS} ${EXTRA_LIBS_CS} )
+               SOVERSION ${${PROJECT_UP_NAME}_MAJOR_VERSION})
+  
+  TARGET_LINK_LIBRARIES(${TARGET_NAME} ${EXTRA_LIBS} ${EXTRA_LIBS_CS})
+  
   IF(ENABLE_INSTALL_RIM)
-    INSTALL( TARGETS ${TARGET_NAME}
-             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} )
+    MESSAGE(STATUS "Installing shared library: ${TARGET_NAME}")
+    INSTALL(TARGETS ${TARGET_NAME}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
   ENDIF(ENABLE_INSTALL_RIM)
 ENDIF(ENABLE_SHARED_LIBS)
 
 IF(ENABLE_STATIC_LIBS)
-   ADD_LIBRARY( ${TARGET_NAME}-static STATIC ${SOURCES} )
-   TARGET_LINK_LIBRARIES (
-                ${TARGET_NAME}-static
-                ${EXTRA_LIBS} ${EXTRA_LIBS_CS} )
+  MESSAGE(STATUS "Creating static library: ${TARGET_NAME}-static")
+  ADD_LIBRARY(${TARGET_NAME}-static STATIC ${SOURCES})
+  TARGET_LINK_LIBRARIES(${TARGET_NAME}-static ${EXTRA_LIBS} ${EXTRA_LIBS_CS})
+
+  IF(WIN32)
+    ADD_CUSTOM_COMMAND(
+      TARGET ${TARGET_NAME}-static POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy
+        "$<TARGET_FILE:${TARGET_NAME}-static>"
+        "${CMAKE_BINARY_DIR}/IccProfLib/Release/IccProfLib2.lib"
+      COMMENT "Renaming IccProfLib2-static.lib to IccProfLib2.lib for Windows"
+    )
+  ENDIF()
 
   IF(ENABLE_INSTALL_RIM)
-   INSTALL( TARGETS ${TARGET_NAME}-static
+    MESSAGE(STATUS "Installing static library: ${TARGET_NAME}-static")
+    INSTALL(TARGETS ${TARGET_NAME}-static
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} )
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
   ENDIF(ENABLE_INSTALL_RIM)
 ENDIF(ENABLE_STATIC_LIBS)
 
 IF(ENABLE_SHARED_LIBS)
-  SET( TARGET_LIB ${TARGET_NAME} )
+  SET(TARGET_LIB ${TARGET_NAME})
 ELSE(ENABLE_SHARED_LIBS)
-  SET( TARGET_LIB ${TARGET_NAME}-static )
+  SET(TARGET_LIB ${TARGET_NAME}-static)
 ENDIF(ENABLE_SHARED_LIBS)
-SET( TARGET_LIB ${TARGET_LIB} PARENT_SCOPE )
+
+SET(TARGET_LIB ${TARGET_LIB} PARENT_SCOPE)
+
+MESSAGE(STATUS "Final library output:")
+MESSAGE(STATUS "  Debug: ${CMAKE_BINARY_DIR}/bin/Debug/${TARGET_LIB}")
+MESSAGE(STATUS "  Release: ${CMAKE_BINARY_DIR}/bin/Release/${TARGET_LIB}")
+MESSAGE(STATUS "  RelWithDebInfo: ${CMAKE_BINARY_DIR}/bin/RelWithDebInfo/${TARGET_LIB}")
+MESSAGE(STATUS "  MinSizeRel: ${CMAKE_BINARY_DIR}/bin/MinSizeRel/${TARGET_LIB}")
+
+MESSAGE(STATUS "[EXIT] Finished configuring libraries for: ${TARGET_NAME}")
+
+message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+message(STATUS "Exiting IccProfLib2 in Project_Root/Build/CmakeIccProfLib/CMakeLists.txt ....................")
+message(STATUS "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
