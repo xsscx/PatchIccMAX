@@ -6,10 +6,10 @@
 # Copyright (©) 2024-2025 David H Hoyt LLC. All rights reserved.
 # 
 #
-# Last Updated: 09-MAR-2025 2027 EDT by David Hoyt
+# Last Updated: 10-MAR-2025 1214 EDT by David Hoyt
 #
 # Changes: 	Modified Build/Cmake/CMakelists.txt and others
-#           Added to CMakelists.txt: iccPngDump
+#           Added to CMakelists.txt: iccPngDump, DemoIccMAXCmm
 #           Adjusted Cross Platform Build Args
 #						
 # TODO: Refactor Debug, Release, Asan 
@@ -420,6 +420,11 @@ else()
     message(FATAL_ERROR "PNG library not found. Please install libpng-dev.")
 endif()
   
+
+
+    message(STATUS "Adding Subdirectory DemoIccMAXCmm.")
+    ADD_SUBDIRECTORY(Tools/DemoIccMAXCmm)
+
   # Check for TIFF library
   find_package(TIFF REQUIRED)
   if (TIFF_FOUND)
@@ -453,9 +458,6 @@ endif()
   else()
     message(FATAL_ERROR "wxWidgets not found. Please install it manually or via vcpkg.")
   endif()
-
-    message(STATUS "Adding Subdirectory DemoIccMAXCmm.")
-    ADD_SUBDIRECTORY(Tools/DemoIccMAXCmm)
 
 ENDIF(ENABLE_TOOLS)
 
