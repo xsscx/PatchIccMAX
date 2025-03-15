@@ -1,7 +1,7 @@
 # ========================== PatchIccMAX ASAN ALT Build Script without Vcpkg Install for VS2022 Community ==========================
 # © 2024-2025 David H Hoyt LLC. All rights reserved.
 #
-# Date: 15-MAr-2025 1245 EDT by David Hoyt
+# Date: 15-MAR-2025 1245 EDT by David Hoyt
 #
 #
 #
