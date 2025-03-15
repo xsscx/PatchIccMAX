@@ -2,7 +2,7 @@
 # DemoIccMAX Master Branch Build Script
 # Copyright (c) 2024-2025 The International Color Consortium. All rights reserved.
 # Author: David Hoyt
-# Date: 24-FEB-2025 1257 EST by David Hoyt
+# Date: 15-MAR-2025 1247 EDT by David Hoyt
 # Run via pwsh: iex (iwr -Uri "https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/Build/VS2022C/build.ps1").Content
 #
 # ============================================================
@@ -14,7 +14,8 @@ Write-Host "For more information on the International Color Consortium see URL h
 Write-Host "Author: David H Hoyt LLC" -ForegroundColor Green
 
 # Set up directories and environment variables
-Write-Host "Set up \test directories and environment variables...."
+Write-Host "Set up build directories, code page, vcpkg command line location and environment variables...."
+chcp 65001
 $env:VSCMD_ARG_HOST_ARCH = "x64"
 $env:VSCMD_ARG_TGT_ARCH = "x64"
 $optDir = "C:\test"
