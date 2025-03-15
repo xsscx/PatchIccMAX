@@ -3,7 +3,7 @@
 ## Copyright (c) 2025 David H Hoyt LLC. All rights reserved.
 ##
 ## Written by David Hoyt 
-## Date: 15-MAR-2025 1321 EDT
+## Date: 15-MAR-2025 1334 EDT
 #
 # Branch: XNU
 # Intent: PROTOTYPE
@@ -105,6 +105,7 @@ mkdir -p Build && cd Build/
 print_banner "Step 5: Configuring CMake with $COMPILER"
 cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" -DCMAKE_BUILD_TYPE=Debug \
 -DCMAKE_CXX_COMPILER="$COMPILER" -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
+-DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON \
 -Wno-dev Cmake/ || { echo "❌ Error: CMake configuration failed. Exiting."; exit 1; }
 
 print_banner "Step 6: Running make (low-noise)"
