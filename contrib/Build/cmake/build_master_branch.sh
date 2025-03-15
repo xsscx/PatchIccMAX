@@ -19,6 +19,9 @@
 #  
 ## Build Script using Clang for master branch
 
+export CXX=clang++
+export CC=clang
+
 # Define log file
 LOGFILE="build_log_$(date +%Y-%m-%d_%H-%M-%S).log"
 START_TIME=$(date +%s)
