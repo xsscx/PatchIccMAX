@@ -3,7 +3,7 @@
 ## Copyright (c) 2025 David H Hoyt LLC. All rights reserved.
 ##
 ## Written by David Hoyt 
-## Date: 15-MAR-2025 1341 EDT
+## Date: 15-MAR-2025 1351 EDT
 #
 # Branch: XNU
 # Intent: PROTOTYPE
@@ -51,11 +51,20 @@ run_and_log() {
     "$@" 2>&1 | tee -a "$LOGFILE"
 }
 
-# Function to track elapsed time
 print_elapsed_time() {
     local END_TIME=$(date +%s)
     local ELAPSED_TIME=$((END_TIME - START_TIME))
-    echo "Elapsed Time: $(date -ud "@$ELAPSED_TIME" +'%H:%M:%S')"
+
+    if [[ "$OS_TYPE" == "Darwin" ]]; then
+        # macOS-compatible elapsed time formatting
+        local HH=$((ELAPSED_TIME / 3600))
+        local MM=$(((ELAPSED_TIME % 3600) / 60))
+        local SS=$((ELAPSED_TIME % 60))
+        printf "Elapsed Time: %02d:%02d:%02d\n" $HH $MM $SS
+    else
+        # Linux (GNU date) version
+        echo "Elapsed Time: $(date -ud "@$ELAPSED_TIME" +'%H:%M:%S')"
+    fi
 }
 
 # Start Script
