@@ -1,9 +1,22 @@
 #!/bin/bash
 ##
-## Copyright (c) 2024 The International Color Consortium. All rights reserved.
+## Copyright (c) 2025 David H Hoyt LLC. All rights reserved.
 ##
-## Written by David Hoyt for ICC color.org & DemoIccMAX Project
-## Date: 24-Nov-2024
+## Written by David Hoyt 
+## Date: 15-MAR-2025 1334 EDT
+#
+# Branch: XNU
+# Intent: PROTOTYPE
+# Production: FALSE
+# Runner: TRUE
+#
+#
+# Updates: Added platform conditional
+#          Fixed globbing
+#
+# Run: /bin/sh -c "$(curl -fsSL /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/xnu/contrib/Build/cmake/build_clang_master_branch.sh)"
+# 
+#  
 ## Build Script using Clang for master branch
 
 # Define log file
@@ -75,9 +88,10 @@ print_banner "Step 4: Starting Build using $COMPILER...."
 cd Build/ || { echo "Error: Build directory not found. Exiting."; exit 1; }
 
 print_banner "Step 5: configuring cmake with $COMPILER"
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug \
--DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
--Wno-dev Cmake/ || { echo "Error: cmake configuration failed. Exiting."; exit 1; }
+cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" -DCMAKE_BUILD_TYPE=Debug \
+-DCMAKE_CXX_COMPILER="$COMPILER" -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
+-DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON \
+-Wno-dev Cmake/ || { echo "❌ Error: CMake configuration failed. Exiting."; exit 1; }
 
 print_banner "Step 6: running make (low-noise)"
 make -j$(nproc) >/dev/null 2>&1 || { echo "Error: Build failed. Exiting."; exit 1; }
