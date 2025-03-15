@@ -3,7 +3,7 @@
 ## Copyright (c) 2025 David H Hoyt LLC. All rights reserved.
 ##
 ## Written by David Hoyt 
-## Date: 15-MAR-2025 1334 EDT
+## Date: 15-MAR-2025 1341 EDT
 #
 # Branch: XNU
 # Intent: PROTOTYPE
@@ -14,7 +14,7 @@
 # Updates: Added platform conditional
 #          Fixed globbing
 #
-# Run: /bin/zsh -c "$(curl -fsSL /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/xnu/contrib/Build/cmake/build_clang_master_branch.zsh)"
+# Run: /bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/xnu/contrib/Build/cmake/build_clang_master_branch.zsh)"
 # 
 #  
 ## Build Script using Clang for master branch
