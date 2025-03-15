@@ -1,7 +1,7 @@
 # ========================== PatchIccMAX ASAN Branch Build Script for VS2022 Community ==========================
 # © 2024-2025 David H Hoyt LLC. All rights reserved.
 #
-# Date: 25-FEB-2025 1522 by David Hoyt
+# Date: 15-MAR-2025 1245 EDT by David Hoyt
 #
 #
 #
@@ -60,7 +60,8 @@ function Run-Command {
 Log-Message "Starting PatchIccMAX ASAN Branch Build for VS2022 Community" "Green"
 
 # === Environment Setup ===
-Log-Message "Setting up directories and environment variables..."
+Write-Host "Set up build directories, code page, vcpkg command line location and environment variables...."
+chcp 65001
 $Env:VSCMD_ARG_HOST_ARCH = "x64"
 $Env:VSCMD_ARG_TGT_ARCH = "x64"
 $BaseDir = "C:\test"
