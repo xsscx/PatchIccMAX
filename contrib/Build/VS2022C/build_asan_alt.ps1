@@ -62,7 +62,7 @@ Log-Message "https://srd.cx"
 Log-Message "======================================================================="
 set MSBUILDDEBUGENGINE=1
 # === Environment Setup ===
-Write-Host "Set up build directories, code page, vcpkg command line location and environment variables...."
+Log-Message "Set up build directories, code page, vcpkg command line location and environment variables...."
 chcp 65001
 $Env:VSCMD_ARG_HOST_ARCH = "x64"
 $Env:VSCMD_ARG_TGT_ARCH = "x64"
