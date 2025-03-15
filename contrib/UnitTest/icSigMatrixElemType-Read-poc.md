@@ -1,6 +1,5 @@
 # Type Confusion in `CIccMpeCalculator::Read`
 
-## 03-MAR-2025 | Resolved
 #### PoC
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/icSigMatrixElemType-Read-poc.sh)"
