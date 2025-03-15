@@ -1,11 +1,23 @@
-#!/bin/zsh
+#!/bin/bash
 ##
-## Copyright (©) 2024 The International Color Consortium. All rights reserved.
+## Copyright (c) 2025 David H Hoyt LLC. All rights reserved.
 ##
-## Written by David Hoyt for ICC color.org & DemoIccMAX Project
-## Date: 24-Nov-2024
-## 
-## Zsh build script for macOS
+## Written by David Hoyt 
+## Date: 15-MAR-2025 1334 EDT
+#
+# Branch: XNU
+# Intent: PROTOTYPE
+# Production: FALSE
+# Runner: TRUE
+#
+#
+# Updates: Added platform conditional
+#          Fixed globbing
+#
+# Run: /bin/sh -c "$(curl -fsSL /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/xnu/contrib/Build/cmake/xnu_build_master_branch.sh)"
+# 
+#  
+## Build Script using Clang for master branch
 
 # Define log file
 LOGFILE="build_log_$(date +%Y-%m-%d_%H-%M-%S).log"
@@ -60,9 +72,10 @@ print_banner "Step 4: Starting Build...."
 cd Build/ || { echo "Error: Build directory not found. Exiting."; exit 1; }
 
 print_banner "Configuring cmake for Debug"
-run_and_log cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug \
-    -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
-    -Wno-dev Cmake/ || { echo "Error: cmake configuration failed. Exiting."; exit 1; }
+run_and_log cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" -DCMAKE_BUILD_TYPE=Debug \
+-DCMAKE_CXX_COMPILER="$COMPILER" -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
+-DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON \
+-Wno-dev Cmake/ || { echo "❌ Error: CMake configuration failed. Exiting."; exit 1; }
 
 print_banner "Step 5: Running make"
 run_and_log make -j$(sysctl -n hw.ncpu) || { echo "Error: Build failed. Exiting."; exit 1; }
