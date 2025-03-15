@@ -30,9 +30,21 @@ else
     exit 1
 fi
 
+## Build Script using Clang for master branch
+
 export CXX=clang++
 export CC=clang
+
+# Default ASAN options
 export ASAN_OPTIONS="alloc_dealloc_mismatch=1:detect_leaks=1:detect_stack_use_after_return=1:strict_string_checks=1:detect_invalid_pointer_pairs=2:halt_on_error=0:verbosity=1"
+
+# Detect if running on macOS (Darwin) and ARM64
+if [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
+    export ASAN_OPTIONS=${ASAN_OPTIONS//detect_leaks=1/detect_leaks=0}
+fi
+
+# Log the ASAN_OPTIONS value
+echo "ASAN_OPTIONS is set to: $ASAN_OPTIONS" >> asan_options.log
 
 # Define log file
 LOGFILE="build_log_$(date +%Y-%m-%d_%H-%M-%S).log"
