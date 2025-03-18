@@ -4,7 +4,7 @@
 ## 
 ##          Copyright (©) 2024-2025 David H Hoyt LLC | All rights reserved.
 ## 
-##          Last Updated: 17-MAR-2025 at 1153 EDT by David Hoyt (©)
+##          Last Updated: 18-MAR-2025 at 1907 EDT by David Hoyt (©)
 ##
 ## Changes:  wrapped logging and platform conditions
 ##           msbuild checks needs attention, vcpkg integration 
@@ -698,7 +698,7 @@ set(PROJECT_SUBDIRECTORY "Tools/DemoIccMAXCmm")
 # Log and add the subdirectory
 message(STATUS "Configuring ${PROJECT_SUBDIRECTORY}...")
 add_subdirectory(${PROJECT_SUBDIRECTORY})
-add_dependencies(iccMAXCmm IccProfLib2-static)
+add_dependencies(DemoIccMAXCmm IccProfLib2-static)
 message(STATUS "Successfully added subdirectory: ${PROJECT_SUBDIRECTORY}")
 
 # Configure wxWidgets with detailed logging
