@@ -12,14 +12,14 @@
 #
 ###############################################################
 
-name: "ubu-pr116-gnucpp"
+name: "ubu-json-gnucpp"
 
 on:
   workflow_dispatch:
 
 jobs:
   build-linux:
-    name: Build and Test Linux PR116 Branch
+    name: Build and Test Linux JSON Branch
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
