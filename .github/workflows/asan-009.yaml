@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "xnu-arm64-debug-asan"
+name: "pr116-arm64-debug-asan"
 
 on:
   workflow_dispatch: # Manual trigger only
@@ -42,7 +42,7 @@ jobs:
           echo "📥 Cloning PatchIccMAX repository..."
           git clone https://github.com/xsscx/PatchIccMAX.git
           cd PatchIccMAX
-          git checkout master
+          git checkout pr116
           echo "📦 Installing Homebrew dependencies..."
           brew install nlohmann-json libxml2 wxwidgets libtiff || echo "⚠️ Some dependencies might already be installed."
           echo "✔ Dependency installation complete."
