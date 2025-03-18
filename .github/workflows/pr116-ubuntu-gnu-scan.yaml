@@ -54,8 +54,8 @@ jobs:
       - name: Configure the build with scan-build
         run: |
           cd DemoIccMAX/Build
-          export CC=clang
-          export CXX=clang++
+          export CC=gcc
+          export CXX=g++
           export PATH="/usr/lib/llvm-17/bin:$PATH"
           scan-build cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release -DENABLE_TOOLS=ON -Wno-dev Cmake/
       # Run scan-build for static analysis
