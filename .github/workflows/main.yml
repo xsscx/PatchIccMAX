@@ -3,23 +3,23 @@
 ## Copyright (©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 14-MAR-2025 1204 EDT by David Hoyt (©)
+## Last Updated: 18-MAR-2025 0745 EDT by David Hoyt (©)
 #
-## Intent: xnu-x86_64-debug-asan
+## Intent: xnu-x86_64-pr116-debug-asan
 #
 ## TODO: Refactor for all Windows & UNIX Device Reporting
 #
 #
 ###############################################################
 
-name: "xnu-rnr-dbg-msvc"
+name: "xnu-pr116-debug-asan"
 
 on:
   workflow_dispatch: # Manual trigger only
 
 jobs:
   build-macos:
-    name: Build Master Branch
+    name: Build PR116 Branch
     runs-on: macos-13
     strategy:
       fail-fast: false
@@ -42,7 +42,7 @@ jobs:
           echo "📥 Cloning PatchIccMAX repository..."
           git clone https://github.com/xsscx/PatchIccMAX.git
           cd PatchIccMAX
-          git checkout xnu-runner
+          git checkout pr116
           echo "📦 Installing Homebrew dependencies..."
           brew install nlohmann-json libxml2 wxwidgets libtiff libpng || echo "⚠️ Some dependencies might already be installed."
           echo "✔ Dependency installation complete."
