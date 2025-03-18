@@ -47,13 +47,13 @@ jobs:
       run: |
         git clone https://github.com/xsscx/PatchIccMAX.git
         cd PatchIccMAX
-        git checkout pr116
+        git checkout json
     # Configure the build with CMake
     - name: Configure the build with CMake
       run: |
         cd PatchIccMAX/Build
-        export CC=clang
-        export CXX=clang++
+        export CC=gcc
+        export CXX=g++
         export PATH="/usr/lib/llvm-17/bin:$PATH"
         echo "CC=gcc" >> $GITHUB_ENV
         echo "CXX=g++" >> $GITHUB_ENV
