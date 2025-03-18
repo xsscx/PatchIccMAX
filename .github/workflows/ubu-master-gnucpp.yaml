@@ -12,14 +12,14 @@
 #
 ###############################################################
 
-name: "ubu-main-gnucpp"
+name: "master-gnucpp-test"
 
 on:
   workflow_dispatch:
 
 jobs:
   build-linux:
-    name: Build and Test Linux PR116 Branch
+    name: Build and Test Linux iccMAX Master Branch
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -51,19 +51,19 @@ jobs:
     # Configure the build with CMake
     - name: Configure the build with CMake
       run: |
-        cd PatchIccMAX/Build
+        cd DemoIccMAX/Build
         export CC=gcc
         export CXX=g++
         export PATH="/usr/lib/llvm-17/bin:$PATH"
         echo "CC=gcc" >> $GITHUB_ENV
         echo "CXX=g++" >> $GITHUB_ENV
-        clang++ --version
-        clang --version
+        g++ --version
+        gcc --version
         cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release -DENABLE_TOOLS=ON -Wno-dev Cmake/
     # Build the project using CMake
     - name: Build project with CMake
       run: |
-        cd PatchIccMAX/Build
+        cd DemoIccMAX/Build
         make -j$(nproc)
     # Run additional system info and validation commands
     - name: Gather system information
@@ -77,7 +77,7 @@ jobs:
     # Check build success
     - name: Check build success
       run: |
-        if [ -f PatchIccMAX/Build/CMakeCache.txt ]; then
+        if [ -f DemoIccMAX/Build/CMakeCache.txt ]; then
           echo "✅ Build configuration exists."
         else
           echo "❌ Build configuration failed."
@@ -88,7 +88,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: master-build-linux
-        path: PatchIccMAX/Build
+        path: DemoIccMAX/Build
 
     # Upload build logs
     - name: Upload build logs
