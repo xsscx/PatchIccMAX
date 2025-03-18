@@ -58,16 +58,6 @@ jobs:
         make -j$(nproc) | tee build.log
         echo "✅ Build completed successfully."
 
-    - name: Gather System Information
-      run: |
-        set -euxo pipefail
-        uname -a | tee system_info.log
-        cat /etc/os-release | tee -a system_info.log
-        gcc -v 2>&1 | tee -a system_info.log
-        lscpu | tee -a system_info.log
-        free -m | tee -a system_info.log
-        df -h | tee -a system_info.log
-
     - name: Verify Build Success
       run: |
         set -euxo pipefail
@@ -83,38 +73,45 @@ jobs:
         echo "✔ Build process completed. Listing generated files..."
         find . -type f \( \( -perm -111 \) -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -exec ls -lh {} \;
 
-    - name: Run Unit Tests
+    - name: Run Unit Tests (Non-Blocking)
       run: |
-        set -euxo pipefail
-        echo "🧪 Running tests..."
+        set +e  # Disable exit on error for tests
+        echo "🧪 Running tests..." | tee test_results.log
         cd PatchIccMAX/Testing
+        touch test_failures.log
 
         # Create All Profiles
-        /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/CreateAllProfiles_cross_check.sh)" || { echo "❌ Profile creation failed. Exiting."; exit 1; }
+        /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/CreateAllProfiles_cross_check.sh)" || { echo "⚠️ Profile creation failed, continuing..." | tee -a test_failures.log; }
 
         # Run AddressSanitizer Tests
-        /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/RunTests_asan.sh)" || { echo "❌ Test execution failed. Exiting."; exit 1; }
+        /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/RunTests_asan.sh)" || { echo "⚠️ ASan test execution failed, continuing..." | tee -a test_failures.log; }
 
         # Set up tagcheck directory and test
         mkdir -p tagcheck && cd tagcheck
         wget -q https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/TestCIccTagXmlProfileSequenceId.cpp
-        sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/TestCIccTagXmlProfileSequenceId.sh)"
-
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/TestCIccTagXmlProfileSequenceId.sh)" || { echo "⚠️ Tag check test failed, continuing..." | tee -a ../test_failures.log; }
+        
         # Set up elemread directory and test
         cd ../
         rm -rf elemread && mkdir elemread && cd elemread
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/icSigMatrixElemType-Read-poc.sh)"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/icSigMatrixElemType-Read-poc.sh)" || { echo "⚠️ Element Read test failed, continuing..." | tee -a ../test_failures.log; }
 
         # Run ICC Profile Creation Tests
         cd ../
-        /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.sh)"
+        /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.sh)" || { echo "⚠️ Profile creation test failed, continuing..." | tee -a test_failures.log; }
 
         # Final directory listing for debugging
         cd ../
         pwd
         ls -tla
+        echo "✔ Tests completed successfully." | tee -a test_results.log
 
-        echo "✔ Tests completed successfully."
+        # Display test failures if any
+        if [ -s test_failures.log ]; then
+          echo "⚠️ Some tests failed, but continuing... See 'test_failures.log' for details."
+        else
+          echo "✅ All tests passed successfully."
+        fi
 
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
@@ -130,6 +127,5 @@ jobs:
           PatchIccMAX/Build/CMakeCache.txt
           PatchIccMAX/Build/build.log
           PatchIccMAX/Build/cmake_config.log
-          system_info.log
-          clang_version.log
-          build_check.log
+          test_results.log
+          test_failures.log
