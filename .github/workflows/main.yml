@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "xnu-pr116-debug-asan"
+name: "xnupr116"
 
 on:
   workflow_dispatch: # Manual trigger only
