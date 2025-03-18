@@ -1,4 +1,4 @@
-name: "PR118-Refactor.v1"
+name: "PR118-Refactor.v2"
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
 
     steps:
-    
+
     - name: Checkout Repository
       uses: actions/checkout@v4
 
@@ -77,6 +77,44 @@ jobs:
           echo "❌ Build configuration failed!" | tee -a build_check.log
           exit 1
         fi
+
+    - name: List Generated Files
+      run: |
+        echo "✔ Build process completed. Listing generated files..."
+        find . -type f \( \( -perm -111 \) -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -exec ls -lh {} \;
+
+    - name: Run Unit Tests
+      run: |
+        set -euxo pipefail
+        echo "🧪 Running tests..."
+        cd PatchIccMAX/Testing
+
+        # Create All Profiles
+        /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/CreateAllProfiles_cross_check.sh)" || { echo "❌ Profile creation failed. Exiting."; exit 1; }
+
+        # Run AddressSanitizer Tests
+        /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/RunTests_asan.sh)" || { echo "❌ Test execution failed. Exiting."; exit 1; }
+
+        # Set up tagcheck directory and test
+        mkdir -p tagcheck && cd tagcheck
+        wget -q https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/TestCIccTagXmlProfileSequenceId.cpp
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/TestCIccTagXmlProfileSequenceId.sh)"
+
+        # Set up elemread directory and test
+        cd ../
+        rm -rf elemread && mkdir elemread && cd elemread
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/icSigMatrixElemType-Read-poc.sh)"
+
+        # Run ICC Profile Creation Tests
+        cd ../
+        /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.sh)"
+
+        # Final directory listing for debugging
+        cd ../
+        pwd
+        ls -tla
+
+        echo "✔ Tests completed successfully."
 
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
