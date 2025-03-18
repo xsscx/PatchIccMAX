@@ -1,0 +1,97 @@
+name: "PR118-Refactor.v1"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    name: Build and Test Linux JSON Branch
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set Up Git Anonymous Identity
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+
+    - name: Install Dependencies
+      run: |
+        set -euxo pipefail
+        sudo apt-get update
+        sudo apt-get install -y \
+          libxml2 libxml2-dev libtiff-dev nlohmann-json3-dev build-essential \
+          cmake clang clang-tools python3 python3-pip libwxgtk3.2-dev wx-common \
+          libopencl-clang-17-dev curl git llvm clang-17
+        echo "✅ Dependencies installed successfully."
+
+    - name: Clone PatchIccMAX Repository
+      run: |
+        set -euxo pipefail
+        git clone https://github.com/xsscx/PatchIccMAX.git
+        cd PatchIccMAX
+        git checkout json
+        echo "✅ PatchIccMAX repository cloned and switched to 'json' branch."
+
+    - name: Configure Build with CMake
+      run: |
+        set -euxo pipefail
+        cd PatchIccMAX/Build
+        export CC=gcc
+        export CXX=g++
+        export PATH="/usr/lib/llvm-17/bin:$PATH"
+        echo "CC=gcc" >> $GITHUB_ENV
+        echo "CXX=g++" >> $GITHUB_ENV
+        clang++ --version | tee clang_version.log
+        clang --version | tee -a clang_version.log
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release -DENABLE_TOOLS=ON -Wno-dev Cmake/ | tee cmake_config.log
+
+    - name: Build Project with CMake
+      run: |
+        set -euxo pipefail
+        cd PatchIccMAX/Build
+        make -j$(nproc) | tee build.log
+        echo "✅ Build completed successfully."
+
+    - name: Gather System Information
+      run: |
+        set -euxo pipefail
+        uname -a | tee system_info.log
+        cat /etc/os-release | tee -a system_info.log
+        gcc -v 2>&1 | tee -a system_info.log
+        lscpu | tee -a system_info.log
+        free -m | tee -a system_info.log
+        df -h | tee -a system_info.log
+
+    - name: Verify Build Success
+      run: |
+        set -euxo pipefail
+        if [ -f PatchIccMAX/Build/CMakeCache.txt ]; then
+          echo "✅ Build configuration exists." | tee build_check.log
+        else
+          echo "❌ Build configuration failed!" | tee -a build_check.log
+          exit 1
+        fi
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: master-build-linux
+        path: PatchIccMAX/Build
+
+    - name: Upload Build Logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs
+        path: |
+          PatchIccMAX/Build/CMakeCache.txt
+          PatchIccMAX/Build/build.log
+          PatchIccMAX/Build/cmake_config.log
+          system_info.log
+          clang_version.log
+          build_check.log
