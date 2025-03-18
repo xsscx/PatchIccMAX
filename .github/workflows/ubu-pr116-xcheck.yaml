@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "ubu-pr116-xcheck"
+name: "ubu-pr116-gnucpp"
 
 on:
   workflow_dispatch:
@@ -55,8 +55,8 @@ jobs:
         export CC=clang
         export CXX=clang++
         export PATH="/usr/lib/llvm-17/bin:$PATH"
-        echo "CC=clang" >> $GITHUB_ENV
-        echo "CXX=clang++" >> $GITHUB_ENV
+        echo "CC=gcc" >> $GITHUB_ENV
+        echo "CXX=g++" >> $GITHUB_ENV
         clang++ --version
         clang --version
         cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release -DENABLE_TOOLS=ON -Wno-dev Cmake/
