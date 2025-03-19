@@ -91,6 +91,8 @@ jobs:
           cmake --build . --config Release -- /m /maxcpucount:32
           
           Write-Host "Running the .exe files built"
+          cd ../Testing
+          pwd
           Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
           
           Write-Host "Running CreateAllProfiles.bat from remote"
