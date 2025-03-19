@@ -72,9 +72,9 @@ jobs:
           pkg-config --modversion libxml-2.0
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
                 -DCMAKE_BUILD_TYPE=Debug \
-                -DCMAKE_C_FLAGS="-I/opt/homebrew/opt/libxml2/include" `
-                -DCMAKE_CXX_FLAGS="-I/opt/homebrew/opt/libxml2/include" `
-                 -DCMAKE_SHARED_LINKER_FLAGS="-L/opt/homebrew/opt/libxml2/lib"
+                -DCMAKE_C_FLAGS="-I/opt/homebrew/Cellar/libxml2/2.13.6/include/" `
+                -DCMAKE_CXX_FLAGS="-I/opt/homebrew/Cellar/libxml2/2.13.6/include/" `
+                -DCMAKE_SHARED_LINKER_FLAGS="-L/opt/homebrew/Cellar/libxml2/2.13.6/lib/"
                 -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
                 -Wno-dev -DENABLE_TOOLS=ON Cmake/
           echo "✔ CMake configuration complete."
