@@ -1,13 +1,20 @@
 ###############################################################
 #
-## Copyright (©) 2024 David H Hoyt. All rights reserved.
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 19-MAR-2025 0730 EST by David Hoyt (©)
+## Last Updated: 19-MAR-2025 0732 EST by David Hoyt (©)
+## Branch: XNU
+# Intent: PROTOTYPE
+# Production: FALSE
+# Runner: TRUE
 #
-## Intent: xnu-cmake-debug-asan
 #
-## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+#
+#
+## RECENT: ADD export PKG_CONFIG_PATH
 #
 #
 ###############################################################
@@ -51,6 +58,7 @@ jobs:
           echo "⚙️ Setting up CMake build configuration..."
           mkdir -p PatchIccMAX/Build
           cd PatchIccMAX/Build
+          export PKG_CONFIG_PATH="/opt/homebrew/opt/libxml2/lib/pkgconfig"
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
                 -DCMAKE_BUILD_TYPE=Debug \
                 -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
