@@ -93,8 +93,8 @@ jobs:
           pwd
           dir
           Get-Location
-          cd ..\Testing
+          cd ../../Testing
           Get-Location
-          dir
-          .\CreatAllProfiles.bat
+          .\CreateAllProfiles.bat
+          .\runtests.bat
           
