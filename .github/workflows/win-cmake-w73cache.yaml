@@ -69,6 +69,7 @@ jobs:
           git clone https://github.com/xsscx/PatchIccMAX.git $patchDir
           
           cd $patchDir
+          Get-Location
           git checkout msvc
           
       - name: 🔹 Configure & Build with CMake
@@ -91,4 +92,9 @@ jobs:
           cmake --build . --config Release -- /m /maxcpucount:32
           pwd
           dir
+          Get-Location
+          cd ..\Testing
+          Get-Location
+          dir
+          .\CreatAllProfiles.bat
           
