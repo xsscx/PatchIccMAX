@@ -58,7 +58,7 @@ jobs:
           cd $vcpkgDir
           .\vcpkg.exe integrate install
           .\vcpkg.exe install nlohmann-json:x64-windows nlohmann-json:x64-windows-static libxml2:x64-windows tiff:x64-windows wxwidgets:x64-windows libxml2:x64-windows-static tiff:x64-windows-static wxwidgets:x64-windows-static
-      - name: 🔹 [FETCH] Clone DemoIccMAX Repository
+      - name: 🔹 [FETCH] Clone PatchIccMAX Repository
         shell: pwsh
         run: |
           $patchDir = "C:\test\PatchIccMAX"
@@ -86,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Build-Artifacts
-          path: C:\test\DemoIccMAX
+          path: C:\test\PatchIccMAX
 
       - name: 📤 [UPLOAD] Build Logs
         uses: actions/upload-artifact@v4
