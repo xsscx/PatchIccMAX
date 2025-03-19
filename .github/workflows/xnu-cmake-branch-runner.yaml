@@ -3,7 +3,7 @@
 ## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 19-MAR-2025 0732 EST by David Hoyt (©)
+## Last Updated: 19-MAR-2025 0733 EST by David Hoyt (©)
 ## Branch: XNU
 # Intent: PROTOTYPE
 # Production: FALSE
@@ -14,7 +14,7 @@
 #
 #
 #
-## RECENT: ADD export PKG_CONFIG_PATH
+## RECENT: Fiddle with Exports and Paths etc...
 #
 #
 ###############################################################
@@ -58,6 +58,8 @@ jobs:
           echo "⚙️ Setting up CMake build configuration..."
           mkdir -p PatchIccMAX/Build
           cd PatchIccMAX/Build
+          export LDFLAGS="-L/opt/homebrew/opt/libxml2/lib"
+          export CPPFLAGS="-I/opt/homebrew/opt/libxml2/include"
           export PKG_CONFIG_PATH="/opt/homebrew/opt/libxml2/lib/pkgconfig"
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
                 -DCMAKE_BUILD_TYPE=Debug \
