@@ -90,14 +90,19 @@ jobs:
           Write-Host "🔹 Building Release..."
           cmake --build . --config Release -- /m /maxcpucount:32
           pwd
+          dir
+          pwd
           Write-Host "Running the .exe files built"
           cd C:\test\PatchIccMAX\Testing\
           pwd
           Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
-          
+          pwd
           Write-Host "Running CreateAllProfiles.bat from remote"
+          pwd
+          ls
           $tempFile = "$env:TEMP\CreateAllProfiles.bat"; iwr -Uri "https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.bat" -OutFile $tempFile; & $tempFile; Remove-Item $tempFile
-          
+          pwd
+          ls
           Write-Host "Running RunTests.bat from local"
           .\RunTests.bat
           
