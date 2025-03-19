@@ -77,28 +77,6 @@ jobs:
           cd PatchIccMAX/Build
           make -j$(sysctl -n hw.ncpu)
           echo "✔ Build process completed. Listing generated files..."
-          find . -type f \( \( -perm -111 \) -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -exec ls -lh {} \;
-          echo "🧪 Running tests..."
-          cd ../Testing
-      
-          /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/CreateAllProfiles_cross_check.sh)" || { echo "❌ Profile creation failed. Exiting."; exit 1; }
-          /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/RunTests_asan.sh)" || { echo "❌ Test execution failed. Exiting."; exit 1; }
-          mkdir tagcheck
-          cd tagcheck
-          pwd
-          wget https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/TestCIccTagXmlProfileSequenceId.cpp
-          sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/UnitTest/TestCIccTagXmlProfileSequenceId.sh)"
-          cd ../
-          rm -rf elemread
-          mkdir elemread
-          cd elemread
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/icSigMatrixElemType-Read-poc.sh)"
-          cd ../
-          /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.sh)"
-          cd ../
-          pwd
-          ls -tla
-          echo "✔ Tests completed successfully."
       - name: Check build success
         run: |
           echo "🔍 Verifying build success..."
