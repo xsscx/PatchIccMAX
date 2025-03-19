@@ -58,9 +58,17 @@ jobs:
           echo "⚙️ Setting up CMake build configuration..."
           mkdir -p PatchIccMAX/Build
           cd PatchIccMAX/Build
+          pwd
+          env | sort
           export LDFLAGS="-L/opt/homebrew/opt/libxml2/lib"
           export CPPFLAGS="-I/opt/homebrew/opt/libxml2/include"
           export PKG_CONFIG_PATH="/opt/homebrew/opt/libxml2/lib/pkgconfig"
+          echo "LDFLAGS=-L/opt/homebrew/opt/libxml2/lib" >> $GITHUB_ENV
+          echo "CPPFLAGS=-I/opt/homebrew/opt/libxml2/include" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=/opt/homebrew/opt/libxml2/lib/pkgconfig" >> $GITHUB_ENV
+          pwd
+          ls
+          env | sort
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
                 -DCMAKE_BUILD_TYPE=Debug \
                 -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
