@@ -3,7 +3,7 @@
 ## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 19-MAR-2025 0634 EDT by David Hoyt (©)
+## Last Updated: 19-MAR-2025 0727 EDT by David Hoyt (©)
 #
 ## Intent: Windows Cmake Build Runner Testing
 #
@@ -90,7 +90,7 @@ jobs:
           git clone https://github.com/xsscx/PatchIccMAX.git "$env:PATCH_DIR"
 
           cd "$env:PATCH_DIR"
-          git checkout msvc
+          git checkout cmake
           
       - name: 🔹 Configure & Build with CMake
         shell: pwsh
