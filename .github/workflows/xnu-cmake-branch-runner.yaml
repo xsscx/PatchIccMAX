@@ -67,7 +67,7 @@ jobs:
           export LDFLAGS="-L/opt/homebrew/opt/libxml2/lib"
           export CPPFLAGS="-I/opt/homebrew/opt/libxml2/include"
           export PKG_CONFIG_PATH="/opt/homebrew/opt/libxml2/lib/pkgconfig"
-          cmake -S Cmake/ -B . -DCMAKE_BUILD_TYPE=Debug -g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON
+          cmake -S Cmake/ -B . -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON
       - name: Build project with CMake
         run: |
           echo "🛠️ Starting build process..."
