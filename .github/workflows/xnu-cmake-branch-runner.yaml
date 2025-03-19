@@ -69,6 +69,8 @@ jobs:
           pwd
           ls
           env | sort
+          brew list libxml2
+          pkg-config --modversion libxml-2.0
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
                 -DCMAKE_BUILD_TYPE=Debug \
                 -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
