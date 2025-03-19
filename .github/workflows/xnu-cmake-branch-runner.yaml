@@ -64,12 +64,6 @@ jobs:
           mkdir -p PatchIccMAX/Build
           cd PatchIccMAX/Build
           pwd
-          env | sort
-          pwd
-          ls
-          env | sort
-          brew list libxml2
-          pkg-config --modversion libxml-2.0
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
                 -DCMAKE_BUILD_TYPE=Debug \
                 -DCMAKE_C_FLAGS="-I/opt/homebrew/Cellar/libxml2/2.13.6/include/" `
