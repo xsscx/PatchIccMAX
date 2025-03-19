@@ -75,7 +75,7 @@ jobs:
           Write-Host "🔹 Changing Dir to Build/Cmake/"
           cd Build/Cmake/
           Write-Host "🔹 Running cmake config"
-          cmake -S .  -B .  -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release  -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON
+          cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DGDI32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64/gdi32.lib" -DUSER32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64/user32.lib"
           Write-Host "🔹 Building Release"
           cmake --build .  --config Release -- /m /maxcpucount:32
           Write-Host "🔹 Repository structure:"
