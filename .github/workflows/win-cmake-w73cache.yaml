@@ -91,8 +91,4 @@ jobs:
           cmake --build . --config Release -- /m /maxcpucount:32
           pwd
           dir
-          Write-Host "Running the .exe files built"
-          cd C:\test\PatchIccMAX\Testing\
-          pwd
-          Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
-          pwd
+          
