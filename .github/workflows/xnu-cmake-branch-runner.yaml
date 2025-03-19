@@ -64,7 +64,7 @@ jobs:
           mkdir -p PatchIccMAX/Build
           cd PatchIccMAX/Build
           pwd
-          cmake Cmake/ -DCMAKE_BUILD_TYPE=Debug $(pkg-config --cflags libxml-2.0 | sed 's/^/-DCMAKE_C_FLAGS="/;s/$/"/') $(pkg-config --cflags libxml-2.0 | sed 's/^/-DCMAKE_CXX_FLAGS="/;s/$/"/') $(pkg-config --libs libxml-2.0 | sed 's/^/-DCMAKE_SHARED_LINKER_FLAGS="/;s/$/"/') -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -Wno-dev -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON
+          cmake Cmake/ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="$(pkg-config --cflags libxml-2.0)" -DCMAKE_CXX_FLAGS="$(pkg-config --cflags libxml-2.0) -g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -DCMAKE_EXE_LINKER_FLAGS="$(pkg-config --libs libxml-2.0)" -Wno-dev -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON
           echo "✔ CMake configuration complete."
       - name: Build project with CMake
         run: |
