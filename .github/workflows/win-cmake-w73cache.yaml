@@ -96,25 +96,3 @@ jobs:
           pwd
           Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
           pwd
-          C:\test\PatchIccMAX\Testing\Release\iccToXml.exe
-          Write-Host "Running CreateProfiles"
-          .\CreateAllProfiles.bat
-          CreateAllProfiles.bat
-          Write-Host "Running RunTests.bat from local"
-          .\RunTests.bat
-          RunTests.bat
-          
-          Write-Host "Collecting ICC Profile Information..."
-          $profiles = Get-ChildItem -Path . -Filter "*.icc" -Recurse -File
-          $totalCount = $profiles.Count
-          
-          $groupedProfiles = $profiles | Group-Object { $_.Directory.FullName }
-          
-          Write-Host "`n========================="
-          Write-Host " ICC Profile Report"
-          Write-Host "========================="
-          foreach ($group in $groupedProfiles) {
-              Write-Host ("{0}: {1} .icc profiles" -f $group.Name, $group.Count)
-          }
-          Write-Host "`nTotal .icc profiles found: $totalCount"
-          Write-Host "=========================`n"
