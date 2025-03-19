@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "ubu-gnu-cmake"
+name: "ubugnu-cmake"
 
 on:
   workflow_dispatch:
