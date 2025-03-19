@@ -1,4 +1,4 @@
-name: win-cmake-c73
+name: win-cmake-c74
 
 on:
   workflow_dispatch:
@@ -18,9 +18,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: C:\test\vcpkg
-          key: Win70-${{ runner.os }}-${{ hashFiles('**/vcpkg.json', '**/bootstrap-vcpkg.bat') }}
+          key: Win74-${{ runner.os }}-${{ hashFiles('**/vcpkg.json', '**/bootstrap-vcpkg.bat') }}
           restore-keys: |
-            Win70-${{ runner.os }}-
+            Win74-${{ runner.os }}-
 
       - name: 🔹 Setup Environment & Build Preparation
         shell: pwsh
