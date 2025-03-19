@@ -64,8 +64,6 @@ jobs:
           mkdir -p PatchIccMAX/Build
           cd PatchIccMAX/Build
           pwd
-          echo 'export PATH="/opt/homebrew/opt/libxml2/bin:$PATH"' >> $GITHUB_ENV
-          echo 'export LDFLAGS="-L/opt/homebrew/opt/libxml2/lib"  >> $GITHUB_ENV
           export LDFLAGS="-L/opt/homebrew/opt/libxml2/lib"
           export CPPFLAGS="-I/opt/homebrew/opt/libxml2/include"
           export PKG_CONFIG_PATH="/opt/homebrew/opt/libxml2/lib/pkgconfig"
