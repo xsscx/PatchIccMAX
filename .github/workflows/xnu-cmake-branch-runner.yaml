@@ -50,8 +50,13 @@ jobs:
           git clone https://github.com/xsscx/PatchIccMAX.git
           cd PatchIccMAX
           git checkout cmake
+          pwd
+          env | sort
           echo "📦 Installing Homebrew dependencies..."
           brew install nlohmann-json libxml2 wxwidgets libtiff || echo "⚠️ Some dependencies might already be installed."
+          echo "PKG_CONFIG_PATH=$(brew --prefix libxml2)/lib/pkgconfig" >> $GITHUB_ENV
+          pkg-config --cflags --libs libxml-2.0
+          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
           echo "✔ Dependency installation complete."
       - name: Configure the build with CMake
         run: |
@@ -60,12 +65,6 @@ jobs:
           cd PatchIccMAX/Build
           pwd
           env | sort
-          export LDFLAGS="-L/opt/homebrew/opt/libxml2/lib"
-          export CPPFLAGS="-I/opt/homebrew/opt/libxml2/include"
-          export PKG_CONFIG_PATH="/opt/homebrew/opt/libxml2/lib/pkgconfig"
-          echo "LDFLAGS=-L/opt/homebrew/opt/libxml2/lib" >> $GITHUB_ENV
-          echo "CPPFLAGS=-I/opt/homebrew/opt/libxml2/include" >> $GITHUB_ENV
-          echo "PKG_CONFIG_PATH=/opt/homebrew/opt/libxml2/lib/pkgconfig" >> $GITHUB_ENV
           pwd
           ls
           env | sort
@@ -73,6 +72,9 @@ jobs:
           pkg-config --modversion libxml-2.0
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
                 -DCMAKE_BUILD_TYPE=Debug \
+                -DCMAKE_C_FLAGS="-I/opt/homebrew/opt/libxml2/include" `
+                -DCMAKE_CXX_FLAGS="-I/opt/homebrew/opt/libxml2/include" `
+                 -DCMAKE_SHARED_LINKER_FLAGS="-L/opt/homebrew/opt/libxml2/lib"
                 -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
                 -Wno-dev -DENABLE_TOOLS=ON Cmake/
           echo "✔ CMake configuration complete."
