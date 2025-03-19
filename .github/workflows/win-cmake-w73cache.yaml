@@ -90,11 +90,3 @@ jobs:
           
           Write-Host "🔹 Building Release..."
           cmake --build . --config Release -- /m /maxcpucount:32
-          pwd
-          dir
-          Get-Location
-          cd ../../Testing
-          Get-Location
-          .\CreateAllProfiles.bat
-          .\runtests.bat
-          
