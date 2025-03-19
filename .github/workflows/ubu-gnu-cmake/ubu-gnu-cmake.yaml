@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "ubugnu-cmake"
+name: "1cmake"
 
 on:
   workflow_dispatch:
