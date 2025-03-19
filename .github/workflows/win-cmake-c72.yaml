@@ -1,17 +1,21 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 19-MAR-2025 0634 EDT by David Hoyt (©)
+#
+## Intent: Windows Cmake Build Runner Testing
+#
+## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+###############################################################
+
 name: win-cmake-c72
 
 on:
   workflow_dispatch:
-
-env:
-  BUILD_ROOT: C:\test
-  VCPKG_DIR: ${{ env.BUILD_ROOT }}\vcpkg
-  PATCH_DIR: ${{ env.BUILD_ROOT }}\PatchIccMAX
-  VCPKG_TOOLCHAIN: ${{ env.VCPKG_DIR }}\scripts\buildsystems\vcpkg.cmake
-  BUILD_TYPE: Release
-  GENERATOR: "Visual Studio 17 2022"
-  ARCH: x64
-  LOG_DIR: ${{ github.workspace }}\logs
 
 jobs:
   build:
@@ -23,6 +27,18 @@ jobs:
 
       - name: 🔹 Setup MSBuild
         uses: microsoft/setup-msbuild@v1
+
+      - name: 🔹 Define Environment Variables
+        shell: pwsh
+        run: |
+          echo "BUILD_ROOT=C:\test" >> $env:GITHUB_ENV
+          echo "VCPKG_DIR=C:\test\vcpkg" >> $env:GITHUB_ENV
+          echo "PATCH_DIR=C:\test\PatchIccMAX" >> $env:GITHUB_ENV
+          echo "VCPKG_TOOLCHAIN=C:\test\vcpkg\scripts\buildsystems\vcpkg.cmake" >> $env:GITHUB_ENV
+          echo "BUILD_TYPE=Release" >> $env:GITHUB_ENV
+          echo "GENERATOR=Visual Studio 17 2022" >> $env:GITHUB_ENV
+          echo "ARCH=x64" >> $env:GITHUB_ENV
+          echo "LOG_DIR=${{ github.workspace }}\logs" >> $env:GITHUB_ENV
 
       - name: 🔹 Restore vcpkg Cache
         uses: actions/cache@v3
@@ -38,71 +54,84 @@ jobs:
           Write-Host "============================= Starting Build =============================" -ForegroundColor Green
           Write-Host "© 2024-2025 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
           
-          $env:VSCMD_ARG_HOST_ARCH = "${{ env.ARCH }}"
-          $env:VSCMD_ARG_TGT_ARCH = "${{ env.ARCH }}"
+          $env:VSCMD_ARG_HOST_ARCH = "$env:ARCH"
+          $env:VSCMD_ARG_TGT_ARCH = "$env:ARCH"
 
           Write-Host "🔹 Configuring git user settings..."
           git config --global user.email "you@example.com"
           git config --global user.name "Your Name"
 
-          if (-Not (Test-Path "${{ env.BUILD_ROOT }}")) { New-Item -ItemType Directory -Path "${{ env.BUILD_ROOT }}" | Out-Null }
+          if (-Not (Test-Path "$env:BUILD_ROOT")) { New-Item -ItemType Directory -Path "$env:BUILD_ROOT" | Out-Null }
 
-          if (-Not (Test-Path "${{ env.VCPKG_DIR }}\vcpkg.exe")) {
+          if (-Not (Test-Path "$env:VCPKG_DIR\vcpkg.exe")) {
               Write-Host "🔹 vcpkg not found. Cloning and bootstrapping..."
-              git clone https://github.com/microsoft/vcpkg.git "${{ env.VCPKG_DIR }}"
-              & "${{ env.VCPKG_DIR }}\bootstrap-vcpkg.bat"
+              git clone https://github.com/microsoft/vcpkg.git "$env:VCPKG_DIR"
+              & "$env:VCPKG_DIR\bootstrap-vcpkg.bat"
           }
 
-          if (-Not (Test-Path "${{ env.VCPKG_DIR }}\vcpkg.exe")) {
+          if (-Not (Test-Path "$env:VCPKG_DIR\vcpkg.exe")) {
               Write-Host "❌ ERROR: vcpkg failed to install!" -ForegroundColor Red
               exit 1
           }
 
           Write-Host "🔹 Installing dependencies via vcpkg..."
           $packages = @(
-            "nlohmann-json:${{ env.ARCH }}-windows", "nlohmann-json:${{ env.ARCH }}-windows-static",
-            "libxml2:${{ env.ARCH }}-windows", "tiff:${{ env.ARCH }}-windows", "wxwidgets:${{ env.ARCH }}-windows",
-            "libxml2:${{ env.ARCH }}-windows-static", "tiff:${{ env.ARCH }}-windows-static", "wxwidgets:${{ env.ARCH }}-windows-static"
+            "nlohmann-json:$env:ARCH-windows", "nlohmann-json:$env:ARCH-windows-static",
+            "libxml2:$env:ARCH-windows", "tiff:$env:ARCH-windows", "wxwidgets:$env:ARCH-windows",
+            "libxml2:$env:ARCH-windows-static", "tiff:$env:ARCH-windows-static", "wxwidgets:$env:ARCH-windows-static"
           )
-          foreach ($pkg in $packages) { & "${{ env.VCPKG_DIR }}\vcpkg.exe" install $pkg }
+          foreach ($pkg in $packages) { & "$env:VCPKG_DIR\vcpkg.exe" install $pkg }
 
       - name: 🔹 Clone PatchIccMAX Repository
         shell: pwsh
         run: |
           Write-Host "🔹 Cloning PatchIccMAX repository..."
-          if (Test-Path "${{ env.PATCH_DIR }}") { Remove-Item -Recurse -Force "${{ env.PATCH_DIR }}" }
-          git clone https://github.com/xsscx/PatchIccMAX.git "${{ env.PATCH_DIR }}"
+          if (Test-Path "$env:PATCH_DIR") { Remove-Item -Recurse -Force "$env:PATCH_DIR" }
+          git clone https://github.com/xsscx/PatchIccMAX.git "$env:PATCH_DIR"
 
-          cd "${{ env.PATCH_DIR }}"
+          cd "$env:PATCH_DIR"
           git checkout msvc
           
       - name: 🔹 Configure & Build with CMake
         shell: pwsh
         run: |
-          cd "${{ env.PATCH_DIR }}\Build\Cmake"
+          cd "$env:PATCH_DIR\Build\Cmake"
           Write-Host "🔹 Running CMake configuration..."
-          cmake -S . -B . -G "${{ env.GENERATOR }}" -A ${{ env.ARCH }} `
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
-            -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_TOOLCHAIN }}" `
-            -DCMAKE_C_FLAGS="/MD /I ${{ env.VCPKG_DIR }}/installed/${{ env.ARCH }}-windows/include" `
-            -DCMAKE_CXX_FLAGS="/MD /I ${{ env.VCPKG_DIR }}/installed/${{ env.ARCH }}-windows/include" `
-            -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:${{ env.VCPKG_DIR }}/installed/${{ env.ARCH }}-windows/lib" `
+          cmake -S . -B . -G "$env:GENERATOR" -A $env:ARCH `
+            -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_TOOLCHAIN" `
+            -DCMAKE_C_FLAGS="/MD /I $env:VCPKG_DIR/installed/$env:ARCH-windows/include" `
+            -DCMAKE_CXX_FLAGS="/MD /I $env:VCPKG_DIR/installed/$env:ARCH-windows/include" `
+            -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:$env:VCPKG_DIR/installed/$env:ARCH-windows/lib" `
             -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON `
             -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON `
-            -DGDI32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/${{ env.ARCH }}/gdi32.lib" `
-            -DUSER32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/${{ env.ARCH }}/user32.lib"
+            -DGDI32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/$env:ARCH/gdi32.lib" `
+            -DUSER32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/$env:ARCH/user32.lib"
           
           Write-Host "🔹 Building Release..."
-          cmake --build . --config ${{ env.BUILD_TYPE }} -- /m /maxcpucount:32
-          
+          cmake --build . --config $env:BUILD_TYPE -- /m /maxcpucount:32
+
+      - name: 📤 Ensure Logs Are Collected
+        shell: pwsh
+        run: |
+          Write-Host "🔹 Ensuring log directory exists..."
+          if (-Not (Test-Path "$env:LOG_DIR")) {
+              New-Item -ItemType Directory -Path "$env:LOG_DIR" | Out-Null
+          }
+          Write-Host "🔹 Copying build logs..."
+          Get-ChildItem -Path "$env:PATCH_DIR" -Recurse -Include *.log | Copy-Item -Destination "$env:LOG_DIR" -Force
+          Write-Host "🔹 Logs collected successfully."
+
       - name: 📤 Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Build-Artifacts
           path: ${{ env.PATCH_DIR }}
+          retention-days: 7
 
       - name: 📤 Upload Build Logs
         uses: actions/upload-artifact@v4
         with:
           name: Build-Logs
           path: ${{ env.LOG_DIR }}
+          retention-days: 7
