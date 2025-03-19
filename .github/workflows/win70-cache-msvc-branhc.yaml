@@ -1,4 +1,4 @@
-name: W70-msvc-cache
+name: win-cmake-msvc
 
 on:
   workflow_dispatch:
