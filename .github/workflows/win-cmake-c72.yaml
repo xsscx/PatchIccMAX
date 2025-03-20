@@ -3,11 +3,11 @@
 ## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 19-MAR-2025 0727 EDT by David Hoyt (©)
+## Last Updated: 20-MAR-2025 0821 EDT by David Hoyt (©)
 #
 ## Intent: Windows Cmake Build Runner Testing
 #
-## TODO: Refactor for all Windows & UNIX Device Reporting
+## TODO: Changed to single cache for cmake branch testing
 #
 #
 ###############################################################
@@ -44,9 +44,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.VCPKG_DIR }}
-          key: Win70-${{ runner.os }}-${{ hashFiles('**/vcpkg.json', '**/bootstrap-vcpkg.bat') }}
+          key: Win72-${{ runner.os }}-${{ hashFiles('**/vcpkg.json', '**/bootstrap-vcpkg.bat') }}
           restore-keys: |
-            Win70-${{ runner.os }}-
+            Win72-${{ runner.os }}-
 
       - name: 🔹 Setup Environment & Build Preparation
         shell: pwsh
