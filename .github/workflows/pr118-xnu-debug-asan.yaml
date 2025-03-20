@@ -3,23 +3,23 @@
 ## Copyright (©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 07-MAR-2025 1256 EST by David Hoyt (©)
+## Last Updated: 20-MAR-2025 0802 EDT by David Hoyt (©)
 #
-## Intent: pr116-xnu-debug-asan
+## Intent: pr118-xnu-debug-asan
 #
 ## TODO: Refactor for all Windows & UNIX Device Reporting
 #
 #
 ###############################################################
 
-name: "pr116-xnu-debug-asan"
+name: "pr118-xnu-debug-asan"
 
 on:
   workflow_dispatch:
 
 jobs:
   build-macos:
-    name: Build Master Branch
+    name: Build PR118
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -35,13 +35,13 @@ jobs:
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
 
-    # Fetch the specific PR branch
+    # Fetch the specific PR118 branch
     - name: Clone the DemoIccMAX repository
       run: |
         git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
         cd DemoIccMAX
-        git fetch origin pull/116/head:pr-116
-        git checkout pr-116
+        git fetch origin pull/116/head:pr-118
+        git checkout pr-118
         brew install nlohmann-json libxml2 wxwidgets libtiff
 
     # Configure the build with CMake
@@ -54,7 +54,7 @@ jobs:
               -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
               -Wno-dev -DENABLE_TOOLS=ON Cmake/
 
-    # Build the project using CMake
+    # Build PR118 using CMake
     - name: Build project with CMake
       run: |
         cd DemoIccMAX/Build
@@ -94,15 +94,14 @@ jobs:
         sips --version >/dev/null 2>&1 && sips --version || echo "sips not found"
 
 
-
-    # Upload built binaries as artifacts
+    # Upload PR118 built binaries as artifacts
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: main_ci_macos build
         path: DemoIccMAX/Build
 
-    # Check build success
+    # Check PR118 build success
     - name: Check build success
       run: |
         if [ $? -eq 0 ]; then
