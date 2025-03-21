@@ -3,16 +3,16 @@
 ## Copyright (©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 20-MAR-2025 2114 EDT by David Hoyt (©)
+## Last Updated: 21-MAR-2025 1220 EDT by David Hoyt (©)
 #
-## Intent: pr119-xnu-debug-asan
+## Intent: pr119-xnu-clang-asan
 #
 ## TODO: Refactor for all Windows & UNIX Device Reporting
 #
 #
 ###############################################################
 
-name: "pr119-xnu-debug-asan"
+name: "pr119-xnu-clang-asan"
 
 on:
   workflow_dispatch:
