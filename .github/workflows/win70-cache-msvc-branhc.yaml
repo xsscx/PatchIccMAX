@@ -1,4 +1,4 @@
-name: win-cmake-pr119
+name: win-cmake-cmake
 
 on:
   workflow_dispatch:
@@ -71,7 +71,7 @@ jobs:
           Write-Host "🔹 Changing Dir to PatchIccMAX/"          
           cd $patchDir
           Write-Host "🔹 Checking out msvc branch"
-          git checkout pr119
+          git checkout cmake
           Write-Host "🔹 Changing Dir to Build/Cmake/"
           cd C:\test\PatchIccMAX\Build\Cmake
           Write-Host "🔹 Running CMake configuration..."
