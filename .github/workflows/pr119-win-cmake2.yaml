@@ -76,25 +76,16 @@ jobs:
         run: |
           cd C:\test\PatchIccMAX\Build\Cmake
           Write-Host "🔹 Running CMake configuration..."
-          cmake -S . -B . -G "Visual Studio 17 2022" -A x64 `
-            -DCMAKE_BUILD_TYPE=Debug `
-            -DCMAKE_TOOLCHAIN_FILE="C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake" `
-            -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" `
-            -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" `
-            -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" `
-            -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON `
-            -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON `
-            -DGDI32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64/gdi32.lib" `
-            -DUSER32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64/user32.lib"
-          
-          Write-Host "🔹 Building Release..."
-          cmake --build . --config Debug -- /m /maxcpucount:32
+          cmake -S .  -B .  -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug  -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON
+          cmake --build .  --config Debug  -- /m /maxcpucount:32
           copy IccProfLib\Debug\IccProfLib2-static.lib IccProfLib\Debug\IccProfLib2.lib
-          cmake --build . --config Debug -- /m /maxcpucount:32
+          cmake --build .  --config Debug  -- /m /maxcpucount:32
           copy IccXML\Debug\IccXML2-static.lib IccXML\Debug\IccXML2.lib
+          cmake --build .  --config Debug  -- /m /maxcpucount:32
           copy C:\test\vcpkg\installed\x64-windows\bin\*.dll ..\..\Testing\
-          cmake --build . --config $env:BUILD_TYPE -- /m /maxcpucount:32
-          cmake --build . --config $env:BUILD_TYPE -- /m /maxcpucount:32
+          copy 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64\clang_rt.asan_dynamic-x86_64.dll' ..\..\Testing\
+          Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
+
           
       - name: 📤 Upload Build Artifacts
         uses: actions/upload-artifact@v4
