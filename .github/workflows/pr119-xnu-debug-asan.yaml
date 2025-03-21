@@ -42,7 +42,7 @@ jobs:
         cd DemoIccMAX
         git fetch origin pull/119/head:pr-119
         git checkout pr-119
-        brew install nlohmann-json libxml2 wxwidgets libtiff
+        brew install nlohmann-json libxml2 wxwidgets libtiff libpng
 
     # Configure the build with CMake
     - name: Configure the build with CMake
