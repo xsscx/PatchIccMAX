@@ -84,6 +84,8 @@ jobs:
             -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" `
             -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON `
             -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON `
+            -DGDI32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64/gdi32.lib" `
+            -DUSER32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64/user32.lib"
           
           Write-Host "🔹 Building Release..."
           cmake --build . --target IccProfLib2 --config Debug -- /m /maxcpucount:32
