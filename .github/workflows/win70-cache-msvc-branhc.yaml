@@ -75,16 +75,14 @@ jobs:
           Write-Host "🔹 Changing Dir to Build/Cmake/"
           cd Build/Cmake/
           Write-Host "🔹 Running cmake config"
-          cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DGDI32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64/gdi32.lib" -DUSER32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64/user32.lib"
+          cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE="C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DGDI32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64/gdi32.lib" -DUSER32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64/user32.lib"
           Write-Host "🔹 Building Release"
-          cmake --build . --target IccProfLib2 --config Release -- /m /maxcpucount:32
-          copy IccProfLib\Release\IccProfLib2.lib IccProfLib\Release\IccProfLib.lib
-          cmake --build . --target IccXML2 --config Release -- /m /maxcpucount:32
-          ## Probably a bad Cache somewhere.. this should break and invalidate to test
-          mkdir C:\test\PatchIccMAX\Build\Cmake\IccXML\Release\
-          copy C:\test\PatchIccMAX\Build\Cmake\IccXML\Release\IccXML2.dll C:\test\PatchIccMAX\Build\Cmake\IccXML\Release\IccXML2-static.lib
-          ## copy IccXML\Release\IccXML2-static.lib  IccXML\Release\IccXML2.lib
-          cmake --build .  --config Release -- /m /maxcpucount:32
+          cmake --build . --config Debug -- /m /maxcpucount:32
+          copy IccProfLib\Debug\IccProfLib2-static.lib IccProfLib\Debug\IccProfLib2.lib
+          copy IccXML\Debug\IccXML2-static.lib IccXML\Debug\IccXML2.lib
+          copy C:\test\vcpkg\installed\x64-windows\bin\*.dll ..\..\Testing\
+          cmake --build . --config $env:BUILD_TYPE -- /m /maxcpucount:32
+          cmake --build . --config $env:BUILD_TYPE -- /m /maxcpucount:32
           Write-Host "🔹 Repository structure:"
           Get-ChildItem -Recurse -Force
           pwd
