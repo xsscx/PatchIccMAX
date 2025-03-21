@@ -88,18 +88,12 @@ jobs:
             -DUSER32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64/user32.lib"
           
           Write-Host "🔹 Building Release..."
-          cmake --build . --target IccProfLib2 --config Debug -- /m /maxcpucount:32
-          C:/test/PatchIccMAX/Build/Cmake/IccProfLib/Debug/IccProfLib2.lib
-          dir C:/test/PatchIccMAX/Build/Cmake/IccProfLib/Debug/IccProfLib2.lib
-          dir C:/test/PatchIccMAX/Build/Cmake/IccProfLib/Debug/
-          mkdir C:/test/PatchIccMAX/Build/Cmake/IccProfLib/Debug/
-          dir C:/test/PatchIccMAX/Build/Cmake/IccProfLib/Debug/
-          copy C:/test/PatchIccMAX/Build/Cmake/IccProfLib/Debug/IccProfLib2.lib C:/test/PatchIccMAX/Build/Cmake/IccProfLib/Debug/IccProfLib2-static.lib
-          dir C:/test/PatchIccMAX/Build/Cmake/IccProfLib/Debug/
-          # copy IccProfLib\Debug\IccProfLib2-static.lib IccProfLib\Debug\IccProfLib2.lib
-          cmake --build . --target IccXML2 --config Debug -- /m /maxcpucount:32
+          cmake --build . --config Debug -- /m /maxcpucount:32
+          copy IccProfLib\Debug\IccProfLib2-static.lib IccProfLib\Debug\IccProfLib2.lib
           copy IccXML\Debug\IccXML2-static.lib IccXML\Debug\IccXML2.lib
-          cmake --build .  --config Debug -- /m /maxcpucount:32
+          copy C:\test\vcpkg\installed\x64-windows\bin\*.dll ..\..\Testing\
+          cmake --build . --config $env:BUILD_TYPE -- /m /maxcpucount:32
+          cmake --build . --config $env:BUILD_TYPE -- /m /maxcpucount:32
           
       - name: 📤 Upload Build Artifacts
         uses: actions/upload-artifact@v4
