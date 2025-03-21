@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "ubu-gnu-cmake"
+name: "pr119-xck-cmake"
 
 on:
   workflow_dispatch:
@@ -39,7 +39,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          libxml2 libxml2-dev libtiff-dev nlohmann-json3-dev build-essential \
+          libpng libpng-dev libxml2 libxml2-dev libtiff-dev nlohmann-json3-dev build-essential \
           cmake clang clang-tools python3 python3-pip libwxgtk3.2-dev wx-common \
           libopencl-clang-17-dev curl git llvm clang-17
     # Clone the PatchIccMAX repository
@@ -47,7 +47,7 @@ jobs:
       run: |
         git clone https://github.com/xsscx/PatchIccMAX.git
         cd PatchIccMAX
-        git checkout cmake
+        git checkout pr119
     # Configure the build with CMake
     - name: Configure the build with CMake
       run: |
