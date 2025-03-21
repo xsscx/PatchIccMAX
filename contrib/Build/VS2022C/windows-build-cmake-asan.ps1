@@ -58,9 +58,6 @@ Function Execute-Command {
     }
 }
 
-# Load Visual Studio Environment
-Execute-Command "&{Import-Module 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Microsoft.VisualStudio.DevShell.dll'; Enter-VsDevShell d5c5a928}" "Failed to load Visual Studio Environment."
-
 # Create and Navigate to Test Directory
 Execute-Command "mkdir C:\test\ -Force" "Failed to create test directory."
 Execute-Command "cd C:\test\" "Failed to navigate to test directory."
