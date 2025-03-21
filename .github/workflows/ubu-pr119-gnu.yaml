@@ -53,10 +53,10 @@ jobs:
       run: |
         cd PatchIccMAX/Build
         export CC=gcc
-        export CXX=g++
+        export CXX=clang++
         export PATH="/usr/lib/llvm-17/bin:$PATH"
         echo "CC=gcc" >> $GITHUB_ENV
-        echo "CXX=g++" >> $GITHUB_ENV
+        echo "CXX=clang++" >> $GITHUB_ENV
         clang++ --version
         clang --version
         cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" -DCMAKE_BUILD_TYPE=Debug  -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -Wno-dev -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -Wno-dev Cmake/
