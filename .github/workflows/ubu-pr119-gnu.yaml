@@ -39,7 +39,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          libxml2 libxml2-dev libtiff-dev nlohmann-json3-dev build-essential \
+          libpng-dev libxml2 libxml2-dev libtiff-dev nlohmann-json3-dev build-essential \
           cmake clang clang-tools python3 python3-pip libwxgtk3.2-dev wx-common \
           libopencl-clang-17-dev curl git llvm clang-17
     # Clone the PatchIccMAX repository
