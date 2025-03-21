@@ -44,9 +44,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.VCPKG_DIR }}
-          key: Win72-${{ runner.os }}-${{ hashFiles('**/vcpkg.json', '**/bootstrap-vcpkg.bat') }}
+          key: Win70-${{ runner.os }}-${{ hashFiles('**/vcpkg.json', '**/bootstrap-vcpkg.bat') }}
           restore-keys: |
-            Win72-${{ runner.os }}-
+            Win70-${{ runner.os }}-
 
       - name: 🔹 Setup Environment & Build Preparation
         shell: pwsh
