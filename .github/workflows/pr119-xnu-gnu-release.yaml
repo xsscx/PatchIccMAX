@@ -5,14 +5,14 @@
 ##
 ## Last Updated: 18-MAR-2025 at 1146 EDT by David Hoyt (©)
 #
-## Intent: ubu-gnu-cmake
+## Intent: pr119-xnu-gnu-release
 #
 ## TODO: Refactor for all Windows & UNIX Device Reporting
 #
 #
 ###############################################################
 
-name: "pr119-xck-cmake"
+name: "pr119-xnu-gnu-release"
 
 on:
   workflow_dispatch:
