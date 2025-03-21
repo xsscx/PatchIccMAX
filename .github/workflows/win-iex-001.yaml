@@ -53,7 +53,7 @@ jobs:
         run: |
           Write-Host "============================= Starting Build =============================" -ForegroundColor Green
           Write-Host "© 2024-2025 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
-          iex (iwr -Uri " https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/cmake/contrib/Build/VS2022C/windows-build-cmake-asan.ps1").Content
+          iex (iwr -Uri " https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/cmake/contrib/Build/VS2022C/windows-alt-cmake-asan.ps1").Content
           
       - name: 📤 Ensure Logs Are Collected
         shell: pwsh
