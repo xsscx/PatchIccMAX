@@ -86,8 +86,8 @@ jobs:
             -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON `
           
           Write-Host "🔹 Building Release..."
-          cmake --build e --target IccProfLib2 --config Release -- /m /maxcpucount:32
-          cmake --build e --target IccXML2 --config Release -- /m /maxcpucount:32
+          cmake --build . --target IccProfLib2 --config Release -- /m /maxcpucount:32
+          cmake --build . --target IccXML2 --config Release -- /m /maxcpucount:32
           copy IccProfLib\Release\IccProfLib2.lib IccProfLib\Release\IccProfLib.lib
           copy IccXML\Release\IccXML2-static.lib  IccXML\Release\IccXML2.lib
           cmake --build .  --config Release -- /m /maxcpucount:32
