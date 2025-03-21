@@ -87,8 +87,8 @@ jobs:
           
           Write-Host "🔹 Building Release..."
           cmake --build . --target IccProfLib2 --config Release -- /m /maxcpucount:32
-          cmake --build . --target IccXML2 --config Release -- /m /maxcpucount:32
           copy IccProfLib\Release\IccProfLib2.lib IccProfLib\Release\IccProfLib.lib
+          cmake --build . --target IccXML2 --config Release -- /m /maxcpucount:32
           copy IccXML\Release\IccXML2-static.lib  IccXML\Release\IccXML2.lib
           cmake --build .  --config Release -- /m /maxcpucount:32
           
