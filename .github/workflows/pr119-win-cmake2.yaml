@@ -89,7 +89,8 @@ jobs:
           
           Write-Host "🔹 Building Release..."
           cmake --build . --target IccProfLib2 --config Debug -- /m /maxcpucount:32
-          copy IccProfLib\Debug\IccProfLib2-static.lib IccProfLib\Debug\IccProfLib2.lib
+          copy C:/test/PatchIccMAX/Build/Cmake/IccProfLib/Debug/IccProfLib2.lib C:/test/PatchIccMAX/Build/Cmake/IccProfLib/Debug/IccProfLib2-static.lib
+          # copy IccProfLib\Debug\IccProfLib2-static.lib IccProfLib\Debug\IccProfLib2.lib
           cmake --build . --target IccXML2 --config Debug -- /m /maxcpucount:32
           copy IccXML\Debug\IccXML2-static.lib IccXML\Debug\IccXML2.lib
           cmake --build .  --config Debug -- /m /maxcpucount:32
