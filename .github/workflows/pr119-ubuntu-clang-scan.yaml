@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "PR119-ubuntu-clang-scan"
+name: "PR119-ubu-clang-scan"
 
 on:
   workflow_dispatch:
