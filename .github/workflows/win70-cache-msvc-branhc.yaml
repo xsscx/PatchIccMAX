@@ -80,7 +80,9 @@ jobs:
           cmake --build . --target IccProfLib2 --config Release -- /m /maxcpucount:32
           copy IccProfLib\Release\IccProfLib2.lib IccProfLib\Release\IccProfLib.lib
           cmake --build . --target IccXML2 --config Release -- /m /maxcpucount:32
-          copy IccXML\Release\IccXML2-static.lib  IccXML\Release\IccXML2.lib
+          ## Probably a bad Cache somewhere.. this should break and invalidate to test
+          copy C:\test\PatchIccMAX\Build\Cmake\IccXML\Release\IccXML2.dll C:\test\PatchIccMAX\Build\Cmake\IccXML\Release\IccXML2-static.lib
+          ## copy IccXML\Release\IccXML2-static.lib  IccXML\Release\IccXML2.lib
           cmake --build .  --config Release -- /m /maxcpucount:32
           Write-Host "🔹 Repository structure:"
           Get-ChildItem -Recurse -Force
