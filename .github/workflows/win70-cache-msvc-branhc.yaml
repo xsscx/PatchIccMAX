@@ -1,4 +1,4 @@
-name: win-cmake-msvc
+name: win-cmake-pr119
 
 on:
   workflow_dispatch:
