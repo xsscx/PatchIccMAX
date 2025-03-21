@@ -84,7 +84,6 @@ jobs:
           cmake --build . --config Release --parallel 32 --target IccXML2-static
            copy IccXML\Release\IccXML2-static.lib IccXML\Release\IccXML2.lib
           cmake --build .  --config Release  -- /m /maxcpucount:32
-          Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
 
       - name: 📤 Upload Build Artifacts
         uses: actions/upload-artifact@v4
