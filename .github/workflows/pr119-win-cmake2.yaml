@@ -77,10 +77,13 @@ jobs:
           cd C:\test\PatchIccMAX\Build\Cmake
           Write-Host "🔹 Running CMake configuration..."
           cmake -S .  -B .  -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug  -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON
-          cmake --build .  --config Debug  -- /m /maxcpucount:32
+          cmake --build . --config Release --parallel 32 --target IccProfLib2-static
+          cmake --build . --config Release --parallel 32 --target IccProfLib2
           copy IccProfLib\Debug\IccProfLib2-static.lib IccProfLib\Debug\IccProfLib2.lib
+          cmake --build . --config Release --parallel 32 --target IccXML2
+          cmake --build . --config Release --parallel 32 --target IccXML2-static
+           copy IccXML\Debug\IccXML2-static.lib IccXML\Debug\IccXML2.lib
           cmake --build .  --config Debug  -- /m /maxcpucount:32
-          copy IccXML\Debug\IccXML2-static.lib IccXML\Debug\IccXML2.lib
           cmake --build .  --config Debug  -- /m /maxcpucount:32
           Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
 
