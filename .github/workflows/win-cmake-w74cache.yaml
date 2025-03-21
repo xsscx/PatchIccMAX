@@ -89,4 +89,8 @@ jobs:
             -DUSER32_LIBRARY="C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64/user32.lib"
           
           Write-Host "🔹 Building Release..."
-          cmake --build . --config Release -- /m /maxcpucount:32
+          cmake --build . --target IccProfLib2 --config Release -- /m /maxcpucount:32
+          cmake --build . --target IccXML2 --config Release -- /m /maxcpucount:32
+          copy IccProfLib\Release\IccProfLib2.lib IccProfLib\Release\IccProfLib.lib
+          copy IccXML\Release\IccXML2-static.lib  IccXML\Release\IccXML2.lib
+          cmake --build .  --config Release -- /m /maxcpucount:32
