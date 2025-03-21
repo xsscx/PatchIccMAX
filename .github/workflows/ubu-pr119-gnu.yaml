@@ -3,7 +3,7 @@
 ## Copyright (©) 2024 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 18-MAR-2025 at 0757 EST by David Hoyt (©)
+## Last Updated: 20-MAR-2025 at 2200 EST by David Hoyt (©)
 #
 ## Intent: Poll the Device and Report
 #
@@ -12,14 +12,14 @@
 #
 ###############################################################
 
-name: "PR118-Ubu-GNU"
+name: "PR119-Ubu-GNU"
 
 on:
   workflow_dispatch:
 
 jobs:
   build-linux:
-    name: Build and Test Linux JSON Branch
+    name: Build and Test Linux PR119 Branch
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -47,7 +47,7 @@ jobs:
       run: |
         git clone https://github.com/xsscx/PatchIccMAX.git
         cd PatchIccMAX
-        git checkout json
+        git checkout pr119
     # Configure the build with CMake
     - name: Configure the build with CMake
       run: |
