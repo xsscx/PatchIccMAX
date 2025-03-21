@@ -82,9 +82,8 @@ jobs:
           cmake --build . --config Release --parallel 32 --target IccXML2
           cmake --build . --config Release --parallel 32 --target IccXML2-static
           copy IccXML\Debug\IccXML2-static.lib IccXML\Debug\IccXML2.lib
-          cmake --build .  --config Debug  -- /m /maxcpucount:32
+          cmake --build .  --config Release  -- /m /maxcpucount:32
           copy C:\test\vcpkg\installed\x64-windows\bin\*.dll ..\..\Testing\
-          copy 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64\clang_rt.asan_dynamic-x86_64.dll' ..\..\Testing\
           Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
           Write-Host "🔹 Repository structure:"
           Get-ChildItem -Recurse -Force
