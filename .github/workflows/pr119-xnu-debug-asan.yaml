@@ -49,6 +49,7 @@ jobs:
       run: |
         mkdir -p DemoIccMAX/Build
         cd DemoIccMAX/Build
+        export CXX=clang++
         cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
               -DCMAKE_BUILD_TYPE=Debug \
               -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
