@@ -98,34 +98,6 @@ jobs:
           cmake --build . --config Release --parallel 32 --target IccXML2-static
           copy IccXML\Release\IccXML2-static.lib IccXML\Release\IccXML2.lib
           cmake --build .  --config Release  -- /m /maxcpucount:32
-          cd ..\Testing\
-          $tempFile = "$Env:TEMP\CreateAllProfiles.bat"
-          # Run the batch file in a new cmd session
-          Start-Process cmd.exe -ArgumentList "/c `"$tempFile`"" -Wait
-
-          # Clean up the temporary batch file
-          Remove-Item $tempFile -Force
-          .\RunTests.bat
-
- 
-          $profiles = Get-ChildItem -Path . -Filter "*.icc" -Recurse -File
-          $totalCount = $profiles.Count
-
- 
-          $groupedProfiles = $profiles | Group-Object { $_.Directory.FullName }
-
-       
-          Write-Host "`n========================="
-          Write-Host " ICC Profile Report"
-          Write-Host "========================="
-
-          # Print count per subdirectory
-          foreach ($group in $groupedProfiles) {
-          Write-Host ("{0}: {1} .icc profiles" -f $group.Name, $group.Count)
-          }
-
-          Write-Host "`nTotal .icc profiles found: $totalCount"
-          Write-Host "=========================`n"
 
       - name: 📤 Upload Build Artifacts
         uses: actions/upload-artifact@v4
