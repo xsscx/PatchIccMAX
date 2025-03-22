@@ -71,7 +71,7 @@ jobs:
           Write-Host "🔹 Changing Dir to PatchIccMAX/"          
           cd $patchDir
           Write-Host "🔹 Checking out msvc branch"
-          git checkout cmake
+          git checkout msvc
           Write-Host "🔹 Changing Dir to Build/Cmake/"
           cd C:\test\PatchIccMAX\Build\Cmake
           Write-Host "🔹 Running CMake configuration..."
