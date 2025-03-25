@@ -1,225 +1,434 @@
-# PatchIccMAX [XNU Branch](https://github.com/xsscx/PatchIccMAX/tree/xnu/)
+# 🛠️ [PR119](https://github.com/InternationalColorConsortium/DemoIccMAX/pull/119)
 
-Welcome to Hoyt's XNU Branch of the DemoIccMAX Project where I am Refactoring the Cmake Configurations.
+### Runner Status
 
-** TESTING ONLY**
+[![PR119-Latest](https://github.com/xsscx/PatchIccMAX/actions/workflows/PR119-Latest.yaml/badge.svg)](https://github.com/xsscx/PatchIccMAX/actions/workflows/PR119-Latest.yaml)
+
+**Last Updated:** 25-MAR-2025 at 0935 EDT by David Hoyt
+
+### iccMAX Graph
+
+#### Before
+![iccMAX GraphViz](https://xss.cx/2025/03/22/img/iccMAX-graph.svg)
+
+#### After
+![iccMAX Target Graph](https://xss.cx/2025/03/24/img/iccMAX_Graph_Latest.png)
+
+#### iccPngDump Tool
+![iccPngDump Graph](https://xss.cx/2025/03/24/img/iccPngDump.png)
+
+---
+
+## CMake Config Update 
+
+**PR119** aligned the build system for `IccProfLib`, `IccXML` + `Tools` for `Windows, Linux, and macOS`. 
+- Added `iccPngDump` to `Tools`. 
+- Updated Documentation
+- Consolidated Runners
+
+### Why This Matters
+
+You may have relied on:
+- **Legacy Visual Studio `.vcxproj` files**
+- **Roll Your Own CMake configurations on UNIX**
+
+These approaches should be deprecated in the future.
+
+**CMake is the _supported cross platform & toolchain build system_**, offering:
+- Unified builds across platforms and compilers (MSVC, Clang, GCC)
+- Consistent static/dynamic linking via `vcpkg` or system packages
+- Modern testing, CI integration, and profiling support
+
+---
+
+## Cmake Migration at a Glance
+
+| Platform        | Old Method                     | New Method (PR119)                            |
+|----------------|----------------------------------|------------------------------------------------|
+| Windows         | `.vcxproj` + manual includes    | `cmake -G "Visual Studio 17 2022"`            |
+| UNIX/Linux/macOS| `make` or broken `CMakeLists`   | `cmake && make` via modular `Build/Cmake`     |
+
+---
+
+PR119 Highlights
+
+- Builds cross-platform: MSVC, Clang, GCC
+- Modular CMakeLists.txt setup per tool
+- Adds new tool: iccPngDump
+- Build matrix: Windows, Linux, macOS (ARM/x64)
+- feat(tools): add iccPngDump, refactor cmake configs
+- build(cmake): support static + shared Windows builds
+- docs(tools): add Readme for iccPngDump usage
+
+Known-Good Runners (Example PR119-win-msvc-release)
+ 
+- Uses vcpkg cache
+- Restores + installs full dependency set (dynamic & static)
+- Clones + checks out PR119 cleanly
+- Powershell-based build using cmake + MSBuild
+- Artifacts + logs uploaded post-build
+---
+
+## Git Diff Summary: `master...pr-119`
 
 ### Reproduction
 
 ```
-export CXX=clang++
-https://github.com/xsscx/PatchIccMAX.git
-cd PatchIccMAX
-git checkout xnu
-cd Build
-brew install nlohmann-json libxml2 wxwidgets libtiff
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release -DENABLE_TOOLS=ON  -Wno-dev Cmake/
-make clean
-make -j$(nproc)
-```
-
-### Build Status | Development Branch
-
-| **Tool or Library**         | **Windows** | **macOS** | **Linux** | **WSL2** |
-|-----------------------------|-------------|-----------|-----------|----------|
-| iccApplyNamedCmm            | ✅          | ✅        | ✅        | ✅       |
-| iccApplyProfiles            | ✅          | ✅        | ✅        | ✅       |
-| iccApplyToLink              | ✅          | ✅        | ✅        | ✅       |
-| iccDumpProfile              | ✅          | ✅        | ✅        | ✅       |
-| iccFromCube                 | ✅          | ✅        | ✅        | ✅       |
-| iccFromXml                  | ✅          | ✅        | ✅        | ✅       |
-| iccToXml                    | ✅          | ✅        | ✅        | ✅       |
-| iccRoundTrip                | ✅          | ✅        | ✅        | ✅       |
-| iccSpecSepToTiff            | ✅          | ✅        | ✅        | ✅       |
-| iccTiffDump                 | ✅          | ✅        | ✅        | ✅       |
-| IccV5DspObsToV4Dsp          | ✅          | ✅        | ✅        | ✅       |
-| wxProfileDump               | ✅          | ✅        | ✅        | ✅       |
-| libIccProfLib2              | ✅          | ✅        | ✅        | ✅       |
-| libIccProfLib2_DLL          | ✅          | ✅        | ✅        | ✅       |
-| libIccProfLib2_CRTDLL       | ✅          | ✅        | ✅        | ✅       |
-| libIccXML2                  | ✅          | ✅        | ✅        | ✅       |
-| libIccXML2_CRTDLL           | ✅          | ✅        | ✅        | ✅       |
-| DemoIccMAXCmm               | ✅          | ✅        | ✅        | ✅       |
-
-
-# Automated Builds
-
-The Project can be cloned and built automatically. Copy the command below and Paste into your Terminal to start the Build.
-
-## Build Instructions
-
-The Project code currently compiles on Unix & Windows out of the box using **Clang**, **MSVC** and **GNU** C++ with the instructions provided below.
-
-### XNU **Clang** Build 
-
-Copy and Paste into your Terminal:
-
-```
-export CXX=clang++
-cd /tmp
-/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/Build/cmake/xnu_build_master_branch.zsh)"
-```
-
-### Linux **Clang** Build
-
-```
-export CXX=clang++
-cd /tmp
-/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/Build/cmake/xnu_build_master_branch.zsh)"
-```
-
-### Expected Output
-
-**Clang Build Tools**
-
-```
-[2024-11-27 18:09:24] $ cd Build
-$ make
-...
-[100%] Built target iccToXml
-...
-+ ../../Build/Tools/IccFromXml/iccFromXml RefIncW.xml RefIncW.icc
-Profile parsed and saved correctly
-...
-Expecting 204 .icc color profiles...
--n ICC file count.. :
-     204
-...
- Clang Build Project and CreateAllProfiles Done!
-```
-
-### Windows **MSVC** Build
-
-Copy and Paste into Powershell:
-
-   ```powershell
-   iex (iwr -Uri "https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/Build/VS2022C/build.ps1").Content
-   ```
-### Expected Output   
-
-Windows using **MSBuild Build** & **vcpkg** Tools
-
-```
-[100%] Built target iccToXml
-...
-+ ../../Build/Tools/IccFromXml/iccFromXml RefIncW.xml RefIncW.icc
-Profile parsed and saved correctly
-...
-Expecting 204 .icc color profiles...
--n ICC file count.. :
-     204
-```
-
-### Build with **GNU C++**
-
-Manually complete the Clone, Patch & Build process shown below on Ubuntu:
-
-```
-#### Clone the DemoIccMAX repository
 git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
 cd DemoIccMAX
+git fetch origin pull/119/head:pr-119
+git checkout pr-119
+git diff --stat origin/master...
+```
 
-# Clone the PatchIccMAX repository to a directory outside the DemoIccMAX repo
-git clone https://github.com/xsscx/PatchIccMAX.git ../PatchIccMAX
-cd ../PatchIccMAX
-git checkout development
-cd -
+#### Expected Output
 
-# Apply the GCC Patch from the PatchIccMAX repository
-# TODO: Analyze Scoping Issue, Fix Template, Re: GNU C++ Strict Checks vs Clang
-git apply ../PatchIccMAX/contrib/patches/pr109-ubuntu-5.15.153.1-microsoft-standard-WSL2-patch.txt
+```
+ Build/Cmake/CMakeLists.txt                     | 667 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--------------------------------------------------
+ Build/Cmake/IccProfLib/CMakeLists.txt          | 100 ++++++++++++++++++---------
+ Build/Cmake/IccXML/CMakeLists.txt              | 123 +++++++++++++++++++++++----------
+ Build/Cmake/Tools/DemoIccMAXCmm/CMakeLists.txt |  87 +++++++++++++++++++++++
+ Build/Cmake/Tools/IccPngDump/CMakeLists.txt    |  70 +++++++++++++++++++
+ Build/Cmake/Tools/wxProfileDump/CMakeLists.txt |  57 ++++++++++++---
+ Build/Cmake/vcpkg-toolchain.cmake              |  61 +++++++++++++++++
+ Tools/CmdLine/IccApplyNamedCmm/CMakeLists.txt  |   1 -
+ Tools/CmdLine/IccApplyProfiles/CMakeLists.txt  |   1 -
+ Tools/CmdLine/IccPngDump/Readme.md             | 139 +++++++++++++++++++++++++++++++++++++
+ Tools/CmdLine/IccPngDump/iccPngDump.cpp        | 434 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ contrib/.github/workflows/PR119-Latest.yaml    | 195 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ contrib/BugReportSamples/pr119.md              | 266 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ contrib/Build/VS2022C/build.ps1                |   6 +-
+ contrib/Build/cmake/build_master_branch.sh     |   8 +--
+ contrib/Build/cmake/build_master_branch.zsh    |   4 +-
+ contrib/Build/vcpkg/Readme.md                  | 138 ++++++++++++++++++++++++++-----------
+ contrib/DGML/Readme.md                         |  64 +++++++++++++++++
+ contrib/DGML/iccMAX_Graph.zip                  | Bin 0 -> 8498644 bytes
+ contrib/Readme.md                              | 487 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-----------------------------------------------------
+ vcpkg.json                                     |  14 ++++
+ 21 files changed, 2400 insertions(+), 522 deletions(-)
+```
 
-# Verify the patch was applied successfully
-git status
+### Reproduction | GNU
 
-# Navigate to the Build directory
+```
+export CXX=g++
+cd /tmp
+git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+cd DemoIccMAX
+git fetch origin pull/119/head:pr-119
+git checkout pr-119
 cd Build
-
-# Install Deps
-sudo apt-get install -y wx-common curl git make cmake clang clang-tools libxml2 libxml2-dev nlohmann-json3-dev build-essential libtiff-tools libtiff-opengl
-
-# Configure the build with CMake
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release -DENABLE_TOOLS=ON  -Wno-dev Cmake/
-
-# Build the project
+sudo apt-get install -y libpng-dev libwxgtk3.2-dev libwxgtk-media3.2-dev libwxgtk-webview3.2-dev wx-common wx3.2-headers libtiff6 curl git make cmake clang clang-tools libxml2 libxml2-dev nlohmann-json3-dev build-essential
+cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" -DCMAKE_BUILD_TYPE=Debug -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -Wno-dev -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -Wno-dev Cmake/
 make -j$(nproc)
+cd ../Testing/
+/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.sh)"
 ```
 
-### Expected Output | Linux DESKTOP 5.15.153.1-microsoft-standard-WSL2
+#### Expected Output
 
 ```
-[2024-11-27 18:29:09 ~/tmp/DemoIccMAX/Build]% uname -a
-Linux DESKTOP 5.15.153.1-microsoft-standard-WSL2 #1 SMP Fri Mar 29 23:14:13 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux
-[2024-11-27 18:29:19 ~/tmp/tt/DemoIccMAX/Build]% make -j$(nproc)
-[ 45%] Built target IccProfLib2-static
-...
-[100%] Built target iccDumpProfile
-
-[2024-11-27 18:29:25 ~/tmp/DemoIccMAX/Build]% Tools/IccToXml/iccToXml
-IccToXml built with IccProfLib Version 2.2.5, IccLibXML Version 2.2.5
-
-[2024-11-27 18:31:15 ~/tmp/tt/DemoIccMAX/Build]% Tools/IccFromXml/iccFromXml
-IccFromXml built with IccProfLib Version 2.2.5, IccLibXML Version 2.2.5
-
-...
+find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print ``` 
+./Tools/IccRoundTrip/iccRoundTrip
+./Tools/IccDumpProfile/iccDumpProfile
+./Tools/IccV5DspObsToV4Dsp/iccV5DspObsToV4Dsp
+./Tools/IccApplyProfiles/iccApplyProfiles
+./Tools/IccApplyToLink/iccApplyToLink
+./Tools/IccSpecSepToTiff/iccSpecSepToTiff
+./Tools/IccToXml/iccToXml
+./Tools/IccApplyNamedCmm/iccApplyNamedCmm
+./Tools/IccFromXml/iccFromXml
+./Tools/IccPngDump/iccPngDump
+./Tools/IccTiffDump/iccTiffDump
+./Tools/IccFromCube/iccFromCube
+./IccProfLib/libIccProfLib2.so.2.1.25
+./IccProfLib/libIccProfLib2-static.a
+./IccXML/libIccXML2.so.2.1.25
+./IccXML/libIccXML2-static.a
 ```
 
-## Reproduction Hosts
+### Reproduction | Clang
 
 ```
-Darwin Kernel Version 24.1.0: Thu Oct 10 21:02:27 PDT 2024; root:xnu-11215.41.3~2/RELEASE_X86_64 x86_64
-24.1.0 Darwin Kernel Version 24.1.0: Thu Oct 10 21:05:14 PDT 2024; root:xnu-11215.41.3~2/RELEASE_ARM64_T8103 arm64
-5.15.153.1-microsoft-standard-WSL2 #1 SMP Fri Mar 29 23:14:13 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux
-Microsoft Windows 11 Pro 10.0.26100 26100 & VisualStudio/17.12.1
+export CXX=clang++
+cd /tmp
+git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+cd DemoIccMAX
+git fetch origin pull/119/head:pr-119
+git checkout pr-119
+cd Build
+sudo apt-get install -y libpng-dev libwxgtk3.2-dev libwxgtk-media3.2-dev libwxgtk-webview3.2-dev wx-common wx3.2-headers libtiff6 curl git make cmake clang clang-tools libxml2 libxml2-dev nlohmann-json3-dev build-essential
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -Wno-dev Cmake/
+make -j$(nproc)
+cd ../Testing/
 ```
 
-Summary: Patch for GNU C++ in process.
-
-### Other Example
-
-## MSBuild on Windows using VS2022 Community
-
-***tl;dr***
-
-   ```
-   iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/VS2022C/build_revert_master_branch.ps1").Content
-   ```
-
-## Build via CMake
-
-***tl;dr***
-
-   ```
-  /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/development/contrib/Build/cmake/build_master_branch.sh)"
-   ```
-
-### Manual Build Examples
-
-**Unix**
-```
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -Wno-dev  Cmake
-make -j$(nproc) 2>&1 | grep 'error:'
-```
-
-**Windows**
-
-*Visual Studio*
+#### Expected Output
 
 ```
-cmake -S ..\Cmake\ -B d -G "Visual Studio 17 2022"  -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=F:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MDd /I F:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MDd /I F:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:F:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DCMAKE_CXX_FLAGS="-fno-implicit-templates -fvisibility=hidden" -DCMAKE_C_FLAGS="-fno-implicit-templates -fvisibility=hidden" -DCMAKE_BUILD_TYPE=Release -Wno-dev --log-level=DEBUG
-cmake --build d --config Release
+find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
+./Tools/IccRoundTrip/iccRoundTrip
+./Tools/IccDumpProfile/iccDumpProfile
+./Tools/IccV5DspObsToV4Dsp/iccV5DspObsToV4Dsp
+./Tools/IccApplyProfiles/iccApplyProfiles
+./Tools/IccApplyToLink/iccApplyToLink
+./Tools/IccSpecSepToTiff/iccSpecSepToTiff
+./Tools/IccToXml/iccToXml
+./Tools/IccApplyNamedCmm/iccApplyNamedCmm
+./Tools/IccFromXml/iccFromXml
+./Tools/IccPngDump/iccPngDump
+./Tools/IccTiffDump/iccTiffDump
+./Tools/IccFromCube/iccFromCube
+./IccProfLib/libIccProfLib2.so.2.1.25
+./IccProfLib/libIccProfLib2-static.a
+./IccXML/libIccXML2.so.2.1.25
+./IccXML/libIccXML2-static.a
 ```
 
-*ninja*
+### Reproduction Windows
+
+#### Prerequisites
+
+- Windows 10/11
+- Visual Studio 2022 (with C++ Desktop Development workload)
+- PowerShell
+- Administrator or Developer command prompt
+
+---
+
+#### Setup: Environment & Dependencies
 
 ```
-cmake -S ..\..\Cmake\ -B d -G "Ninja"  -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=F:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MDd /I F:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MDd /I F:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:F:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DCMAKE_CXX_FLAGS="-fno-implicit-templates -fvisibility=hidden" -DCMAKE_C_FLAGS="-fno-implicit-templates -fvisibility=hidden" -DCMAKE_BUILD_TYPE=Release -Wno-dev --log-level=DEBUG
-cmake --build d --config Release
+mkdir C:\test\
+cd C:\test\
 ```
 
-*vcpkg*
+### Clone vcpkg and bootstrap
 
 ```
-cmake -S ..\Cmake\ -B build -G "Visual Studio 17 2022" -T "v143"-A x64 -DCMAKE_TOOLCHAIN_FILE=F:/test/vcpkg/scripts/buildsystems/vcpkg.cmake
-cmake --build d --config Release
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+.\bootstrap-vcpkg.bat -disableMetrics
+.\vcpkg.exe integrate install
+```
+
+#### Install required libraries (both dynamic and static)
+
+```
+.\vcpkg.exe install `
+  libpng `
+  nlohmann-json:x64-windows `
+  nlohmann-json:x64-windows-static `
+  libxml2:x64-windows `
+  libxml2:x64-windows-static `
+  tiff:x64-windows `
+  tiff:x64-windows-static `
+  wxwidgets:x64-windows `
+  wxwidgets:x64-windows-static
+```
+
+#### Clone and Checkout ICCMAX PR
+
+```
+cd C:\test\
+git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+cd DemoIccMAX
+```
+
+#### Checkout pull request #119
+
+```
+git fetch origin pull/119/head:pr-119
+git checkout pr-119
+```
+
+---
+
+#### Configure & Build Example (Debug)
+
+```
+cd Build
+mkdir win
+cd win
+cmake -S ..\Cmake -B . -G "Visual Studio 17 2022" -A x64 `
+  -DCMAKE_BUILD_TYPE=Debug `
+  -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake `
+  -DCMAKE_C_FLAGS="/MD /Od /Zi /I C:/test/vcpkg/installed/x64-windows/include" `
+  -DCMAKE_CXX_FLAGS="/MD /Od /Zi /I C:/test/vcpkg/installed/x64-windows/include" `
+  -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" `
+  -DENABLE_TOOLS=ON `
+  -DENABLE_SHARED_LIBS=ON `
+  -DENABLE_STATIC_LIBS=ON `
+  -DENABLE_TESTS=ON `
+  -DENABLE_INSTALL_RIM=ON `
+  -DENABLE_ICCXML=ON `
+  -DENABLE_SPECTRE_MITIGATION=OFF `
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON `
+  --graphviz=iccMAX-project.dot
+
+cmake --build . --config Debug -- /m /maxcpucount:32
+```
+
+##### Result
+
+```
+C:\test\pr119\PatchIccMAX\Build\Cmake\Tools\IccPngDump\Debug\iccPngDump.exe
+[INFO] Starting iccPngDump...
+Built with IccProfLib version 2.2.5
+Built with LibPNG version 1.6.46
+Usage: iccPngDump <input.png> [output.icc]
+  Extracts the ICC profile from a PNG file.
+```
+
+## CMake Build System Updates (Cross-Platform)
+
+PR119 modified the Cmake Build Configurations in the `Build/Cmake/` directory, moving towards a modern cross-platform build system.
+
+#### Updates:
+
+- **Top-Level CMake Configuration**
+  - `CMakeLists.txt` enables unified configuration for tools, libraries, and flags.
+  - Supports toggles for shared/static linking, ICCXML, and optional RIM inclusion.
+  - No need to maintain `.vcxproj` files
+
+- **Tool-Specific Subdirectories**
+  - Each tool (e.g., `IccPngDump`, `IccDumpProfile`, `IccToXml`) is configured via `CMakeLists.txt` under `Build/Cmake/Tools/`.
+  - Adds modularity, CI targeting, and selective builds.
+
+- **Cross-Platform Toolchain Support**
+  - Adds support for Clang, GCC, and MSVC via conditional platform logic.
+
+### Triples Testing Summary
+
+| **Operating System**       | **Kernel Version**                                | **Architecture**     | **Environment**                       |
+|----------------------------|--------------------------------------------------|-----------------------|---------------------------------------|
+| macOS                      | Darwin Kernel Version 24.1.0                     | ARM64                | RELEASE_ARM64_T8103                   |
+| macOS                      | Darwin Kernel Version 24.1.0                     | x86_64               | RELEASE_X86_64                        |
+| WSL2 (Linux)               | 5.15.153.1-microsoft-standard-WSL2               | x86_64               | GNU/Linux                             |
+| Microsoft Windows 11 Pro   | 10.0.26100                                       | x86_64               | Visual Studio 17.12.1                 |
+
+#### PR Preflight Checks
+1. Build on Linux, macOS & Windows.
+2. Create ICC Profiles.
+
+### Dependencies
+- `libpng-dev`: Required for Png Support.
+- `libxml2`: Required for XML support.
+- `libwxgtk3.2-dev`: Required for GUI support.
+- `nlohmann-json3-dev`: Enables JSON parsing for configuration files.
+- `libtiff`: Supports TIFF image manipulation for image processing tools.
+- `wxWidgets`: Cross-platform GUI framework for the basic profile viewer.
+
+---
+
+## Scan Build
+
+```
+Build - scan-build results
+User:        root@Mac-1742852499290.local
+Working Directory: /Users/runner/work/PatchIccMAX/PatchIccMAX/DemoIccMAX/Build
+Command Line:      make -j3
+Clang Version:     Homebrew clang version 17.0.6
+Date:              Mon Mar 24 21:48:47 2025
+
+Bug Summary
+Bug Type                                      Quantity
+------------------------------------------------------
+All Bugs                                      65
+
+Logic error
+  Assigned value is garbage or undefined       1
+  Dereference of null pointer                  1
+  Garbage return value                         1
+  Result of operation is garbage or undefined  4
+  Uninitialized argument value                 3
+
+Memory error
+  Memory leak                                  1
+  Use of zero allocated                        1
+  Use-after-free                               3
+
+Unused code
+  Dead assignment                             22
+  Dead increment                               4
+  Dead initialization                         22
+  Dead nested assignment                       2
+```
+
+### Build Examples
+
+#### Optional: Build All Configurations with One-Liners
+
+##### Test
+
+```
+cd C:\test\
+git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+cd DemoIccMAX\Build\Cmake\
+```
+
+Each of the following one-liners builds the corresponding configuration and generates its own `.dot` graph file.
+
+##### Debug
+```
+cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/DEBUG /OPT:REF /OPT:ICF /LTCG /LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DENABLE_SPECTRE_MITIGATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --graphviz=iccMAX-Debug.dot
+cmake --build . --config Debug -- /m /maxcpucount:32
+```
+
+##### Release
+```
+cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/DEBUG /OPT:REF /OPT:ICF /LTCG /LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DENABLE_SPECTRE_MITIGATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --graphviz=iccMAX-Release.dot
+cmake --build . --config Release -- /m /maxcpucount:32
+```
+
+##### RelWithDebInfo
+```
+cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/DEBUG /OPT:REF /OPT:ICF /LTCG /LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DENABLE_SPECTRE_MITIGATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --graphviz=iccMAX-RelWithDebInfo.dot
+cmake --build . --config RelWithDebInfo -- /m /maxcpucount:32
+```
+
+##### MinSizeRel
+```
+cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/DEBUG /OPT:REF /OPT:ICF /LTCG /LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DENABLE_SPECTRE_MITIGATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --graphviz=iccMAX-MinSizeRel.dot
+cmake --build . --config MinSizeRel -- /m /maxcpucount:32
+```
+
+##### Optional: Visualize the Build Graph
+
+If [Graphviz](https://graphviz.org/download/) is installed, you can convert the `.dot` files to SVG:
+
+```
+dot -Tsvg iccMAX-Debug.dot -o iccMAX-Debug.svg
+```
+
+##### RelWithDebInfo
+
+```
+cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/DEBUG /OPT:REF /OPT:ICF /LTCG /LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DENABLE_SPECTRE_MITIGATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --graphviz=iccMAX-project.dot
+cmake --build . --config RelWithDebInfo -- /m /maxcpucount:32
+```
+
+##### Graphviz
+
+```
+cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /Od /Zi /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /Od /Zi /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DENABLE_SPECTRE_MITIGATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --graphviz=iccMAX-project.dot
+dot -Tsvg .dot -o iccMAX-graph.svg
+```
+
+##### Debug with Config Log
+
+```
+cmake -S .  -B .  -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug  -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON --graphviz=graph.dot . --trace-expand  2>&1 | Tee-Object cmake_trace.log
+```
+
+##### Debug with Build Log
+
+```
+cmake --build . --config Debug -- /v:diag /m > msbuild_diag.log 2>&1 
+```
+
+##### AST Dump
+
+```
+Get-ChildItem -Recurse Tools -Filter *.cpp | ForEach-Object { clang++ -Xclang -ast-dump -fsyntax-only -IC:/test/vcpkg/installed/x64-windows/include -I./IccProfLib -I./IccXML/IccLibXML $_.FullName *> (Join-Path $_.Directory.FullName "$($_.BaseName)-ast.txt") 2>> warnings.log }
 ```
