@@ -6,44 +6,44 @@
 [![PR119-Scan-Build](https://github.com/xsscx/PatchIccMAX/actions/workflows/pr119-ubuntu-clang-scan.yaml/badge.svg)](https://github.com/xsscx/PatchIccMAX/actions/workflows/pr119-ubuntu-clang-scan.yaml)
 [![PR119-Unit-Test](https://github.com/xsscx/PatchIccMAX/actions/workflows/pr119-xnu-debug-asan.yaml/badge.svg)](https://github.com/xsscx/PatchIccMAX/actions/workflows/pr119-xnu-debug-asan.yaml)
 
-**Last Updated:** 24-MAR-2025 at 1605 EDT by David Hoyt
+**Last Updated:** 27-MAR-2025 at 0700 EDT by David Hoyt
 
 ### iccMAX Graph
 
-#### Graphviz
+#### Before
 ![iccMAX GraphViz](https://xss.cx/2025/03/22/img/iccMAX-graph.svg)
 
-#### Code Map
-![iccMAX Target Graph](https://xss.cx/2025/03/24/img/iccMAX_Graph.png)
+#### After
+![iccMAX Target Graph](https://xss.cx/2025/03/24/img/iccMAX_Graph_Latest.png)
 
 #### iccPngDump Tool
 ![iccPngDump Graph](https://xss.cx/2025/03/24/img/iccPngDump.png)
 
 ---
 
-## 📢 CMake Config Update 
+## CMake Config Update 
 
 **PR119** aligned the build system for `IccProfLib`, `IccXML` + `Tools` for `Windows, Linux, and macOS`. 
 - Added `iccPngDump` to `Tools`. 
 - Updated Documentation
 - Consolidated Runners
 
-### ❗ Why This Matters
+### Why This Matters
 
 You may have relied on:
-- ❌ **Legacy Visual Studio `.vcxproj` files**
-- ❌ **Roll Your Own CMake configurations on UNIX**
+- **Legacy Visual Studio `.vcxproj` files**
+- **Roll Your Own CMake configurations on UNIX**
 
 These approaches should be deprecated in the future.
 
-✅ **CMake is the _supported cross platform & toolchain build system_**, offering:
+**CMake is the _supported cross platform & toolchain build system_**, offering:
 - Unified builds across platforms and compilers (MSVC, Clang, GCC)
 - Consistent static/dynamic linking via `vcpkg` or system packages
 - Modern testing, CI integration, and profiling support
 
 ---
 
-## 🧭 Cmake Migration at a Glance
+## Cmake Migration at a Glance
 
 | Platform        | Old Method                     | New Method (PR119)                            |
 |----------------|----------------------------------|------------------------------------------------|
@@ -52,7 +52,7 @@ These approaches should be deprecated in the future.
 
 ---
 
-🧩 PR119 Highlights
+PR119 Highlights
 
 - Builds cross-platform: MSVC, Clang, GCC
 - Modular CMakeLists.txt setup per tool
@@ -62,7 +62,7 @@ These approaches should be deprecated in the future.
 - build(cmake): support static + shared Windows builds
 - docs(tools): add Readme for iccPngDump usage
 
-🏗️ Known-Good Runners (Example PR119-win-msvc-release)
+Known-Good Runners (Example PR119-win-msvc-release)
  
 - Uses vcpkg cache
 - Restores + installs full dependency set (dynamic & static)
@@ -71,9 +71,9 @@ These approaches should be deprecated in the future.
 - Artifacts + logs uploaded post-build
 ---
 
-## 🧾 Git Diff Summary: `master...pr-119`
+## Git Diff Summary: `master...pr-119`
 
-### 🔁 Reproduction
+### Reproduction
 
 ```
 git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
@@ -83,38 +83,41 @@ git checkout pr-119
 git diff --stat origin/master...
 ```
 
-#### 📄 Expected Output
+#### Expected Output
 
 ```
- Build/Cmake/CMakeLists.txt                         | 667 +++++++++++++++------
- Build/Cmake/IccProfLib/CMakeLists.txt              | 100 +--
- Build/Cmake/IccXML/CMakeLists.txt                  | 123 ++--
- Build/Cmake/Tools/DemoIccMAXCmm/CMakeLists.txt     |  87 +++
- Build/Cmake/Tools/IccPngDump/CMakeLists.txt        |  70 +++
- Build/Cmake/Tools/wxProfileDump/CMakeLists.txt     |  57 +-
- Build/Cmake/vcpkg-toolchain.cmake                  |  61 ++
- Tools/CmdLine/IccApplyNamedCmm/CMakeLists.txt      |   1 -
- Tools/CmdLine/IccApplyProfiles/CMakeLists.txt      |   1 -
- Tools/CmdLine/IccPngDump/Readme.md                 | 139 +++++
- Tools/CmdLine/IccPngDump/iccPngDump.cpp            | 434 ++++++++++++++
- contrib/.github/workflows/PR119-Latest.yaml        | 195 ++++++
- contrib/BugReportSamples/pr119.md                  | 372 ++++++++++++
- contrib/Build/VS2022C/build.ps1                    |   6 +-
- contrib/Build/cmake/build_master_branch.sh         |   8 +-
- contrib/Build/cmake/build_master_branch.zsh        |   4 +-
- contrib/Build/vcpkg/Readme.md                      | 138 +++--
- contrib/CalcTest/check_profiles.zsh                |  21 +-
- contrib/DGML/Readme.md                             |  64 ++
- contrib/DGML/iccMAX_Graph.zip                      | Bin 0 -> 8498644 bytes
- contrib/Readme.md                                  | 493 ++++++++-------
- .../UnitTest/TestCIccTagXmlProfileSequenceId.sh    |   8 +-
- .../iccApplyNamedCmm_allocator_mismatch_check.sh   |  76 +--
- contrib/UnitTest/iccMAX-cicd-build-checks.sh       |  80 +++
- vcpkg.json                                         |  14 +
- 25 files changed, 2642 insertions(+), 577 deletions(-)
+ Build/Cmake/CMakeLists.txt                                    | 667 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++------------------------------------------------
+ Build/Cmake/IccProfLib/CMakeLists.txt                         | 100 +++++++++++++++++---------
+ Build/Cmake/IccXML/CMakeLists.txt                             | 123 ++++++++++++++++++++++---------
+ Build/Cmake/Tools/DemoIccMAXCmm/CMakeLists.txt                |  87 ++++++++++++++++++++++
+ Build/Cmake/Tools/IccPngDump/CMakeLists.txt                   |  70 ++++++++++++++++++
+ Build/Cmake/Tools/wxProfileDump/CMakeLists.txt                |  57 ++++++++++++---
+ Build/Cmake/vcpkg-toolchain.cmake                             |  61 ++++++++++++++++
+ Tools/CmdLine/IccApplyNamedCmm/CMakeLists.txt                 |   1 -
+ Tools/CmdLine/IccApplyProfiles/CMakeLists.txt                 |   1 -
+ Tools/CmdLine/IccPngDump/Readme.md                            | 139 +++++++++++++++++++++++++++++++++++
+ Tools/CmdLine/IccPngDump/iccPngDump.cpp                       | 432 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ contrib/.github/workflows/PR119-Latest.yaml                   | 195 +++++++++++++++++++++++++++++++++++++++++++++++++
+ contrib/BugReportSamples/pr119.md                             | 377 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ contrib/Build/VS2022C/build.ps1                               |   6 +-
+ contrib/Build/cmake/build_master_branch.sh                    |   8 +--
+ contrib/Build/cmake/build_master_branch.zsh                   |   4 +-
+ contrib/Build/vcpkg/Readme.md                                 | 138 ++++++++++++++++++++++++-----------
+ contrib/CalcTest/check_profiles.zsh                           |  21 +++++-
+ contrib/DGML/Readme.md                                        |  64 +++++++++++++++++
+ contrib/DGML/iccMAX_Graph.zip                                 | Bin 0 -> 8498644 bytes
+ contrib/Readme.md                                             | 533 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--------------------------------------------------
+ contrib/UnitTest/TestCIccTagXmlProfileSequenceId.sh           |   8 +--
+ contrib/UnitTest/iccApplyNamedCmm_allocator_mismatch_check.sh |  76 ++++++++++----------
+ contrib/UnitTest/iccMAX-cicd-build-checks.md                  |  14 ++++
+ contrib/UnitTest/iccMAX-cicd-build-checks.sh                  |  73 +++++++++++++++++++
+ contrib/UnitTest/zsh_ubuntu_checks..md                        |  17 +++++
+ contrib/UnitTest/zsh_ubuntu_checks.zsh                        | 171 +++++++++++++++++++++++++++++++++++++++++++
+ vcpkg.json                                                    |  14 ++++
+ 28 files changed, 2894 insertions(+), 563 deletions(-)
 ```
 
-### 🔁 Reproduction | GNU
+### Reproduction | GNU
 
 ```
 export CXX=g++
@@ -131,7 +134,7 @@ cd ../Testing/
 /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/CreateAllProfiles.sh)"
 ```
 
-#### 📄 Expected Output
+#### Expected Output
 
 ```
 find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print ``` 
@@ -153,7 +156,7 @@ find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \
 ./IccXML/libIccXML2-static.a
 ```
 
-### 🔁 Reproduction | Clang
+### Reproduction | Clang
 
 ```
 export CXX=clang++
@@ -169,7 +172,7 @@ make -j$(nproc)
 cd ../Testing/
 ```
 
-#### 📄 Expected Output
+#### Expected Output
 
 ```
 find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
@@ -191,9 +194,9 @@ find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \
 ./IccXML/libIccXML2-static.a
 ```
 
-### 🔁 Reproduction Windows
+### Reproduction Windows
 
-#### ✅ Prerequisites
+#### Prerequisites
 
 - Windows 10/11
 - Visual Studio 2022 (with C++ Desktop Development workload)
@@ -202,7 +205,7 @@ find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \
 
 ---
 
-#### 📦 Setup: Environment & Dependencies
+#### Setup: Environment & Dependencies
 
 ```
 mkdir C:\test\
@@ -233,7 +236,7 @@ cd vcpkg
   wxwidgets:x64-windows-static
 ```
 
-#### 📥 Clone and Checkout ICCMAX PR
+#### Clone and Checkout ICCMAX PR
 
 ```
 cd C:\test\
@@ -250,13 +253,12 @@ git checkout pr-119
 
 ---
 
-#### 🛠️ Configure & Build Example (Debug)
+#### Configure & Build Example (Debug)
 
 ```
-cd Build\
+cd Build
 mkdir win
 cd win
-
 cmake -S ..\Cmake -B . -G "Visual Studio 17 2022" -A x64 `
   -DCMAKE_BUILD_TYPE=Debug `
   -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake `
@@ -276,7 +278,7 @@ cmake -S ..\Cmake -B . -G "Visual Studio 17 2022" -A x64 `
 cmake --build . --config Debug -- /m /maxcpucount:32
 ```
 
-##### 🔚 Result
+##### Result
 
 ```
 C:\test\pr119\PatchIccMAX\Build\Cmake\Tools\IccPngDump\Debug\iccPngDump.exe
@@ -287,7 +289,7 @@ Usage: iccPngDump <input.png> [output.icc]
   Extracts the ICC profile from a PNG file.
 ```
 
-## 🔧 CMake Build System Updates (Cross-Platform)
+## CMake Build System Updates (Cross-Platform)
 
 PR119 modified the Cmake Build Configurations in the `Build/Cmake/` directory, moving towards a modern cross-platform build system.
 
@@ -328,7 +330,7 @@ PR119 modified the Cmake Build Configurations in the `Build/Cmake/` directory, m
 
 ---
 
-## Scan Build
+## [Scan Build](https://github.com/xsscx/PatchIccMAX/actions/runs/14046632061)
 
 ```
 Build - scan-build results
@@ -364,7 +366,7 @@ Unused code
 
 ### Build Examples
 
-#### 🔁 Optional: Build All Configurations with One-Liners
+#### Optional: Build All Configurations with One-Liners
 
 ##### Test
 
@@ -400,7 +402,7 @@ cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel 
 cmake --build . --config MinSizeRel -- /m /maxcpucount:32
 ```
 
-##### 🖼️ Optional: Visualize the Build Graph
+##### Optional: Visualize the Build Graph
 
 If [Graphviz](https://graphviz.org/download/) is installed, you can convert the `.dot` files to SVG:
 
