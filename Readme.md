@@ -364,80 +364,65 @@ Unused code
   Dead nested assignment                       2
 ```
 
-### Build Examples
+## Legacy Overhang
 
-#### Optional: Build All Configurations with One-Liners
+### PR119 Analysis
 
-##### Test
+- **Total files scanned**: 125 `.cpp` / `.h`
+- Source: `PatchIccMAX-pr119.zip`
 
-```
-cd C:\test\
-git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
-cd DemoIccMAX\Build\Cmake\
-```
+### TODO in future PR's
 
-Each of the following one-liners builds the corresponding configuration and generates its own `.dot` graph file.
+| Pattern        | Count | Risk/Notes |
+|----------------|-------|------------|
+| `C-style casts`       | 3,125 | Manual casting, fragile and unsafe in C++ |
+| `#define`             | 358   | Preprocessor macros, often legacy patterns |
+| `#ifdef`              | 218   | Conditional compilation, complex flow |
+| `char*`               | 514   | Raw strings; consider `std::string` |
+| `sprintf`             | 714   | Buffer overflows — use `snprintf` |
+| `memcpy`              | 247   | Manual memory handling — bounds checks required |
+| `printf`              | 424   | Replace with safe logging abstraction |
+| `free`                | 213   | Manual memory — replace with RAII |
+| `malloc`              | 103   | Raw allocation — use smart pointers |
+| `void*`               | 88    | Unsafe, untyped memory |
+| `strcpy`              | 40    | Overflow vector |
 
-##### Debug
-```
-cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/DEBUG /OPT:REF /OPT:ICF /LTCG /LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DENABLE_SPECTRE_MITIGATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --graphviz=iccMAX-Debug.dot
-cmake --build . --config Debug -- /m /maxcpucount:32
-```
+---
 
-##### Release
-```
-cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/DEBUG /OPT:REF /OPT:ICF /LTCG /LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DENABLE_SPECTRE_MITIGATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --graphviz=iccMAX-Release.dot
-cmake --build . --config Release -- /m /maxcpucount:32
-```
+### Migration Shims
 
-##### RelWithDebInfo
-```
-cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/DEBUG /OPT:REF /OPT:ICF /LTCG /LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DENABLE_SPECTRE_MITIGATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --graphviz=iccMAX-RelWithDebInfo.dot
-cmake --build . --config RelWithDebInfo -- /m /maxcpucount:32
-```
-
-##### MinSizeRel
-```
-cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/DEBUG /OPT:REF /OPT:ICF /LTCG /LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DENABLE_SPECTRE_MITIGATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --graphviz=iccMAX-MinSizeRel.dot
-cmake --build . --config MinSizeRel -- /m /maxcpucount:32
-```
-
-##### Optional: Visualize the Build Graph
-
-If [Graphviz](https://graphviz.org/download/) is installed, you can convert the `.dot` files to SVG:
+#### Potential `printf` Wrapper
 
 ```
-dot -Tsvg iccMAX-Debug.dot -o iccMAX-Debug.svg
+#ifdef MODERNIZE_PRINTF
+#include <stdio.h>
+#include <stdarg.h>
+void safe_printf(const char* fmt, ...) {
+    char buffer[1024];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    va_end(args);
+    fputs(buffer, stdout);
+}
+#define printf(...) safe_printf(__VA_ARGS__)
+#endif
 ```
 
-##### RelWithDebInfo
+#### Potential `sprintf` Replacement
 
 ```
-cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /O2 /Zi /GL /DEBUG /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/DEBUG /OPT:REF /OPT:ICF /LTCG /LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DENABLE_SPECTRE_MITIGATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --graphviz=iccMAX-project.dot
-cmake --build . --config RelWithDebInfo -- /m /maxcpucount:32
+#define SAFE_SPRINTF(dest, size, ...) snprintf(dest, size, __VA_ARGS__)
+// Example:
+SAFE_SPRINTF(buf, sizeof(buf), "Value: %d", x);
 ```
 
-##### Graphviz
+#### Potential Memory Change
 
 ```
-cmake -S . -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /Od /Zi /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /Od /Zi /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DENABLE_SPECTRE_MITIGATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --graphviz=iccMAX-project.dot
-dot -Tsvg .dot -o iccMAX-graph.svg
-```
+// Old
+char *buf = (char*)malloc(100);
 
-##### Debug with Config Log
-
-```
-cmake -S .  -B .  -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug  -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON --graphviz=graph.dot . --trace-expand  2>&1 | Tee-Object cmake_trace.log
-```
-
-##### Debug with Build Log
-
-```
-cmake --build . --config Debug -- /v:diag /m > msbuild_diag.log 2>&1 
-```
-
-##### AST Dump
-
-```
-Get-ChildItem -Recurse Tools -Filter *.cpp | ForEach-Object { clang++ -Xclang -ast-dump -fsyntax-only -IC:/test/vcpkg/installed/x64-windows/include -I./IccProfLib -I./IccXML/IccLibXML $_.FullName *> (Join-Path $_.Directory.FullName "$($_.BaseName)-ast.txt") 2>> warnings.log }
+// New
+std::unique_ptr<char[]> buf(new char[100]);
 ```
