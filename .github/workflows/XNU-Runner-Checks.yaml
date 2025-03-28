@@ -3,7 +3,7 @@
 ## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 23-MAR-2025 1600 EDT by David Hoyt (©)
+## Last Updated: 28-MAR-2025 1800 EDT by David Hoyt (©)
 #
 ## Intent: XNU-Runner-Checks
 #
@@ -26,7 +26,7 @@ on:
 
 jobs:
   build-macos:
-    name: Build PR119-Unit-Test
+    name: Build PR120-Unit-Test
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -44,8 +44,8 @@ jobs:
       run: |
         git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
         cd DemoIccMAX
-        git fetch origin pull/119/head:pr-119
-        git checkout pr-119
+        git fetch origin pull/120/head:pr-120
+        git checkout pr-120
         brew install nlohmann-json libxml2 wxwidgets libtiff libpng
 
     - name: Configure the build with CMake (strict + logged)
@@ -62,7 +62,7 @@ jobs:
         make -j$(sysctl -n hw.ncpu)
         cd ../Testing
         echo "=== Running CI Stub Test Harness ==="
-        wget https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr119/contrib/UnitTest/iccMAX-cicd-build-checks.sh
+        wget https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr120/contrib/UnitTest/iccMAX-cicd-build-checks.sh
         bash iccMAX-cicd-build-checks.sh > ../test-suite.log 2>&1 || echo "Tests failed, continuing to upload logs."
         echo "========= CI STUB TESTS COMPLETE ========="
 
