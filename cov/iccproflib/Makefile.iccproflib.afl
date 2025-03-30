@@ -1,0 +1,55 @@
+## Makefile.iccproflib.afl
+#
+## 
+## Copyright (c) 2024-2025. David H Hoyt LLC. All rights reserved.
+##
+## Written by David Hoyt 
+## Date: 31-MAR-2025 2000 EDT
+#
+# Branch: PR121
+# Intent: Builds libIccProfLib2.a instrumented for AFL++ fuzzing
+# Production: TRUE
+# Runner: TRUE
+#
+#
+# Updates:  Builds libIccProfLib2.a instrumented for AFL++ fuzzing
+#          
+#
+## Makefile for building instrumented libIccProfLib2.a with ASan/UBSan and LLVM coverage
+## Makefile.afl.libIccProfLib2
+## Builds libIccProfLib2.a instrumented for AFL++ fuzzing
+
+# === CONFIG ===
+CXX := afl-clang-lto++
+SRC_PATH := ../../IccProfLib
+OBJ_PATH := obj_afl
+OUT := libIccProfLib2.a
+
+CXXFLAGS := -O3 -g -fno-omit-frame-pointer \
+            -Wall -Wextra -Wpedantic -std=c++17 -I$(SRC_PATH)
+LDFLAGS :=
+
+# === SOURCES ===
+SRCS := $(wildcard $(SRC_PATH)/*.cpp)
+OBJS := $(patsubst $(SRC_PATH)/%.cpp,$(OBJ_PATH)/%.o,$(SRCS))
+
+.PHONY: all clean
+
+# === BUILD LIB ===
+all: $(OUT)
+
+$(OUT): $(OBJS)
+	@echo "[AR] Creating $@"
+	ar rcs $@ $(OBJS)
+
+$(OBJ_PATH)/%.o: $(SRC_PATH)/%.cpp | $(OBJ_PATH)
+	@echo "[AFL] Compiling $<"
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(OBJ_PATH):
+	@mkdir -p $(OBJ_PATH)
+
+# === CLEAN ===
+clean:
+	@echo "[CLEAN] Removing AFL object files and archive"
+	rm -rf $(OBJ_PATH) $(OUT)

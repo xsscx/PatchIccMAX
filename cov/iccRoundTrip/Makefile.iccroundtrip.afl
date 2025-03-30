@@ -1,0 +1,32 @@
+## Makefile.icctoXml.afl
+## Builds AFL++ instrumented iccRoundTrip binary with ASan (no coverage/profile)
+
+# === CONFIG ===
+CXX := afl-clang++
+CXXFLAGS := -O0 -g -fno-inline -fno-omit-frame-pointer -fsanitize=address
+
+INCLUDES := -I../../IccXML/IccLibXML \
+            -I../../IccProfLib \
+            -I../../IccXML/CmdLine/IccToXml \
+            -I/usr/include/libxml2
+
+LDFLAGS := -fsanitize=address \
+           -Wl,--whole-archive ../iccxml/libIccXML2.a ../iccproflib/libIccProfLib2.a -Wl,--no-whole-archive \
+           -lxml2
+
+SRC := ../../Tools/CmdLine/IccRoundTrip/iccRoundTrip.cpp
+BIN := iccRoundTrip_afl
+
+.PHONY: all clean
+
+# === BUILD AFL FUZZ TARGET ===
+all: $(BIN)
+
+$(BIN): $(SRC)
+	@echo "[AFL] Building silo fuzz target with ASan"
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@ $(LDFLAGS)
+
+# === CLEAN ===
+clean:
+	@echo "[CLEAN] Removing AFL fuzzing binary"
+	rm -f $(BIN)
