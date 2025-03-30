@@ -1,0 +1,84 @@
+--- a/IccXML/IccLibXML/IccProfileXml.cpp
++++ b/IccXML/IccLibXML/IccProfileXml.cpp
+@@
+ CIccProfileXml::ParseBasic(xmlNode *pNode, std::string &parseStr)
+-{  	  
+-  std::string temp;
+-  memset(&m_Header, 0, sizeof(m_Header));  // Zeroed struct
+-
+-  for (pNode = pNode->children; pNode; pNode = pNode->next) {
+-    if (pNode->type == XML_ELEMENT_NODE) {
+-
+-      if (!icXmlStrCmp((const char*)pNode->name, "ProfileVersion")) {
+-        const char *szVer = (const char*)pNode->children->content;
+-        std::string ver;
+-        unsigned long verMajor = 0;
+-
+-        for (; *szVer && *szVer != '.' && *szVer != ','; szVer++) {
+-          ver += *szVer;
+-        }
+-
+-        verMajor = atol(ver.c_str());
+-        m_Header.version = (icUInt32Number)(verMajor << 24);
+-      }
+-    }
+-  }
+-
+-  return true;
++{  	  
++  std::string temp;
++  memset(&m_Header, 0, sizeof(m_Header));  // Zeroed struct
++
++  bool foundProfileVersion = false;
++  bool foundColorSpace = false;
++  bool foundProfileClass = false;
++
++  for (pNode = pNode->children; pNode; pNode = pNode->next) {
++    if (pNode->type == XML_ELEMENT_NODE) {
++
++      if (!icXmlStrCmp((const char*)pNode->name, "ProfileVersion")) {
++        if (pNode->children && pNode->children->content) {
++          const char *szVer = (const char*)pNode->children->content;
++          std::string ver;
++          unsigned long verMajor = 0;
++
++          for (; *szVer && *szVer != '.' && *szVer != ','; szVer++) {
++            ver += *szVer;
++          }
++
++          verMajor = atol(ver.c_str());
++          m_Header.version = (icUInt32Number)(verMajor << 24);
++          foundProfileVersion = true;
++        } else {
++          parseStr += "Missing <ProfileVersion> content.\n";
++          return false;
++        }
++      }
++      else if (!icXmlStrCmp((const char*)pNode->name, "ColorSpace")) {
++        if (pNode->children && pNode->children->content) {
++          m_Header.colorSpace = GetColorSpaceSig((const char*)pNode->children->content);
++          foundColorSpace = true;
++        } else {
++          parseStr += "Missing <ColorSpace> content.\n";
++          return false;
++        }
++      }
++      else if (!icXmlStrCmp((const char*)pNode->name, "ProfileClass")) {
++        if (pNode->children && pNode->children->content) {
++          m_Header.deviceClass = GetProfileClassSig((const char*)pNode->children->content);
++          foundProfileClass = true;
++        } else {
++          parseStr += "Missing <ProfileClass> content.\n";
++          return false;
++        }
++      }
++    }
++  }
++
++  if (!foundProfileVersion || !foundColorSpace || !foundProfileClass) {
++    parseStr += "Missing mandatory ICC profile fields.\n";
++    return false;
++  }
++
++  return true;
+ }

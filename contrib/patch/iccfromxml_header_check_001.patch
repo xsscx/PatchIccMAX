@@ -1,0 +1,52 @@
+diff --git a/IccXML/CmdLine/IccFromXml/IccFromXml.cpp b/IccXML/CmdLine/IccFromXml/IccFromXml.cpp
+index abcdef0..1234567 100644
+--- a/IccXML/CmdLine/IccFromXml/IccFromXml.cpp
++++ b/IccXML/CmdLine/IccFromXml/IccFromXml.cpp
+@@ int main(int argc, char* argv[])
+   if (profile.Validate(valid_report)<=icValidateWarning) {
+-    int i;
+-
+-    for (i=0; i<16; i++) {
+-      if (profile.m_Header.profileID.ID8[i])
+-        break;
+-    }
++    if (!profile.IsHeaderValid()) {
++      printf("Warning: Profile header is invalid. Aborting unsafe access.\n");
++      return -1;
++    }
++    int i;
++    for (i=0; i<16; i++) {
++      if (profile.m_Header.profileID.ID8[i])
++        break;
++    }
+
+diff --git a/IccXML/IccLibXML/IccProfileXml.cpp b/IccXML/IccLibXML/IccProfileXml.cpp
+index 89abcde..456def0 100644
+--- a/IccXML/IccLibXML/IccProfileXml.cpp
++++ b/IccXML/IccLibXML/IccProfileXml.cpp
+@@ CIccProfileXml::CIccProfileXml()
+ {
+-  // original constructor
++  memset(&m_Header, 0, sizeof(m_Header));
++  m_bHeaderValid = false;
+ }
+
+@@ bool CIccProfileXml::LoadXml(const char *szFilename, const char *szRelaxNGDir, std::string *parseStr)
+     // After successful header node parsing
++    m_bHeaderValid = true;
+
+diff --git a/IccXML/IccLibXML/IccProfileXml.h b/IccXML/IccLibXML/IccProfileXml.h
+index fedcba9..789abcd 100644
+--- a/IccXML/IccLibXML/IccProfileXml.h
++++ b/IccXML/IccLibXML/IccProfileXml.h
+@@ class CIccProfileXml : public CIccProfile
+ public:
+   CIccProfileXml();
+   bool LoadXml(const char *szFilename, const char *szRelaxNGDir=NULL, std::string *parseStr=NULL);
+   IccValidateStatus Validate(std::string &sReport);
++
++  bool IsHeaderValid() const { return m_bHeaderValid; }
++
++protected:
++  bool m_bHeaderValid;
+ };

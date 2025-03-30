@@ -1,0 +1,48 @@
+## Makefile.iccdumpprofile.afl
+## 
+## Copyright (c) 2024-2025. David H Hoyt LLC. All rights reserved.
+##
+## Written by David Hoyt 
+## Date: 03-MAR-2025 0900 EDT
+#
+# Branch: PR121
+# Intent: ## Builds instrumented iccDumpProfile binary with AFL for fuzzing
+# Production: TRUE
+# Runner: TRUE
+#
+#
+# Updates:  ## Builds instrumented iccDumpProfile binary with AFL for fuzzing
+#          
+#
+# 
+# 
+## Builds instrumented iccDumpProfile binary with AFL for fuzzing
+
+# === CONFIG ===
+CXX := afl-clang++
+CXXFLAGS := -O2 -g -fno-omit-frame-pointer
+
+INCLUDES := -I../../IccXML/IccLibXML \
+            -I../../IccProfLib \
+            -I../../Tools/CmdLine/IccDumpProfile \
+            -I/usr/include/libxml2
+
+LDFLAGS := -Wl,--whole-archive ../iccxml/libIccXML2.a ../iccproflib/libIccProfLib2.a -Wl,--no-whole-archive \
+           -lxml2
+
+SRC := ../../Tools/CmdLine/IccDumpProfile/iccDumpProfile.cpp
+BIN := iccDumpProfile_afl
+
+.PHONY: all clean
+
+# === BUILD ===
+all: $(BIN)
+
+$(BIN): $(SRC)
+	@echo "[AFL] Compiling and linking $@ with AFL instrumentation"
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@ $(LDFLAGS)
+
+# === CLEAN ===
+clean:
+	@echo "[CLEAN] Removing AFL build artifacts"
+	rm -f $(BIN)

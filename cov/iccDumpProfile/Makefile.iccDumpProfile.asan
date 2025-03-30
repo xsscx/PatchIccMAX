@@ -1,0 +1,73 @@
+## Makefile.iccdumpprofile.asan
+#
+## 
+## Copyright (c) 2024-2025. David H Hoyt LLC. All rights reserved.
+##
+## Written by David Hoyt 
+## Date: 31-MAR-2025 2000 EDT
+#
+# Branch: PR121
+# Intent: Builds instrumented iccDumpProfile binary with ASan/UBSan and generates LLVM coverage data
+# Production: TRUE
+# Runner: TRUE
+#
+#
+# Updates:  Builds instrumented iccDumpProfile binary with ASan/UBSan and generates LLVM coverage data
+#          
+#
+# 
+# 
+## Builds instrumented iccDumpProfile binary with ASan/UBSan and generates LLVM coverage data
+
+# === CONFIG ===
+CXX := clang++
+SANITIZER_FLAGS := -fsanitize=address,undefined -fno-omit-frame-pointer
+
+CXXFLAGS := -O0 -g -fno-limit-debug-info -fno-inline \
+            -fprofile-instr-generate -fcoverage-mapping \
+            $(SANITIZER_FLAGS)
+
+INCLUDES := -I../../IccXML/IccLibXML \
+            -I../../IccProfLib \
+            -I../../Tools/CmdLine/IccDumpProfile \
+            -I/usr/include/libxml2
+
+LDFLAGS := $(SANITIZER_FLAGS) \
+           -Wl,--whole-archive ../iccxml/libIccXML2.a ../iccproflib/libIccProfLib2.a -Wl,--no-whole-archive \
+           -lxml2
+
+SRC := ../../Tools/CmdLine/IccDumpProfile/iccDumpProfile.cpp
+BIN := iccDumpProfile_test
+RAW := iccDumpProfile.profraw
+PROFDATA := iccDumpProfile.profdata
+COV := coverage_iccdumpprofile.txt
+
+.PHONY: all clean run profile report
+
+# === BUILD ===
+all: $(BIN)
+
+$(BIN): $(SRC)
+	@echo "[CXX] Compiling and linking $@ with ASan/UBSan"
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@ $(LDFLAGS)
+
+# === RUN WITH COVERAGE ===
+run: $(BIN)
+	@echo "[RUN] Executing $(BIN) with LLVM_PROFILE_FILE=$(RAW)"
+	LLVM_PROFILE_FILE=$(RAW) ./$(BIN) || true
+
+# === MERGE PROFILE DATA ===
+profile: run
+	@echo "[PROF] Merging raw profile into $(PROFDATA)"
+	llvm-profdata merge -sparse $(RAW) -o $(PROFDATA)
+
+# === GENERATE COVERAGE REPORT ===
+report: profile
+	@echo "[REPORT] Generating coverage report → $(COV)"
+	llvm-cov show ./$(BIN) -instr-profile=$(PROFDATA) > $(COV)
+	@echo "[+] Coverage written to $(COV)"
+
+# === CLEAN ===
+clean:
+	@echo "[CLEAN] Removing build artifacts"
+	rm -f $(BIN) $(RAW) $(PROFDATA) $(COV)
