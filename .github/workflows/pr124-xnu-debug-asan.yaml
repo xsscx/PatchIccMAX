@@ -1,0 +1,74 @@
+###############################################################
+#
+## Copyright (©) 2024 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 10-APRIL-2025 2100 EDT by David Hoyt (©)
+#
+## Intent:PR124-Unit-Test
+#
+## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+###############################################################
+
+name: "PR124-Unit-Test"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    name: Build and Test PR124 on macOS
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: ⏬ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Set up Git Identity
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: 📦 Clone and Checkout PR Branch
+        run: |
+          echo "=== Cloning DemoIccMAX and Checking Out PR124 ==="
+          git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+          cd DemoIccMAX
+          git fetch origin pull/124/head:pr-124
+          git checkout pr-124
+
+      - name: 🧰 Install Dependencies
+        run: |
+          echo "=== Installing Dependencies via Homebrew ==="
+          brew install nlohmann-json libxml2 wxwidgets libtiff libpng
+
+      - name: 🏗️ Configure and Build with CMake
+        run: |
+          echo "=== Configuring CMake Build (Release) ==="
+          cd DemoIccMAX/Build
+          sudo rm -rf /Library/Frameworks/Mono.framework/Headers/png.h
+          export CFLAGS="-I$(brew --prefix libpng)/include"
+          export LDFLAGS="-L$(brew --prefix libpng)/lib"
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release \
+                -DENABLE_TOOLS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_SHARED_LIBS=ON \
+                -Wno-dev Cmake/
+          echo "=== Building with Make ==="
+          make -j$(sysctl -n hw.ncpu)
+
+      - name: 📂 Verify Artifacts
+        run: |
+          echo "=== Verifying Build Artifacts ==="
+          pwd
+          find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
+               -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
+
+      - name: 🧪 Run Unit Tests
+        run: |
+          echo "========= BEGIN CI TEST HARNESS ========="
+          cd DemoIccMAX/Testing
+          curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr122/contrib/UnitTest/iccMAX-cicd-build-checks.sh | bash
+          echo "========= CI TEST HARNESS COMPLETE ========="
