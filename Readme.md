@@ -167,7 +167,8 @@ export CXX=g++
 cd ~
 git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
 cd DemoIccMAX/Build
-sudo apt-get install -y libpng-dev libwxgtk3.2-dev libwxgtk-media3.2-dev libwxgtk-webview3.2-dev wx-common wx3.2-headers libtiff6 curl git make cmake clang clang-tools libxml2 libxml2-dev nlohmann-json3-dev build-essential
+sudo apt-get install -y libpng-dev libjpeg-dev libwxgtk3.2-dev libwxgtk-media3.2-dev libwxgtk-webview3.2-dev wx-common wx3.2-headers libtiff6 curl git make cmake clang clang-tools libxml2 libxml2-dev nlohmann-json3-dev build-essential
+
 cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" -DCMAKE_BUILD_TYPE=Debug -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -Wno-dev -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -Wno-dev Cmake/
 make -j$(nproc)
 find IccProfLib/ IccXML/ Tools/ -type f -executable -exec file {} \; | grep 'ELF' | cut -d: -f1
@@ -190,7 +191,7 @@ export CXX=clang++
 cd ~
 git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
 cd DemoIccMAX/Build
-brew install libpng nlohmann-json libxml2 wxwidgets libtiff
+brew install libpng nlohmann-json libxml2 wxwidgets libtiff jpeg
 cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" -Wno-dev Cmake/
 make -j$(nproc)
 cd ..
@@ -356,8 +357,9 @@ Adjust the Cmake Configure args shown above to use `$vcpkg` instead of `C:/test/
 3. CICD Runner plus Stub
 
 ### Project Dependencies
-- `libpng-dev`: Required for Png Support.
 - `libxml2`: Required for XML support.
+- `libpng-dev`: Required for Png Support.
+- `libjpg-dev`: Required for Jpg Support. 
 - `libwxgtk3.2-dev`: Required for GUI support.
 - `nlohmann-json3-dev`: Enables JSON parsing for configuration files.
 - `libtiff`: Supports TIFF image manipulation for image processing tools.
