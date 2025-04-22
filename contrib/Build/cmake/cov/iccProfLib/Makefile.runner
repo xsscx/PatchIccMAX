@@ -1,0 +1,98 @@
+###############################################################
+#
+# Copyright (©) 2024 David H Hoyt. All rights reserved.
+#                 https://srd.cx
+#
+# Last Updated: 14-MAY-2025 at 0700 EDT by David Hoyt (©)
+#
+# Intent: Makefile.runner for IccProfLib
+# Why: Runner are not the same as you local devenc
+# Outcome: Demonstrate Runner for Little ICC Scanner
+#
+#
+#
+#
+###############################################################
+
+# === COMPILER SETTINGS ===
+CXX ?= clang++
+CC ?= clang
+
+# === PATHS ===
+SRC_PATH := ../../../../../IccProfLib
+OBJ_PATH := obj
+OUT := libIccProfLib2.a
+
+# === DETECT CLANG ===
+IS_CLANG := $(shell $(CXX) --version | grep -qi clang && echo 1 || echo 0)
+
+# === MINIMAL FLAGS ===
+BASE_FLAGS := -std=c++17 -fno-omit-frame-pointer -fno-inline -g -I$(SRC_PATH)
+
+# === SUPPRESS WARNINGS ENTIRELY ===
+ifeq ($(IS_CLANG),1)
+  NOISE_FILTER_FLAGS := -w
+else
+  NOISE_FILTER_FLAGS := -w
+endif
+
+# === INSTRUMENTATION FLAGS (ONLY IF CLANG) ===
+ifeq ($(IS_CLANG),1)
+  INSTRUMENT_FLAGS := -fprofile-instr-generate \
+                      -fcoverage-mapping \
+                      -fsanitize-coverage=trace-pc-guard
+else
+  INSTRUMENT_FLAGS :=
+endif
+
+# === SANITIZER CONTROL ===
+SANITIZER ?= address
+SAN_FLAGS := -fsanitize=$(SANITIZER)
+
+# === FINAL FLAGS ===
+CXXFLAGS := $(BASE_FLAGS) $(NOISE_FILTER_FLAGS) $(INSTRUMENT_FLAGS) $(SAN_FLAGS)
+LDFLAGS := $(SAN_FLAGS)
+
+# === SOURCES AND OBJECTS ===
+SRCS := $(wildcard $(SRC_PATH)/*.cpp)
+OBJS := $(patsubst $(SRC_PATH)/%.cpp,$(OBJ_PATH)/%.o,$(SRCS))
+
+.PHONY: all clean check-prof
+
+# === BUILD TARGET ===
+all: $(OUT)
+
+$(OUT): $(OBJS)
+	@echo "[AR] Creating $@"
+	@ar rcs $@ $(OBJS)
+
+$(OBJ_PATH)/%.o: $(SRC_PATH)/%.cpp | $(OBJ_PATH)
+	@echo "[CXX] Compiling $<"
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(OBJ_PATH):
+	@mkdir -p $(OBJ_PATH)
+
+# === CLEAN ===
+clean:
+	@echo "[CLEAN] Removing build artifacts"
+	@rm -rf $(OBJ_PATH) $(OUT)
+
+# === INSTRUMENTATION CHECK ===
+check-prof: $(OUT)
+	@echo "[CHECK] Verifying instrumentation in $(OUT)"
+	@TMPDIR=$$(mktemp -d); \
+	cd "$$TMPDIR" && \
+	ar -x "$(abspath $(OUT))" && \
+	FOUND=0; \
+	for f in *.o; do \
+		llvm-objdump -h "$$f" | grep -q __llvm_prf_data && \
+		echo "  → [INSTRUMENTED] $$f" && FOUND=1; \
+	done; \
+	if [ $$FOUND -eq 0 ]; then \
+		echo "❌ No instrumentation symbols found."; \
+		exit 1; \
+	else \
+		echo "✅ Instrumentation verified."; \
+	fi; \
+	rm -rf "$$TMPDIR"
