@@ -1,3 +1,11 @@
+2025-MAY-02 David Hoyt
+* Further Align Code to address Fuzzing Results 
+* Target additional Bug Classes to Log for Refactoring
+* Refactor iccGui App to resolve RoundTrip Report, Runtime, Other Issues
+
+2025-APR-24 David Hoyt
+* Align Code to address CWE, CVE, AFL, Radamsa, LibFuzzer, Manual Issues
+
 2025-APR-12 David Hoyt
 * Align Cmake X-Platform, Code Refactoring, Code Coverage + AFL
 

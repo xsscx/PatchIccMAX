@@ -1,0 +1,355 @@
+-------------------------------------
+Translated Report (Full Report Below)
+-------------------------------------
+
+Process:               ColorSync Utility [19628]
+Path:                  /System/Applications/Utilities/ColorSync Utility.app/Contents/MacOS/ColorSync Utility
+Identifier:            com.apple.ColorSyncUtility
+Version:               12.0.0 (420)
+Build Info:            ColorSyncUtility-420000000000000~895
+Code Type:             X86-64 (Native)
+Parent Process:        launchd [1]
+User ID:               501
+
+Date/Time:             2023-03-17 14:11:30.0916 -0400
+OS Version:            macOS 13.2.1 (22D68)
+Report Version:        12
+Bridge OS Version:     7.2 (20P3045)
+
+
+Time Awake Since Boot: 97000 seconds
+Time Since Wake:       836 seconds
+
+System Integrity Protection: disabled
+
+Crashed Thread:        0  Dispatch queue: com.apple.main-thread
+
+Exception Type:        EXC_BAD_INSTRUCTION (SIGILL)
+Exception Codes:       0x0000000000000001, 0x0000000000000000
+
+Termination Reason:    Namespace SIGNAL, Code 4 Illegal instruction: 4
+Terminating Process:   exc handler [19628]
+
+Application Specific Information:
+detected buffer overflow
+
+
+Thread 0 Crashed::  Dispatch queue: com.apple.main-thread
+0   libsystem_c.dylib             	    0x7ff8064b918b __chk_fail_overflow + 16
+1   libsystem_c.dylib             	    0x7ff8064402fe __memcpy_chk + 18
+2   ColorSync Utility             	       0x10efad455 0x10ef8f000 + 123989
+3   ColorSync Utility             	       0x10ef92785 0x10ef8f000 + 14213
+4   CoreFoundation                	    0x7ff8066423d4 __CFNOTIFICATIONCENTER_IS_CALLING_OUT_TO_AN_OBSERVER__ + 137
+5   CoreFoundation                	    0x7ff8066dc41a ___CFXRegistrationPost_block_invoke + 88
+6   CoreFoundation                	    0x7ff8066dc369 _CFXRegistrationPost + 536
+7   CoreFoundation                	    0x7ff8066158f9 _CFXNotificationPost + 735
+8   Foundation                    	    0x7ff807451abc -[NSNotificationCenter postNotificationName:object:userInfo:] + 82
+9   AppKit                        	    0x7ff8098b994c -[NSTableView _sendSelectionChangedNotificationForRows:columns:] + 215
+10  AppKit                        	    0x7ff809ac74cf -[NSTableView mouseDown:] + 5954
+11  AppKit                        	    0x7ff80998a3a2 -[NSWindow(NSEventRouting) _handleMouseDownEvent:isDelayedEvent:] + 4283
+12  AppKit                        	    0x7ff80990058e -[NSWindow(NSEventRouting) _reallySendEvent:isDelayedEvent:] + 2595
+13  AppKit                        	    0x7ff8098ff94f -[NSWindow(NSEventRouting) sendEvent:] + 345
+14  AppKit                        	    0x7ff8098fdcbe -[NSApplication(NSEvent) sendEvent:] + 358
+15  AppKit                        	    0x7ff809bbc665 -[NSApplication _handleEvent:] + 65
+16  AppKit                        	    0x7ff80978c7dc -[NSApplication run] + 623
+17  AppKit                        	    0x7ff8097607f7 NSApplicationMain + 817
+18  dyld                          	    0x7ff80623e310 start + 2432
+
+Thread 1:: com.apple.NSEventThread
+0   libsystem_kernel.dylib        	    0x7ff8065325c2 mach_msg2_trap + 10
+1   libsystem_kernel.dylib        	    0x7ff806540604 mach_msg2_internal + 82
+2   libsystem_kernel.dylib        	    0x7ff806539635 mach_msg_overwrite + 723
+3   libsystem_kernel.dylib        	    0x7ff8065328a8 mach_msg + 19
+4   CoreFoundation                	    0x7ff80664ccbe __CFRunLoopServiceMachPort + 145
+5   CoreFoundation                	    0x7ff80664b72a __CFRunLoopRun + 1360
+6   CoreFoundation                	    0x7ff80664ab60 CFRunLoopRunSpecific + 560
+7   AppKit                        	    0x7ff8098fc179 _NSEventThread + 132
+8   libsystem_pthread.dylib       	    0x7ff806571259 _pthread_start + 125
+9   libsystem_pthread.dylib       	    0x7ff80656cc7b thread_start + 15
+
+Thread 2:
+0   libsystem_pthread.dylib       	    0x7ff80656cc58 start_wqthread + 0
+
+Thread 3:
+0   libsystem_pthread.dylib       	    0x7ff80656cc58 start_wqthread + 0
+
+Thread 4:
+0   libsystem_pthread.dylib       	    0x7ff80656cc58 start_wqthread + 0
+
+
+Thread 0 crashed with X86 Thread State (64-bit):
+  rax: 0x0000000000000000  rbx: 0x000000000000d401  rcx: 0x0000000000000000  rdx: 0x0000000000000000
+  rdi: 0x0000000000000000  rsi: 0x000000001f08000c  rbp: 0x00007ff7b0f6e8b0  rsp: 0x00007ff7b0f6e8b0
+   r8: 0x0000000000000000   r9: 0x0000000000000000  r10: 0x0000000000000032  r11: 0x0000000000000206
+  r12: 0x000000010efcbea0  r13: 0x00007f87681a785e  r14: 0x00007f876818400c  r15: 0x00007f876818d015
+  rip: 0x00007ff8064b918b  rfl: 0x0000000000010202  cr2: 0x00000001111d0000
+  
+Logical CPU:     4
+Error Code:      0x00000000 
+Trap Number:     6
+
+Thread 0 instruction stream:
+  f0 48 83 c4 38 5b 41 5c-41 5d 41 5e 41 5f 5d c3  .H..8[A\A]A^A_].
+  4c 89 f7 e8 65 25 00 00-48 83 7d c8 00 74 25 49  L...e%..H.}..t%I
+  89 dc 41 be ff ff ff ff-4c 8b 7d d0 48 8b 5d c0  ..A.....L.}.H.].
+  49 8b 3c df e8 44 25 00-00 48 83 c3 ff 72 f1 4c  I.<..D%..H...r.L
+  89 e3 eb aa 41 be ff ff-ff ff 4c 8b 7d d0 eb 9e  ....A.....L.}...
+  55 48 89 e5 48 8d 3d 27-7b 00 00 e8 68 05 00 00  UH..H.='{...h...
+ [0f]0b 55 48 89 e5 48 8d-3d 2e 7b 00 00 e8 56 05  ..UH..H.=.{...V.	<==
+  00 00 0f 0b 55 48 89 e5-41 57 41 56 41 54 53 49  ....UH..AWAVATSI
+  39 c8 72 38 49 89 cf 49-89 f6 49 89 fc e8 41 26  9.r8I..I..I...A&
+  00 00 48 89 c3 48 89 c1-4c 29 e1 48 85 c0 49 0f  ..H..H..L).H..I.
+  44 cf 4c 89 e7 48 89 ce-4c 89 f2 e8 32 6f f8 ff  D.L..H..L...2o..
+  48 89 d8 5b 41 5c 41 5e-41 5f 5d c3 e8 8f ff ff  H..[A\A^A_].....
+
+Binary Images:
+    0x7ff806439000 -     0x7ff8064c1fff libsystem_c.dylib (*) <1aec5d1a-6e43-30f9-a9f2-11eb85d3e70c> /usr/lib/system/libsystem_c.dylib
+       0x10ef8f000 -        0x10efcafff com.apple.ColorSyncUtility (12.0.0) <d6e09a40-ae43-3827-b82e-dabec3b41aae> /System/Applications/Utilities/ColorSync Utility.app/Contents/MacOS/ColorSync Utility
+    0x7ff8065cd000 -     0x7ff806a66fef com.apple.CoreFoundation (6.9) <c2615780-0140-315c-a455-7e03bb22d3d6> /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
+    0x7ff807448000 -     0x7ff807e59ff6 com.apple.Foundation (6.9) <a58576df-7109-3a13-a338-617f135ce8a8> /System/Library/Frameworks/Foundation.framework/Versions/C/Foundation
+    0x7ff80975d000 -     0x7ff80a765ff2 com.apple.AppKit (6.9) <540cedfd-5a35-3f35-8953-dcb7c4834eb5> /System/Library/Frameworks/AppKit.framework/Versions/C/AppKit
+    0x7ff806238000 -     0x7ff8062cccaf dyld (*) <bba77709-6cad-3592-ab03-09d0f7b8610e> /usr/lib/dyld
+    0x7ff806531000 -     0x7ff80656aff7 libsystem_kernel.dylib (*) <87ff381c-4d30-3087-bab7-a5a53d232c00> /usr/lib/system/libsystem_kernel.dylib
+    0x7ff80656b000 -     0x7ff806576ff7 libsystem_pthread.dylib (*) <3bd433d4-15bd-3add-a612-95e4d3b20719> /usr/lib/system/libsystem_pthread.dylib
+
+External Modification Summary:
+  Calls made by other processes targeting this process:
+    task_for_pid: 0
+    thread_create: 0
+    thread_set_state: 0
+  Calls made by this process:
+    task_for_pid: 0
+    thread_create: 0
+    thread_set_state: 0
+  Calls made by all processes on this machine:
+    task_for_pid: 55
+    thread_create: 0
+    thread_set_state: 583
+
+VM Region Summary:
+ReadOnly portion of Libraries: Total=789.1M resident=0K(0%) swapped_out_or_unallocated=789.1M(100%)
+Writable regions: Total=1.4G written=0K(0%) resident=0K(0%) swapped_out=0K(0%) unallocated=1.4G(100%)
+
+                                VIRTUAL   REGION 
+REGION TYPE                        SIZE    COUNT (non-coalesced) 
+===========                     =======  ======= 
+Accelerate framework               384K        3 
+Activity Tracing                   256K        1 
+CG backing stores                 5040K        4 
+CG image                          6124K       81 
+ColorSync                          248K       28 
+CoreAnimation                    601.8M     2492 
+CoreGraphics                        12K        2 
+CoreImage                            8K        2 
+CoreUI image data                 4184K       34 
+Foundation                          36K        2 
+Image IO                           108K        2 
+Kernel Alloc Once                    8K        1 
+MALLOC                           382.4M      230 
+MALLOC guard page                   32K        8 
+MALLOC_NANO (reserved)           384.0M        1         reserved VM address space (unallocated)
+STACK GUARD                       56.0M        5 
+Stack                             10.0M        5 
+VM_ALLOCATE                       1496K       65 
+__CTF                               756        1 
+__DATA                            31.8M      578 
+__DATA_CONST                      39.7M      379 
+__DATA_DIRTY                      1768K      216 
+__FONT_DATA                        2352        1 
+__GLSLBUILTINS                    5174K        1 
+__LINKEDIT                       182.1M        7 
+__OBJC_RO                         65.5M        1 
+__OBJC_RW                         1989K        2 
+__TEXT                           607.0M      602 
+dyld private memory                256K        1 
+mapped file                      400.4M       63 
+shared memory                      800K       21 
+===========                     =======  ======= 
+TOTAL                              2.7G     4839 
+TOTAL, minus reserved VM space     2.3G     4839 
+
+
+
+-----------
+Full Report
+-----------
+
+{"app_name":"ColorSync Utility","timestamp":"2023-03-17 14:11:34.00 -0400","app_version":"12.0.0","sroute_id":3,"slice_uuid":"d6e09a40-ae43-3827-b82e-dabec3b41aae","build_version":"420","platform":1,"bundleID":"com.apple.ColorSyncUtility","share_with_app_devs":0,"is_first_party":1,"bug_type":"309","os_version":"macOS 13.2.1 (22D68)","roots_installed":0,"name":"ColorSync Utility","incident_id":"FA2CCF30-E893-46E9-8AF9-2CA3F15498A0"}
+{
+  "uptime" : 97000,
+  "procRole" : "Foreground",
+  "version" : 2,
+  "userID" : 501,
+  "deployVersion" : 210,
+  "modelCode" : "Macmini8,1",
+  "coalitionID" : 1696,
+  "osVersion" : {
+    "train" : "macOS 13.2.1",
+    "build" : "22D68",
+    "releaseType" : "User"
+  },
+  "captureTime" : "2023-03-17 14:11:30.0916 -0400",
+  "incident" : "FA2CCF30-E893-46E9-8AF9-2CA3F15498A0",
+  "pid" : 19628,
+  "cpuType" : "X86-64",
+  "roots_installed" : 0,
+  "bug_type" : "309",
+  "procLaunch" : "2023-03-17 08:24:34.4154 -0400",
+  "procStartAbsTime" : 83087438704049,
+  "procExitAbsTime" : 97907484024709,
+  "procName" : "ColorSync Utility",
+  "procPath" : "\/System\/Applications\/Utilities\/ColorSync Utility.app\/Contents\/MacOS\/ColorSync Utility",
+  "bundleInfo" : {"CFBundleShortVersionString":"12.0.0","CFBundleVersion":"420","CFBundleIdentifier":"com.apple.ColorSyncUtility"},
+  "buildInfo" : {"ProjectName":"ColorSyncUtility","SourceVersion":"420000000000000","BuildVersion":"895"},
+  "storeInfo" : {"deviceIdentifierForVendor":"43177B59-347C-5598-AF65-ADC4D957CDC9"},
+  "parentProc" : "launchd",
+  "parentPid" : 1,
+  "coalitionName" : "com.apple.ColorSyncUtility",
+  "crashReporterKey" : "9547D8B0-D35D-3401-C64E-CF0C51C28F6C",
+  "throttleTimeout" : 2147483647,
+  "wakeTime" : 836,
+  "bridgeVersion" : {"build":"20P3045","train":"7.2"},
+  "sleepWakeUUID" : "6FFF21C1-9E92-403F-8E3A-0CA58F0D2480",
+  "sip" : "disabled",
+  "sroute_id" : 3,
+  "exception" : {"codes":"0x0000000000000001, 0x0000000000000000","rawCodes":[1,0],"type":"EXC_BAD_INSTRUCTION","signal":"SIGILL"},
+  "termination" : {"flags":0,"code":4,"namespace":"SIGNAL","indicator":"Illegal instruction: 4","byProc":"exc handler","byPid":19628},
+  "asi" : {"libsystem_c.dylib":["detected buffer overflow"]},
+  "extMods" : {"caller":{"thread_create":0,"thread_set_state":0,"task_for_pid":0},"system":{"thread_create":0,"thread_set_state":583,"task_for_pid":55},"targeted":{"thread_create":0,"thread_set_state":0,"task_for_pid":0},"warnings":0},
+  "faultingThread" : 0,
+  "threads" : [{"triggered":true,"id":667720,"instructionState":{"instructionStream":{"bytes":[240,72,131,196,56,91,65,92,65,93,65,94,65,95,93,195,76,137,247,232,101,37,0,0,72,131,125,200,0,116,37,73,137,220,65,190,255,255,255,255,76,139,125,208,72,139,93,192,73,139,60,223,232,68,37,0,0,72,131,195,255,114,241,76,137,227,235,170,65,190,255,255,255,255,76,139,125,208,235,158,85,72,137,229,72,141,61,39,123,0,0,232,104,5,0,0,15,11,85,72,137,229,72,141,61,46,123,0,0,232,86,5,0,0,15,11,85,72,137,229,65,87,65,86,65,84,83,73,57,200,114,56,73,137,207,73,137,246,73,137,252,232,65,38,0,0,72,137,195,72,137,193,76,41,225,72,133,192,73,15,68,207,76,137,231,72,137,206,76,137,242,232,50,111,248,255,72,137,216,91,65,92,65,94,65,95,93,195,232,143,255,255],"offset":96}},"threadState":{"r13":{"value":140219543877726},"rax":{"value":0},"rflags":{"value":66050},"cpu":{"value":4},"r14":{"value":140219543732236},"rsi":{"value":520617996},"r8":{"value":0},"cr2":{"value":4582080512},"rdx":{"value":0},"r10":{"value":50},"r9":{"value":0},"r15":{"value":140219543769109},"rbx":{"value":54273},"trap":{"value":6},"err":{"value":0},"r11":{"value":518},"rip":{"value":140703234232715,"matchesCrashFrame":1},"rbp":{"value":140701802621104},"rsp":{"value":140701802621104},"r12":{"value":4546412192},"rcx":{"value":0},"flavor":"x86_THREAD_STATE","rdi":{"value":0}},"queue":"com.apple.main-thread","frames":[{"imageOffset":524683,"symbol":"__chk_fail_overflow","symbolLocation":16,"imageIndex":0},{"imageOffset":29438,"symbol":"__memcpy_chk","symbolLocation":18,"imageIndex":0},{"imageOffset":123989,"imageIndex":1},{"imageOffset":14213,"imageIndex":1},{"imageOffset":480212,"symbol":"__CFNOTIFICATIONCENTER_IS_CALLING_OUT_TO_AN_OBSERVER__","symbolLocation":137,"imageIndex":2},{"imageOffset":1111066,"symbol":"___CFXRegistrationPost_block_invoke","symbolLocation":88,"imageIndex":2},{"imageOffset":1110889,"symbol":"_CFXRegistrationPost","symbolLocation":536,"imageIndex":2},{"imageOffset":297209,"symbol":"_CFXNotificationPost","symbolLocation":735,"imageIndex":2},{"imageOffset":39612,"symbol":"-[NSNotificationCenter postNotificationName:object:userInfo:]","symbolLocation":82,"imageIndex":3},{"imageOffset":1427788,"symbol":"-[NSTableView _sendSelectionChangedNotificationForRows:columns:]","symbolLocation":215,"imageIndex":4},{"imageOffset":3581135,"symbol":"-[NSTableView mouseDown:]","symbolLocation":5954,"imageIndex":4},{"imageOffset":2282402,"symbol":"-[NSWindow(NSEventRouting) _handleMouseDownEvent:isDelayedEvent:]","symbolLocation":4283,"imageIndex":4},{"imageOffset":1717646,"symbol":"-[NSWindow(NSEventRouting) _reallySendEvent:isDelayedEvent:]","symbolLocation":2595,"imageIndex":4},{"imageOffset":1714511,"symbol":"-[NSWindow(NSEventRouting) sendEvent:]","symbolLocation":345,"imageIndex":4},{"imageOffset":1707198,"symbol":"-[NSApplication(NSEvent) sendEvent:]","symbolLocation":358,"imageIndex":4},{"imageOffset":4585061,"symbol":"-[NSApplication _handleEvent:]","symbolLocation":65,"imageIndex":4},{"imageOffset":194524,"symbol":"-[NSApplication run]","symbolLocation":623,"imageIndex":4},{"imageOffset":14327,"symbol":"NSApplicationMain","symbolLocation":817,"imageIndex":4},{"imageOffset":25360,"symbol":"start","symbolLocation":2432,"imageIndex":5}]},{"id":667758,"name":"com.apple.NSEventThread","frames":[{"imageOffset":5570,"symbol":"mach_msg2_trap","symbolLocation":10,"imageIndex":6},{"imageOffset":62980,"symbol":"mach_msg2_internal","symbolLocation":82,"imageIndex":6},{"imageOffset":34357,"symbol":"mach_msg_overwrite","symbolLocation":723,"imageIndex":6},{"imageOffset":6312,"symbol":"mach_msg","symbolLocation":19,"imageIndex":6},{"imageOffset":523454,"symbol":"__CFRunLoopServiceMachPort","symbolLocation":145,"imageIndex":2},{"imageOffset":517930,"symbol":"__CFRunLoopRun","symbolLocation":1360,"imageIndex":2},{"imageOffset":514912,"symbol":"CFRunLoopRunSpecific","symbolLocation":560,"imageIndex":2},{"imageOffset":1700217,"symbol":"_NSEventThread","symbolLocation":132,"imageIndex":4},{"imageOffset":25177,"symbol":"_pthread_start","symbolLocation":125,"imageIndex":7},{"imageOffset":7291,"symbol":"thread_start","symbolLocation":15,"imageIndex":7}]},{"id":770868,"frames":[{"imageOffset":7256,"symbol":"start_wqthread","symbolLocation":0,"imageIndex":7}]},{"id":771188,"frames":[{"imageOffset":7256,"symbol":"start_wqthread","symbolLocation":0,"imageIndex":7}]},{"id":771222,"frames":[{"imageOffset":7256,"symbol":"start_wqthread","symbolLocation":0,"imageIndex":7}]}],
+  "usedImages" : [
+  {
+    "source" : "P",
+    "arch" : "x86_64",
+    "base" : 140703233708032,
+    "size" : 561152,
+    "uuid" : "1aec5d1a-6e43-30f9-a9f2-11eb85d3e70c",
+    "path" : "\/usr\/lib\/system\/libsystem_c.dylib",
+    "name" : "libsystem_c.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "x86_64",
+    "base" : 4546162688,
+    "CFBundleShortVersionString" : "12.0.0",
+    "CFBundleIdentifier" : "com.apple.ColorSyncUtility",
+    "size" : 245760,
+    "uuid" : "d6e09a40-ae43-3827-b82e-dabec3b41aae",
+    "path" : "\/System\/Applications\/Utilities\/ColorSync Utility.app\/Contents\/MacOS\/ColorSync Utility",
+    "name" : "ColorSync Utility",
+    "CFBundleVersion" : "420"
+  },
+  {
+    "source" : "P",
+    "arch" : "x86_64h",
+    "base" : 140703235362816,
+    "CFBundleShortVersionString" : "6.9",
+    "CFBundleIdentifier" : "com.apple.CoreFoundation",
+    "size" : 4825072,
+    "uuid" : "c2615780-0140-315c-a455-7e03bb22d3d6",
+    "path" : "\/System\/Library\/Frameworks\/CoreFoundation.framework\/Versions\/A\/CoreFoundation",
+    "name" : "CoreFoundation",
+    "CFBundleVersion" : "1953.300"
+  },
+  {
+    "source" : "P",
+    "arch" : "x86_64",
+    "base" : 140703250546688,
+    "CFBundleShortVersionString" : "6.9",
+    "CFBundleIdentifier" : "com.apple.Foundation",
+    "size" : 10559479,
+    "uuid" : "a58576df-7109-3a13-a338-617f135ce8a8",
+    "path" : "\/System\/Library\/Frameworks\/Foundation.framework\/Versions\/C\/Foundation",
+    "name" : "Foundation",
+    "CFBundleVersion" : "1953.300"
+  },
+  {
+    "source" : "P",
+    "arch" : "x86_64",
+    "base" : 140703287332864,
+    "CFBundleShortVersionString" : "6.9",
+    "CFBundleIdentifier" : "com.apple.AppKit",
+    "size" : 16814067,
+    "uuid" : "540cedfd-5a35-3f35-8953-dcb7c4834eb5",
+    "path" : "\/System\/Library\/Frameworks\/AppKit.framework\/Versions\/C\/AppKit",
+    "name" : "AppKit",
+    "CFBundleVersion" : "2299.40.118"
+  },
+  {
+    "source" : "P",
+    "arch" : "x86_64",
+    "base" : 140703231606784,
+    "size" : 609456,
+    "uuid" : "bba77709-6cad-3592-ab03-09d0f7b8610e",
+    "path" : "\/usr\/lib\/dyld",
+    "name" : "dyld"
+  },
+  {
+    "source" : "P",
+    "arch" : "x86_64",
+    "base" : 140703234723840,
+    "size" : 237560,
+    "uuid" : "87ff381c-4d30-3087-bab7-a5a53d232c00",
+    "path" : "\/usr\/lib\/system\/libsystem_kernel.dylib",
+    "name" : "libsystem_kernel.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "x86_64",
+    "base" : 140703234961408,
+    "size" : 49144,
+    "uuid" : "3bd433d4-15bd-3add-a612-95e4d3b20719",
+    "path" : "\/usr\/lib\/system\/libsystem_pthread.dylib",
+    "name" : "libsystem_pthread.dylib"
+  }
+],
+  "sharedCache" : {
+  "base" : 140703231000576,
+  "size" : 21474836480,
+  "uuid" : "57815a20-af2c-3b56-9006-23abde7962b0"
+},
+  "vmSummary" : "ReadOnly portion of Libraries: Total=789.1M resident=0K(0%) swapped_out_or_unallocated=789.1M(100%)\nWritable regions: Total=1.4G written=0K(0%) resident=0K(0%) swapped_out=0K(0%) unallocated=1.4G(100%)\n\n                                VIRTUAL   REGION \nREGION TYPE                        SIZE    COUNT (non-coalesced) \n===========                     =======  ======= \nAccelerate framework               384K        3 \nActivity Tracing                   256K        1 \nCG backing stores                 5040K        4 \nCG image                          6124K       81 \nColorSync                          248K       28 \nCoreAnimation                    601.8M     2492 \nCoreGraphics                        12K        2 \nCoreImage                            8K        2 \nCoreUI image data                 4184K       34 \nFoundation                          36K        2 \nImage IO                           108K        2 \nKernel Alloc Once                    8K        1 \nMALLOC                           382.4M      230 \nMALLOC guard page                   32K        8 \nMALLOC_NANO (reserved)           384.0M        1         reserved VM address space (unallocated)\nSTACK GUARD                       56.0M        5 \nStack                             10.0M        5 \nVM_ALLOCATE                       1496K       65 \n__CTF                               756        1 \n__DATA                            31.8M      578 \n__DATA_CONST                      39.7M      379 \n__DATA_DIRTY                      1768K      216 \n__FONT_DATA                        2352        1 \n__GLSLBUILTINS                    5174K        1 \n__LINKEDIT                       182.1M        7 \n__OBJC_RO                         65.5M        1 \n__OBJC_RW                         1989K        2 \n__TEXT                           607.0M      602 \ndyld private memory                256K        1 \nmapped file                      400.4M       63 \nshared memory                      800K       21 \n===========                     =======  ======= \nTOTAL                              2.7G     4839 \nTOTAL, minus reserved VM space     2.3G     4839 \n",
+  "legacyInfo" : {
+  "threadTriggered" : {
+    "queue" : "com.apple.main-thread"
+  }
+},
+  "trialInfo" : {
+  "rollouts" : [
+    {
+      "rolloutId" : "610d52e1fc54bc3389840408",
+      "factorPackIds" : {
+        "SIRI_UNDERSTANDING_ASR_ASSISTANT" : "63619607c8a2104545a570c7",
+        "SIRI_UNDERSTANDING_MORPHUN" : "62ec7220c682040ba94e6a20"
+      },
+      "deploymentId" : 240000663
+    },
+    {
+      "rolloutId" : "6347054113acce15305b7b82",
+      "factorPackIds" : {
+        "SIRI_MEMORY_SYNC_CONFIG" : "634705e78e8be655c1316a6e"
+      },
+      "deploymentId" : 240000005
+    }
+  ],
+  "experiments" : [
+
+  ]
+}
+}
+
+Model: Macmini8,1, BootROM 1916.80.2.0.0 (iBridge: 20.16.3045.0.0,0), 6 processors, 6-Core Intel Core i7, 3.2 GHz, 16 GB, SMC 
+Graphics: Intel UHD Graphics 630, Intel UHD Graphics 630, Built-In
+Display: DELL S3221QS, 6720 x 3780, Main, MirrorOff, Online
+Memory Module: BANK 0/ChannelA-DIMM0, 8 GB, DDR4, 2667 MHz, SK Hynix, HMA81GS6CJR8N-VK
+Memory Module: BANK 2/ChannelB-DIMM0, 8 GB, DDR4, 2667 MHz, SK Hynix, HMA81GS6CJR8N-VK
+AirPort: spairport_wireless_card_type_wifi (0x14E4, 0x7BF), wl0: Dec  1 2022 17:15:41 version 9.30.489.6.32.5.85 FWID 01-c30a5043
+Bluetooth: Version (null), 0 services, 0 devices, 0 incoming serial ports
+Network Service: Ethernet, Ethernet, en0
+USB Device: USB31Bus
+USB Device: T2Bus
+USB Device: Headset
+USB Device: Apple T2 Controller
+Thunderbolt Bus: Mac mini, Apple Inc., 47.5
+Thunderbolt Bus: Mac mini, Apple Inc., 47.5
