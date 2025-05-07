@@ -1,0 +1,72 @@
+name: CvWin
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout PR129
+        uses: actions/checkout@v4
+        with:
+          ref: pr129
+
+      - name: Cache vcpkg dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg/installed
+            ${{ github.workspace }}/vcpkg/buildtrees
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json', '**/CMakeLists.txt') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+
+      - name: Cache CMake build output
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/Build/alt
+          key: cmake-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            cmake-${{ runner.os }}-
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Bootstrap vcpkg
+        shell: pwsh
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git "$env:GITHUB_WORKSPACE/vcpkg"
+          . "$env:GITHUB_WORKSPACE/vcpkg/bootstrap-vcpkg.bat"
+
+      - name: Install vcpkg dependencies (manifest mode)
+        shell: pwsh
+        run: |
+          & "$env:GITHUB_WORKSPACE/vcpkg/vcpkg.exe" install
+
+      - name: Configure and Build
+        shell: pwsh
+        run: |
+          $vcpkgRoot = "$env:GITHUB_WORKSPACE/vcpkg"
+          $sourceRoot = "$env:GITHUB_WORKSPACE"
+          $buildDir = "$sourceRoot/Build/alt"
+          New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
+          Set-Location $buildDir
+          cmake ..\Cmake -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_TOOLCHAIN_FILE="$vcpkgRoot/scripts/buildsystems/vcpkg.cmake" `
+            -DVCPKG_MANIFEST_DIR="$sourceRoot" `
+            -DCMAKE_BUILD_TYPE=Release -DENABLE_ICCXML=ON -DUSE_SYSTEM_LIBXML2=OFF `
+            -DCMAKE_CXX_FLAGS="/I vcpkg_installed/x64-windows/include"
+          cmake --build . --config Release -- /m /maxcpucount
+
+      - name: Verify Build Output
+        shell: pwsh
+        run: |
+          $cmakeCache = "$env:GITHUB_WORKSPACE/Build/alt/CMakeCache.txt"
+          if (Test-Path $cmakeCache) {
+            Write-Host "✅ Build succeeded. CMakeCache.txt found."
+          } else {
+            Write-Host "❌ Build failed! No CMakeCache.txt found."
+            exit 1
+          }

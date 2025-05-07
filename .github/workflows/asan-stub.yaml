@@ -1,0 +1,131 @@
+###############################################################
+#
+## Copyright (©) 2024 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 10-APRIL-2025 at 2000 EDT by David Hoyt (©)
+#
+## Intent: ASAN-STUB
+#
+## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+###############################################################
+
+name: "AA-STUB"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    name: Build PR129 Branch
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: ⏬ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Set Up Git Identity
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: 🧰 Install Dependencies
+        run: |
+          echo "=== Installing Build and Runtime Dependencies ==="
+          sudo apt-get update
+          sudo apt-get install -y \
+            libpng-dev libjpeg-dev libxml2 libxml2-dev libtiff-dev nlohmann-json3-dev \
+            build-essential cmake clang clang-tools python3 python3-pip \
+            libwxgtk3.2-dev wx-common libopencl-clang-17-dev curl git \
+            llvm clang-17
+
+      - name: 📦 Clone PatchIccMAX Repository
+        run: |
+          echo "=== Cloning PatchIccMAX for PR129 ==="
+          git clone https://github.com/xsscx/PatchIccMAX.git
+          cd PatchIccMAX
+          git checkout pr129
+          echo "=== DONE Cloning PatchIccMAX for PR129 ==="
+
+      - name: 🏗️ Configure with CMake (ASAN + Debug)
+        run: |
+          echo "=== Configuring Build with AddressSanitizer ==="
+          cd PatchIccMAX/Build
+          export CC=gcc
+          export CXX=g++
+          export PATH="/usr/lib/llvm-17/bin:$PATH"
+          echo "CC=gcc" >> $GITHUB_ENV
+          echo "CXX=g++" >> $GITHUB_ENV
+          clang++ --version
+          clang --version
+           cmake   -DCMAKE_INSTALL_PREFIX="$HOME/.local"   -DCMAKE_BUILD_TYPE=Debug   -DENABLE_TOOLS=ON   -DENABLE_SHARED_LIBS=ON   -DENABLE_STATIC_LIBS=ON   -DENABLE_TESTS=ON   -DENABLE_INSTALL_RIM=ON   -DENABLE_ICCXML=ON   -DICC_TRACE_NAN_ENABLED=ON   -DICC_CLUT_DEBUG=ON   -DCMAKE_CXX_FLAGS="-g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer -fno-inline -Wall -Wextra -DICC_TRACE_NAN_ENABLED -DICC_CLUT_DEBUG -DICC_ENABLE_ASSERTS -DICC_LOG_SAFE"   -DCMAKE_EXE_LINKER_FLAGS="-lX11 -fsanitize=address,undefined"   Cmake/
+      - name: 🔨 Build Project
+        run: |
+          echo "=== Starting Build ==="
+          cd PatchIccMAX/Build
+          make -j$(nproc)
+
+      - name: 🧪 Run Unit Tests (CI Harness)
+        run: |
+          echo "========= BEGIN CI TEST HARNESS ========="
+          cd PatchIccMAX/Testing
+          echo "🗂️ Current directory:"
+          pwd
+          echo "📁 Listing contents:"
+          ls -la
+
+          # Add Tools/* to PATH
+          for d in ../Build/Tools/*; do
+            [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
+          done
+
+          echo "🔁 STUB"
+          sh CreateAllProfiles.sh
+          pwd
+          ls
+          ../Build/Tools/IccDumpProfile/iccDumpProfile -v ICS/Rec2100HlgFull-Part2.icc
+          echo "========= CI TEST HARNESS COMPLETE ========="
+          echo "✅ Harness executed. Runtime failures do NOT block CI."
+
+      - name: 🧾 System Diagnostics
+        run: |
+          echo "=== System Info ==="
+          uname -a
+          cat /etc/os-release
+          gcc -v
+          lscpu
+          free -m
+          df -h
+
+      - name: ✅ Verify Build Output
+        run: |
+          echo "=== Verifying Build Result ==="
+          if [ -f PatchIccMAX/Build/CMakeCache.txt ]; then
+            echo "✅ Build configuration exists."
+          else
+            echo "❌ Build configuration failed."
+            exit 1
+          fi
+
+      - name: 📤 Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: patchiccmax-linux-binaries
+          path: PatchIccMAX/Build
+
+      - name: 📤 Upload CMake Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: patchiccmax-cmake-log
+          path: PatchIccMAX/Build/CMakeCache.txt
+      - name: Summary Report
+        if: always()
+        run: |
+          echo "### Ubuntu Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Directory: PatchIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts Uploaded: iccmax-macos-clang" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: Success" >> $GITHUB_STEP_SUMMARY

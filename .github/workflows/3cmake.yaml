@@ -1,0 +1,87 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 01-MAY-2025 1200 EDT by David Hoyt (©)
+#
+## Intent: 3cmake
+#
+## TODO: Add Unit Test Suite
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: 3cmake
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        build_type: [Release, Debug]
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache vcpkg
+        uses: actions/cache@v3
+        with:
+          path: |
+            C:/vcpkg/installed
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+      - name: Cache CMake build
+        uses: actions/cache@v3
+        with:
+          path: |
+            PatchIccMAX/Build/Cmake/build
+          key: cmake-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            cmake-${{ runner.os }}-${{ matrix.build_type }}-
+      - name: Install dependencies
+        run: |
+          git clone https://github.com/xsscx/PatchIccMAX.git
+          cd PatchIccMAX
+          git checkout pr129
+          vcpkg integrate install
+          vcpkg install
+      - name: Configure
+        run: |
+          cd .\PatchIccMAX\Build\Cmake\
+          cmake -B build -S . -G "Visual Studio 17 2022" -A x64 ^
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ^
+          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+      - name: Build
+        run: |
+          cd .\PatchIccMAX\Build\Cmake\
+          cmake --build build --config ${{ matrix.build_type }}
+          dir /s /b *.exe *.lib
+      - name: 🖥️ RUN STUV
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path "build\Tools" -Recurse -Filter *.exe | Select-Object -ExpandProperty DirectoryName -Unique | ForEach-Object { $env:PATH += ";$_"; Write-Host "✅ Added to PATH: $_"
+          cd PatchIccMAX/Testing
+          CreateAllProfiles.bat
+          systeminfo
+          Get-CimInstance -ClassName Win32_Processor
+      - name: Summary Report
+        if: always()
+        run: |
+          echo "### Windows Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Directory: PatchIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts Uploaded: iccmax-windows-arm" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: Success" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,158 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 11-APRIL-2025 1745 EDT by David Hoyt (©)
+#
+## Intent: PR124-Stub5
+#
+## TODO: Continue Windows Prototyping
+#        Unit Testing for Windows in Powershell
+#        Refactor to Git Bash for Cross platform
+#
+#
+# Caveats: Sanitizers on Widows are aspirational
+#          Prototype Cross Platform
+#          Unit Tests are run on Linux | XNU
+#
+#
+###############################################################
+
+name: PR124-Stub5
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: 🔹 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔹 Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      - name: 🔹 Restore vcpkg Cache
+        uses: actions/cache@v3
+        with:
+          path: C:\test\vcpkg
+          key: Win70-${{ runner.os }}-${{ hashFiles('**/vcpkg.json', '**/bootstrap-vcpkg.bat') }}
+          restore-keys: |
+            Win70-${{ runner.os }}-
+      - name: 🔹 Setup Environment & Build Preparation
+        shell: pwsh
+        run: |
+          $env:VSCMD_ARG_HOST_ARCH = "x64"
+          $env:VSCMD_ARG_TGT_ARCH = "x64"
+          $optDir = "C:\test"
+          $vcpkgDir = "$optDir\vcpkg"
+          $patchDir = "$optDir\PatchIccMAX"
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"
+          if (-Not (Test-Path $optDir)) { New-Item -ItemType Directory -Path $optDir | Out-Null }
+          if (-Not (Test-Path "$vcpkgDir\vcpkg.exe")) {
+              git clone https://github.com/microsoft/vcpkg.git $vcpkgDir
+              & "$vcpkgDir\bootstrap-vcpkg.bat"
+          }
+          if (-Not (Test-Path "$vcpkgDir\vcpkg.exe")) {
+              Write-Host "❌ ERROR: vcpkg failed to install!" -ForegroundColor Red
+              exit 1
+          }
+          $packages = @(
+            "libpng:x64-windows", "nlohmann-json:x64-windows", "nlohmann-json:x64-windows-static",
+            "libxml2:x64-windows", "tiff:x64-windows", "wxwidgets:x64-windows",
+            "libxml2:x64-windows-static", "tiff:x64-windows-static", "wxwidgets:x64-windows-static"
+          )
+          foreach ($pkg in $packages) { & "$vcpkgDir\vcpkg.exe" install $pkg }
+      - name: 🔹 Clone PatchIccMAX Repository
+        shell: pwsh
+        run: |
+          $patchDir = "C:\test\PatchIccMAX"
+          if (Test-Path $patchDir) { Remove-Item -Recurse -Force $patchDir }
+          git clone https://github.com/xsscx/PatchIccMAX.git $patchDir
+          cd $patchDir
+          git checkout pr124
+      - name: 🔹 Configure & Build with CMake
+        shell: pwsh
+        run: |
+          cd C:\test\PatchIccMAX\Build\Cmake
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake `
+            -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" `
+            -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" `
+            -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" `
+            -DENABLE_TOOLS=ON `
+            -DENABLE_SHARED_LIBS=ON `
+            -DENABLE_STATIC_LIBS=ON `
+            -DENABLE_TESTS=ON `
+            -DENABLE_INSTALL_RIM=ON `
+            -DENABLE_ICCXML=ON
+          cmake --build build --config Release -- /m /maxcpucount:32
+      - name: 🔹 Update PATH for Test Execution
+        shell: pwsh
+        run: |
+          $exeDir = "C:\test\PatchIccMAX\Build\Cmake\build\Tools\IccFromXml\Release"
+          $env:PATH += ";$exeDir"
+          [System.Environment]::SetEnvironmentVariable("PATH", "$env:PATH", "Process")
+          Write-Host "PATH=$env:PATH"
+      - name: 🧪 Runner Stub - Test Execution
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          cd C:\test\PatchIccMAX\Testing
+          # Copy test tools into local folder
+          cp C:\test\PatchIccMAX\Build\Cmake\build\Tools\IccFromXml\Release\iccFromXml.exe .
+          cp C:\test\PatchIccMAX\Build\Cmake\build\Tools\IccDumpProfile\Release\iccDumpProfile.exe .
+          cp C:\test\PatchIccMAX\Build\Cmake\build\Tools\IccApplyNamedCmm\Release\iccApplyNamedCmm.exe .
+          # Set PATH and aliases to ensure they resolve as commands
+          $env:PATH += ";$PWD"
+          Set-Alias iccFromXml "$PWD\iccFromXml.exe"
+          Set-Alias iccApplyNamedCmm "$PWD\iccApplyNamedCmm.exe"
+          Set-Alias iccDumpProfile "$PWD\iccDumpProfile.exe"
+          Write-Host "📍 PATH and tools configured. Running tests..."
+          Write-Host "Running the .exe files built"
+          # copy ..\..\vcpkg\installed\x64-windows-static\lib\tiff.lib  ..\..\vcpkg\installed\x64-windows-static\lib\libtiff.lib
+          Get-ChildItem -Path "." -Recurse -Filter *.exe | ForEach-Object { Write-Host "Running: $($_.FullName)"; & $_.FullName }
+          Write-Host "Running CreateAllProfiles.bat from remote"
+          $tempFile = "$env:TEMP\CreateAllProfiles.bat"; iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr124/contrib/UnitTest/pr124-create.bat" -OutFile $tempFile; & $tempFile; Remove-Item $tempFile
+          # Run Tests
+          Write-Host "Running RunTests.bat from local"
+          .\RunTests.bat
+          # Collect .icc profile information
+          $profiles = Get-ChildItem -Path . -Filter "*.icc" -Recurse -File
+          $totalCount = $profiles.Count
+          # Group profiles by directory
+          $groupedProfiles = $profiles | Group-Object { $_.Directory.FullName }
+          # Generate Summary Report
+          Write-Host "`n========================="
+          Write-Host " ICC Profile Report"
+          Write-Host "========================="
+          # Print count per subdirectory
+          foreach ($group in $groupedProfiles) {
+          Write-Host ("{0}: {1} .icc profiles" -f $group.Name, $group.Count)
+          }
+          Write-Host "`nTotal .icc profiles found: $totalCount"
+          Write-Host "=========================`n"
+          # Write-Host "Running STUB of iccMAX-cicd-build-checks.ps1`n"
+          Write-Host "Running STUB of iccMAX-cicd-build-checks.ps1`n"
+          $tempScript = "$env:TEMP\check_profiles_stub.ps1"
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr124/contrib/CalcTest/check_profiles.ps1" -OutFile $tempScript -UseBasicParsing
+          & $tempScript
+          Write-Host "STUB All Done!"
+          Write-Host "Runner All Done!"
+
+      - name: 📤 Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-Artifacts
+          path: C:\test\PatchIccMAX
+
+      - name: 🖥️ Host System Info
+        shell: pwsh
+        run: |
+          systeminfo
+          Get-CimInstance -ClassName Win32_Processor
