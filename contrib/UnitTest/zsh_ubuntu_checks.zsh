@@ -1,7 +1,7 @@
-﻿#!/bin/zsh
+﻿#!zsh
 ##########################################################################################################
 #
-# Copyright (c) 2025. International Color Consortium. All rights reserved.
+# 
 # Copyright (c) 2024. David H Hoyt LLC. All rights reserved.
 #
 # Last Updated: 26-MAR-2025 at 1200 EDT by David Hoyt
@@ -17,12 +17,12 @@
 #
 # Usage:
 #   Run this script in a terminal from project_root with:
-#     /bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/zsh_ubuntu_checks.zsh)"
+#    zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/zsh_ubuntu_checks.zsh)"
 
 set -euo pipefail
 
-log_file="linux_inventory_$(date +%Y%m%d_%H%M%S).log"
-HTML_FILE="linux_build_report.html"
+log_file="ubuntu_inventory_$(date +%Y%m%d_%H%M%S).log"
+HTML_FILE="ubuntu_build_report.html"
 
 typeset -a executables dynamic_libs static_libs signed_files unsigned_files_list
 executables=()
