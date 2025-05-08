@@ -1,0 +1,16 @@
+{
+  "name": "iccmax",
+  "version": "2.2.26",
+   "port-version": 2,
+  "dependencies": [
+    "vcpkg-cmake",
+    "vcpkg-cmake-config",
+    "libpng",
+    "wxwidgets",
+    "tiff",
+    "libxml2",
+    "libiconv",
+    "nlohmann-json",
+    "libjpeg-turbo"
+  ]
+}
