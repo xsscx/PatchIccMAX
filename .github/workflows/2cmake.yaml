@@ -27,37 +27,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    strategy:
-      matrix:
-        build_type: [Release, Debug]
-    defaults:
-      run:
-        shell: cmd
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Cache vcpkg
-        uses: actions/cache@v3
-        with:
-          path: |
-            C:/vcpkg/installed
-          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
-          restore-keys: |
-            vcpkg-${{ runner.os }}-
-      - name: Cache CMake build
-        uses: actions/cache@v3
-        with:
-          path: |
-            PatchIccMAX/Build/Cmake
-          key: cmake-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
-          restore-keys: |
-            cmake-${{ runner.os }}-${{ matrix.build_type }}-
-on:
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: windows-latest
     defaults:
       run:
         shell: cmd
