@@ -27,31 +27,12 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    strategy:
-      matrix:
-        build_type: [Release, Debug]
     defaults:
       run:
         shell: cmd
     steps:
       - uses: actions/checkout@v3
 
-      - name: Cache vcpkg
-        uses: actions/cache@v3
-        with:
-          path: |
-            C:/vcpkg/installed
-          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
-          restore-keys: |
-            vcpkg-${{ runner.os }}-
-      - name: Cache CMake build
-        uses: actions/cache@v3
-        with:
-          path: |
-            PatchIccMAX/Build/Cmake/build
-          key: cmake-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
-          restore-keys: |
-            cmake-${{ runner.os }}-${{ matrix.build_type }}-
       - name: Install dependencies
         run: |
           git clone https://github.com/xsscx/PatchIccMAX.git
@@ -59,7 +40,6 @@ jobs:
           git checkout pr129
           vcpkg integrate install
           vcpkg install
-          ls
       - name: Configure
         run: |
           cd PatchIccMAX
@@ -74,12 +54,9 @@ jobs:
           cmake --build build --config ${{ matrix.build_type }}
           dir /s /b *.exe *.lib
  
-      - name: 🖥️ RUN STUB
+      - name: 🖥️ Host System Info
         shell: pwsh
         run: |
-          Get-ChildItem -Path "build\Tools" -Recurse -Filter *.exe | Select-Object -ExpandProperty DirectoryName -Unique | ForEach-Object { $env:PATH += ";$_"; Write-Host "✅ Added to PATH: $_"
-          cd PatchIccMAX/Testing
-          CreateAllProfiles.bat
           systeminfo
           Get-CimInstance -ClassName Win32_Processor
       - name: Summary Report
