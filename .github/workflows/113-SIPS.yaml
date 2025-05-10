@@ -80,6 +80,8 @@ jobs:
           echo "========= BEGIN INSIDE STUB ========="
           echo "=================== Running Checks off xnu-research Branch =========================================" 
           set +e
+          echo "RUN file"
+          echo -n "Found ICC files: "; find Issue113/ -type f -name "*.icc" -print0 | tee >(tr '\0' ' ') | while IFS= read -r -d '' f; do echo ">>> FILE: $f"; file "$f" || true; done
           echo "RUN sips"
           echo -n "Found ICC files: "; find Issue113/ -type f -name "*.icc" -print0 | tee >(tr '\0' ' ') | while IFS= read -r -d '' f; do echo ">>> SIPS: $f"; sips --verify "$f" || true; done
           echo "========= INSIDE STUB EXIT ========="
