@@ -5,7 +5,7 @@
 ##
 ## Last Updated: 10-MAY-2025 at 1030 EDT by David Hoyt (©)
 #
-## Intent: 113-SIPS
+## Intent: Issue113-SIPS
 #
 #
 #
@@ -20,7 +20,7 @@
 ###############################################################
 
 
-name: "113-SIPS"
+name: "Issue113-SIPS"
 
 on:
   workflow_dispatch:
