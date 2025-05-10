@@ -86,7 +86,7 @@ jobs:
           echo "RUN iccRoundTrip"
           dir=../Testing; for f in "$dir"/*.{icc,icm}; do [ -f "$f" ] && echo ">>> RoundTripping: $f" && ../Build/Tools/IccRoundTrip/iccRoundTrip "$f"; done || true
           echo "RUN sips"
-          dir=../Testing; for f in "$dir"/*.{icc,icm}; do [ -f "$f" ] && echo ">>> SIPS: $f" && sips -v "$f"; done || true
+          dir=../Testing; for f in "$dir"/*.{icc,icm}; do [ -f "$f" ] && echo ">>> SIPS: $f" && sips --verify "$f"; done || true
           echo "RUN TC PoC"
           echo "▶️ Executing round-trip PoC..."
           echo "=================== Running TC PoC off research Branch ========================================="
