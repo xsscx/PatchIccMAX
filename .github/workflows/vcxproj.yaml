@@ -101,7 +101,7 @@ jobs:
               "Tools\CmdLine\IccFromCube\iccFromCube_v16.vcxproj",
               "Tools\CmdLine\IccRoundTrip\iccRoundTrip_v22.vcxproj",
               "Tools\CmdLine\IccV5DspObsToV4Dsp\IccV5DspObsToV4Dsp_v22.vcxproj",
-              "Tools\Winnt\DemoIccMAXCmm\DemoIccMAXCmm_v22.vcxproj",
+              "Tools\Winnt\DemoIccMAXCmm\DemoIccMAXCmm_v22.vcxproj"
           )
           foreach ($project in $projects) {
               Write-Host "🔹 Building: $project"
