@@ -5,7 +5,7 @@
 ##
 ## Last Updated: 10-MAY-2025 at 0700 EDT by David Hoyt (©)
 #
-## Intent: 113cov | Work in Progress
+## Intent: Issue113cov | Work in Progress
 #
 ## TODO: Instrumentation for AFL=Bool Builds & Report
 #
@@ -14,7 +14,7 @@
 #
 ###############################################################
 
-name: "113covReport"
+name: "Issue113covReport"
 
 on:
   workflow_dispatch:
