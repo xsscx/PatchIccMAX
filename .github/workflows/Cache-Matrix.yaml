@@ -70,7 +70,9 @@ jobs:
           for d in ../Build/Tools/*; do
            [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
           done
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr128/contrib/UnitTest/iccMAX-cicd-build-checks.sh)" 
+          pwd
+          ls
+          # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr128/contrib/UnitTest/iccMAX-cicd-build-checks.sh)" 
           # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr122/contrib/UnitTest/iccMAX-cicd-build-checks.sh)"
 
       - name: 🧾 Verify CMake Cache
@@ -138,8 +140,9 @@ jobs:
           for d in ../Build/Tools/*; do
            [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
           done
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr128/contrib/UnitTest/iccMAX-cicd-build-checks.sh)" 
-       
+          # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr128/contrib/UnitTest/iccMAX-cicd-build-checks.sh)" 
+          pwd
+          ls
           # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr122/contrib/UnitTest/iccMAX-cicd-build-checks.sh)"
 
       - name: 🧾 Verify CMake Cache
