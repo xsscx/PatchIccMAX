@@ -59,16 +59,23 @@ jobs:
           git checkout pr129
           vcpkg integrate install
           vcpkg install
+          ls
       - name: Configure
         run: |
+          pwd
           cd .\PatchIccMAX\Build\Cmake\
+          pwd
+          ls
           cmake -B build -S . -G "Visual Studio 17 2022" -A x64 ^
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ^
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
       - name: Build
         run: |
+          pwd
           cd .\PatchIccMAX\Build\Cmake\
+          pwd
           cmake --build build --config ${{ matrix.build_type }}
+          ls
           dir /s /b *.exe *.lib
       - name: 🖥️ RUN STUV
         shell: pwsh
