@@ -5,14 +5,14 @@
 ##
 ## Last Updated: 10-MAY-2025 at 0900 EDT by David Hoyt (©)
 #
-## Intent: 113Patch
+## Intent: Issue113Patch
 #
 ## TODO: Refactor for all Windows & UNIX Device Reporting
 #
 #
 ###############################################################
 
-name: "113Patch"
+name: "Issue113Patch"
 
 on:
   workflow_dispatch:
