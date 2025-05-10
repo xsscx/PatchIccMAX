@@ -72,9 +72,10 @@ jobs:
           echo "=================== Extering PatchIccMAX/contrib/Build/cmake/cov ========================================="
           echo "=== Running COV | Test Unit Dump All for Issue 113 ==="      
           set +e
-          pwd
           echo "=== Running COV | ./iccRoundTrip_test ../../../../../Testing/Issue113/Coated_Fogra39L_VIGC_300-runner.icc ==="
           cd iccRoundTrip
+          pwd
+          ls
           ./iccRoundTrip_test ../../../../../Testing/Issue113/Coated_Fogra39L_VIGC_300-runner.icc
           echo "=== Running COV | llvm-profdata merge -sparse *.profraw -o default.profdata ==="
           llvm-profdata merge -sparse *.profraw -o default.profdata
@@ -83,7 +84,10 @@ jobs:
           echo "=== Running COV | llvm-cov show ./iccRoundTrip_test -instr-profile=default.profdata ==="
           llvm-cov show ./iccRoundTrip_test -instr-profile=default.profdata > iccRoundTrip_test-report.txt
           echo "=== Running COV | ./iccDumpProfile_test ../../../../../Testing/Issue113/Coated_Fogra39L_VIGC_300-runner.icc ==="
+          pwd
+          ls
           cd ../iccDumpProfile
+          pwd
           LLVM_PROFILE_FILE="iccDumpProfile_test.profraw"  ./iccDumpProfile_test ../../../../../Testing/Issue113/Coated_Fogra39L_VIGC_300-runner.icc
           LLVM_PROFILE_FILE="iccDumpProfile_test.profraw"  ./iccDumpProfile_test -v  ../../../../../Testing/Issue113/Coated_Fogra39L_VIGC_300-runner.icc
           echo "=== Running COV | llvm-profdata merge -sparse *.profraw -o iccDumpProfile_test.profdata ==="
@@ -92,8 +96,15 @@ jobs:
           llvm-cov report ./iccDumpProfile_test -instr-profile=iccDumpProfile_test.profdata
           echo "=== Running COV | llvm-cov show ./iccDumpProfile_test -instr-profile=iccDumpProfile_test.profdata ==="
           llvm-cov show ./iccDumpProfile_test -instr-profile=iccDumpProfile_test.profdata  > iccDumpProfile_test-report.txt
+          ls
           # genhtml -o htmlcov iccRoundTrip_test.lcov
           cd ../
+          cd iccFromXml
+          pwd
+          LLVM_PROFILE_FILE="iccFromXml_test.profraw" ./iccFromXml_test_test iccFromXml/icPlatformSignature-ubsan-poc.xml iccFromXml/icPlatformSignature-ubsan-poc.occ
+          LLVM_PROFILE_FILE="iccFromXml_test.profraw" ./iccFromXml_test iccFromXml/icSigMatrixElemType-Read-poc.xml iccFromXml/icSigMatrixElemType-Read-poc.icc
+          LLVM_PROFILE_FILE="iccFromXml_test.profraw" ./iccFromXml_test iccFromXml/cve-2023-46602.xml iccFromXml/cve-2023-46602.icc
+          ls
           EXIT_CODE=$?
           if [ "$EXIT_CODE" -ne 0 ]; then
           echo "PoC executed as expected with failure code $EXIT_CODE."
