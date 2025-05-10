@@ -48,7 +48,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            PatchIccMAX/Build/Cmake/build
+            PatchIccMAX/Build/Cmake
           key: cmake-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
             cmake-${{ runner.os }}-${{ matrix.build_type }}-
@@ -64,7 +64,7 @@ jobs:
           cd PatchIccMAX
           cd Build
           cd Cmake
-          cmake -B build -S Build/Cmake -G "Visual Studio 17 2022" -A x64 ^
+          cmake -B build -S . -G "Visual Studio 17 2022" -A x64 ^
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ^
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
       - name: Build
