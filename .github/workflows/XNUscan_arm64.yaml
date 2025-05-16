@@ -62,7 +62,7 @@ jobs:
         export CC=clang
         export CXX=clang++
         sudo rm -rf /Library/Frameworks/Mono.framework/Headers/png.h
-        cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" -DCMAKE_BUILD_TYPE=Debug -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall -I/opt/homebrew/include -L/opt/homebrew/lib" -Wno-dev Cmake/
+        cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" -DCMAKE_BUILD_TYPE=Debug -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall -I/opt/homebrew/include -L/opt/homebrew/lib" -DCMAKE_CXX_FLAGS="-w" -DCMAKE_C_FLAGS="-w" -Wno-dev Cmake/
         make -j$(nproc)
         
     - name: Build Color Bleed Demo Scanner with Code Coverage
