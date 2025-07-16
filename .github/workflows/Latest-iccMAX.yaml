@@ -80,15 +80,12 @@ jobs:
     steps:
       - name: Checkout issue113
         uses: actions/checkout@v4
-        with:
-          ref: issue113
 
       - name: Clone repository and install dependencies
         run: |
           echo "📥 Cloning PatchIccMAX repository..."
           git clone https://github.com/xsscx/PatchIccMAX.git
           cd PatchIccMAX
-          git checkout issue113
           echo "📦 Installing Homebrew dependencies..."
           brew install libpng nlohmann-json libxml2 wxwidgets libtiff jpeg || echo "⚠️ Some dependencies might already be installed."
           echo "✔ Dependency installation complete."
@@ -134,8 +131,6 @@ jobs:
     steps:
       - name: Checkout issue113
         uses: actions/checkout@v4
-        with:
-          ref: issue113
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1
@@ -187,7 +182,6 @@ jobs:
           if (Test-Path $patchDir) { Remove-Item -Recurse -Force $patchDir }
           git clone https://github.com/xsscx/PatchIccMAX.git $patchDir
           cd $patchDir
-          git checkout pr129
       - name: Configure & Build with CMake
         shell: pwsh
         run: |
