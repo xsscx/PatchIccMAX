@@ -29,8 +29,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: issue113
 
       - name: Initialize the CodeQL tools
         uses: github/codeql-action/init@v3
