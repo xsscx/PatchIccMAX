@@ -28,10 +28,8 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Checkout PR129
+      - name: Checkout master
         uses: actions/checkout@v4
-        with:
-          ref: issue113
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1
@@ -83,7 +81,6 @@ jobs:
           if (Test-Path $patchDir) { Remove-Item -Recurse -Force $patchDir }
           git clone https://github.com/xsscx/PatchIccMAX.git $patchDir
           cd $patchDir
-          git checkout pr129
       - name: Configure & Build with CMake
         shell: pwsh
         run: |
