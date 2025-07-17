@@ -85,9 +85,11 @@ jobs:
           ls
           find . -type f -name '*.sh' -print -exec sh '{}' \;
           echo "RUN iccDumProfile"
-          dir=../Testing; for f in "$dir"/*.{icc,icm}; do [ -f "$f" ] && echo ">>> Dumping: $f" && ../Build/Tools/IccDumpProfile/iccDumpProfile -v "$f"; done || true
+          # dir=../Testing; for f in "$dir"/*.{icc,icm}; do [ -f "$f" ] && echo ">>> Dumping: $f" && ../Build/Tools/IccDumpProfile/iccDumpProfile -v "$f"; done || true
+          dir=../Testing; for f in "$dir"/*.{icc,icm}; do [ -f "$f" ] && echo ">>> Dumping: $f" && iccDumpProfile -v "$f"; done || true
           echo "RUN iccRoundTrip"
-          dir=../Testing; for f in "$dir"/*.{icc,icm}; do [ -f "$f" ] && echo ">>> RoundTripping: $f" && ../Build/Tools/IccRoundTrip/iccRoundTrip "$f"; done || true
+          # dir=../Testing; for f in "$dir"/*.{icc,icm}; do [ -f "$f" ] && echo ">>> RoundTripping: $f" && ../Build/Tools/IccRoundTrip/iccRoundTrip "$f"; done || true
+          dir=../Testing; for f in "$dir"/*.{icc,icm}; do [ -f "$f" ] && echo ">>> RoundTripping: $f" && iccRoundTrip "$f"; done || true
           echo "RUN sips"
           echo -n "Found ICC files: "; find . -type f -name "*.icc" -print0 | tee >(tr '\0' ' ') | while IFS= read -r -d '' f; do echo ">>> SIPS: $f"; sips --verify "$f" || true; done
           echo "========= INSIDE STUB EXIT ========="
