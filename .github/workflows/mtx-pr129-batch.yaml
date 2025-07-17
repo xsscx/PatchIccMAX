@@ -3,11 +3,11 @@
 ## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 05-MAY-2025 at 1030 EDT by David Hoyt (©)
+## Last Updated: 17-JULY-2025 at 1400 EDT by David Hoyt (©)
 #
-## Intent: mtx-pr129-batch
+## Intent: mtx-latest-batch
 #
-#
+## What: Run the latest head on master 
 #
 #
 #
@@ -19,14 +19,14 @@
 #
 ###############################################################
 
-name: "mtx-pr129-batch"
+name: "mtx-latest-batch"
 
 on:
   workflow_dispatch:
 
 jobs:
   build-test-matrix:
-    name: mtx-research-stub ${{ matrix.macos }} ${{ matrix.arch }}
+    name: mtx-master-stub ${{ matrix.macos }} ${{ matrix.arch }}
     runs-on: macos-${{ matrix.macos }}
     strategy:
       fail-fast: false
@@ -35,10 +35,10 @@ jobs:
         arch: [x86_64, arm64]
 
     steps:
-      - name: Checkout Repository for mtx-research-stub
+      - name: Checkout Repository for mtx-master-stub
         uses: actions/checkout@v4
 
-      - name: Set Up Git Identity for mtx-research-stub
+      - name: Set Up Git Identity for mtx-master-stub
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
@@ -46,15 +46,15 @@ jobs:
         run: |
           echo "=== Installing Build and Runtime Dependencies ==="
           brew install nlohmann-json libxml2 wxwidgets libtiff libpng jpeg
-      - name: Get research for mtx-research-stub
+      - name: Get master for mtx-master-stub
         run: |
-          echo "=== Cloning off research Branch for mtx-research-stub ==="
+          echo "=== Cloning off master Branch for mtx-master-stub ==="
           git clone https://github.com/xsscx/PatchIccMAX.git
           cd PatchIccMAX
-          echo "=== DONE Cloning PatchIccMAX for mtx-research-stub ==="
+          echo "=== DONE Cloning PatchIccMAX for mtx-master-stub ==="
       - name: Configure with CMake (ASAN + Debug)
         run: |
-          echo "=== Configuring mtx-research-stub ==="
+          echo "=== Configuring mtx-master-stub ==="
           cd PatchIccMAX/Build
           export CC=clang
           export CXX=clang++
@@ -65,23 +65,23 @@ jobs:
           clang --version
           sudo rm -rf /Library/Frameworks/Mono.framework/Headers/png.h
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wextra -Wno-unused-parameter -Wno-unused-variable"  -Wno-dev -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON  -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON Cmake/
-      - name: Build research for mtx-research-stub
+      - name: Build master for mtx-master-stub
         run: |
           echo "=== Starting Build ==="
           cd PatchIccMAX/Build
           make -j$(nproc)
-      - name: BATCH 1 - mtx-research-stub
+      - name: BATCH 1 - mtx-master-stub
         run: |
-          echo "========= BEGIN OUTSIDE COV STUB for mtx-research-stub ========="
-          echo "========= BEGIN INSIDE STUB for mtx-research-stub =============="
+          echo "========= BEGIN OUTSIDE COV STUB for mtx-master-stub ========="
+          echo "========= BEGIN INSIDE STUB for mtx-master-stub =============="
           cd PatchIccMAX/Testing
           # Add Tools/* to PATH
           for d in ../Build/Tools/*; do
             [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
           done
-          echo "=================== Running Checks off xnu-research Branch for mtx-research-stub =========================================" 
+          echo "=================== Running Checks off xnu-master Branch for mtx-master-stub =========================================" 
           set +e
-          echo "========= BEGIN mtx-research-stub ========"
+          echo "========= BEGIN mtx-master-stub ========"
           pwd
           sh CreateAllProfiles.sh
           cd CalcTest
@@ -109,7 +109,7 @@ jobs:
           
           echo "Measurement: iccRoundTrip Display/Rec2100HlgNarrow.icc"
           iccDumpProfile Display/Rec2100HlgNarrow.icc
-          echo "========= EXIT  mtx-research-stub ========"
+          echo "========= EXIT  mtx-master-stub ========"
           echo "========= BEGIN INNER Issue 113 STUB ========"
           set +e
           echo "RUN file"
@@ -117,20 +117,20 @@ jobs:
           echo "RUN sips"
           echo -n "Found ICC files: "; find Issue113/ -type f -name "*.icc" -print0 | tee >(tr '\0' ' ') | while IFS= read -r -d '' f; do echo ">>> SIPS: $f"; sips --verify "$f" || true; done
           echo "========= INNER STUB Issue 113 EXIT ========="
-          echo "=================== Running Checks off xnu-research Branch =========================================" 
+          echo "=================== Running Checks off xnu-master Branch =========================================" 
           echo "RUN sips"
           echo -n "Found ICC files: "; find . -type f -name "*.icc" -print0 | tee >(tr '\0' ' ') | while IFS= read -r -d '' f; do echo ">>> SIPS: $f"; sips --verify "$f" || true; done
           echo "========= INSIDE STUB EXIT ========="
-          echo "========= INSIDE STUB mtx-research-stub EXIT =================="
+          echo "========= INSIDE STUB mtx-master-stub EXIT =================="
  
           EXIT_CODE=$?
           if [ "$EXIT_CODE" -ne 0 ]; then
-          echo "mtx-research-stub executed as expected with failure code $EXIT_CODE."
+          echo "mtx-master-stub executed as expected with failure code $EXIT_CODE."
           else
-          echo "mtx-research-stub unexpectedly succeeded. Please verify runtime behavior."
+          echo "mtx-master-stub unexpectedly succeeded. Please verify runtime behavior."
           fi
-          echo "========= OUTSIDE STUB mtx-research-stub EXIT ========="
-      - name: BATCH 2 - mtx-research-stub
+          echo "========= OUTSIDE STUB mtx-master-stub EXIT ========="
+      - name: BATCH 2 - mtx-master-stub
         run: |
           echo "========= BEGIN OUTSIDE STUB ========="
           cd PatchIccMAX/Testing
@@ -139,7 +139,7 @@ jobs:
             [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
           done
           echo "========= BEGIN INSIDE STUB ========="
-          echo "=================== Running Issue 113 Checks off research Branch ========================================="
+          echo "=================== Running Issue 113 Checks off master Branch ========================================="
           sh CreateAllProfiles.sh
           set +e
           echo "RUN iccDumProfile"
@@ -150,7 +150,7 @@ jobs:
           dir=../Testing; for f in "$dir"/*.{icc,icm}; do [ -f "$f" ] && echo ">>> SIPS: $f" && sips --verify "$f"; done || true
           echo "RUN TC PoC"
           echo "▶️ Executing round-trip PoC..."
-          echo "=================== Running TC PoC off research Branch ========================================="
+          echo "=================== Running TC PoC off master Branch ========================================="
           echo "PoC iccRoundTrip Testing/ICS/Rec2100HlgFull-Part2.icc"
           echo "Issue: NaN detected in icDeltaE:dL(): input=NaN [bits=0xffc00000]"
           echo "Issue: IccProfLib/IccEval.cpp:141:28: runtime error: downcast of address 0x507000000090 which does not point to an object of type 'CIccTagLutAtoB'"
@@ -180,10 +180,10 @@ jobs:
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mtx-research-stub-${{ matrix.macos }}-${{ matrix.arch }}
+          name: mtx-master-stub-${{ matrix.macos }}-${{ matrix.arch }}
           path: PatchIccMAX/Build
 
-      - name: Upload CMake Logs for mtx-research-stub
+      - name: Upload CMake Logs for mtx-master-stub
         uses: actions/upload-artifact@v4
         with:
           name: cmake-log-${{ matrix.macos }}-${{ matrix.arch }}
@@ -192,6 +192,6 @@ jobs:
       - name: Matrix Summary
         if: always()
         run: |
-          echo "## for mtx-research-stub ${{ matrix.macos }} ${{ matrix.arch }} Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## for mtx-master-stub ${{ matrix.macos }} ${{ matrix.arch }} Summary" >> $GITHUB_STEP_SUMMARY
           echo "- Directory: PatchIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
-          echo "- RAN: mtx-research-stub: Yes" >> $GITHUB_STEP_SUMMARY          
+          echo "- RAN: mtx-master-stub: Yes" >> $GITHUB_STEP_SUMMARY          
