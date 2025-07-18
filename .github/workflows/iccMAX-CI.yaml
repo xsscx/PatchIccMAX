@@ -33,7 +33,7 @@ jobs:
       matrix:
         compiler: [gcc, clang]
     steps:
-      - name: Checkout PR129
+      - name: Checkout master
         uses: actions/checkout@v4
 
       - name: Install Dependencies
@@ -90,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: iccmax-linux-${{ matrix.compiler }}
-          path: Build
+          path: PatchIccMAX/Build/Tools
 
       - name: Summary Report
         if: always()
@@ -104,7 +104,7 @@ jobs:
     name: "macOS Clang"
     runs-on: macos-latest
     steps:
-      - name: Checkout PR129
+      - name: Checkout master
         uses: actions/checkout@v4
 
       - name: Clone repository and install dependencies
@@ -144,11 +144,11 @@ jobs:
           make -j$(sysctl -n hw.ncpu)
           find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print `` 
           echo "✔ Build process completed. Listing generated files..."
-      - name: Upload Linux Artifacts
+      - name: Upload macos Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: iccmax-macos-${{ matrix.compiler }}
-          path: Build
+          path: PatchIccMAX/Build/Tools
       - name: Summary Report
         if: always()
         run: |
