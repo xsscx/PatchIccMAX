@@ -75,10 +75,10 @@ jobs:
 
       - name: Update PATH for Tools
         run: |
-          $toolDirs = Get-ChildItem -Path PatchIccMAX\Tools -Recurse -Filter Debug -Directory |
-            Select-Object -ExpandProperty FullName
-          $env:PATH = ($toolDirs -join ';') + ';' + $env:PATH
-          Write-Host "Updated PATH: $env:PATH"
+             for /R PatchIccMAX\Tools %%D in (Debug) do (
+             set "PATH=%%D;%PATH%"
+             )
+             echo Updated PATH: %PATH%
 
       - name: Create ICC Profiles
         run: |
