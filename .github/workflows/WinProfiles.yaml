@@ -75,7 +75,6 @@ jobs:
 
       - name: Update PATH for Tools
         run: |
-          # Add all Debug directories under Tools to PATH
           $toolDirs = Get-ChildItem -Path PatchIccMAX\Tools -Recurse -Filter Debug -Directory |
             Select-Object -ExpandProperty FullName
           $env:PATH = ($toolDirs -join ';') + ';' + $env:PATH
