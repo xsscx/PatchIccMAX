@@ -82,7 +82,7 @@ jobs:
 
       - name: Create ICC Profiles
         run: |
-          cd Calc
+          cd PatchIccMAX\Testing\Calc
           D:\a\PatchIccMAX\PatchIccMAX\PatchIccMAX\Build\Cmake\build\Tools\IccFromXml\Release\iccFromXml.exe CameraModel.xml CameraModel.icc
           D:\a\PatchIccMAX\PatchIccMAX\PatchIccMAX\Build\Cmake\build\Tools\IccFromXml\Release\iccFromXml.exe ElevenChanKubelkaMunk.xml ElevenChanKubelkaMunk.icc
           D:\a\PatchIccMAX\PatchIccMAX\PatchIccMAX\Build\Cmake\build\Tools\IccFromXml\Release\iccFromXml.exe RGBWProjector.xml RGBWProjector.icc
