@@ -1,0 +1,94 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 22-JULY-2025 0900 EDT by David Hoyt (©)
+#
+## Intent: WinProfiles
+#
+## TODO: Sanitizer Builds
+#
+## Latest: Add create profiles and run tests
+#          Add Windows PATH for Tools/ & Testing/
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: WinProfiles
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: cmd
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache vcpkg packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            C:\vcpkg\installed
+            C:\vcpkg\buildtrees
+            C:\vcpkg\downloads
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+      - name: Cache build binaries
+        uses: actions/cache@v3
+        with:
+          path: |
+            PatchIccMAX\Build\Cmake\build
+          key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
+      - name: Install dependencies
+        run: |
+          git clone https://github.com/xsscx/PatchIccMAX.git
+          cd PatchIccMAX
+          vcpkg integrate install
+          vcpkg install
+      - name: Configure
+        run: |
+          cd PatchIccMAX
+          cd Build\Cmake
+          cmake -B build -S . -G "Visual Studio 17 2022" -A x64 ^
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ^
+          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+      - name: Build
+        run: |
+          cd PatchIccMAX\Build\Cmake
+          cmake --build build --config ${{ matrix.build_type }}
+          dir /s /b *.exe *.lib
+
+      - name: Update PATH for Tools
+        run: |
+          # Add all Debug directories under Tools to PATH
+          $toolDirs = Get-ChildItem -Path PatchIccMAX\Tools -Recurse -Filter Debug -Directory |
+            Select-Object -ExpandProperty FullName
+          $env:PATH = ($toolDirs -join ';') + ';' + $env:PATH
+          Write-Host "Updated PATH: $env:PATH"
+
+      - name: Create ICC Profiles
+        run: |
+          cd PatchIccMAX\Testing
+          .\CreateAllProfiles.bat
+
+      - name: Run Unit Tests
+        run: |
+          cd PatchIccMAX\Testing
+          .\CreateAllProfiles.bat
+          .\RunTests.bat
+          
