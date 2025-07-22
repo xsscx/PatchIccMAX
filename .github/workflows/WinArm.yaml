@@ -43,7 +43,7 @@ jobs:
             C:\vcpkg\installed
             C:\vcpkg\buildtrees
             C:\vcpkg\downloads
-          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+          key: vcpkg-arm-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
           restore-keys: |
             vcpkg-${{ runner.os }}-
       - name: Cache build binaries
@@ -51,7 +51,7 @@ jobs:
         with:
           path: |
             PatchIccMAX\Build\Cmake\build
-          key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
+          key: cmake-arm-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
             cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
       - name: Install dependencies
