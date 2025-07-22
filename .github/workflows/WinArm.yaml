@@ -59,6 +59,7 @@ jobs:
           git clone https://github.com/xsscx/PatchIccMAX.git
           cd PatchIccMAX
           vcpkg integrate install
+          vcpkg install
 
       - name: Configure
         run: |
@@ -68,7 +69,7 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
       - name: Build
         run: |
-          cd PatchIccMAX\Build\Cmake
+          cd PatchIccMAX\
           cmake --build build --config ${{ matrix.build_type }}
           dir /s /b *.exe *.lib
 
