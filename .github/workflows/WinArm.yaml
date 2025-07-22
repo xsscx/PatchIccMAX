@@ -60,6 +60,7 @@ jobs:
           cd PatchIccMAX
           vcpkg integrate install
           vcpkg install
+          vcpkg x-add-version --all
 
       - name: Configure
         run: |
