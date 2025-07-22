@@ -50,7 +50,7 @@ jobs:
             llvm clang-17
       - name: 📦 Get research for Stub Build
         run: |
-          echo "=== Cloning off research Branch ==="
+          echo "=== Cloning off master Branch ==="
           git clone https://github.com/xsscx/PatchIccMAX.git
           cd PatchIccMAX
           echo "=== DONE Cloning PatchIccMAX for POCSTUB ==="
@@ -84,13 +84,14 @@ jobs:
             [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
           done
           echo "🔁 STUB"
-          echo "=================== Running CreateAllProfiles.sh ========================================="
+          echo "=================== Running CreateAllProfiles & RunTests ========================================="
           sh CreateAllProfiles.sh
+          sh RunTests.sh
           pwd
           ls
-          echo "=================== DONE in CreateAllProfiles.sh ========================================="
+          echo "=================== DON ========================================="
           echo "▶️ Executing round-trip PoC..."
-          echo "=================== Running TC PoC off research Branch ========================================="
+          echo "=================== Running TC PoC off master Branch ========================================="
           echo "PoC iccRoundTrip Testing/ICS/Rec2100HlgFull-Part2.icc"
           set +e  # Allow failure (crash) without exiting script
           ../Build/Tools/IccRoundTrip/iccRoundTrip ICS/Rec2100HlgFull-Part2.icc
