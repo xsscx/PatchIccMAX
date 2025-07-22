@@ -59,7 +59,7 @@ jobs:
           git clone https://github.com/xsscx/PatchIccMAX.git
           cd PatchIccMAX
           vcpkg integrate install
-          vcpkg install
+
       - name: Configure
         run: |
           cd PatchIccMAX
@@ -79,11 +79,6 @@ jobs:
              set "PATH=%%D;%PATH%"
              )
              echo Updated PATH: %PATH%
-
-      - name: Create ICC Profiles
-        run: |
-          cd PatchIccMAX\Testing
-          .\CreateAllProfiles.bat
 
       - name: Run Unit Tests
         run: |
