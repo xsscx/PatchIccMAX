@@ -58,6 +58,7 @@ jobs:
         run: |
           git clone https://github.com/xsscx/PatchIccMAX.git
           cd PatchIccMAX
+          git fetch
           vcpkg integrate install
           vcpkg install
       - name: Configure
