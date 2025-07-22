@@ -102,8 +102,8 @@ typedef float              icFloatNumber;
 /** String formating macros need to match precision of icFloatNumber
 *If precision is double change the "f" below to "lf"
 */
-#define ICFLOATSFX "f"
-#define ICFLOATFMT "%f"
+#define ICFLOATSFX "lf"
+#define ICFLOATFMT "%lf"
 
 /* For string operations */
 typedef char                icChar;
