@@ -146,5 +146,5 @@ jobs:
         run: |
           echo "### Ubuntu Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "- Build Directory: PatchIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
-          echo "- Artifacts Uploaded: iccmax-macos-clang" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts Uploaded: iccmax-linux-clang" >> $GITHUB_STEP_SUMMARY
           echo "- Status: Success" >> $GITHUB_STEP_SUMMARY
