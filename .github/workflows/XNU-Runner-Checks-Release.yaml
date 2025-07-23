@@ -46,7 +46,6 @@ jobs:
           brew install nlohmann-json libxml2 wxwidgets libtiff libpng jpeg
     - name: Configure the build with CMake (strict + logged)
       run: |
-        mkdir -p PatchIccMAX/Build
         cd PatchIccMAX/Build
         sudo rm -rf /Library/Frameworks/Mono.framework/Headers/png.h
         export CXX=clang++
