@@ -49,7 +49,7 @@ jobs:
         cd PatchIccMAX/Build
         sudo rm -rf /Library/Frameworks/Mono.framework/Headers/png.h
         export CXX=clang++
-        cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -Wextra -Wno-unused-parameter -Wno-unused-variable"  -Wno-dev -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON  -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON Cmake/
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-dev -DENABLE_TOOLS=ON -DENABLE_SHARED_LIBS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_TESTS=ON  -DENABLE_INSTALL_RIM=ON -DENABLE_ICCXML=ON Cmake/
     - name: Build and Run Test Suite
       run: |
         cd PatchIccMAX/Build
