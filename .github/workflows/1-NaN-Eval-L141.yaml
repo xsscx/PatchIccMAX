@@ -60,7 +60,6 @@ jobs:
           echo "=== Cloning TC PoC off research Branch ==="
           git clone https://github.com/xsscx/PatchIccMAX.git
           cd PatchIccMAX
-          git checkout research
           echo "=== DONE Cloning PatchIccMAX for research ==="
       - name: 🏗️ Configure with CMake (ASAN + Debug)
         run: |
