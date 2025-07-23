@@ -44,7 +44,6 @@ jobs:
       run: |
         git clone https://github.com/xsscx/PatchIccMAX.git
         cd PatchIccMAX
-        git checkout research
 
     - name: Install dependencies
       run: brew install nlohmann-json libxml2 wxwidgets libtiff libpng jpeg
