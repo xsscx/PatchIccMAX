@@ -66,6 +66,7 @@ jobs:
           [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
          done
         sh CreateAllProfiles.sh
+        sh RunTests.sh
         # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr128/contrib/UnitTest/iccMAX-cicd-build-checks.sh)"
         # wget https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/pr120/contrib/UnitTest/iccMAX-cicd-build-checks.sh
         # bash iccMAX-cicd-build-checks.sh > ../test-suite.log 2>&1 || echo "Tests failed, continuing to upload logs."
