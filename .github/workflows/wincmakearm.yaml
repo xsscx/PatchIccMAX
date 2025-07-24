@@ -3,14 +3,14 @@
 ## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 26-JULY-2025 1400Z by David Hoyt (©)
+## Last Updated: 25-JULY-2025 1500Z by David Hoyt (©)
 #
-## Intent: WinProfiles
+## Intent: WinCmakeArm
 #
-## TODO: Sanitizer Builds
+## TODO: Add Unit Test Suite
 #
-## Latest: Add create profiles and run tests
-#          Add Windows PATH for Tools/ & Testing/
+#
+#
 #
 #
 #
@@ -19,51 +19,31 @@
 #
 ###############################################################
 
-name: WinProfiles
+name: WinCmakeArm
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-11-arm
     defaults:
       run:
         shell: cmd
     strategy:
       matrix:
-        build_type: [Debug, Release]
+        build_type: [Release]
+
     steps:
       - uses: actions/checkout@v3
 
-      - name: Cache vcpkg packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            C:\vcpkg\installed
-            C:\vcpkg\buildtrees
-            C:\vcpkg\downloads
-          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
-          restore-keys: |
-            vcpkg-${{ runner.os }}-
-      - name: Cache build binaries
-        uses: actions/cache@v3
-        with:
-          path: |
-            PatchIccMAX\Build\Cmake\build
-          key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
-          restore-keys: |
-            cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
       - name: Install dependencies
         run: |
           git clone https://github.com/xsscx/PatchIccMAX.git
           cd PatchIccMAX
+          cd Build\Cmake
           vcpkg integrate install
           vcpkg install
-      - name: Configure
-        run: |
-          cd PatchIccMAX
-          cd Build\Cmake
           cmake -B build -S . -G "Visual Studio 17 2022" -A x64 ^
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ^
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
@@ -72,20 +52,9 @@ jobs:
           cd PatchIccMAX\Build\Cmake
           cmake --build build --config ${{ matrix.build_type }}
           dir /s /b *.exe *.lib
-          Get-ChildItem -Recurse -Include *.exe -Path .\build_* | Where-Object { -not $_.PSIsContainer -and $_.FullName -notmatch '\\CMakeFiles\\' } | Select-Object FullName, Length | Sort-Object FullName
-          Get-ChildItem -Recurse -Include *.lib -Path .\build_* | Where-Object { -not $_.PSIsContainer -and $_.FullName -notmatch '\\CMakeFiles\\' } | Select-Object FullName, Length | Sort-Object FullName
-          Get-ChildItem -Recurse -Include *.exe,*.lib -Path .\build_* | Where-Object { -not $_.PSIsContainer -and $_.FullName -notmatch '\\CMakeFiles\\' } | Select-Object FullName, Length | Sort-Object FullName
-
-
-      - name: Update PATH for Tools
+      - name: Run Unit Tests
         run: |
-             for /R PatchIccMAX\Tools %%D in (Debug) do (
-             set "PATH=%%D;%PATH%"
-             )
-             echo Updated PATH: %PATH%
 
-      - name: Create ICC Profiles
-        run: |
           cd PatchIccMAX\Testing\Calc
           D:\a\PatchIccMAX\PatchIccMAX\PatchIccMAX\Build\Cmake\build\Tools\IccFromXml\Release\iccFromXml.exe CameraModel.xml CameraModel.icc
           D:\a\PatchIccMAX\PatchIccMAX\PatchIccMAX\Build\Cmake\build\Tools\IccFromXml\Release\iccFromXml.exe ElevenChanKubelkaMunk.xml ElevenChanKubelkaMunk.icc
@@ -239,37 +208,3 @@ jobs:
           D:\a\PatchIccMAX\PatchIccMAX\PatchIccMAX\Build\Cmake\build\Tools\IccFromXml\Release\iccFromXml.exe RefDecH.xml RefDecH.icc
           D:\a\PatchIccMAX\PatchIccMAX\PatchIccMAX\Build\Cmake\build\Tools\IccFromXml\Release\iccFromXml.exe RefIncW.xml RefIncW.icc
           cd ..
-      - name: Verify Build Output
-        shell: pwsh
-        run: |
-          $cmakeCache = "D:\a\PatchIccMAX\Build\Cmake\build\CMakeCache.txt"
-          if (Test-Path $cmakeCache) {
-            Write-Host "? Build succeeded. CMake cache found."
-          } else {
-            Write-Host "? Build failed! No CMakeCache.txt found."
-            exit 1
-          }
-      - name: Upload Windows Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: iccmax-windows-msvc
-          path: C:\test\PatchIccMAX
-
-      - name: Upload Windows Logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: iccmax-windows-logs
-          path: C:\test\PatchIccMAX\Build\Cmake\build\CMakeCache.txt
-
-      - name: Host System Info
-        shell: pwsh
-        run: |
-          systeminfo
-          Get-CimInstance -ClassName Win32_Processor
-      - name: Summary Report
-        if: always()
-        run: |
-          echo "### Windows Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- Build Directory: D:\a\PatchIccMAX\Build\Cmake\build\/" >> $GITHUB_STEP_SUMMARY
-          echo "- Artifacts Uploaded: iccmax-windows-clang" >> $GITHUB_STEP_SUMMARY
-          echo "- Status: Success" >> $GITHUB_STEP_SUMMARY

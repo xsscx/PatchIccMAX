@@ -59,6 +59,7 @@ jobs:
         export PATH="/opt/homebrew/opt/llvm@17/bin:$PATH"
         mkdir -p DemoIccMAX/Build
         cd DemoIccMAX/Build
+        sudo rm -rf /Library/Frameworks/Mono.framework/Headers/png.h
         cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release-Wno-dev -DENABLE_TOOLS=ON Cmake/
 
     # Run make on macos-arm64-master-release

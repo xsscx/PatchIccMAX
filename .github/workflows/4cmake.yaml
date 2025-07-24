@@ -1,0 +1,111 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 25-JULY-2025 1600Z by David Hoyt (©)
+#
+## Intent: 4Cmake
+#
+## TODO: Add Unit Test Suite
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: 4Cmake
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Clone DemoIccMAX Source
+        run: |
+          git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+          cd DemoIccMAX
+          vcpkg integrate install
+          vcpkg install
+
+      - name: Configure with Preset
+        run: |
+          cd DemoIccMAX
+          cmake --preset vs2022-x64 -B $env:GITHUB_WORKSPACE\DemoIccMAX\build -S Build/Cmake
+
+      - name: Build Project
+        run: |
+          cd DemoIccMAX
+          cmake --build build -- /m /maxcpucount
+
+      - name: Prepend Debug Tools to PATH
+        run: |
+          $tools = @(
+            "IccApplyNamedCmm", "IccApplyProfiles", "IccApplyToLink", "IccDumpProfile",
+            "IccFromCube", "IccFromXml", "IccJpegDump", "IccPngDump",
+            "IccRoundTrip", "IccSpecSepToTiff", "IccTiffDump", "IccToXml",
+            "IccV5DspObsToV4Dsp", "wxProfileDump"
+          )
+          foreach ($tool in $tools) {
+            $env:PATH = "$env:GITHUB_WORKSPACE\DemoIccMAX\Tools\$tool\Debug;$env:PATH"
+          }
+
+      - name: Run Functional Test Suite
+        run: |
+          cd $env:GITHUB_WORKSPACE\DemoIccMAX\Testing
+          .\CreateAllProfiles.bat
+          .\RunTests.bat
+
+          cd CalcTest
+          .\checkInvalidProfiles.bat
+          .\runtests.bat
+          cd ..
+
+          cd Display
+          .\RunProtoTests.bat
+          cd ..
+
+          cd HDR
+          .\mkprofiles.bat
+          cd ..
+
+          cd mcs
+          .\updateprev.bat
+          .\updateprevWithBkgd.bat
+          cd ..
+
+          cd Overprint
+          .\RunTests.bat
+          cd ..
+
+      - name: Post-Build Summary Script
+        run: |
+          cd $env:GITHUB_WORKSPACE\DemoIccMAX
+          iwr https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/windows-build-report.ps1 -OutFile windows-build-report.ps1
+          ./windows-build-report.ps1
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: iccmax-windows-msvc
+          path: DemoIccMAX/build/**/*.@(exe|lib)
+
+      - name: Summary Report
+        if: always()
+        run: |
+          echo "### ICCMAX Windows Build" >> $env:GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ job.status }}" >> $env:GITHUB_STEP_SUMMARY

@@ -49,7 +49,7 @@ jobs:
           
           $env:VSCMD_ARG_HOST_ARCH = "x64"
           $env:VSCMD_ARG_TGT_ARCH = "x64"
-          
+          del vcpkg.json
           $optDir = "C:\test"
           $vcpkgDir = "$optDir\vcpkg"
           $patchDir = "$optDir\PatchIccMAX"
@@ -81,6 +81,7 @@ jobs:
           if (Test-Path $patchDir) { Remove-Item -Recurse -Force $patchDir }
           git clone https://github.com/xsscx/PatchIccMAX.git $patchDir
           cd $patchDir
+          del vcpkg.json
       - name: Configure & Build with CMake
         shell: pwsh
         run: |
