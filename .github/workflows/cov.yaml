@@ -3,7 +3,7 @@
 ## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
 ##                 https://srd.cx
 ##
-## Last Updated: 04-MAY-2025 at 0800 EST by David Hoyt (©)
+## Last Updated: 25-JULY-2025 at 1200Z by David Hoyt (©)
 #
 ## Intent: code-coverage-proto
 #
@@ -19,7 +19,7 @@ on:
 
 jobs:
   build-linux:
-    name: Build Instrumented Binaries
+    name: Build Instrumented Binaries from Master
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -45,7 +45,7 @@ jobs:
       run: |
         git clone https://github.com/xsscx/PatchIccMAX.git
         cd PatchIccMAX
-        git checkout research
+        git checkout master
 
     - name: Configure the build with CMake
       run: |
