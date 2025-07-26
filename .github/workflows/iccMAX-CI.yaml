@@ -31,6 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        build_type: [Release, Debug]
         compiler: [gcc, clang]
     steps:
       - name: Checkout master
@@ -103,6 +104,11 @@ jobs:
   macos:
     name: "macOS Clang"
     runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Release, Debug]
+        compiler: [gcc, clang]
     steps:
       - name: Checkout master
         uses: actions/checkout@v4
@@ -159,8 +165,12 @@ jobs:
   windows:
     name: "Windows MSVC"
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Release, Debug]
     steps:
-      - name: Checkout PR129
+      - name: Checkout master
         uses: actions/checkout@v4
 
       - name: Setup MSBuild
