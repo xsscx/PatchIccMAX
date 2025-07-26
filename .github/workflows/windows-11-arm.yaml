@@ -49,7 +49,9 @@ jobs:
           
           $env:VSCMD_ARG_HOST_ARCH = "x64"
           $env:VSCMD_ARG_TGT_ARCH = "x64"
-          
+          del vcpkg.json
+          cd PatchIccMAX
+          del vcpkg.json
           $optDir = "C:\test"
           $vcpkgDir = "$optDir\vcpkg"
           $patchDir = "$optDir\PatchIccMAX"
