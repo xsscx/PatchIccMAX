@@ -26,7 +26,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest-arm
+    runs-on: windows-11-arm
     defaults:
       run:
         shell: cmd
