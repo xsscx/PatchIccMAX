@@ -52,9 +52,9 @@ jobs:
         with:
           path: |
             PatchIccMAX\Build\Cmake\build
-          key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
+          key: cmake-win-arm-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
+            cmake-win-arm-${{ runner.os }}-${{ matrix.build_type }}-
       - name: Install dependencies
         run: |
           git clone https://github.com/xsscx/PatchIccMAX.git
