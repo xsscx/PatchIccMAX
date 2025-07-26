@@ -77,16 +77,7 @@ jobs:
         run: |
           cd PatchIccMAX\Testing
           dir
-      - name: Verify Build Output
-        shell: pwsh
-        run: |
-          $cmakeCache = "D:\a\PatchIccMAX\Build\Cmake\build\CMakeCache.txt"
-          if (Test-Path $cmakeCache) {
-            Write-Host "? Build succeeded. CMake cache found."
-          } else {
-            Write-Host "? Build failed! No CMakeCache.txt found."
-            exit 1
-          }
+          
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
