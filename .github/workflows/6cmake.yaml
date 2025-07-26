@@ -91,13 +91,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: iccmax-windows-msvc
-          path: C:\test\PatchIccMAX
-
-      - name: Upload Windows Logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: iccmax-windows-logs
-          path: PatchIccMAX\Build\Cmake\build\CMakeCache.txt
+          path: D:\a\PatchIccMAX\Build\Cmake\build\
 
       - name: Host System Info
         shell: pwsh
