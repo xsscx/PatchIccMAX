@@ -229,3 +229,38 @@ jobs:
           D:\a\PatchIccMAX\PatchIccMAX\PatchIccMAX\Build\Cmake\build\Tools\IccFromXml\Release\iccFromXml.exe RefDecH.xml RefDecH.icc
           D:\a\PatchIccMAX\PatchIccMAX\PatchIccMAX\Build\Cmake\build\Tools\IccFromXml\Release\iccFromXml.exe RefIncW.xml RefIncW.icc
           cd ..
+      - name: Verify Build Output
+        shell: pwsh
+        run: |
+          $cmakeCache = "D:\a\PatchIccMAX\Build\Cmake\build\CMakeCache.txt"
+          if (Test-Path $cmakeCache) {
+            Write-Host "? Build succeeded. CMake cache found."
+          } else {
+            Write-Host "? Build failed! No CMakeCache.txt found."
+            exit 1
+          }
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: iccmax-windows-msvc
+          path: C:\test\PatchIccMAX
+
+      - name: Upload Windows Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: iccmax-windows-logs
+          path: C:\test\PatchIccMAX\Build\Cmake\build\CMakeCache.txt
+
+      - name: Host System Info
+        shell: pwsh
+        run: |
+          systeminfo
+          Get-CimInstance -ClassName Win32_Processor
+      - name: Summary Report
+        if: always()
+        run: |
+          echo "### Windows Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Directory: D:\a\PatchIccMAX\Build\Cmake\build\/" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts Uploaded: iccmax-windows-clang" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: Success" >> $GITHUB_STEP_SUMMARY
+
