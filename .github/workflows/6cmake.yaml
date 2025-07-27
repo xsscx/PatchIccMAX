@@ -52,7 +52,7 @@ jobs:
         with:
           path: |
             PatchIccMAX\Build\Cmake\build
-          key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
+          key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/vcpkg.json') }}
           restore-keys: |
             cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
       - name: Install dependencies
@@ -77,15 +77,12 @@ jobs:
         run: |
           cd PatchIccMAX\Testing
           dir
-          $env:PATH = "D:\a\PatchIccMAX\PatchIccMAX\PatchIccMAX\Build\Cmake\build\Tools\IccFromXml\Release;$env:PATH"
-          iccFromXml
-          CreateAllProfiles.bat
           
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: iccmax-windows-msvc
-          path: D:\a\PatchIccMAX\PatchIccMAX\PatchIccMAX\Build\Cmake\build
+          path: D:\a\PatchIccMAX\Build\Cmake\build\
 
       - name: Host System Info
         shell: pwsh
@@ -96,10 +93,9 @@ jobs:
         if: always()
         run: |
           echo "### Windows Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- Build Directory: D:\a\PatchIccMAX\PatchIccMAX\PatchIccMAX\Build\Cmake\build >> $GITHUB_STEP_SUMMARY
+          echo "- Build Directory: D:\a\PatchIccMAX\Build\Cmake\build\" >> $GITHUB_STEP_SUMMARY
           echo "- Artifacts Uploaded: iccmax-windows-clang" >> $GITHUB_STEP_SUMMARY
           echo "- Status: Success" >> $GITHUB_STEP_SUMMARY
-
 #      - name: Run CreateAllProfiles.bat
 #        run: |
 #          $tempFile = "$env:TEMP\CreateAllProfiles.bat"
