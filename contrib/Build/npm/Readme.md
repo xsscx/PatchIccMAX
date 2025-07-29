@@ -1,5 +1,9 @@
 # NPM Install
 
+**Last Updated:** 29-JULY-2025 2300Z by David Hoyt
+
+This directory was used to create the Node NPM Package on [Releases](https://github.com/InternationalColorConsortium/DemoIccMAX/releases).
+
 1. Download [iccmax-npm-v2.2.61.tgz](https://github.com/InternationalColorConsortium/DemoIccMAX/releases/download/v2.2.6/iccmax-npm-2.2.61.tgz)
 2. mkdir test-iccmax
 3. cd test-iccmax
