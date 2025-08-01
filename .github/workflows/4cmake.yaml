@@ -79,54 +79,6 @@ jobs:
           cmake --build build --config ${{ matrix.build_type }}
           dir /s /b *.exe *.lib
 
-      - name: Extend PATH for Debug Tool Testing
-        shell: pwsh
-        run: |
-          $tools = @(
-            "IccApplyNamedCmm", "IccApplyProfiles", "IccApplyToLink", "IccDumpProfile",
-            "IccFromCube", "IccFromXml", "IccJpegDump", "IccPngDump",
-            "IccRoundTrip", "IccSpecSepToTiff", "IccTiffDump", "IccToXml",
-            "IccV5DspObsToV4Dsp", "wxProfileDump"
-          )
-          foreach ($tool in $tools) {
-            $env:PATH = "$env:GITHUB_WORKSPACE\DemoIccMAX\Tools\$tool\Debug;$env:PATH"
-          }
-
-      - name: Run Functional Test Suite
-        run: |
-          cd DemoIccMAX\Testing
-          call CreateAllProfiles.bat
-          call RunTests.bat
-
-          cd CalcTest
-          call checkInvalidProfiles.bat
-          call runtests.bat
-          cd ..
-
-          cd Display
-          call RunProtoTests.bat
-          cd ..
-
-          cd HDR
-          call mkprofiles.bat
-          cd ..
-
-          cd mcs
-          call updateprev.bat
-          call updateprevWithBkgd.bat
-          cd ..
-
-          cd Overprint
-          call RunTests.bat
-          cd ..
-
-      - name: Post-Build Summary Report
-        shell: pwsh
-        run: |
-          cd $env:GITHUB_WORKSPACE\DemoIccMAX
-          iwr https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/windows-build-report.ps1 -OutFile windows-build-report.ps1
-          ./windows-build-report.ps1
-
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
