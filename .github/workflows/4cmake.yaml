@@ -19,7 +19,7 @@
 #
 ###############################################################
 
-name: WinCmake
+name: 4Cmake
 
 on:
   workflow_dispatch:
