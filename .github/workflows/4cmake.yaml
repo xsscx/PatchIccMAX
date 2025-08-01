@@ -30,9 +30,13 @@ jobs:
     defaults:
       run:
         shell: cmd
+    strategy:
+      matrix:
+        build_type: [Release]
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Cache vcpkg packages
         uses: actions/cache@v3
@@ -50,11 +54,11 @@ jobs:
         with:
           path: |
             DemoIccMAX\Build\Cmake\build
-          key: cmake-build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt') }}
+          key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            cmake-build-${{ runner.os }}-
+            cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
 
-      - name: Clone and setup
+      - name: Clone Official DemoIccMAX
         run: |
           git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
           cd DemoIccMAX
@@ -63,18 +67,19 @@ jobs:
 
       - name: Configure
         run: |
-          cd DemoIccMAX\Build\Cmake
+          cd DemoIccMAX
+          cd Build\Cmake
           cmake -B build -S . -G "Visual Studio 17 2022" -A x64 ^
-          -DCMAKE_BUILD_TYPE=Debug ^
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ^
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
 
       - name: Build
         run: |
           cd DemoIccMAX\Build\Cmake
-          cmake --build build --config Debug
+          cmake --build build --config ${{ matrix.build_type }}
           dir /s /b *.exe *.lib
 
-      - name: Prepend Debug Tools to PATH
+      - name: Extend PATH for Debug Tool Testing
         shell: pwsh
         run: |
           $tools = @(
@@ -87,40 +92,51 @@ jobs:
             $env:PATH = "$env:GITHUB_WORKSPACE\DemoIccMAX\Tools\$tool\Debug;$env:PATH"
           }
 
-      - name: Run Tests
+      - name: Run Functional Test Suite
         run: |
           cd DemoIccMAX\Testing
           call CreateAllProfiles.bat
           call RunTests.bat
+
           cd CalcTest
           call checkInvalidProfiles.bat
           call runtests.bat
-          cd ..\Display
+          cd ..
+
+          cd Display
           call RunProtoTests.bat
-          cd ..\HDR
+          cd ..
+
+          cd HDR
           call mkprofiles.bat
-          cd ..\mcs
+          cd ..
+
+          cd mcs
           call updateprev.bat
           call updateprevWithBkgd.bat
-          cd ..\Overprint
+          cd ..
+
+          cd Overprint
           call RunTests.bat
           cd ..
 
-      - name: Post-Build Summary
+      - name: Post-Build Summary Report
         shell: pwsh
         run: |
           cd $env:GITHUB_WORKSPACE\DemoIccMAX
           iwr https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/windows-build-report.ps1 -OutFile windows-build-report.ps1
           ./windows-build-report.ps1
 
-      - name: Upload Build Artifacts
+      - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: iccmax-windows-msvc
-          path: DemoIccMAX/Build/Cmake/build/**/*.@(exe|lib)
+          path: DemoIccMAX\Build\Cmake\build\**\*.{exe,lib}
 
       - name: Summary Report
         if: always()
         run: |
-          echo "### ICCMAX Windows Build" >> $GITHUB_STEP_SUMMARY
+          echo "### Windows Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Directory: DemoIccMAX\\Build\\Cmake\\build\\" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts Uploaded: iccmax-windows-msvc" >> $GITHUB_STEP_SUMMARY
           echo "- Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
