@@ -19,7 +19,7 @@
 #
 ###############################################################
 
-name: 4Cmake
+name: WinCmake
 
 on:
   workflow_dispatch:
@@ -29,30 +29,53 @@ jobs:
     runs-on: windows-latest
     defaults:
       run:
-        shell: pwsh
+        shell: cmd
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Clone DemoIccMAX Source
+      - name: Cache vcpkg packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            C:\vcpkg\installed
+            C:\vcpkg\buildtrees
+            C:\vcpkg\downloads
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+
+      - name: Cache build binaries
+        uses: actions/cache@v3
+        with:
+          path: |
+            DemoIccMAX\Build\Cmake\build
+          key: cmake-build-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            cmake-build-${{ runner.os }}-
+
+      - name: Clone and setup
         run: |
           git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
           cd DemoIccMAX
           vcpkg integrate install
           vcpkg install
 
-      - name: Configure with Preset
+      - name: Configure
         run: |
-          cd DemoIccMAX
-          cmake --preset vs2022-x64 -B $env:GITHUB_WORKSPACE\DemoIccMAX\build -S Build/Cmake
+          cd DemoIccMAX\Build\Cmake
+          cmake -B build -S . -G "Visual Studio 17 2022" -A x64 ^
+          -DCMAKE_BUILD_TYPE=Debug ^
+          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
 
-      - name: Build Project
+      - name: Build
         run: |
-          cd DemoIccMAX
-          cmake --build build -- /m /maxcpucount
+          cd DemoIccMAX\Build\Cmake
+          cmake --build build --config Debug
+          dir /s /b *.exe *.lib
 
       - name: Prepend Debug Tools to PATH
+        shell: pwsh
         run: |
           $tools = @(
             "IccApplyNamedCmm", "IccApplyProfiles", "IccApplyToLink", "IccDumpProfile",
@@ -64,35 +87,27 @@ jobs:
             $env:PATH = "$env:GITHUB_WORKSPACE\DemoIccMAX\Tools\$tool\Debug;$env:PATH"
           }
 
-      - name: Run Functional Test Suite
+      - name: Run Tests
         run: |
-          cd $env:GITHUB_WORKSPACE\DemoIccMAX\Testing
-          .\CreateAllProfiles.bat
-          .\RunTests.bat
-
+          cd DemoIccMAX\Testing
+          call CreateAllProfiles.bat
+          call RunTests.bat
           cd CalcTest
-          .\checkInvalidProfiles.bat
-          .\runtests.bat
+          call checkInvalidProfiles.bat
+          call runtests.bat
+          cd ..\Display
+          call RunProtoTests.bat
+          cd ..\HDR
+          call mkprofiles.bat
+          cd ..\mcs
+          call updateprev.bat
+          call updateprevWithBkgd.bat
+          cd ..\Overprint
+          call RunTests.bat
           cd ..
 
-          cd Display
-          .\RunProtoTests.bat
-          cd ..
-
-          cd HDR
-          .\mkprofiles.bat
-          cd ..
-
-          cd mcs
-          .\updateprev.bat
-          .\updateprevWithBkgd.bat
-          cd ..
-
-          cd Overprint
-          .\RunTests.bat
-          cd ..
-
-      - name: Post-Build Summary Script
+      - name: Post-Build Summary
+        shell: pwsh
         run: |
           cd $env:GITHUB_WORKSPACE\DemoIccMAX
           iwr https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/windows-build-report.ps1 -OutFile windows-build-report.ps1
@@ -102,10 +117,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: iccmax-windows-msvc
-          path: DemoIccMAX/build/**/*.@(exe|lib)
+          path: DemoIccMAX/Build/Cmake/build/**/*.@(exe|lib)
 
       - name: Summary Report
         if: always()
         run: |
-          echo "### ICCMAX Windows Build" >> $env:GITHUB_STEP_SUMMARY
-          echo "- Status: ${{ job.status }}" >> $env:GITHUB_STEP_SUMMARY
+          echo "### ICCMAX Windows Build" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
