@@ -77,6 +77,53 @@ jobs:
         run: |
           cd PatchIccMAX\Testing
           dir
+
+      - name: Prepend Debug Tools to PATH
+        run: |
+          $tools = @(
+            "IccApplyNamedCmm", "IccApplyProfiles", "IccApplyToLink", "IccDumpProfile",
+            "IccFromCube", "IccFromXml", "IccJpegDump", "IccPngDump",
+            "IccRoundTrip", "IccSpecSepToTiff", "IccTiffDump", "IccToXml",
+            "IccV5DspObsToV4Dsp", "wxProfileDump"
+          )
+          foreach ($tool in $tools) {
+            $env:PATH = "$env:GITHUB_WORKSPACE\DemoIccMAX\Tools\$tool\Debug;$env:PATH"
+          }
+
+      - name: Run Functional Test Suite
+        run: |
+          cd $env:GITHUB_WORKSPACE\DemoIccMAX\Testing
+          .\CreateAllProfiles.bat
+          .\RunTests.bat
+
+          cd CalcTest
+          .\checkInvalidProfiles.bat
+          .\runtests.bat
+          cd ..
+
+          cd Display
+          .\RunProtoTests.bat
+          cd ..
+
+          cd HDR
+          .\mkprofiles.bat
+          cd ..
+
+          cd mcs
+          .\updateprev.bat
+          .\updateprevWithBkgd.bat
+          cd ..
+
+          cd Overprint
+          .\RunTests.bat
+          cd ..
+
+      - name: Post-Build Summary Script
+        run: |
+          cd $env:GITHUB_WORKSPACE\DemoIccMAX
+          iwr https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/windows-build-report.ps1 -OutFile windows-build-report.ps1
+          ./windows-build-report.ps1
+
           
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
