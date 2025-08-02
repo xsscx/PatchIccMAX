@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "WASM-mtx"
+name: "WASM-Matrix"
 
 on:
   workflow_dispatch:
