@@ -53,8 +53,9 @@ jobs:
       run: |
         source emsdk/emsdk_env.sh
         bash -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/wasm/wasm_remote_build.sh)" &> wasm_build.log
-        cp emsdk/DemoIccMAX/LICENSE.md emsdk/DemoIccMAX/Build/
-
+        cp emsdk/DemoIccMAX/LICENSE.md emsdk/DemoIccMAX/Build/IccProfLib
+        cp emsdk/DemoIccMAX/LICENSE.md emsdk/DemoIccMAX/Build/IccXML
+        cp emsdk/DemoIccMAX/LICENSE.md emsdk/DemoIccMAX/Build/Tools
     - name: Upload WASM Build Logs
       uses: actions/upload-artifact@v4
       with:
