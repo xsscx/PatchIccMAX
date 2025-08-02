@@ -60,6 +60,26 @@ jobs:
           cd PatchIccMAX
           vcpkg integrate install
           vcpkg install
+      - name: Configure & Build with CMake
+        shell: pwsh
+        run: |
+          cd C:\test\PatchIccMAX\Build\Cmake
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake `
+            -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" `
+            -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" `
+            -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" `
+            -DENABLE_TOOLS=ON `
+            -DENABLE_SHARED_LIBS=ON `
+            -DENABLE_STATIC_LIBS=ON `
+            -DENABLE_TESTS=ON `
+            -DENABLE_INSTALL_RIM=ON `
+            -DENABLE_ICCXML=ON
+          cmake --build build --config Release -- /m /maxcpucount:32
+          Get-ChildItem -Recurse -Include *.exe -Path .\build_* | Where-Object { -not $_.PSIsContainer -and $_.FullName -notmatch '\\CMakeFiles\\' } | Select-Object FullName, Length | Sort-Object FullName
+          Get-ChildItem -Recurse -Include *.lib -Path .\build_* | Where-Object { -not $_.PSIsContainer -and $_.FullName -notmatch '\\CMakeFiles\\' } | Select-Object FullName, Length | Sort-Object FullName
+          Get-ChildItem -Recurse -Include *.exe,*.lib -Path .\build_* | Where-Object { -not $_.PSIsContainer -and $_.FullName -notmatch '\\CMakeFiles\\' } | Select-Object FullName, Length | Sort-Object FullName
       - name: Configure
         run: |
           cd PatchIccMAX
