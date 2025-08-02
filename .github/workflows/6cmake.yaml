@@ -57,17 +57,12 @@ jobs:
             cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
       - name: Install dependencies
         run: |
-          git clone https://github.com/xsscx/PatchIccMAX.git
-          cd PatchIccMAX
-          vcpkg integrate install
-          vcpkg install
-      - name: Configure
+         vcpkg integrate install
+         vcpkg install
+      - name: Install dependencies
         run: |
-          cd PatchIccMAX
-          cd Build\Cmake
-          cmake -B build -S . -G "Visual Studio 17 2022" -A x64 ^
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ^
-          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+         vcpkg integrate install
+         vcpkg install
       - name: Build
         run: |
           cd PatchIccMAX\Build\Cmake
