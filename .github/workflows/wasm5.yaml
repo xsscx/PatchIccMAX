@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "WASM5 Enhanced"
+name: "WASM5"
 
 on:
   workflow_dispatch:
