@@ -47,6 +47,7 @@ jobs:
         ./emsdk activate latest
         source ./emsdk_env.sh
         bash -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/wasm/wasm_remote_build.sh)" &> wasm_build.log
+        cp LICENSE.md Build/
 
     - name: Upload WASM Build Logs
       uses: actions/upload-artifact@v4
@@ -81,8 +82,11 @@ jobs:
         find emsdk/DemoIccMAX/Build/Tools/ -type f \( -name '*.js' -o -name '*.wasm' \) -ls
         find emsdk/DemoIccMAX/Build/IccProfLib/ -name '*.a' -exec sh -c 'for obj in $(ar t "$1" | grep "\.o$"); do ar p "$1" "$obj" > "/tmp/$obj"; command -v wasm-objdump && wasm-objdump -x "/tmp/$obj" | head || echo "wasm-objdump not installed"; done' sh {} \;
 
-    - name: Upload Corrected WASM Artifacts
+    - name: Upload WASM Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: wasm-build-artifacts
-        path: emsdk/DemoIccMAX/Build/*
+        path: |
+          emsdk/DemoIccMAX/Build/IccProfLib
+          emsdk/DemoIccMAX/Build/IccXML
+          emsdk/DemoIccMAX/Build/Tools
