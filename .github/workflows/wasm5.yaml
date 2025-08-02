@@ -12,7 +12,7 @@
 #
 ###############################################################
 
-name: "WASM5"
+name: "WASM5 Enhanced"
 
 on:
   workflow_dispatch:
@@ -39,21 +39,27 @@ jobs:
         path: emsdk
         key: emsdk-${{ runner.os }}-${{ hashFiles('emsdk/**') }}
 
-    - name: Run WASM Build Script
+    - name: Setup Emscripten SDK
       run: |
-        git clone https://github.com/emscripten-core/emsdk.git
+        if [ ! -d "emsdk/.git" ]; then
+          git clone https://github.com/emscripten-core/emsdk.git emsdk
+        fi
         cd emsdk
+        git pull
         ./emsdk install latest
         ./emsdk activate latest
-        source ./emsdk_env.sh
+
+    - name: Run WASM Build Script
+      run: |
+        source emsdk/emsdk_env.sh
         bash -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/wasm/wasm_remote_build.sh)" &> wasm_build.log
-        cp LICENSE.md Build/
+        cp emsdk/DemoIccMAX/LICENSE.md emsdk/DemoIccMAX/Build/
 
     - name: Upload WASM Build Logs
       uses: actions/upload-artifact@v4
       with:
         name: wasm-build-log
-        path: emsdk/wasm_build.log
+        path: wasm_build.log
 
     - name: Gather system information
       run: |
