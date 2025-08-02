@@ -53,16 +53,11 @@ jobs:
         lscpu
         free -m
         df -h
-    # Upload built binaries as artifacts
-    - name: Upload build artifacts
+    - name: List Corrected Build Outputs
+      run: |
+        ls -R emsdk/DemoIccMAX/Build
+    - name: Upload Corrected WASM Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: master-build-linux
-        path: DemoIccMAX/Build
-
-    # Upload build logs
-    - name: Upload build logs
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-logs
-        path: DemoIccMAX/Build/CMakeCache.txt
+        name: wasm-build-artifacts
+        path: emsdk/DemoIccMAX/Build/*
