@@ -45,7 +45,6 @@ jobs:
         run: |
           git clone https://github.com/xsscx/PatchIccMAX.git
           cd PatchIccMAX
-          git checkout pr129
 
       - name: 🍺 Install Dependencies (brew)
         run: |
