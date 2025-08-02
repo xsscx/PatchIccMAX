@@ -44,6 +44,8 @@ jobs:
        ./emsdk activate latest
        source ./emsdk_env.sh
        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/wasm/wasm_remote_build.sh)"
+       cp emsdk/DemoIccMAX/LICENSE.md emsdk/DemoIccMAX/Build/
+       ls emsdk/DemoIccMAX/Build/
     # Run additional system info and validation commands
     - name: Gather system information
       run: |
