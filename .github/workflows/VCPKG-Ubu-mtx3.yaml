@@ -1,0 +1,85 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated:05-AUGUST-2025 at 1100Z by David Hoyt (©)
+#
+## Intent: VCPKG-Ubu-mtx3
+#
+## TODO: 
+#
+#
+###############################################################
+
+name: "VCPKG-Ubu-mtx3"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    name: Build and Test Linux on Ubuntu ${{ matrix.ubuntu }}
+    runs-on: ${{ matrix.ubuntu }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu: [ubuntu-22.04, ubuntu-latest]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Git anonymous identity
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+
+    - name: Install Linux dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential cmake clang git python3 curl unzip tar \
+          libxml2-dev libtiff-dev nlohmann-json3-dev libjpeg-dev libpng-dev \
+          libtool m4 autoconf automake libltdl-dev libx11-dev libxft-dev \
+          libxext-dev libxi-dev libxtst-dev libxrandr-dev tree
+
+    - name: Clone and prepare DemoIccMAX with vcpkg
+      run: |
+        set -e
+        git clone https://github.com/xsscx/PatchIccMAX.git
+        cd PatchIccMAX
+        git checkout vcpkg
+        rm -f vcpkg.json
+        cd ..
+        git clone https://github.com/microsoft/vcpkg.git
+        cd vcpkg
+        ./bootstrap-vcpkg.sh
+        ./vcpkg integrate install || true
+        cd ..
+
+    - name: Install iccdev port
+      run: |
+        set +e
+        cd PatchIccMAX
+        ../vcpkg/vcpkg install --overlay-ports=ports || true
+
+        echo "==== Installed files under ./vcpkg/installed/x64-linux/ ===="
+        find ../vcpkg/installed/x64-linux/ -type f || echo "Nothing installed."
+
+        echo "==== Installed binaries ===="
+        find ../vcpkg/installed/x64-linux/bin -name "*.exe" || echo "No binaries"
+
+        echo "==== Installed libraries ===="
+        find ../vcpkg/installed/x64-linux/lib -name "*.a" -o -name "*.so" || echo "No libraries"
+
+        echo "==== Installed CMake configs ===="
+        find ../vcpkg/installed/x64-linux/share/iccdev/ -type f || echo "No iccdev share dir found"
+
+        echo "==== Port install status ===="
+        ../vcpkg/vcpkg list | grep iccdev || echo "iccdev not listed"
+
+        echo "==== Final tree of installation ===="
+        tree ../vcpkg/installed/x64-linux/ || echo "tree unavailable"
+
+        echo "==== Build done. Check logs above for success/failure. ===="
