@@ -41,7 +41,7 @@ jobs:
     - name: Clone DemoIccMAX repository
       run: |
         git clone https://github.com/xsscx/PatchIccMAX.git
-        cd PAtchIccMAX
+        cd PatchIccMAX
         git checkout vcpkg
         rm -f vcpkg.json
         pwd
