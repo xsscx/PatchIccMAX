@@ -24,7 +24,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ubuntu: [ubuntu-22.04, ubuntu-latest]
+        ubuntu: [ubuntu-latest]
+#        ubuntu: [ubuntu-22.04, ubuntu-latest]
 
     steps:
     - name: Checkout repository
@@ -62,7 +63,7 @@ jobs:
       run: |
         set +e
         cd PatchIccMAX
-        ../vcpkg/vcpkg install --overlay-ports=ports || true
+        ../vcpkg/vcpkg --classic install iccdev --overlay-ports=ports || true
 
         echo "==== Installed files under ./vcpkg/installed/x64-linux/ ===="
         find ../vcpkg/installed/x64-linux/ -type f || echo "Nothing installed."
