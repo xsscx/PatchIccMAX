@@ -58,7 +58,7 @@ jobs:
         ./bootstrap-vcpkg.sh
         ./vcpkg integrate install || true
 
-        ./vcpkg --classic install iccdev --overlay-ports=DemoIccMAX/ports || true
+        ./vcpkg --classic install iccdev --overlay-ports=PatchIccMAX/ports || true
 
         echo "==== Installed files under ./vcpkg/installed/x64-linux/ ===="
         find ../vcpkg/installed/x64-linux/ -type f || echo "Nothing installed."
