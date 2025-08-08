@@ -18,13 +18,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-linux:
-    name: VCPKG XNU Smoke Test ${{ matrix.macos }}
-    runs-on: ${{ matrix.macos }}
+  build-macos:
+    name: PoC on macOS ${{ matrix.macos }} ${{ matrix.arch }}
+    runs-on: macos-${{ matrix.macos }}
     strategy:
       fail-fast: false
       matrix:
-        ubuntu: [macos14, macos-latest]
+        macos: [13, 14, latest]
+        arch: [x86_64, arm64]
 
     steps:
     # Checkout repository
