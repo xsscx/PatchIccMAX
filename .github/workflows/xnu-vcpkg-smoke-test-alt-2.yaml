@@ -50,5 +50,7 @@ jobs:
         pwd
         ls ../
         cd ../DemoIccMAX
-        ../vcpkg/vcpkg install --overlay-ports=ports
+        pwd
+        ls
+        ../vcpkg/vcpkg --classic install --overlay-ports=ports
         ../vcpkg/vcpkg list
