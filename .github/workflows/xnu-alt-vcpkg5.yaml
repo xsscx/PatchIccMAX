@@ -19,10 +19,12 @@ on:
 
 jobs:
   build-linux:
-    name: VCPKG XNU Smoke Test
-    runs-on: macos-latest
+    name: VCPKG XNU Smoke Test ${{ matrix.macos }}
+    runs-on: ${{ matrix.macos }}
     strategy:
       fail-fast: false
+      matrix:
+        ubuntu: [macos14, macos-latest]
 
     steps:
     # Checkout repository
