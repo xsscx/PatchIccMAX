@@ -57,13 +57,8 @@ jobs:
         cd vcpkg
         ./bootstrap-vcpkg.sh
         ./vcpkg integrate install || true
-        cd ..
 
-    - name: Install iccdev port
-      run: |
-        set +e
-        cd PatchIccMAX
-        ../vcpkg/vcpkg --classic install iccdev --overlay-ports=ports || true
+        ./vcpkg --classic install iccdev --overlay-ports=DemoIccMAX/ports || true
 
         echo "==== Installed files under ./vcpkg/installed/x64-linux/ ===="
         find ../vcpkg/installed/x64-linux/ -type f || echo "Nothing installed."
