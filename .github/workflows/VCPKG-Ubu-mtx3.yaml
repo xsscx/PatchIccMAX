@@ -28,54 +28,34 @@ jobs:
 #        ubuntu: [ubuntu-22.04, ubuntu-latest]
 
     steps:
+    # Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    # Set up Git anonymous identity
     - name: Set up Git anonymous identity
       run: |
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
-
-    - name: Install Linux dependencies
+    # Clone DemoIccMAX repository and checkout vcpkg branch
+    - name: Clone DemoIccMAX repository
       run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential cmake clang git python3 curl unzip tar \
-          libxml2-dev libtiff-dev nlohmann-json3-dev libjpeg-dev libpng-dev \
-          libtool m4 autoconf automake libltdl-dev libx11-dev libxft-dev \
-          libxext-dev libxi-dev libxtst-dev libxrandr-dev tree
-
-    - name: Clone and prepare DemoIccMAX with vcpkg
-      run: |
-        set -e
         git clone https://github.com/xsscx/PatchIccMAX.git
-        cd PatchIccMAX
+        cd PAtchIccMAX
         git checkout vcpkg
         rm -f vcpkg.json
+        pwd
         cd ..
         git clone https://github.com/microsoft/vcpkg.git
         cd vcpkg
         ./bootstrap-vcpkg.sh
-        ./vcpkg integrate install || true
-
-        ./vcpkg --classic install iccdev --overlay-ports=PatchIccMAX/ports || true
-
-        echo "==== Installed files under ./vcpkg/installed/x64-linux/ ===="
-        find ../vcpkg/installed/x64-linux/ -type f || echo "Nothing installed."
-
-        echo "==== Installed binaries ===="
-        find ../vcpkg/installed/x64-linux/bin -name "*.exe" || echo "No binaries"
-
-        echo "==== Installed libraries ===="
-        find ../vcpkg/installed/x64-linux/lib -name "*.a" -o -name "*.so" || echo "No libraries"
-
-        echo "==== Installed CMake configs ===="
-        find ../vcpkg/installed/x64-linux/share/iccdev/ -type f || echo "No iccdev share dir found"
-
-        echo "==== Port install status ===="
-        ../vcpkg/vcpkg list | grep iccdev || echo "iccdev not listed"
-
-        echo "==== Final tree of installation ===="
-        tree ../vcpkg/installed/x64-linux/ || echo "tree unavailable"
-
-        echo "==== Build done. Check logs above for success/failure. ===="
+        ./vcpkg integrate install
+        pwd
+        ls ../
+        cd ../PatchIccMAX
+        pwd
+        ls
+        # Install overlay port using the SAME vcpkg instance and explicit triplet
+        ../vcpkg/vcpkg --classic --overlay-ports=ports --clean-after-build install iccdev --debug
+        # Verify using the SAME instance/root + triplet for consistency
+        ../vcpkg/vcpkg list
