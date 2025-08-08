@@ -18,54 +18,43 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-macos:
+  build-linux:
     name: VCPKG XNU Smoke Test
     runs-on: macos-latest
+    strategy:
+      fail-fast: false
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    # Checkout repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up Git anonymous identity
-        run: |
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "GitHub Actions"
+    # Set up Git anonymous identity
+    - name: Set up Git anonymous identity
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
 
-      - name: Clone DemoIccMAX (vcpkg branch)
-        run: |
-          git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
-          cd DemoIccMAX
-          git checkout vcpkg
-          rm -f vcpkg.json  # ensure classic mode
-          pwd
-          ls -la
+    # Clone DemoIccMAX repository and checkout vcpkg branch
+    - name: Clone DemoIccMAX repository
+      run: |
+        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+        cd DemoIccMAX
+        git checkout vcpkg
+        rm -f vcpkg.json
+        pwd
+        cd ..
+        git clone https://github.com/microsoft/vcpkg.git
+        cd vcpkg
+        ./bootstrap-vcpkg.sh
+        ./vcpkg integrate install
+        pwd
+        ls ../
+        cd ../DemoIccMAX
+        pwd
+        ls
+        # Install overlay port using the SAME vcpkg instance and explicit triplet
+        ../vcpkg/vcpkg --classic --overlay-ports=ports --clean-after-build install iccdev:arm64-osx --debug
+        # Verify using the SAME instance/root + triplet for consistency
+        ../vcpkg/vcpkg list --triplet arm64-osx || true
 
-      - name: Clone and bootstrap vcpkg (local)
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          cd vcpkg
-          ./bootstrap-vcpkg.sh -disableMetrics
-          ./vcpkg version
-          pwd
-          ls -la ..
-
-      - name: Install iccdev from overlay (arm64-osx)
-        env:
-          OVERLAY: ${{ github.workspace }}/DemoIccMAX/ports
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-          TRIPLET: arm64-osx
-        run: |
-          echo "Overlay: $OVERLAY"
-          test -f "$OVERLAY/iccdev/portfile.cmake" || { echo "Missing port at $OVERLAY/iccdev"; exit 1; }
-          "$VCPKG_ROOT/vcpkg" --overlay-ports="$OVERLAY" search iccdev --debug
-          "$VCPKG_ROOT/vcpkg" --overlay-ports="$OVERLAY" --clean-after-build install "iccdev:$TRIPLET" --debug
-
-      - name: Verify install (same vcpkg instance)
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-          TRIPLET: arm64-osx
-        run: |
-          "$VCPKG_ROOT/vcpkg" list --triplet "$TRIPLET" || true
-          echo "--- files under installed/$TRIPLET ---"
-          find "$VCPKG_ROOT/installed/$TRIPLET" -maxdepth 3 -type f | sort | head -n 200 || true
-          echo "--- usage ---"
-          cat "$VCPKG_ROOT/installed/$TRIPLET/share/iccdev/usage" || true
