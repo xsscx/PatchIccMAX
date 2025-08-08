@@ -34,7 +34,6 @@ jobs:
       run: |
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
-
     # Clone DemoIccMAX repository and checkout vcpkg branch
     - name: Clone DemoIccMAX repository
       run: |
@@ -51,4 +50,4 @@ jobs:
         pwd
         ls ../
         cd ../DemoIccMAX
-        ../vcpkg/vcpkg --classic install iccmax --overlay-ports=ports --debug
+        ../vcpkg/vcpkg install --overlay-ports=ports
