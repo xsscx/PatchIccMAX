@@ -57,6 +57,7 @@ jobs:
 
           # Install overlay port using the SAME vcpkg instance and explicit triplet
           ..\vcpkg\vcpkg.exe --classic --overlay-ports=ports --clean-after-build install iccdev:x64-windows --debug
-
+          ..\vcpkg\vcpkg.exe --classic --overlay-ports=ports --clean-after-build install iccdev:x64-windows --debug
+          
           # Verify using the SAME instance/root + triplet for consistency
           ..\vcpkg\vcpkg.exe list --triplet x64-windows || exit 0
