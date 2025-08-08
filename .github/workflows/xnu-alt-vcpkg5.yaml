@@ -38,7 +38,7 @@ jobs:
     - name: Clone DemoIccMAX repository
       run: |
         git clone https://github.com/xsscx/PatchIccMAX.git
-        cd DemoIccMAX
+        cd PAtchIccMAX
         git checkout vcpkg
         rm -f vcpkg.json
         pwd
@@ -49,7 +49,7 @@ jobs:
         ./vcpkg integrate install
         pwd
         ls ../
-        cd ../DemoIccMAX
+        cd ../PatchIccMAX
         pwd
         ls
         # Install overlay port using the SAME vcpkg instance and explicit triplet
