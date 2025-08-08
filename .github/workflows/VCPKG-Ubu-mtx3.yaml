@@ -24,8 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ubuntu: [ubuntu-latest]
-#        ubuntu: [ubuntu-22.04, ubuntu-latest]
+        ubuntu: [ubuntu-22.04, ubuntu-latest]
 
     steps:
     # Checkout repository
