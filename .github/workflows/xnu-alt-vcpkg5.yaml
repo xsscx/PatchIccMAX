@@ -37,7 +37,7 @@ jobs:
     # Clone DemoIccMAX repository and checkout vcpkg branch
     - name: Clone DemoIccMAX repository
       run: |
-        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
+        git clone https://github.com/xsscx/PatchIccMAX.git
         cd DemoIccMAX
         git checkout vcpkg
         rm -f vcpkg.json
