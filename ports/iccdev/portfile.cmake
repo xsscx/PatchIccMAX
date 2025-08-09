@@ -40,7 +40,9 @@ vcpkg_cmake_build(TARGET IccProfLib2)   # core color lib
 vcpkg_cmake_build(TARGET IccXML2)       # XML lib depends on the core lib
 vcpkg_cmake_install()
 
-# --- Stage 2: 
+# --- Stage 2:
+vcpkg_cmake_build(TARGET IccProfLib2)   # core color lib
+vcpkg_cmake_build(TARGET IccXML2)       # XML lib depends on the core lib 
 vcpkg_cmake_build(TARGET iccApplyToLink)
 vcpkg_cmake_build(TARGET iccDumpProfile)
 vcpkg_cmake_build(TARGET iccFromCube)
