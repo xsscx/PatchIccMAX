@@ -54,4 +54,5 @@ jobs:
           pwd
           ls
           # Verify using the SAME instance/root + triplet for consistency
-          ..\vcpkg\vcpkg.exe list --triplet x64-windows || exit 0
+          Get-ChildItem -Filter *.exe | ForEach-Object { Write-Host "== Testing $($_.Name) =="; & $_.FullName --help 2>&1 | Select-Object -First 20; ""; }
+          vcpkg.exe list --triplet x64-windows || exit 0
