@@ -57,5 +57,5 @@ jobs:
           Get-ChildItem -Filter *.exe | ForEach-Object { Write-Host "== Testing $($_.Name) =="; & $_.FullName --help 2>&1 | Select-Object -First 20; ""; }
           vcpkg.exe --classic list 
           vcpkg.exe --classic --overlay-ports=..\ports install iccdev[tools]:x64-windows --debug --clean-after-build
-          Get-ChildItem -Recurse -File -Include *.exe,*.dll,*.lib,*.a -Path C:\test\vcpkg | Where-Object { $_.FullName -match 'iccdev' -and $_.FullName -notmatch '\\CMakeFiles\\' -and $_.Name -notmatch '^CMake(C|CXX)CompilerId\.exe$' } | ForEach-Object { $_.FullName }
+          Get-ChildItem -Recurse -File -Include *.exe,*.dll,*.lib,*.a  | Where-Object { $_.FullName -match 'iccdev' -and $_.FullName -notmatch '\\CMakeFiles\\' -and $_.Name -notmatch '^CMake(C|CXX)CompilerId\.exe$' } | ForEach-Object { $_.FullName }
           
