@@ -56,3 +56,4 @@ jobs:
           # Verify using the SAME instance/root + triplet for consistency
           Get-ChildItem -Filter *.exe | ForEach-Object { Write-Host "== Testing $($_.Name) =="; & $_.FullName --help 2>&1 | Select-Object -First 20; ""; }
           vcpkg.exe list --triplet x64-windows || exit 0
+          vcpkg.exe --classic --overlay-ports=..\ports install iccdev[tools]:x64-windows --debug --clean-after-build
