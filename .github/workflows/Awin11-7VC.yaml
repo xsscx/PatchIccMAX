@@ -37,7 +37,7 @@ jobs:
       - name: Clone DemoIccMAX repository
         shell: pwsh
         run: |
-          git clonehttps://github.com/InternationalColorConsortium/DemoIccMAX.git
+          git clon ehttps://github.com/InternationalColorConsortium/DemoIccMAX.git
           cd DemoIccMAX
           git checkout vcpkg
           Remove-Item -Force -ErrorAction SilentlyContinue vcpkg.json
