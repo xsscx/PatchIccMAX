@@ -48,8 +48,10 @@ jobs:
           .\vcpkg.exe integrate install
           pwd
           Get-ChildItem
-          vcpkg.exe --classic --overlay-ports=..\DemoIccMAX/ports  install iccdev --debug
-          vcpkg.exe --classic --overlay-ports=..\DemoIccMAX/ports  install iccdev --debug
-          
+          ls
+          vcpkg.exe --classic --overlay-ports=..\ports  install iccdev --debug
+          vcpkg.exe --classic --overlay-ports=..\ports  install iccdev --debug
+          pwd
+          ls
           # Verify using the SAME instance/root + triplet for consistency
           ..\vcpkg\vcpkg.exe list --triplet x64-windows || exit 0
