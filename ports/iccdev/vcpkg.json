@@ -7,7 +7,6 @@
     "vcpkg-cmake",
     "vcpkg-cmake-config",
     "libpng",
-    "wxwidgets",
     "tiff",
     "libxml2",
     "libiconv",
