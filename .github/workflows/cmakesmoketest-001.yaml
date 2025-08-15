@@ -1,0 +1,157 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 13-AUGUST-2025 1900 EDT by David Hoyt (©)
+#
+## Intent: cmake-branch-test
+#
+## 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: cmake-branch-test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    name: "Linux ${{ matrix.compiler }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+    steps:
+      - name: Checkout cmake
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake gcc g++ clang clang-tools \
+            libpng-dev libxml2 libxml2-dev libtiff-dev \
+            nlohmann-json3-dev libwxgtk3.2-dev wx-common \
+            python3 python3-pip curl git llvm
+      - name: Set Compiler
+        run: |
+          if [ "${{ matrix.compiler }}" = "gcc" ]; then
+            echo "CC=gcc" >> $GITHUB_ENV
+            echo "CXX=g++" >> $GITHUB_ENV
+          else
+            echo "CC=clang" >> $GITHUB_ENV
+            echo "CXX=clang++" >> $GITHUB_ENV
+          fi
+      - name: Print Compiler Version
+        run: |
+          echo "Compiler Version:" >> $GITHUB_STEP_SUMMARY
+          $CC --version >> $GITHUB_STEP_SUMMARY
+      - name: CMake Configure
+        run: |
+          git clone https://github.com/xsscx/PatchIccMAX.git
+          cd PatchIccMAX
+          git branch
+          git status
+          git checkout cmake
+          cd Build
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DENABLE_TOOLS=ON \
+                -DENABLE_STATIC_LIBS=ON \
+                -DENABLE_SHARED_LIBS=ON \
+                -Wno-dev Cmake/
+          make -j$(nproc)
+          find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
+            -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: iccmax-linux-${{ matrix.compiler }}
+          path: Build
+
+      - name: Summary Report
+        if: always()
+        run: |
+          echo "### Linux Build Summary (${{ matrix.compiler }})" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Directory: Build/" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts Uploaded: iccmax-linux-${{ matrix.compiler }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: Success" >> $GITHUB_STEP_SUMMARY
+  macos:
+    name: "macOS Clang"
+    runs-on: macos-latest
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+
+      - name: Clone repository and install dependencies
+        run: |
+          echo "📥 Cloning PatchIccMAX repository..."
+          git clone https://github.com/xsscx/PatchIccMAX.git
+          cd PatchIccMAX
+          git branch
+          git status
+          git checkout cmake
+          echo "📦 Installing Homebrew dependencies..."
+          brew install libpng nlohmann-json libxml2 wxwidgets libtiff jpeg zlib || echo "⚠️ Some dependencies might already be installed."
+          echo "✔ Dependency installation complete."
+      - name: Print Compiler Version
+        run: |
+          echo "Compiler Version:" >> $GITHUB_STEP_SUMMARY
+          clang --version >> $GITHUB_STEP_SUMMARY
+      - name: CMake Configure
+        run: |
+           echo "⚙️ Setting up CMake build configuration..."
+           mkdir -p PatchIccMAX/Build
+           cd PatchIccMAX/Build
+           sudo rm -rf /Library/Frameworks/Mono.framework/Headers/png.h || true
+           echo 'export PATH="/opt/homebrew/opt/jpeg/bin:$PATH"' >> /Users/runner/.bash_profile
+           export PATH="/opt/homebrew/opt/jpeg/bin:$PATH"
+           export CPPFLAGS="-I/opt/homebrew/opt/jpeg/include ${CPPFLAGS}"
+           export PKG_CONFIG_PATH="/opt/homebrew/opt/jpeg/lib/pkgconfig:${PKG_CONFIG_PATH}"
+           export CFLAGS="-I$(brew --prefix libpng)/include -I$(brew --prefix jpeg)/include ${CFLAGS}"
+           export CXXFLAGS="${CXXFLAGS}"
+           export LDFLAGS="-L$(brew --prefix libpng)/lib -L$(brew --prefix jpeg)/lib ${LDFLAGS}"
+           export CPATH="$(brew --prefix nlohmann-json)/include:$(brew --prefix libpng)/include:$(brew --prefix zlib)/include:${CPATH}"
+           export CPLUS_INCLUDE_PATH="$(brew --prefix nlohmann-json)/include:${CPLUS_INCLUDE_PATH}"
+           export LIBRARY_PATH="$(brew --prefix libpng)/lib:$(brew --prefix zlib)/lib:${LIBRARY_PATH}"
+           cmake -S Cmake -B . \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$HOME/.local" \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix libpng);$(brew --prefix zlib);$(brew --prefix jpeg);$(brew --prefix nlohmann-json)" \
+            -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DPNG_PNG_INCLUDE_DIR="$(brew --prefix libpng)/include" \
+            -DPNG_LIBRARY="$(brew --prefix libpng)/lib/libpng16.dylib" \
+            -DZLIB_INCLUDE_DIR="$(brew --prefix zlib)/include" \
+            -DZLIB_LIBRARY="$(brew --prefix zlib)/lib/libz.dylib" \
+            -DJPEG_INCLUDE_DIR="$(brew --prefix jpeg)/include" \
+            -DJPEG_LIBRARY="$(brew --prefix jpeg)/lib/libjpeg.dylib" \
+            -DENABLE_TOOLS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_SHARED_LIBS=ON -Wno-dev
+           make -j$(sysctl -n hw.ncpu)
+           find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
+             -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
+           echo "✔ Build process completed."
+      - name: Upload macOS Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: iccmax-macos-clang
+          path: PatchIccMAX/Build
+
+      - name: Summary Report
+        if: always()
+        run: |
+          echo "### macOS Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Directory: PatchIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts Uploaded: iccmax-macos-clang" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: Success" >> $GITHUB_STEP_SUMMARY
