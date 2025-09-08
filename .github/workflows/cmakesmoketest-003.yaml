@@ -1,0 +1,92 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 11-AUGUST-2025 at 1900Z by David Hoyt (©)
+#
+## Intent: ubuntu-x86_64-master-release
+#
+## TODO: Refactor for all Windows & UNIX Device Reporting
+#
+#
+###############################################################
+
+name: "u24-cmake-branch-test"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    name: Build and Test Linux Master Branch
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    # Checkout repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Set up Git anonymous identity
+    - name: Set up Git anonymous identity
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+    # Install dependencies
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libxml2 libxml2-dev libtiff-dev nlohmann-json3-dev build-essential \
+          cmake clang clang-tools python3 python3-pip libwxgtk3.2-dev wx-common \
+          libopencl-clang-17-dev curl git llvm clang-17 libjpeg-dev libpng-dev zsh
+    # Clone the DemoIccMAX repository
+    - name: Clone the DemoIccMAX repository
+      run: |
+        git clone https://github.com/xsscx/PatchIccMAX.git
+        cd PatchIccMAX
+        git checkout cmake
+    # Configure the build with CMake
+    - name: Configure the build with CMake
+      run: |
+        cd PatchIccMAX/Build
+        export CC=clang
+        export CXX=clang++
+        export PATH="/usr/lib/llvm-17/bin:$PATH"
+        echo "CC=clang" >> $GITHUB_ENV
+        echo "CXX=clang++" >> $GITHUB_ENV
+        clang++ --version
+        clang --version
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release -DENABLE_TOOLS=ON -Wno-dev Cmake/
+    # Build the project using CMake
+    - name: Build project with CMake
+      run: |
+        cd PatchIccMAX/Build
+        make -j$(nproc)
+        cat /etc/shells
+        pwd
+        ls
+        find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print `` 
+        cd ..
+        zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/ubuntu24-runner-remote.zsh)"
+        cat linux_build_report.html
+        pwd
+        ls
+        cd Testing
+        pwd
+        ls
+            for d in ../Build/Tools/*; do
+            [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
+          done
+          sh CreateAllProfiles.sh
+    # Run additional system info and validation commands
+    - name: Gather system information
+      run: |
+        uname -a
+        cat /etc/os-release
+        gcc -v
+        lscpu
+        free -m
+        df -h
