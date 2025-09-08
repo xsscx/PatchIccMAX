@@ -4,13 +4,13 @@
 #                                        All rights reserved.
 # 
 #
-#  Last Updated: 11-AUGUST-2025 at 1900Z EDT by David Hoyt
+#  Last Updated: 08-september-2025 at 1800Z EDT by David Hoyt
 #
 #
 #
-#  Changes: Align with pending WASM PR
-#           Dup check on flags etc
-#           Aligned NamedCmm, IccApplyProfiles Configs
+#  Changes: REMOVE wxwidgets / dumpgui build for Runners
+# 
+#
 #						
 #  TODO:    Align Version on IccProfLibVer.h, Housekeeping, Debug Options
 #           Version Headers, Doxygen Config, Exports etc...
@@ -829,15 +829,16 @@ ADD_SUBDIRECTORY(Tools/IccPngDump)
     message(FATAL_ERROR "TIFF library not found. Please install libtiff-dev.")
   endif()
 
-  # Configure wxWidgets
-  find_package(wxWidgets COMPONENTS core base REQUIRED)
-  if (wxWidgets_FOUND)
-    include(${wxWidgets_USE_FILE})
-      ADD_SUBDIRECTORY(Tools/wxProfileDump)
-    message(STATUS "wxWidgets found and configured")
-  else()
-    message(FATAL_ERROR "wxWidgets not found. Please install it manually or via vcpkg.")
-  endif()
+# Dependency Failure for windows-latest runner 08-Sept-2025
+#  # Configure wxWidgets
+#  find_package(wxWidgets COMPONENTS core base REQUIRED)
+#  if (wxWidgets_FOUND)
+#    include(${wxWidgets_USE_FILE})
+#      ADD_SUBDIRECTORY(Tools/wxProfileDump)
+#    message(STATUS "wxWidgets found and configured")
+#  else()
+#    message(FATAL_ERROR "wxWidgets not found. Please install it manually or via vcpkg.")
+#  endif()
 
 ENDIF(ENABLE_TOOLS)
 
