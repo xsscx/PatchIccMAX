@@ -2,18 +2,18 @@
 # Cmake Project Configuration| iccDEV Project
 # Copyright (C) 2024-2025 The International Color Consortium.
 #                                        All rights reserved.
-# 
-#
-#  Last Updated: 18-OCT-2025 at 1200Z by David Hoyt
 #
 #
+#  Last Updated: 20-OCT-2025 1700Z by David Hoyt
 #
-#  Changes: Add Source to ProfLib
-#           Add Tool iccApplySearch
-#           Modify Cmake Configs, bump Version
-#						
-#  TODO:    Align Version on IccProfLibVer.h, Housekeeping, Debug Options
-#           Version Headers, Doxygen Config, Exports etc...
+#
+#
+#  Changes: WASM Testing v2.3.1
+#           Ubuntu24 Only
+#
+#
+#  TODO:    Version Headers, Doxygen Config, Exports etc...
+#           Reduce 3-Tier CMakeLists.txt in NamedCmm, IccApplyProfiles
 #           Refactor this to .mk's, add research args, other Housekeeping
 #
 #
@@ -40,6 +40,8 @@ endif()
 
 cmake_minimum_required(VERSION 3.21 FATAL_ERROR)  # Modern minimum for policy safety
 
+cmake_policy(SET CMP0135 NEW)
+
 # Adopt modern behavior for scoped scripts and alias linking
 # cmake_policy(SET CMP0112 NEW)  # Respect parent scope in script mode
 # cmake_policy(SET CMP0156 NEW)  # Allow ALIAS targets for link dependencies
@@ -51,11 +53,7 @@ set(CMAKE_WARN_DEPRECATED TRUE)
 # set(CMAKE_POLICY_WARNING_CMP0012 TRUE)
 
 # Suppress redundant regeneration messages (less CLI noise)
-# set(CMAKE_SUPPRESS_REGENERATION ON)
-
-cmake_policy(SET CMP0135 NEW)
-# set(CMAKE_SUPPRESS_DEVELOPER_ERRORS TRUE)
-# set(CMAKE_WARN_DEPRECATED TRUE)
+set(CMAKE_SUPPRESS_REGENERATION ON)
 
 # ----------------------------------------------------------------------
 # Timestamped Configuration Header
@@ -64,7 +62,7 @@ cmake_policy(SET CMP0135 NEW)
 string(TIMESTAMP CURRENT_DATETIME "%Y-%m-%d %H:%M:%S")
 message(STATUS "")
 message(STATUS "############################################################")
-message(STATUS "## Developer tools for ICC color profiles ##") 
+message(STATUS "## WASM Developer tools for ICC color profiles            ##") 
 message(STATUS "############################################################")
 message(STATUS "## Configuration and Build started at ${CURRENT_DATETIME} ##") 
 message(STATUS "")
@@ -118,13 +116,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Descriptive metadata (for packaging, install, CI)
 set(PACKAGE_NAME "${PROJECT_DOWN_NAME}")
 set(PACKAGE_DESCRIPTION
-  "Developer tools for ICC color profiles."
+  "WASM Developer tools for ICC color profiles."
 )
-
-# ----------------------------------------------------------------------
-# Define project root (relative to CMake source directory)
-# This may be overridden on CLI or CI environments
-set(PROJECT_ROOT_DIR "${CMAKE_SOURCE_DIR}/../..")
 
 # ----------------------------------------------------------------------
 # Build Configuration Summary
@@ -139,6 +132,12 @@ message(STATUS "  C++ Standard       : C++${CMAKE_CXX_STANDARD}")
 message(STATUS "  Description        : ${PACKAGE_DESCRIPTION}")
 message(STATUS "=========================================")
 message(STATUS "")
+
+
+# ----------------------------------------------------------------------
+# Define project root (relative to CMake source directory)
+# This may be overridden in superbuilds or CI environments
+set(PROJECT_ROOT_DIR "${CMAKE_SOURCE_DIR}/../..")
 
 # ----------------------------------------------------------------------
 # Host System Diagnostics
@@ -292,7 +291,6 @@ message(STATUS "C++ Flags               : ${CMAKE_CXX_FLAGS}")
 message(STATUS "C Flags                 : ${CMAKE_C_FLAGS}")
 message(STATUS "Active Config Flags     : ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}")
 
-
 # ----------------------------------------------------------------------
 # Third-Party Dependencies
 # ----------------------------------------------------------------------
@@ -300,40 +298,33 @@ message(STATUS "Active Config Flags     : ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}
 message(STATUS "")
 message(STATUS "### Dependency Summary ###")
 
-# --- LibXml2 ---
-find_package(LibXml2 REQUIRED)
-message(STATUS "LibXml2                : ${LIBXML2_LIBRARIES} (version: ${LIBXML2_VERSION})")
+# --- LibXml2 (Manually Linked) ---
+if(NOT LIBXML2_INCLUDE_DIR OR NOT LIBXML2_LIBRARY)
+  message(FATAL_ERROR "LIBXML2_INCLUDE_DIR or LIBXML2_LIBRARY is not set. Manual libxml2 linking requires both.")
+endif()
+
+add_library(LibXml2::LibXml2 STATIC IMPORTED GLOBAL)
+set_target_properties(LibXml2::LibXml2 PROPERTIES
+  IMPORTED_LOCATION "${LIBXML2_LIBRARY}"
+  INTERFACE_INCLUDE_DIRECTORIES "${LIBXML2_INCLUDE_DIR}"
+)
+
+message(STATUS "LibXml2                : ${LIBXML2_LIBRARY} (headers: ${LIBXML2_INCLUDE_DIR})")
 
 # --- nlohmann_json ---
-find_package(nlohmann_json REQUIRED)
+include(FetchContent)
+
+FetchContent_Declare(
+  nlohmann_json
+  URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+)
+
+FetchContent_MakeAvailable(nlohmann_json)
+
+
+# include_directories(/usr/include)
+# find_package(nlohmann_json REQUIRED)
 message(STATUS "nlohmann_json          : ${nlohmann_json_DIR} (version: ${nlohmann_json_VERSION})")
-
-# --- TIFF ---
-find_package(TIFF REQUIRED)
-message(STATUS "TIFF                   : ${TIFF_LIBRARIES} (version: ${TIFF_VERSION})")
-message(STATUS "TIFF Include Directory : ${TIFF_INCLUDE_DIR}")
-
-# --- PNG ---
-message(STATUS "Checking for PNG...")
-find_package(PNG REQUIRED)
-
-if(PNG_FOUND)
-  message(STATUS "PNG Library            : ${PNG_LIBRARIES}")
-  message(STATUS "PNG Include Directory  : ${PNG_INCLUDE_DIRS}")
-  message(STATUS "PNG Version            : ${PNG_VERSION}")
-else()
-  message(FATAL_ERROR " PNG not found. Please install libpng-dev or install via vcpkg.")
-endif()
-
-# --- JPEG ---
-message(STATUS "Checking for JPEG...")
-find_package(JPEG REQUIRED)
-if(JPEG_FOUND)
-  message(STATUS "JPEG Library           : ${JPEG_LIBRARIES}")
-  message(STATUS "JPEG Include Directory : ${JPEG_INCLUDE_DIR}")
-else()
-  message(FATAL_ERROR " JPEG not found. Please install libjpeg-dev or install via vcpkg.")
-endif()
 
 # ----------------------------------------------------------------------
 # Include Directories
@@ -394,8 +385,10 @@ message(STATUS "GNU Install CMake Dir  : ${CMAKE_INSTALL_DATAROOTDIR}/cmake")
 # ----------------------------------------------------------------------
 # Build Feature Toggles
 # ----------------------------------------------------------------------
+
 message(STATUS "")
 message(STATUS "### Build Options ###")
+
 # Build and feature flags
 option(ENABLE_TESTS               "Build tests (requires static libs)"                  ON)
 option(ENABLE_TOOLS               "Build tools (command-line + GUI)"                    ON)
@@ -436,6 +429,7 @@ endif()
 # ----------------------------------------------------------------------
 # Build Status Output
 # ----------------------------------------------------------------------
+
 message(STATUS "ENABLE_TESTS               = ${ENABLE_TESTS}")
 message(STATUS "ENABLE_TOOLS               = ${ENABLE_TOOLS}")
 message(STATUS "ENABLE_SHARED_LIBS         = ${ENABLE_SHARED_LIBS}")
@@ -487,12 +481,12 @@ else()
   set(ENABLE_INSTALL_RIM OFF CACHE BOOL "Install disabled in subproject mode" FORCE)
   set(ENABLE_STATIC_LIBS ON  CACHE BOOL "Force static linking in subproject" FORCE)
   set(ENABLE_SHARED_LIBS OFF CACHE BOOL "Disable shared libs in subproject" FORCE)
-
   message(STATUS "RefIccMAX included as subproject - installation is disabled.")
   message(STATUS "ENABLE_INSTALL_RIM      = ${ENABLE_INSTALL_RIM}")
   message(STATUS "ENABLE_STATIC_LIBS      = ${ENABLE_STATIC_LIBS}")
   message(STATUS "ENABLE_SHARED_LIBS      = ${ENABLE_SHARED_LIBS}")
 endif()
+
 # ----------------------------------------------------------------------
 # Default Build Type Enforcement
 # ----------------------------------------------------------------------
@@ -532,75 +526,32 @@ endif()
 # ----------------------------------------------------------------------
 # Architecture and Platform Detection
 # ----------------------------------------------------------------------
+
 if(APPLE)
   message(STATUS "Detected platform: macOS")
 
-  # Host architecture (where CMake is running)
-  set(_HOST_ARCH "${CMAKE_HOST_SYSTEM_PROCESSOR}")
-  if(NOT _HOST_ARCH)
-    execute_process(COMMAND uname -m
-      OUTPUT_VARIABLE _HOST_ARCH
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-  endif()
-  string(TOLOWER "${_HOST_ARCH}" _HOST_ARCH_LC)
-  if(_HOST_ARCH_LC MATCHES "^arm64e?$")
-    set(_HOST_ARCH "arm64")
-  elseif(_HOST_ARCH_LC MATCHES "^(x86_64|amd64)$")
-    set(_HOST_ARCH "x86_64")
-  endif()
-  message(STATUS "Host architecture       : ${_HOST_ARCH}")
-
-  # Detect Rosetta (1 means translated)
+  # Detect native architecture (e.g., arm64 or x86_64)
   execute_process(
-    COMMAND /usr/sbin/sysctl -n sysctl.proc_translated
-    OUTPUT_VARIABLE _ROSETTA
-    ERROR_QUIET
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  if(_ROSETTA STREQUAL "1")
-    message(STATUS "Rosetta translation     : active (terminal running under Rosetta)")
+    COMMAND uname -m
+    OUTPUT_VARIABLE OSX_ARCHITECTURE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+  if("${OSX_ARCHITECTURE}" STREQUAL "arm64")
+    message(STATUS "Configuring build for Apple Silicon (ARM64).")
+    set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "macOS architecture")
+    add_compile_definitions(ARM64)
+    message(STATUS ">>> Macro 'ARM64' is defined for Apple Silicon targets.")
+
+  elseif("${OSX_ARCHITECTURE}" STREQUAL "x86_64")
+    message(STATUS "Configuring build for Intel macOS (x86_64).")
+    set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "macOS architecture")
+
   else()
-    message(STATUS "Rosetta translation     : not active")
+    message(FATAL_ERROR "Unsupported macOS architecture detected: '${OSX_ARCHITECTURE}'")
   endif()
 
-  # Target architectures: respect user/toolchain if already set
-  if(DEFINED CMAKE_OSX_ARCHITECTURES AND NOT CMAKE_OSX_ARCHITECTURES STREQUAL "")
-    set(_REQ_ARCHS "${CMAKE_OSX_ARCHITECTURES}")
-    # Normalize list elements
-    separate_arguments(_REQ_ARCHS)
-    set(_NORM_ARCHS "")
-    foreach(a IN LISTS _REQ_ARCHS)
-      string(TOLOWER "${a}" a_lc)
-      if(a_lc MATCHES "^arm64e?$")
-        list(APPEND _NORM_ARCHS "arm64")
-      elseif(a_lc MATCHES "^(x86_64|amd64)$")
-        list(APPEND _NORM_ARCHS "x86_64")
-      else()
-        message(FATAL_ERROR "Unsupported requested macOS arch: '${a}'")
-      endif()
-    endforeach()
-    list(REMOVE_DUPLICATES _NORM_ARCHS)
-    list(JOIN _NORM_ARCHS ";" _ARCHS_FINAL)
-    if(NOT _ARCHS_FINAL STREQUAL "${CMAKE_OSX_ARCHITECTURES}")
-      set(CMAKE_OSX_ARCHITECTURES "${_ARCHS_FINAL}" CACHE STRING "macOS architectures" FORCE)
-    endif()
-    message(STATUS "Requested target archs  : ${CMAKE_OSX_ARCHITECTURES}")
-  else()
-    # Default to host arch if nothing specified
-    set(CMAKE_OSX_ARCHITECTURES "${_HOST_ARCH}" CACHE STRING "macOS architectures" FORCE)
-    message(STATUS "Defaulting target archs : ${CMAKE_OSX_ARCHITECTURES}")
-  endif()
-
-  # Add compile definitions for single-arch builds
-  list(LENGTH CMAKE_OSX_ARCHITECTURES _ARCHLEN)
-  if(_ARCHLEN EQUAL 1)
-    list(GET CMAKE_OSX_ARCHITECTURES 0 _ONLY_ARCH)
-    if(_ONLY_ARCH STREQUAL "arm64")
-      add_compile_definitions(ARM64)
-      message(STATUS "Macro defined           : ARM64")
-    endif()
-  endif()
-
-  message(STATUS "Final macOS architectures: ${CMAKE_OSX_ARCHITECTURES}")
+  message(STATUS "Final macOS Architecture set: ${CMAKE_OSX_ARCHITECTURES}")
 
 elseif(UNIX AND NOT APPLE)
   message(STATUS "Detected platform: Linux")
@@ -633,18 +584,6 @@ unset(IccProfLib2_LIBRARY CACHE)
 unset(IccProfLib2_LIB CACHE)
 unset(IccProfLib2 CACHE)
 
-# ----------------------------------------------------------------------
-# Third-Party Dependencies
-# ----------------------------------------------------------------------
-message(STATUS "")
-message(STATUS "## Third Party Dependencies ##")
-find_package(LibXml2 REQUIRED)
-find_package(nlohmann_json REQUIRED)
-find_package(TIFF REQUIRED)
-find_package(PNG REQUIRED)
-find_package(JPEG REQUIRED)
-
-message(STATUS "")
 #
 # Target installation folders
 #
@@ -689,7 +628,6 @@ FIND_PROGRAM(CMAKE_AR_TMP NAMES ar)
 #
 # Core library
 #
-message(STATUS "## Project Configuration ##")
 message(STATUS "Adding subdirectory for IccProfLib.")
 add_subdirectory(IccProfLib)
 
@@ -703,32 +641,26 @@ set(TARGET_LIB_ICCPROFLIB IccProfLib2 CACHE INTERNAL "Link target for IccProfLib
 if(ENABLE_ICCXML)
   message(STATUS "ICCXML support enabled")
 
-  if(USE_SYSTEM_LIBXML2)
-    find_package(LibXml2 REQUIRED)
-  else()
-    find_package(LibXml2 QUIET)
+  if(NOT LIBXML2_INCLUDE_DIR OR NOT LIBXML2_LIBRARY)
+    message(FATAL_ERROR "ENABLE_ICCXML is ON, but LIBXML2_INCLUDE_DIR or LIBXML2_LIBRARY is not set.")
   endif()
 
-  if(LibXml2_FOUND)
-    message(STATUS "Found LibXml2 via system or toolchain integration")
-    set(HAVE_LIBXML2 TRUE)
+  message(STATUS "Using manually specified libxml2:")
+  message(STATUS " - Include dir: ${LIBXML2_INCLUDE_DIR}")
+  message(STATUS " - Static lib : ${LIBXML2_LIBRARY}")
 
-    # Use imported CMake target if available
-    if(TARGET LibXml2::LibXml2)
-      set(LIBXML2_LIBRARIES LibXml2::LibXml2)
-    else()
-      # Legacy fallback (non-target based CMake find)
-      include_directories(${LIBXML2_INCLUDE_DIR})
-      set(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES})
-    endif()
-  else()
-    message(WARNING "LibXml2 not found; falling back to internal IccXML/libxml2")
+  include_directories(${LIBXML2_INCLUDE_DIR})
 
-    set(HAVE_LIBXML2 TRUE)
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/IccXML/libxml2)
-    add_subdirectory(IccXML/libxml2)
-    set(LIBXML2_LIBRARIES xml2-static)
+  if(NOT TARGET LibXml2::LibXml2)
+    add_library(LibXml2::LibXml2 STATIC IMPORTED GLOBAL)
+    set_target_properties(LibXml2::LibXml2 PROPERTIES
+      IMPORTED_LOCATION "${LIBXML2_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${LIBXML2_INCLUDE_DIR}"
+    )
   endif()
+
+  set(HAVE_LIBXML2 TRUE)
+  set(LIBXML2_LIBRARIES LibXml2::LibXml2)
 endif()
 
 #
@@ -744,102 +676,98 @@ set(TARGET_LIB_ICCXML IccXML2 CACHE INTERNAL "Link target for IccXML2")
 include_directories(${TOP_SOURCE_DIR}/IccXML/IccLibXML/)
 
 # Diagnostic: Output current linker flags
-
 message(STATUS "CMAKE_EXE_LINKER_FLAGS = ${CMAKE_EXE_LINKER_FLAGS}")
 message(STATUS "CMAKE_SHARED_LINKER_FLAGS = ${CMAKE_SHARED_LINKER_FLAGS}")
 message(STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
 
+# --- Ensure nlohmann_json is found (Emscripten-safe rewrite) ---
 
-# Ensure nlohmann_json is found
-find_package(nlohmann_json REQUIRED)
+# Don't force /usr/include into path — this breaks Emscripten
+# include_directories(/usr/include)  # <-- COMMENTED OUT
+
+# Diagnostic message for manual or FetchContent builds
 message(STATUS "nlohmann_json library found: ${nlohmann_json_DIR}")
 
- # Function to add and log subdirectories
-function(add_tool_subdirectory TOOL_SUBDIRECTORY)
-    message(STATUS "Adding Subdirectory: ${TOOL_SUBDIRECTORY}...")
-    add_subdirectory(${TOOL_SUBDIRECTORY})
-    message(STATUS "Successfully added Subdirectory: ${TOOL_SUBDIRECTORY}")
-endfunction()
-
 IF(ENABLE_TOOLS)
-  # Verify nlohmann_json is configured properly
-  IF(nlohmann_json_DIR)
-    MESSAGE(STATUS "Found nlohmann JSON library at: ${nlohmann_json_DIR}")
+# --- Ensure nlohmann_json is found (Emscripten-safe) ---
 
-    # Use nlohmann_json include directory
-    include_directories(${nlohmann_json_DIR})
-  ELSE()
-    MESSAGE(WARNING "nlohmann JSON library not found. Skipping..")
-    RETURN() # Exit script for tools if dependency is not found
-  ENDIF()
+# Skip system include: Emscripten cannot use /usr/include
+# include_directories(/usr/include)
 
-  # Add XML-related tools
-  message(STATUS "Adding Subdirectory IccFromXml.")
-  ADD_SUBDIRECTORY(Tools/IccFromXml)
-  message(STATUS "Adding Subdirectory IccToXml.")
-  ADD_SUBDIRECTORY(Tools/IccToXml)
-  message(STATUS "Adding Subdirectory IccJpegDump.")
-  ADD_SUBDIRECTORY(Tools/IccJpegDump)
-  message(STATUS "Adding Subdirectory IccApplyNamedCmm.")
-  ADD_SUBDIRECTORY(Tools/IccApplyNamedCmm)
-  message(STATUS "Adding Subdirectory IccDumpProfile.")
-  ADD_SUBDIRECTORY(Tools/IccDumpProfile)
-  message(STATUS "Adding Subdirectory IccDumpRoundTrip.")
-  ADD_SUBDIRECTORY(Tools/IccRoundTrip)
-  message(STATUS "Adding Subdirectory IccFromCube.")
-  ADD_SUBDIRECTORY(Tools/IccFromCube)
-  message(STATUS "Adding Subdirectory IccV5DspObsToV4Dsp.")
-  ADD_SUBDIRECTORY(Tools/IccV5DspObsToV4Dsp)
-  message(STATUS "Adding Subdirectory IccApplyToLink.")
-  ADD_SUBDIRECTORY(Tools/IccApplyToLink)
-  message(STATUS "Adding Subdirectory IccApplySearch.")
-  ADD_SUBDIRECTORY(Tools/IccApplySearch)
+message(STATUS "nlohmann_json library found: ${nlohmann_json_DIR}")
 
-# --- PNG ---
-message(STATUS "Checking for PNG...")
-find_package(PNG REQUIRED)
+if(ENABLE_TOOLS)
+  # Check either CMake config path or target created by FetchContent
+  if(nlohmann_json_DIR OR TARGET nlohmann_json::nlohmann_json)
+    message(STATUS "Found nlohmann JSON library or target at: ${nlohmann_json_DIR}")
 
-if(PNG_FOUND)
-  message(STATUS "PNG Library            : ${PNG_LIBRARIES}")
-  message(STATUS "PNG Include Directory  : ${PNG_INCLUDE_DIRS}")
-  message(STATUS "PNG Version            : ${PNG_VERSION}")
-else()
-  message(FATAL_ERROR " PNG not found. Please install libpng-dev or install via vcpkg.")
-endif()
-message(STATUS "Adding Subdirectory IccPngDump.")
-ADD_SUBDIRECTORY(Tools/IccPngDump)
+    # Add include directory only if it's a real path (for older setups)
+    if(nlohmann_json_DIR AND EXISTS "${nlohmann_json_DIR}")
+      include_directories(${nlohmann_json_DIR})
+    endif()
 
+    function(add_tool_subdirectory TOOL_SUBDIRECTORY)
+      message(STATUS "Adding Subdirectory: ${TOOL_SUBDIRECTORY}...")
+      add_subdirectory(${TOOL_SUBDIRECTORY})
+      message(STATUS "Successfully added Subdirectory: ${TOOL_SUBDIRECTORY}")
+    endfunction()
 
-    message(STATUS "Adding Subdirectory DemoIccMAXCmm.")
-    ADD_SUBDIRECTORY(Tools/DemoIccMAXCmm)
+    message(STATUS "Adding Subdirectory IccFromXml.")
+    add_tool_subdirectory(Tools/IccFromXml)
 
+    message(STATUS "Adding Subdirectory IccToXml.")
+    add_tool_subdirectory(Tools/IccToXml)
 
-  # Check for TIFF library
-  find_package(TIFF REQUIRED)
-  if (TIFF_FOUND)
-    include_directories(${TIFF_INCLUDE_DIR})
-    message(STATUS "TIFF library found: ${TIFF_LIBRARIES}")
+    message(STATUS "Adding Subdirectory IccDumpProfile.")
+    add_tool_subdirectory(Tools/IccDumpProfile)
 
-    # Add TIFF-dependent tools
-    message(STATUS "Adding Subdirectory IccApplyProfiles.")
-    ADD_SUBDIRECTORY(Tools/IccApplyProfiles)
-    message(STATUS "Adding subdirectory IccSpecSepToTiff.")
-    ADD_SUBDIRECTORY(Tools/IccSpecSepToTiff)
+    message(STATUS "Adding Subdirectory IccRoundTrip.")
+    add_tool_subdirectory(Tools/IccRoundTrip)
+
+    message(STATUS "Adding Subdirectory IccFromCube.")
+    add_tool_subdirectory(Tools/IccFromCube)
+
+    message(STATUS "Adding Subdirectory IccV5DspObsToV4Dsp.")
+    add_tool_subdirectory(Tools/IccV5DspObsToV4Dsp)
+
     message(STATUS "Adding Subdirectory IccTiffDump.")
-    ADD_SUBDIRECTORY(Tools/IccTiffDump)
-  else()
-    message(FATAL_ERROR "TIFF library not found. Please install libtiff-dev.")
-  endif()
+    add_tool_subdirectory(Tools/IccTiffDump)
 
-  # Configure wxWidgets
-  find_package(wxWidgets COMPONENTS core base REQUIRED)
-  if (wxWidgets_FOUND)
-    include(${wxWidgets_USE_FILE})
-      ADD_SUBDIRECTORY(Tools/wxProfileDump)
-    message(STATUS "wxWidgets found and configured")
+    message(STATUS "Adding Subdirectory IccSpecSepToTiff.")
+    add_tool_subdirectory(Tools/IccSpecSepToTiff)
+
+    message(STATUS "Adding Subdirectory IccApplyProfiles.")
+    add_tool_subdirectory(Tools/IccApplyProfiles)
+
+    message(STATUS "Adding Subdirectory IccApplyToLink.")
+    add_tool_subdirectory(Tools/IccApplyToLink)
+
+    message(STATUS "Adding Subdirectory IccApplyNamedCmm.")
+    add_tool_subdirectory(Tools/IccApplyNamedCmm)
+
+    message(STATUS "Adding Subdirectory IccApplySearch.")
+    add_tool_subdirectory(Tools/IccApplySearch)
+
+    message(STATUS "Top-Level JPEG_INCLUDE_DIR = ${JPEG_INCLUDE_DIR}")
+    message(STATUS "Top-Level JPEG_LIBRARY = ${JPEG_LIBRARY}")
+
+    # Force propagation to subdirectories
+    set(JPEG_INCLUDE_DIR "${JPEG_INCLUDE_DIR}" CACHE PATH "Path to JPEG include" FORCE)
+    set(JPEG_LIBRARY "${JPEG_LIBRARY}" CACHE FILEPATH "Path to JPEG static lib" FORCE)
+
+    message(STATUS "Adding Subdirectory IccJpegDump.")
+    add_tool_subdirectory(Tools/IccJpegDump)
+
+    message(STATUS "Adding Subdirectory IccPngDump.")
+    add_tool_subdirectory(Tools/IccPngDump)
+
   else()
-    message(FATAL_ERROR "wxWidgets not found. Please install it manually or via vcpkg.")
+    message(WARNING "nlohmann JSON library not found. Skipping Tools")
+    return()  # Exit from tool addition only
   endif()
+endif()
+
+
 
 ENDIF(ENABLE_TOOLS)
 
@@ -887,7 +815,6 @@ ADD_CUSTOM_TARGET( dist-bin2
     COMMAND mkdir -p ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/IccApplyNamedCmm ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccApplyProfiles ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
-    COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccApplySearch ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccApplyToLink ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccDumpProfile ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/
     COMMAND cp -av ${CMAKE_SOURCE_DIR}/../../Testing/iccDumpProfileGui ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}${ARCH}-${${PROJECT_UP_NAME}_VERSION}/Testing/ || echo ""

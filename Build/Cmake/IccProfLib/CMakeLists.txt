@@ -4,13 +4,14 @@
 #                                        All rights reserved.
 # 
 #
-#  Last Updated: 18-OCT-2025 at 1200Z by David Hoyt
+#  Last Updated: 24-MAR-2025 1222 EDT by David Hoyt
+#  date -d @1742833338
+#  Mon Mar 24 12:22:18 EDT 2025
 #
-#
-#
-# Changes:  Add Source Files for IccSearch & IccCmm Search
-#           
-##
+# Changes:  Modified output target to fix a few subproject pathing issues
+#           Added to CMakelists.txt: IccPngDump
+#           Adjusted Cross Platform Build Args
+#						
 # TODO: Refactor Debug, Release, Asan, subproject pathing issues
 #       Collapse 3-tier CMakeLists.txt, Housekeeping
 #       Refactor Base Configs & logging to .mk's 
@@ -99,6 +100,7 @@ IF(ENABLE_INSTALL_RIM)
     ${SRC_PATH}/IccProfLib/IccUtil.h
     ${SRC_PATH}/IccProfLib/IccWrapper.h
     ${SRC_PATH}/IccProfLib/IccXformFactory.h
+    ${SRC_PATH}/IccProfLib/icProfileHeader.h
     ${SRC_PATH}/IccProfLib/IccMD5.h
     ${SRC_PATH}/IccProfLib/IccSignatureUtils.h
     ${SRC_PATH}/IccProfLib/IccSearch.h
