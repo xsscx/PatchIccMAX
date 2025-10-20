@@ -9,11 +9,7 @@
 */
 
 /*
- * The ICC Software License, Version 0.2
- *
- *
- * Copyright (c) 2003-2024 The International Color Consortium. All rights
- * reserved.
+ * Copyright (c) International Color Consortium.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -134,6 +130,8 @@ bool jsonToArray(const json& v, std::vector<std::string>& vals);
 bool jsonToList(const json& v, std::list<std::string>& vals);
 bool jsonToCStr(const json& j, char* str, int nSize);
 bool jsonToColorSpace(const json& j, icColorSpaceSignature& sig);
+
+bool jsonExistsField(const json& j, const char* field);
 
 // ========================
 // JSON File I/O

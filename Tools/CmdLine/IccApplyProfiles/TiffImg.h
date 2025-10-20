@@ -9,11 +9,7 @@
 */
 
 /*
- * The ICC Software License, Version 0.2
- *
- *
- * Copyright (c) 2003-2010 The International Color Consortium. All rights 
- * reserved.
+ * Copyright (c) International Color Consortium.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -79,6 +75,7 @@
 #define PHOTO_MINISWHITE  1
 #define PHOTO_CIELAB      2
 #define PHOTO_ICCLAB      3
+#define PHOTO_RGB         4
 
 class CTiffImg  
 {
@@ -89,7 +86,7 @@ public:
   void Close();
 
   bool Create(const char *szFname, unsigned int nWidth, unsigned int nHeight,
-              unsigned int nBPS, unsigned int nPhoto, unsigned int nSamples,
+              unsigned int nBPS, unsigned int nPhoto, unsigned int nSamples, unsigned int nExtraSamples,
               float fXRes, float fYRes, bool bCompress=true, bool bSep=false);
   bool Open(const char *szFname);
 

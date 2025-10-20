@@ -5,15 +5,11 @@
 
     Version:    V1
 
-    Copyright:  � see ICC Software License
+    Copyright:  (c) see Software License
 */
 
 /*
- * The ICC Software License, Version 0.2
- *
- *
- * Copyright (c) 2003-2012 The International Color Consortium. All rights 
- * reserved.
+ * Copyright (c) International Color Consortium.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -76,8 +72,8 @@
 #include <string>
 #include <limits>
 
-#ifdef USEREFICCMAXNAMESPACE
-namespace refIccMAX {
+#ifdef USEICCDEVNAMESPACE
+namespace iccDEV {
 #endif
 
 ICCPROFLIB_API void* icRealloc(void *ptr, size_t size);
@@ -411,8 +407,8 @@ public:
 
 extern ICCPROFLIB_API CIccInfo icInfo;
 
-#ifdef USEREFICCMAXNAMESPACE
-} //namespace refIccMAX
+#ifdef USEICCDEVNAMESPACE
+} //namespace iccDEV
 #endif
 
 #endif

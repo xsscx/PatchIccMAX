@@ -6,15 +6,11 @@ Contains:   Header for implementation of Channel Calculator element
 
 Version:    V1
 
-Copyright:  (c) see ICC Software License
+Copyright:  (c) see Software License
 */
 
 /*
- * The ICC Software License, Version 0.1
- *
- *
- * Copyright (c) 2003-2006 The International Color Consortium. All rights 
- * reserved.
+ * Copyright (c) International Color Consortium.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -80,8 +76,8 @@ Copyright:  (c) see ICC Software License
 #include <vector>
 
 //CIccFloatTag support
-#ifdef USEREFICCMAXNAMESPACE
-namespace refIccMAX {
+#ifdef USEICCDEVNAMESPACE
+namespace iccDEV {
 #endif
 
 //Declare forward references
@@ -560,7 +556,7 @@ public:
 #define icCalcDebuggerConsole ((IIccCalcDebugger*)-1) 
 
 //CIccMPElements support  
-#ifdef USEREFICCMAXNAMESPACE
+#ifdef USEICCDEVNAMESPACE
 }
 #endif
 
