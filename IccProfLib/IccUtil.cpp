@@ -84,8 +84,8 @@
 
 #define PI 3.1415926535897932384626433832795
 
-#ifdef USEREFICCMAXNAMESPACE
-namespace refIccMAX {
+#ifdef USEICCDEVNAMESPACE
+namespace iccDEV {
 #endif
 
 ICCPROFLIB_API const char *icMsgValidateWarning = "Warning! - ";
@@ -1932,6 +1932,9 @@ const icChar *CIccInfo::GetCmmSigName(icCmmSignature sig)
   case icSigDemoIccMAX:
     return "DemoIccMAX";
 
+  case icSigIccDEV:
+	  return "iccDEV";
+
   case icSigRolfGierling:
     return "Rolf Gierling Multitools";
 
@@ -2610,6 +2613,6 @@ CIccPixelBuf::~CIccPixelBuf()
     delete [] m_pixel;
 }
 
-#ifdef USEREFICCMAXNAMESPACE
-} //namespace refIccMAX
+#ifdef USEICCDEVNAMESPACE
+} //namespace iccDEV
 #endif

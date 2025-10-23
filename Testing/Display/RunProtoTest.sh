@@ -1,6 +1,6 @@
 #!/bin/bash
 ##
-## Copyright (c) 2025 International Color Consortium. All rights reserved.
+## Copyright (c) 2025 David H Hoyt LLC. All rights reserved.
 ##
 ## Written by David Hoyt 
 ## Date: 21-OCT-2025 1700Z by David Hoyt
