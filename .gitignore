@@ -3,6 +3,7 @@
 *.lo
 *.o
 *.obj
+*.d
 
 # Precompiled Headers
 *.gch
@@ -60,10 +61,3 @@ Build/XCode/libxml/*.h*
 **/Win32/**
 **/vc_msw*/**
 Developer Defs.props
-
-
-# copied code
-Tools/CmdLine/IccSpecSepToTiff/TiffImg.cpp
-Tools/CmdLine/IccSpecSepToTiff/TiffImg.h
-Tools/CmdLine/IccTiffDump/TiffImg.cpp
-Tools/CmdLine/IccTiffDump/TiffImg.h

@@ -2,16 +2,16 @@
 # Cmake Project Configuration| iccDEV Project
 # Copyright (C) 2024-2025 The International Color Consortium.
 #                                        All rights reserved.
-# 
 #
-#  Last Updated: 18-OCT-2025 at 1200Z by David Hoyt
+#
+#  Last Updated: 23-OCT-2025 at 1200Z by David Hoyt
 #
 #
 #
 #  Changes: Add Source to ProfLib
 #           Add Tool iccApplySearch
 #           Modify Cmake Configs, bump Version
-#						
+#
 #  TODO:    Align Version on IccProfLibVer.h, Housekeeping, Debug Options
 #           Version Headers, Doxygen Config, Exports etc...
 #           Refactor this to .mk's, add research args, other Housekeeping
@@ -402,11 +402,11 @@ option(ENABLE_TOOLS               "Build tools (command-line + GUI)"            
 option(ENABLE_SHARED_LIBS         "Build dynamic link libraries"                        ON)
 option(ENABLE_STATIC_LIBS         "Build static libraries"                              ON)
 option(ENABLE_ICCXML              "Build IccXML library support"                        ON)
-option(ICC_TRACE_NAN_ENABLED      "Enable tracing NaN inputs in debug builds"           OFF)
-option(ICC_CLUT_DEBUG             "Enable CLUT debugging support"                       OFF)
-option(ICC_ENABLE_ASSERTS         "Enable ICC_ASSERT traps and debug assertions"        OFF)
-option(ICC_LOG_SAFE               "Enable ICC_LOG_SAFE_VAL bounds-checked logging"      OFF)
-option(ENABLE_SANITIZERS          "Enable runtime sanitizers (ASan, UBSan, etc.)"       OFF)
+option(ICC_TRACE_NAN_ENABLED      "Enable tracing NaN inputs in debug builds"           ON)
+option(ICC_CLUT_DEBUG             "Enable CLUT debugging support"                       ON)
+option(ICC_ENABLE_ASSERTS         "Enable ICC_ASSERT traps and debug assertions"        ON)
+option(ICC_LOG_SAFE               "Enable ICC_LOG_SAFE_VAL bounds-checked logging"      ON)
+option(ENABLE_SANITIZERS          "Enable runtime sanitizers (ASan, UBSan, etc.)"       ON)
 option(ENABLE_FUZZING             "Enable fuzzing instrumentation (libFuzzer)"          OFF)
 option(ENABLE_SPECTRE_MITIGATION  "Enable /Qspectre on MSVC for Spectre V1 mitigation"  OFF)
 option(ENABLE_USEREFICCMAXNAMESPACE "Use refIccMAX namespace wrapping"                  OFF)

@@ -83,6 +83,7 @@
 #include "IccConvertUTF.h"
 #include "IccSparseMatrix.h"
 #include "IccCmm.h"
+#include "IccSignatureUtils.h"
 
 #ifdef ICC_USE_ZLIB
 #include "zlib.h"
@@ -3590,34 +3591,32 @@ CIccTagXYZ::~CIccTagXYZ()
  */
 bool CIccTagXYZ::Read(icUInt32Number size, CIccIO *pIO)
 {
-  icTagTypeSignature sig;
+  ICC_LOG_DEBUG("CIccTagXYZ::Read() called with size=%u", size);
 
-  if (sizeof(icTagTypeSignature) + 
-      sizeof(icUInt32Number) + 
-      sizeof(icXYZNumber) > size)
-    return false;
-
-  if (!pIO) {
+  if (!pIO || size < sizeof(icXYZNumber)) {
+    ICC_LOG_WARNING("CIccTagXYZ::Read() failed: invalid IO or size too small");
     return false;
   }
 
-  if (!pIO->Read32(&sig))
-    return false;
+  if (!m_XYZ) {
+    m_XYZ = (icXYZNumber*)calloc(1, sizeof(icXYZNumber));
+    if (!m_XYZ) {
+      ICC_LOG_INFO("CIccTagXYZ::Read() failed: memory allocation failed");
+      return false;
+    }
+  }
 
-  if (!pIO->Read32(&m_nReserved))
+  if (!pIO->Read8(m_XYZ, sizeof(icXYZNumber))) {
+    ICC_LOG_WARNING("CIccTagXYZ::Read() failed to read icXYZNumber");
     return false;
+  }
 
-  icUInt32Number nNum=((size-2*sizeof(icUInt32Number)) / sizeof(icXYZNumber));
-  icUInt32Number nNum32 = nNum*sizeof(icXYZNumber)/sizeof(icUInt32Number);
-
-  if (!SetSize(nNum))
-    return false;
-
-  if (pIO->Read32(m_XYZ, nNum32) != (icInt32Number)nNum32 )
-    return false;
+  ICC_LOG_DEBUG("CIccTagXYZ::Read() read XYZ: X=%d, Y=%d, Z=%d",
+                m_XYZ->X, m_XYZ->Y, m_XYZ->Z);
 
   return true;
 }
+
 
 
 /**
@@ -7090,7 +7089,7 @@ bool CIccLocalizedUnicode::GetText(std::string &sText)
 
     //UTF-16 to UTF-32
 
-    if (*str <= 0xD7FF || *str >= 0xE000) {
+    if (*str <= 0xD7FF) {
       code32 = *str;
       str++;
     }
@@ -7099,10 +7098,6 @@ bool CIccLocalizedUnicode::GetText(std::string &sText)
       icUInt16Number low = *(str + 1) - 0xDC00;
       code32 = (low | high) + 0x10000;
       str += 2;
-    }
-    else {  //range dc00-dfff should only occur after a d800-dbfff
-      str++;
-      continue;
     }
 
     //UTF-32 to UTF-8 -------

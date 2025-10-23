@@ -12,7 +12,7 @@
  * The ICC Software License, Version 0.2
  *
  *
- * Copyright (c) 2003-2012 The International Color Consortium. All rights 
+ * Copyright (c) 2003-2012 The International Color Consortium. All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -20,7 +20,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -48,20 +48,20 @@
  * ====================================================================
  *
  * This software consists of voluntary contributions made by many
- * individuals on behalf of the The International Color Consortium. 
+ * individuals on behalf of the The International Color Consortium.
  *
  *
  * Membership in the ICC is encouraged when this software is used for
- * commercial purposes. 
+ * commercial purposes.
  *
- *  
+ *
  * For more information on The International Color Consortium, please
  * see <http://www.color.org/>.
- *  
- * 
+ *
+ *
  */
 
-////////////////////////////////////////////////////////////////////// 
+//////////////////////////////////////////////////////////////////////
 // HISTORY:
 //
 // -Initial implementation by Max Derhak 5-15-2003
@@ -84,6 +84,8 @@
 #include "IccSparseMatrix.h"
 #include "IccEncoding.h"
 #include "IccMatrixMath.h"
+#include "IccMatrixMath.h"
+#include "IccSignatureUtils.h"
 
 #ifdef USEREFICCMAXNAMESPACE
 namespace refIccMAX {
@@ -5586,8 +5588,8 @@ CIccXform3DLut::CIccXform3DLut(CIccTag *pTag)
 /**
  **************************************************************************
  * Name: CIccXform3DLut::~CIccXform3DLut
- * 
- * Purpose: 
+ *
+ * Purpose:
  *  Destructor
  **************************************************************************
  */
@@ -5598,8 +5600,8 @@ CIccXform3DLut::~CIccXform3DLut()
 /**
  **************************************************************************
  * Name: CIccXform3DLut::Begin
- * 
- * Purpose: 
+ *
+ * Purpose:
  *  Does the initialization of the Xform before Apply() is called.
  *  Must be called before Apply().
  *
@@ -5620,52 +5622,68 @@ CIccXform3DLut::~CIccXform3DLut()
     return icCmmStatInvalidLut;
   }
 
-  m_ApplyCurvePtrA = NULL;
-  m_ApplyCurvePtrB = NULL;
-  m_ApplyCurvePtrM = NULL;
+  m_ApplyCurvePtrA = nullptr;
+  m_ApplyCurvePtrB = nullptr;
+  m_ApplyCurvePtrM = nullptr;
 
-  if (m_pTag->m_bInputMatrix) {
-    if (m_pTag->m_CurvesB) {
-      Curve = m_pTag->m_CurvesB;
+if (m_pTag->m_bInputMatrix) {
+  if (m_pTag->m_CurvesB) {
+    Curve = m_pTag->m_CurvesB;
 
-      Curve[0]->Begin();
-      Curve[1]->Begin();
-      Curve[2]->Begin();
+    ICC_LOG_DEBUG("m_CurvesB ptrs: [%p, %p, %p]", (void*)Curve[0], (void*)Curve[1], (void*)Curve[2]);
 
-      if (!Curve[0]->IsIdentity() || !Curve[1]->IsIdentity() || !Curve[2]->IsIdentity()) {
-        m_ApplyCurvePtrB = Curve;
-      }
+    if (Curve[0]) Curve[0]->Begin();
+    else ICC_LOG_WARNING("m_CurvesB[0] is null before Begin()");
+
+    if (Curve[1]) Curve[1]->Begin();
+    else ICC_LOG_WARNING("m_CurvesB[1] is null before Begin()");
+
+    if (Curve[2]) Curve[2]->Begin();
+    else ICC_LOG_WARNING("m_CurvesB[2] is null before Begin()");
+
+    if ((Curve[0] && !Curve[0]->IsIdentity()) ||
+        (Curve[1] && !Curve[1]->IsIdentity()) ||
+        (Curve[2] && !Curve[2]->IsIdentity())) {
+      m_ApplyCurvePtrB = Curve;
     }
+  }
 
-    if (m_pTag->m_CurvesM) {
-      Curve = m_pTag->m_CurvesM;
+  if (m_pTag->m_CurvesM) {
+    Curve = m_pTag->m_CurvesM;
 
-      Curve[0]->Begin();
-      Curve[1]->Begin();
-      Curve[2]->Begin();
-      
-      if (!Curve[0]->IsIdentity() || !Curve[1]->IsIdentity() || !Curve[2]->IsIdentity()) {
-        m_ApplyCurvePtrM = Curve;
-      }
+    ICC_LOG_DEBUG("m_CurvesM ptrs: [%p, %p, %p]", (void*)Curve[0], (void*)Curve[1], (void*)Curve[2]);
+
+    if (Curve[0]) Curve[0]->Begin();
+    if (Curve[1]) Curve[1]->Begin();
+    if (Curve[2]) Curve[2]->Begin();
+
+    if ((Curve[0] && !Curve[0]->IsIdentity()) ||
+        (Curve[1] && !Curve[1]->IsIdentity()) ||
+        (Curve[2] && !Curve[2]->IsIdentity())) {
+      m_ApplyCurvePtrM = Curve;
     }
+  }
 
-    if (m_pTag->m_CLUT) {
-      m_pTag->m_CLUT->Begin();
-    }
 
     if (m_pTag->m_CurvesA) {
       Curve = m_pTag->m_CurvesA;
 
-      for (i=0; i<m_pTag->m_nOutput; i++) {
-        Curve[i]->Begin();
-      }
+for (i=0; i < m_pTag->m_nOutput; i++) {
+  if (Curve[i]) {
+    Curve[i]->Begin();
+  } else {
+    ICC_LOG_WARNING("CIccCmm::Begin(): m_CurvesA[%d] is null before Begin()", i);
+  }
+}
 
-      for (i=0; i<m_pTag->m_nOutput; i++) {
-        if (!Curve[i]->IsIdentity()) {
-          m_ApplyCurvePtrA = Curve;
-          break;
-        }
-      }
+
+for (i=0; i < m_pTag->m_nOutput; i++) {
+  if (Curve[i] && !Curve[i]->IsIdentity()) {
+    m_ApplyCurvePtrA = Curve;
+    break;
+  }
+}
+
     }
 
   }
@@ -5673,11 +5691,20 @@ CIccXform3DLut::~CIccXform3DLut()
     if (m_pTag->m_CurvesA) {
       Curve = m_pTag->m_CurvesA;
 
-      Curve[0]->Begin();
-      Curve[1]->Begin();
-      Curve[2]->Begin();
+      ICC_LOG_DEBUG("m_CurvesA ptrs: [%p, %p, %p]", (void*)Curve[0], (void*)Curve[1], (void*)Curve[2]);
 
-      if (!Curve[0]->IsIdentity() || !Curve[1]->IsIdentity() || !Curve[2]->IsIdentity()) {
+      if (Curve[0]) Curve[0]->Begin();
+      else ICC_LOG_WARNING("m_CurvesA[0] is null before Begin()");
+
+      if (Curve[1]) Curve[1]->Begin();
+      else ICC_LOG_WARNING("m_CurvesA[1] is null before Begin()");
+
+      if (Curve[2]) Curve[2]->Begin();
+      else ICC_LOG_WARNING("m_CurvesA[2] is null before Begin()");
+
+      if ((Curve[0] && !Curve[0]->IsIdentity()) ||
+          (Curve[1] && !Curve[1]->IsIdentity()) ||
+          (Curve[2] && !Curve[2]->IsIdentity())) {
         m_ApplyCurvePtrA = Curve;
       }
     }
@@ -5690,11 +5717,12 @@ CIccXform3DLut::~CIccXform3DLut()
       Curve = m_pTag->m_CurvesM;
 
       for (i=0; i<m_pTag->m_nOutput; i++) {
-        Curve[i]->Begin();
+        if (Curve[i]) Curve[i]->Begin();
+        else ICC_LOG_WARNING("m_CurvesM[%d] is null before Begin()", i);
       }
 
       for (i=0; i<m_pTag->m_nOutput; i++) {
-        if (!Curve[i]->IsIdentity()) {
+        if (Curve[i] && !Curve[i]->IsIdentity()) {
           m_ApplyCurvePtrM = Curve;
           break;
         }
@@ -5705,17 +5733,19 @@ CIccXform3DLut::~CIccXform3DLut()
       Curve = m_pTag->m_CurvesB;
 
       for (i=0; i<m_pTag->m_nOutput; i++) {
-        Curve[i]->Begin();
+        if (Curve[i]) Curve[i]->Begin();
+        else ICC_LOG_WARNING("m_CurvesB[%d] is null before Begin()", i);
       }
 
       for (i=0; i<m_pTag->m_nOutput; i++) {
-        if (!Curve[i]->IsIdentity()) {
+        if (Curve[i] && !Curve[i]->IsIdentity()) {
           m_ApplyCurvePtrB = Curve;
           break;
         }
       }
     }
-  }
+
+}
 
   m_ApplyMatrixPtr = NULL;
   if (m_pTag->m_Matrix) {

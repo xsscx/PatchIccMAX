@@ -1,0 +1,52 @@
+## Makefile.iccRoundTrip.afl
+## Builds iccApplyProfiles binary instrumented for AFL++ fuzzing (no sanitizers, no LLVM coverage)
+## Copyright (c) 2024-2025. David H Hoyt LLC. All rights reserved.
+##
+## Written by David Hoyt 
+## Date: 15-APRIL-2025 2000 EDT
+#
+# Branch: PR124
+# Intent: Builds AFL++ instrumented iccRoundTrip binary with ASan (no coverage/profile)
+# Production: TRUE
+# Runner: TRUE
+#
+#
+# Updates:  Coverage Scope
+#          
+#
+# 
+#
+#
+## Makefile for building afl-instrumented iccRoundTrip with ASan + LLVM coverage
+
+AFL ?= 1
+
+ifeq ($(AFL),1)
+    CXX := afl-clang++
+    CXXFLAGS := -O0 -g -fno-inline -fno-omit-frame-pointer -fsanitize=address -fprofile-instr-generate -fcoverage-mapping
+    BIN := iccRoundTrip_afl
+else
+    CXX := clang++
+    CXXFLAGS := -O0 -g -fprofile-instr-generate -fcoverage-mapping
+    BIN := iccRoundTrip_test
+endif
+
+INCLUDES := -I../../../../../IccXML/IccLibXML \
+            -I../../../../../IccProfLib \
+            -I/usr/include/libxml2
+
+LDFLAGS := -fsanitize=address \
+           -Wl,--whole-archive ../iccXmlLib/libIccXML2.a ../iccProfLib/libIccProfLib2.a -Wl,--no-whole-archive \
+           -lxml2
+
+SRC := ../../../../../Tools/CmdLine/IccRoundTrip/iccRoundTrip.cpp
+
+.PHONY: all clean
+
+all: $(BIN)
+
+$(BIN): $(SRC)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@ $(LDFLAGS)
+
+clean:
+	rm -f iccRoundTrip_afl iccRoundTrip_test iccRoundTrip.profraw iccRoundTrip.profdata coverage_iccRoundTrip.txt
