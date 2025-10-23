@@ -4,13 +4,13 @@
 #                                        All rights reserved.
 # 
 #
-#  Last Updated: 18-OCT-2025 at 1200Z by David Hoyt
+#  Last Updated: 31-OCT-2025 at 1200Z by David Hoyt
 #
 #
 #
-#  Changes: Add Source to ProfLib
-#           Add Tool iccApplySearch
-#           Modify Cmake Configs, bump Version
+#  Changes: Reseaarch Mods
+#           
+#           
 #						
 #  TODO:    Align Version on IccProfLibVer.h, Housekeeping, Debug Options
 #           Version Headers, Doxygen Config, Exports etc...
@@ -396,27 +396,37 @@ message(STATUS "GNU Install CMake Dir  : ${CMAKE_INSTALL_DATAROOTDIR}/cmake")
 # ----------------------------------------------------------------------
 message(STATUS "")
 message(STATUS "### Build Options ###")
-# Build and feature flags
+
+# Core Build Options
 option(ENABLE_TESTS               "Build tests (requires static libs)"                  ON)
 option(ENABLE_TOOLS               "Build tools (command-line + GUI)"                    ON)
 option(ENABLE_SHARED_LIBS         "Build dynamic link libraries"                        ON)
 option(ENABLE_STATIC_LIBS         "Build static libraries"                              ON)
 option(ENABLE_ICCXML              "Build IccXML library support"                        ON)
-option(ICC_TRACE_NAN_ENABLED      "Enable tracing NaN inputs in debug builds"           OFF)
-option(ICC_CLUT_DEBUG             "Enable CLUT debugging support"                       OFF)
-option(ICC_ENABLE_ASSERTS         "Enable ICC_ASSERT traps and debug assertions"        OFF)
-option(ICC_LOG_SAFE               "Enable ICC_LOG_SAFE_VAL bounds-checked logging"      OFF)
-option(ENABLE_SANITIZERS          "Enable runtime sanitizers (ASan, UBSan, etc.)"       OFF)
-option(ENABLE_FUZZING             "Enable fuzzing instrumentation (libFuzzer)"          OFF)
-option(ENABLE_SPECTRE_MITIGATION  "Enable /Qspectre on MSVC for Spectre V1 mitigation"  OFF)
-option(ENABLE_USEREFICCMAXNAMESPACE "Use refIccMAX namespace wrapping"                  OFF)
 
-if(ENABLE_USEREFICCMAXNAMESPACE)
-  message(STATUS ">>> Namespace wrapping enabled (refIccMAX)")
-  add_compile_definitions(USEREFICCMAXNAMESPACE=1)
+# Diagnostic / Debug Toggles (match IccSignatureUtils.h)
+option(ICC_TRACE_NAN_ENABLED      "Enable NaN input tracing diagnostics"                ON)
+option(ICC_CLUT_DEBUG             "Enable CLUT debug logging"                           ON)
+option(ICC_ENABLE_ASSERTS         "Enable runtime asserts and soft contract checks"     ON)
+option(ICC_LOG_SAFE               "Enable safe bounds-checked logging (ICC_LOG_SAFE_VAL)" ON)
+
+# Extended Instrumentation / Analysis Toggles
+option(ENABLE_SANITIZERS          "Enable Address/UB Sanitizers"                        ON)
+option(ENABLE_FUZZING             "Enable fuzzing instrumentation (libFuzzer, etc.)"    OFF)
+option(ENABLE_SPECTRE_MITIGATION  "Enable /Qspectre (MSVC Spectre V1 mitigation)"       OFF)
+option(ENABLE_USEICCDEVNAMESPACE  "Enable iccDEV namespace wrapping"                    OFF)
+option(USE_WX_LOGGING             "Enable wxWidgets-based logging in ICC_LOG_* macros"  OFF)
+# ----------------------------------------------------------------------
+# Apply Compile Definitions
+# ----------------------------------------------------------------------
+if(ENABLE_USEICCDEVNAMESPACE)
+  add_compile_definitions(USEICCDEVNAMESPACE=1)
 endif()
 
-# Apply compile definitions for feature toggles
+if(USE_WX_LOGGING)
+  add_compile_definitions(USE_WX_LOGGING=1)
+endif()
+
 if(ICC_TRACE_NAN_ENABLED)
   add_compile_definitions(ICC_TRACE_NAN_ENABLED=1)
 endif()
@@ -433,6 +443,21 @@ if(ICC_LOG_SAFE)
   add_compile_definitions(ICC_LOG_SAFE=1)
 endif()
 
+if(ENABLE_FUZZING)
+  add_compile_definitions(ENABLE_FUZZING=1)
+endif()
+
+if(ENABLE_SANITIZERS)
+  # Optional: Enable AddressSanitizer and UndefinedBehaviorSanitizer
+  set(SAN_FLAGS "-fsanitize=address,undefined")
+  set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${SAN_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SAN_FLAGS}")
+endif()
+
+if(ENABLE_SPECTRE_MITIGATION AND MSVC)
+  add_compile_options(/Qspectre)
+endif()
+
 # ----------------------------------------------------------------------
 # Build Status Output
 # ----------------------------------------------------------------------
@@ -445,6 +470,7 @@ message(STATUS "ICC_TRACE_NAN_ENABLED      = ${ICC_TRACE_NAN_ENABLED}")
 message(STATUS "ICC_CLUT_DEBUG             = ${ICC_CLUT_DEBUG}")
 message(STATUS "ICC_ENABLE_ASSERTS         = ${ICC_ENABLE_ASSERTS}")
 message(STATUS "ICC_LOG_SAFE               = ${ICC_LOG_SAFE}")
+message(STATUS "USE_WX_LOGGING             = ${USE_WX_LOGGING}")
 message(STATUS "ENABLE_SANITIZERS          = ${ENABLE_SANITIZERS}")
 message(STATUS "ENABLE_FUZZING             = ${ENABLE_FUZZING}")
 message(STATUS "ENABLE_SPECTRE_MITIGATION  = ${ENABLE_SPECTRE_MITIGATION}")
@@ -810,8 +836,8 @@ message(STATUS "Adding Subdirectory IccPngDump.")
 ADD_SUBDIRECTORY(Tools/IccPngDump)
 
 
-    message(STATUS "Adding Subdirectory DemoIccMAXCmm.")
-    ADD_SUBDIRECTORY(Tools/DemoIccMAXCmm)
+    message(STATUS "Adding Subdirectory IccDEVCmm.")
+    ADD_SUBDIRECTORY(Tools/IccDEVCmm)
 
 
   # Check for TIFF library
