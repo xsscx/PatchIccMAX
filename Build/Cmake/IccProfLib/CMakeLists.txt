@@ -4,11 +4,11 @@
 #                                        All rights reserved.
 # 
 #
-#  Last Updated: 20-OCT-2025 at 2000Z by David Hoyt
+#  Last Updated: 23-OCT-2025 at 2000Z by David Hoyt
 #
 #
 #
-# Changes:  Restore include for icProfileHeader.h
+# Changes:  Modify for static executable build
 #           
 ##
 # TODO: Refactor Debug, Release, Asan, subproject pathing issues
@@ -150,6 +150,12 @@ IF(ENABLE_STATIC_LIBS)
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
   ENDIF()
+
+# Add logical alias so that "IccProfLib2" resolves to the static target
+if(TARGET IccProfLib2-static AND NOT TARGET IccProfLib2)
+    add_library(IccProfLib2 ALIAS IccProfLib2-static)
+endif()
+
 
   # 💡 Provide alias to resolve MSVC LNK1104: expected IccProfLib2.lib
   IF(WIN32 AND ENABLE_SHARED_LIBS)

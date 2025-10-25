@@ -4,11 +4,11 @@
 #                                        All rights reserved.
 # 
 #
-#  Last Updated: 12-AUGUST-2025 1300Z by David Hoyt
+#  Last Updated: 24-OCT-2025 1500Z by David Hoyt
 #
 #
 #
-# Changes:  Reduce Logging
+# Changes:  Modify for static executable builds
 #           
 #           
 #						
@@ -115,19 +115,44 @@ IF(ENABLE_STATIC_LIBS)
 ENDIF()
 
 # Resolve linking target for parent scope
-IF(ENABLE_SHARED_LIBS)
-  SET(TARGET_LIB ${TARGET_NAME})
-ELSE()
-  SET(TARGET_LIB ${TARGET_NAME}-static)
-ENDIF()
+if(ENABLE_SHARED_LIBS)
+  set(TARGET_LIB ${TARGET_NAME})
+else()
+  set(TARGET_LIB ${TARGET_NAME}-static)
+endif()
+
+set(TARGET_LIB ${TARGET_LIB} PARENT_SCOPE)
+message(STATUS "Final TARGET_LIB = ${TARGET_LIB}")
+
+# ---------------------------------------------------------------------
+# FIX: Correctly handle property lookup depending on which target exists
+# ---------------------------------------------------------------------
+if(TARGET ${TARGET_NAME})
+  get_target_property(SHARED_OUTPUT_NAME ${TARGET_NAME} OUTPUT_NAME)
+  get_target_property(SHARED_OUTPUT_DIR ${TARGET_NAME} LIBRARY_OUTPUT_DIRECTORY)
+  get_target_property(SHARED_ARCHIVE_DIR ${TARGET_NAME} ARCHIVE_OUTPUT_DIRECTORY)
+elseif(TARGET ${TARGET_NAME}-static)
+  get_target_property(SHARED_OUTPUT_NAME ${TARGET_NAME}-static OUTPUT_NAME)
+  get_target_property(SHARED_OUTPUT_DIR ${TARGET_NAME}-static LIBRARY_OUTPUT_DIRECTORY)
+  get_target_property(SHARED_ARCHIVE_DIR ${TARGET_NAME}-static ARCHIVE_OUTPUT_DIRECTORY)
+else()
+  message(WARNING "Neither ${TARGET_NAME} nor ${TARGET_NAME}-static target exists in ${CMAKE_CURRENT_SOURCE_DIR}")
+endif()
+# ---------------------------------------------------------------------
+
+# Add logical alias so that "IccXML2" resolves to the static target
+if(TARGET IccXML2-static AND NOT TARGET IccXML2)
+    add_library(IccXML2 ALIAS IccXML2-static)
+endif()
+
 
 SET(TARGET_LIB ${TARGET_LIB} PARENT_SCOPE)
-# message(STATUS "Final TARGET_LIB = ${TARGET_LIB}")
+message(STATUS "Final TARGET_LIB = ${TARGET_LIB}")
 
 # Debug logging for output paths
-GET_TARGET_PROPERTY(SHARED_OUTPUT_NAME ${TARGET_NAME} OUTPUT_NAME)
-GET_TARGET_PROPERTY(SHARED_OUTPUT_DIR ${TARGET_NAME} LIBRARY_OUTPUT_DIRECTORY)
-GET_TARGET_PROPERTY(SHARED_ARCHIVE_DIR ${TARGET_NAME} ARCHIVE_OUTPUT_DIRECTORY)
-# message(STATUS "SHARED lib output name: ${SHARED_OUTPUT_NAME}")
-# message(STATUS "SHARED lib output dir: ${SHARED_OUTPUT_DIR}")
-# message(STATUS "SHARED archive dir: ${SHARED_ARCHIVE_DIR}")
+#GET_TARGET_PROPERTY(SHARED_OUTPUT_NAME ${TARGET_NAME} OUTPUT_NAME)
+#GET_TARGET_PROPERTY(SHARED_OUTPUT_DIR ${TARGET_NAME} LIBRARY_OUTPUT_DIRECTORY)
+#GET_TARGET_PROPERTY(SHARED_ARCHIVE_DIR ${TARGET_NAME} ARCHIVE_OUTPUT_DIRECTORY)
+message(STATUS "SHARED lib output name: ${SHARED_OUTPUT_NAME}")
+message(STATUS "SHARED lib output dir: ${SHARED_OUTPUT_DIR}")
+message(STATUS "SHARED archive dir: ${SHARED_ARCHIVE_DIR}")
