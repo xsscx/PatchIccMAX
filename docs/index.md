@@ -1,6 +1,6 @@
 ## Introduction
 
-The iccdev project (formally known as DemoIccMAX) provides an
+The iccdev project (formerly known as DemoIccMAX) provides an
 open source set of libraries and tools that allow for the interaction, manipulation,
 and application of ICC based color management profiles based on the 
 [ICC profile specification](http://www.color.org/icc_specs2.xalter) and 
