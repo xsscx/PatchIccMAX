@@ -39,7 +39,7 @@ source ./emsdk_env.sh
 rm -rf iccDEV
 git clone https://github.com/InternationalColorConsortium/iccDEV.git
 cd iccDEV
-git checkout wasm-v231
+git checkout wasm
 
 # === Third-Party Dependencies ===
 mkdir -p Build/third_party && cd Build/third_party
