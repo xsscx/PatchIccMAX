@@ -101,7 +101,7 @@ jobs:
         if: ${{ runner.os == 'macOS' }}
         run: |
           echo "📥 Building PR189"
-          git clone https://github.com/ChrisCoxArt/iccDEV.git
+          git clone https://github.com/InternationalColorConsortium/iccDEV.git
           cd iccDEV
           git branch
           git status
