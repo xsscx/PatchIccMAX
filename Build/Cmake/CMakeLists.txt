@@ -4,14 +4,14 @@
 #                                        All rights reserved.
 # 
 #
-#  Last Updated: 18-OCT-2025 at 1200Z by David Hoyt
+#  Last Updated: 02-NOV-2025 at 1200Z by David Hoyt
 #
 #
 #
-#  Changes: Add Source to ProfLib
-#           Add Tool iccApplySearch
-#           Modify Cmake Configs, bump Version
-#						
+#  Changes: MODS for vcpkg
+#					
+#
+#	
 #  TODO:    Align Version on IccProfLibVer.h, Housekeeping, Debug Options
 #           Version Headers, Doxygen Config, Exports etc...
 #           Refactor this to .mk's, add research args, other Housekeeping
@@ -398,7 +398,7 @@ message(STATUS "")
 message(STATUS "### Build Options ###")
 # Build and feature flags
 option(ENABLE_TESTS               "Build tests (requires static libs)"                  ON)
-option(ENABLE_TOOLS               "Build tools (command-line + GUI)"                    ON)
+# option(ENABLE_TOOLS               "Build tools (command-line + GUI)"                    ON)
 option(ENABLE_SHARED_LIBS         "Build dynamic link libraries"                        ON)
 option(ENABLE_STATIC_LIBS         "Build static libraries"                              ON)
 option(ENABLE_ICCXML              "Build IccXML library support"                        ON)
@@ -778,68 +778,10 @@ IF(ENABLE_TOOLS)
   ADD_SUBDIRECTORY(Tools/IccFromXml)
   message(STATUS "Adding Subdirectory IccToXml.")
   ADD_SUBDIRECTORY(Tools/IccToXml)
-  message(STATUS "Adding Subdirectory IccJpegDump.")
-  ADD_SUBDIRECTORY(Tools/IccJpegDump)
-  message(STATUS "Adding Subdirectory IccApplyNamedCmm.")
-  ADD_SUBDIRECTORY(Tools/IccApplyNamedCmm)
-  message(STATUS "Adding Subdirectory IccDumpProfile.")
-  ADD_SUBDIRECTORY(Tools/IccDumpProfile)
-  message(STATUS "Adding Subdirectory IccDumpRoundTrip.")
-  ADD_SUBDIRECTORY(Tools/IccRoundTrip)
-  message(STATUS "Adding Subdirectory IccFromCube.")
-  ADD_SUBDIRECTORY(Tools/IccFromCube)
-  message(STATUS "Adding Subdirectory IccV5DspObsToV4Dsp.")
-  ADD_SUBDIRECTORY(Tools/IccV5DspObsToV4Dsp)
-  message(STATUS "Adding Subdirectory IccApplyToLink.")
-  ADD_SUBDIRECTORY(Tools/IccApplyToLink)
-  message(STATUS "Adding Subdirectory IccApplySearch.")
-  ADD_SUBDIRECTORY(Tools/IccApplySearch)
-
-# --- PNG ---
-message(STATUS "Checking for PNG...")
-find_package(PNG REQUIRED)
-
-if(PNG_FOUND)
-  message(STATUS "PNG Library            : ${PNG_LIBRARIES}")
-  message(STATUS "PNG Include Directory  : ${PNG_INCLUDE_DIRS}")
-  message(STATUS "PNG Version            : ${PNG_VERSION}")
-else()
-  message(FATAL_ERROR " PNG not found. Please install libpng-dev or install via vcpkg.")
-endif()
-message(STATUS "Adding Subdirectory IccPngDump.")
-ADD_SUBDIRECTORY(Tools/IccPngDump)
-
 
     message(STATUS "Adding Subdirectory IccDEVCmm.")
     ADD_SUBDIRECTORY(Tools/IccDEVCmm)
 
-
-  # Check for TIFF library
-  find_package(TIFF REQUIRED)
-  if (TIFF_FOUND)
-    include_directories(${TIFF_INCLUDE_DIR})
-    message(STATUS "TIFF library found: ${TIFF_LIBRARIES}")
-
-    # Add TIFF-dependent tools
-    message(STATUS "Adding Subdirectory IccApplyProfiles.")
-    ADD_SUBDIRECTORY(Tools/IccApplyProfiles)
-    message(STATUS "Adding subdirectory IccSpecSepToTiff.")
-    ADD_SUBDIRECTORY(Tools/IccSpecSepToTiff)
-    message(STATUS "Adding Subdirectory IccTiffDump.")
-    ADD_SUBDIRECTORY(Tools/IccTiffDump)
-  else()
-    message(FATAL_ERROR "TIFF library not found. Please install libtiff-dev.")
-  endif()
-
-  # Configure wxWidgets
-  find_package(wxWidgets COMPONENTS core base REQUIRED)
-  if (wxWidgets_FOUND)
-    include(${wxWidgets_USE_FILE})
-      ADD_SUBDIRECTORY(Tools/wxProfileDump)
-    message(STATUS "wxWidgets found and configured")
-  else()
-    message(FATAL_ERROR "wxWidgets not found. Please install it manually or via vcpkg.")
-  endif()
 
 ENDIF(ENABLE_TOOLS)
 
