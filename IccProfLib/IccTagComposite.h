@@ -128,7 +128,7 @@ public:
   virtual ~IIccArray() {}
   virtual IIccArray* NewCopy(CIccTagArray *pNewTagArray) const = 0;
 
-  virtual void Describe(std::string &sDescription, int nVerboseness) const { }
+  virtual void Describe(std::string & /*sDescription*/, int /*nVerboseness*/) const { }
 
   virtual const icChar *GetClassName() const = 0;
 

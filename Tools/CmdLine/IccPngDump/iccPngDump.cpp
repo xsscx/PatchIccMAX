@@ -400,7 +400,8 @@ png_set_IHDR(write_ptr, write_info_ptr,
              png_get_filter_type(png_ptr, info_ptr));
 
 // only now is it safe to attach ICC
-png_set_iCCP(write_ptr, write_info_ptr, "icc", 0, iccData.data(), iccData.size());
+// TODO - this should have a size check to make sure the profile is less than 2 Gig (32 bit api limit)
+png_set_iCCP(write_ptr, write_info_ptr, "icc", 0, iccData.data(), (png_uint_32)iccData.size());
 
 // finally write header
 png_write_info(write_ptr, write_info_ptr);

@@ -200,14 +200,12 @@ int main(int argc, const char** argv)
   unsigned int sn, sen, sphoto, photo, bps, dbps;
   CTiffImg SrcImg, DstImg;
   unsigned char *sptr, *dptr;
-  bool bSuccess = true;
-  bool bConvert = false;
   const char *last_path = NULL;
 
   //Open source image file and get information from it
   if (!SrcImg.Open(cfgApply.m_srcImgFile.c_str())) {
     printf("\nFile [%s] cannot be opened.\n", cfgApply.m_srcImgFile.c_str());
-    return false;
+    return -1;
   }
   sn = SrcImg.GetSamples();
   sen = SrcImg.GetExtraSamples();
@@ -228,7 +226,7 @@ int main(int argc, const char** argv)
       break;
     default:
       printf("Source bit depth / color data encoding not supported.\n");
-      return false;
+      return -1;
   }
 
   if (cfgApply.m_dstEncoding == icEncodeUnknown) {
@@ -249,7 +247,7 @@ int main(int argc, const char** argv)
         break;
       default:
         printf("Source color data encoding not recognized.\n");
-        return false;
+        return -1;
     }
   }
   unsigned char* pSrcProfile;
@@ -418,7 +416,6 @@ int main(int argc, const char** argv)
     break;
 
   case icSigXYZData:
-    bConvert = true;
     //Fall through - No break here
 
   case icSigLabData:
@@ -436,12 +433,12 @@ int main(int argc, const char** argv)
   //Open up output image using information from SrcImg and theCmm
   if (!DstImg.Create(cfgApply.m_dstImgFile.c_str(), SrcImg.GetWidth(), SrcImg.GetHeight(), dbps, photo, nDestSamples, nExtraSamples, SrcImg.GetXRes(), SrcImg.GetYRes(), bCompress, bSeparation)) {
     printf("Unable to create Tiff file - '%s'\n", cfgApply.m_dstImgFile.c_str());
-    return false;
+    return -1;
   }
 
   //Embed the last profile into output image as needed
   if (bEmbed && last_path) {
-    unsigned long length = 0;
+    icInt32Number length = 0;
     icUInt8Number *pDestProfile = NULL;
 
     CIccFileIO io;
@@ -461,7 +458,7 @@ int main(int argc, const char** argv)
   unsigned char *pSBuf = (unsigned char *)malloc(SrcImg.GetBytesPerLine());  
   if (!pSBuf) {
     printf("Out of Memory!\n");
-    return false;
+    return -1;
   }
 
   //Allocate buffer for putting color managed pixels into that will be sent to output tiff image
@@ -469,7 +466,7 @@ int main(int argc, const char** argv)
   if (!pDBuf) {
     printf("Out of Memory!\n");
     free(pSBuf);
-    return false;
+    return -1;
   }
 
   //Allocate pixel buffers for performing encoding transformations
@@ -480,7 +477,6 @@ int main(int argc, const char** argv)
   //Read each line
   for (i=0; i<(int)SrcImg.GetHeight(); i++) {
     if (!SrcImg.ReadLine(pSBuf)) {
-      bSuccess = false;
       break;
     }
     for (sptr=pSBuf, dptr=pDBuf, j=0; j<(int)SrcImg.GetWidth(); j++, sptr+=sbpp, dptr+=dbpp) {
@@ -621,7 +617,6 @@ int main(int argc, const char** argv)
 
     //Output the converted pixels to the destination image
     if (!DstImg.WriteLine(pDBuf)) {
-      bSuccess = false;
       break;
     }
 

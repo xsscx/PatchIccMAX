@@ -91,9 +91,9 @@ ICCPROFLIB_API double icRoundOffset(double v);
 ICCPROFLIB_API icValidateStatus icMaxStatus(icValidateStatus s1, icValidateStatus s2);
 ICCPROFLIB_API bool  icIsSpaceCLR(icColorSpaceSignature sig);
 
-ICCPROFLIB_API void icColorIndexName(icChar *szName, icColorSpaceSignature csSig,
+ICCPROFLIB_API void icColorIndexName(icChar *szName, size_t nameSize, icColorSpaceSignature csSig,
                       int nIndex, int nColors, const icChar *szUnknown);
-ICCPROFLIB_API void icColorValue(icChar *szValue, icFloatNumber nValue,
+ICCPROFLIB_API void icColorValue(icChar *szValue, size_t nameSize, icFloatNumber nValue,
                   icColorSpaceSignature csSig, int nIndex, bool bUseLegacy=false);
 
 ICCPROFLIB_API bool icIsIllumD50(icXYZNumber xyz);
@@ -175,11 +175,11 @@ ICCPROFLIB_API void icXyzToPcs(icFloatNumber *XYZ);
 
 ICCPROFLIB_API void icMemDump(std::string &sDump, void *pBuf, icUInt32Number nNum);
 ICCPROFLIB_API void icMatrixDump(std::string &sDump, icS15Fixed16Number *pMatrix);
-ICCPROFLIB_API const icChar* icGetSig(icChar *pBuf, icUInt32Number sig, bool bGetHexVal=true);
-ICCPROFLIB_API const icChar* icGet16bitSig(icChar* pBuf, icUInt16Number sig, bool bGetHexVal=true);
-ICCPROFLIB_API const icChar* icGetSigStr(icChar *pBuf, icUInt32Number nSig);
-ICCPROFLIB_API const icChar* icGetColorSig(icChar *pBuf, icUInt32Number sig, bool bGetHexVal=true);
-ICCPROFLIB_API const icChar *icGetColorSigStr(icChar *pBuf, icUInt32Number nSig);
+ICCPROFLIB_API const icChar* icGetSig(icChar *pBuf, size_t bufSize, icUInt32Number sig, bool bGetHexVal=true);
+ICCPROFLIB_API const icChar* icGet16bitSig(icChar* pBuf, size_t bufSize, icUInt16Number sig, bool bGetHexVal=true);
+ICCPROFLIB_API const icChar* icGetSigStr(icChar *pBuf, size_t bufSize, icUInt32Number nSig);
+ICCPROFLIB_API const icChar* icGetColorSig(icChar *pBuf, size_t bufSize, icUInt32Number sig, bool bGetHexVal=true);
+ICCPROFLIB_API const icChar *icGetColorSigStr(icChar *pBuf, size_t bufSize, icUInt32Number nSig);
 
 #define icUtf8StrCmp(x, y) strcmp((const char*)x, (const char*)y)
 
@@ -351,8 +351,9 @@ public:
   bool IsValidSpectralSpace(icColorSpaceSignature sig);
 
 protected:
-  icChar m_szStr[128];
-  icChar m_szSigStr[128];
+  static const size_t m_bufSize = 128;
+  icChar m_szStr[m_bufSize];
+  icChar m_szSigStr[m_bufSize];
   std::string *m_str;
 };
 
@@ -372,7 +373,7 @@ class ICCPROFLIB_API CIccPixelBuf
 public:
   CIccPixelBuf(int nChan=icDefaultPixelBufSize);
   ~CIccPixelBuf();
-  icFloatNumber &operator[](int nPos) { return m_pixel[nPos]; }
+  icFloatNumber &operator[](size_t nPos) { return m_pixel[nPos]; }
   icFloatNumber *get() { return m_pixel;}
   
   operator icFloatNumber *() { return m_pixel; }

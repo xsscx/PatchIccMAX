@@ -163,7 +163,7 @@ bool icIsNear(icFloatNumber v1, icFloatNumber v2, icFloatNumber nearRange /* = 1
 */
 bool icValidTagPos(const icPositionNumber& pos, icUInt32Number nTagHeaderSize, icUInt32Number nTagSize, bool bAllowEmpty)
 {
-  if (bAllowEmpty && !pos.size || !pos.offset)
+  if ((bAllowEmpty && !pos.size) || !pos.offset)
     return true;
 
   if (pos.offset < nTagHeaderSize)
@@ -199,7 +199,8 @@ bool icValidOverlap(const icPositionNumber& pos1, const icPositionNumber &pos2, 
       (icUInt64Number)pos1.offset >= (icUInt64Number)pos2.offset + pos2.size)
     return true;
 
-  if (bAllowSame && pos1.offset == pos2.offset || pos1.size == pos2.size)
+// TODO - double check this logic!
+  if ( (bAllowSame && pos1.offset == pos2.offset) || pos1.size == pos2.size)
     return true;
 
   return false;
@@ -269,8 +270,6 @@ bool icIsSpaceCLR(icColorSpaceSignature sig)
   szSig[3] = (icChar)(sig);
   szSig[4] = '\0';
 
-  int d0 = icHexDigit(szSig[0]);
-
   if (szSig[0]=='n' && szSig[1]=='c')
     return true;
   else if (!strcmp(szSig+1, "CLR")) {
@@ -293,7 +292,7 @@ bool icIsSpaceCLR(icColorSpaceSignature sig)
   return false;
 }
 
-void icColorIndexName(icChar *szName, icColorSpaceSignature csSig,
+void icColorIndexName(icChar *szName, size_t nameSize, icColorSpaceSignature csSig,
                       int nIndex, int nColors, const icChar *szUnknown)
 {
   icChar szSig[5] = {0};
@@ -314,49 +313,49 @@ void icColorIndexName(icChar *szName, icColorSpaceSignature csSig,
       strcpy(szName, szSig);
     }
     else if ((size_t)nColors == strlen(szSig)) {
-      sprintf(szName, "%s_%c", szSig, szSig[nIndex]);
+      snprintf(szName, nameSize, "%s_%c", szSig, szSig[nIndex]);
     }
     else {
-      sprintf(szName, "%s_%d", szSig, nIndex+1);
+      snprintf(szName, nameSize, "%s_%d", szSig, nIndex+1);
     }
   }
   else if (nColors==1) {
     strcpy(szName, szUnknown);
   }
   else {
-    sprintf(szName, "%s_%d", szUnknown, nIndex+1);
+    snprintf(szName, nameSize, "%s_%d", szUnknown, nIndex+1);
   }
 }
 
-void icColorValue(icChar *szValue, icFloatNumber nValue,
+void icColorValue(icChar *szValue, size_t nameSize, icFloatNumber nValue,
                   icColorSpaceSignature csSig, int nIndex,
                   bool bUseLegacy)
 {
   if (csSig==icSigLabData) {
     if (!bUseLegacy) {
       if (!nIndex || nIndex>2)
-        sprintf(szValue, "%7.3lf", nValue * 100.0);
+        snprintf(szValue, nameSize, "%7.3lf", nValue * 100.0);
       else
-        sprintf(szValue, "%8.3lf", nValue * 255.0 - 128.0);
+        snprintf(szValue, nameSize, "%8.3lf", nValue * 255.0 - 128.0);
     }
     else {
       if (!nIndex || nIndex>2)
-        sprintf(szValue, "%7.3lf", nValue * 100.0 * 65535.0 / 65280.0);
+        snprintf(szValue, nameSize, "%7.3lf", nValue * 100.0 * 65535.0 / 65280.0);
       else
-        sprintf(szValue, "%8.3lf", nValue * 255.0 * 65535.0 / 65280.0 - 128.0);
+        snprintf(szValue, nameSize, "%8.3lf", nValue * 255.0 * 65535.0 / 65280.0 - 128.0);
     }
   }
   else if (csSig==icSigUnknownData) {
-    sprintf(szValue, "%8.5lf", nValue);
+    snprintf(szValue, nameSize, "%8.5lf", nValue);
   }
   else {
-    sprintf(szValue, "%7.3lf", nValue * 100.0);
+    snprintf(szValue, nameSize, "%7.3lf", nValue * 100.0);
   }
 }
 
 static bool icIsS15Fixed16NumberNear(icS15Fixed16Number F, icFloatNumber D)
 {
-  icFloatNumber v=icFtoD(F);
+  //icFloatNumber v=icFtoD(F);
 
   return (icUInt32Number)(F*10000.0f + 0.5) == (icUInt32Number)(D*10000.0f + 0.5);
 }
@@ -952,8 +951,10 @@ void icXyzToPcs(icFloatNumber *XYZ)
 void icMemDump(std::string &sDump, void *pBuf, icUInt32Number nNum)
 {
   icUInt8Number *pData = (icUInt8Number *)pBuf;
-  icChar buf[80] = {0};
-  icChar num[10] = {0};
+  const size_t bufSize = 80;
+  const size_t numSize = 10;
+  icChar buf[bufSize] = {0};
+  icChar num[numSize] = {0};
 
   icInt32Number i, j;
   icUInt8Number c;
@@ -971,11 +972,11 @@ void icMemDump(std::string &sDump, void *pBuf, icUInt32Number nNum)
       buf[76] = ' ';
       buf[77] = '\n';
       buf[78] = '\0';
-      sprintf(num, "%08X:", i);
+      snprintf(num, numSize, "%08X:", i);
       strncpy(buf, num, 9);
     }
 
-    sprintf(num, "%02X", *pData);
+    snprintf(num, numSize, "%02X", *pData);
     strncpy(buf+10+j*3, num, 2);
 
     c=*pData;
@@ -988,20 +989,22 @@ void icMemDump(std::string &sDump, void *pBuf, icUInt32Number nNum)
 
 void icMatrixDump(std::string &sDump, icS15Fixed16Number *pMatrix)
 {
-  icChar buf[128];
+  const size_t bufSize = 128;
+  icChar buf[bufSize];
 
-  sprintf(buf, "%8.4lf %8.4lf %8.4lf\n", icFtoD(pMatrix[0]), icFtoD(pMatrix[1]), icFtoD(pMatrix[2]));
+  snprintf(buf, bufSize, "%8.4lf %8.4lf %8.4lf\n", icFtoD(pMatrix[0]), icFtoD(pMatrix[1]), icFtoD(pMatrix[2]));
   sDump += buf;
-  sprintf(buf, "%8.4lf %8.4lf %8.4lf\n", icFtoD(pMatrix[3]), icFtoD(pMatrix[4]), icFtoD(pMatrix[5]));
+  snprintf(buf, bufSize, "%8.4lf %8.4lf %8.4lf\n", icFtoD(pMatrix[3]), icFtoD(pMatrix[4]), icFtoD(pMatrix[5]));
   sDump += buf;
-  sprintf(buf, "%8.4lf %8.4lf %8.4lf\n", icFtoD(pMatrix[6]), icFtoD(pMatrix[7]), icFtoD(pMatrix[8]));
+  snprintf(buf, bufSize, "%8.4lf %8.4lf %8.4lf\n", icFtoD(pMatrix[6]), icFtoD(pMatrix[7]), icFtoD(pMatrix[8]));
   sDump += buf;
 }
 
-const icChar* icGet16bitSig(icChar* pBuf, icUInt16Number nSig, bool bGetHexVal)
+const icChar* icGet16bitSig(icChar* pBuf, size_t bufSize, icUInt16Number nSig, bool bGetHexVal)
 {
     icUInt16Number sig = nSig;
     icUInt8Number c;
+// TODO - really need to check bufSize for minimum limits
 
     if (!nSig) {
         strcpy(pBuf, "NULL");
@@ -1019,18 +1022,19 @@ const icChar* icGet16bitSig(icChar* pBuf, icUInt16Number nSig, bool bGetHexVal)
     pBuf[2] = c;
 
     if (bGetHexVal)
-        sprintf(pBuf + 3, "' = %04X", nSig);
+        snprintf(pBuf + 3, bufSize-3, "' = %04X", nSig);
     else
-        sprintf(pBuf + 3, "'");
+        snprintf(pBuf + 3, bufSize-3, "'");
 
     return pBuf;
 }
 
-const icChar *icGetSig(icChar *pBuf, icUInt32Number nSig, bool bGetHexVal)
+const icChar *icGetSig(icChar *pBuf, size_t bufSize, icUInt32Number nSig, bool bGetHexVal)
 {
   int i;
   icUInt32Number sig=nSig;
   icUInt8Number c;
+// TODO - really need to check bufSize for minimum limits
 
   if (!nSig) {
     strcpy(pBuf, "NULL");
@@ -1047,19 +1051,20 @@ const icChar *icGetSig(icChar *pBuf, icUInt32Number nSig, bool bGetHexVal)
   }
 
   if (bGetHexVal)
-    sprintf(pBuf+5, "' = %08X", nSig);
+    snprintf(pBuf+5, bufSize-5, "' = %08X", nSig);
   else
-    sprintf(pBuf+5, "'");
+    snprintf(pBuf+5, bufSize-5, "'");
 
   return pBuf;
 }
 
-const icChar *icGetSigStr(icChar *pBuf, icUInt32Number nSig)
+const icChar *icGetSigStr(icChar *pBuf, size_t bufSize, icUInt32Number nSig)
 {
   int i, j=-1;
   icUInt32Number sig=nSig;
   icUInt8Number c;
   bool bGetHexVal = false;
+// TODO - really need to check bufSize for minimum limits
 
   for (i=0; i<4; i++) {
     c=(icUInt8Number)(sig>>24);
@@ -1078,7 +1083,7 @@ const icChar *icGetSigStr(icChar *pBuf, icUInt32Number nSig)
   }
 
   if (bGetHexVal)
-    sprintf(pBuf, "%08Xh", nSig);
+    snprintf(pBuf, bufSize, "%08Xh", nSig);
   else
     pBuf[4] = '\0';
 
@@ -1086,9 +1091,10 @@ const icChar *icGetSigStr(icChar *pBuf, icUInt32Number nSig)
 }
 
 
-const icChar *icGetColorSig(icChar *pBuf, icUInt32Number nSig, bool bGetHexVal)
+const icChar *icGetColorSig(icChar *pBuf, size_t bufSize, icUInt32Number nSig, bool bGetHexVal)
 {
   icUInt32Number sig=nSig;
+// TODO - really need to check bufSize for minimum limits
 
   switch (icGetColorSpaceType(nSig)) {
     case icSigNChannelData:
@@ -1102,13 +1108,13 @@ const icChar *icGetColorSig(icChar *pBuf, icUInt32Number nSig, bool bGetHexVal)
       pBuf[1] = (icUInt8Number)(sig>>24);
       sig<<=8;
       pBuf[2] = (icUInt8Number)(sig>>24);
-      sprintf(pBuf+3, "%04X\"", icNumColorSpaceChannels(nSig));
+      snprintf(pBuf+3, bufSize-3, "%04X\"", icNumColorSpaceChannels(nSig));
       return pBuf;
     
     default:
     {
 
-      int i, j=-1;
+      int i;
       icUInt8Number c;
       bool bNeedHexVal = false;
 
@@ -1124,12 +1130,12 @@ const icChar *icGetColorSig(icChar *pBuf, icUInt32Number nSig, bool bGetHexVal)
       }
 
       if (bGetHexVal)
-        sprintf(pBuf+5, "' = %08X", nSig);
+        snprintf(pBuf+5, bufSize-5, "' = %08X", nSig);
       else if (bNeedHexVal) {
-        sprintf(pBuf, "%08Xh", nSig);
+        snprintf(pBuf, bufSize, "%08Xh", nSig);
       }
       else
-        sprintf(pBuf+5, "'");
+        snprintf(pBuf+5, bufSize-5, "'");
     }
   }
 
@@ -1137,9 +1143,10 @@ const icChar *icGetColorSig(icChar *pBuf, icUInt32Number nSig, bool bGetHexVal)
 }
 
 
-const icChar *icGetColorSigStr(icChar *pBuf, icUInt32Number nSig)
+const icChar *icGetColorSigStr(icChar *pBuf, size_t bufSize, icUInt32Number nSig)
 {
   icUInt32Number sig=nSig;
+// TODO - really need to check bufSize for minimum limits
 
   switch (icGetColorSpaceType(nSig)) {
     case icSigNChannelData:
@@ -1152,7 +1159,7 @@ const icChar *icGetColorSigStr(icChar *pBuf, icUInt32Number nSig)
       pBuf[0] = (icUInt8Number)(sig>>24);
       sig<<=8;
       pBuf[1] = (icUInt8Number)(sig>>24);
-      sprintf(pBuf+2, "%04X", icNumColorSpaceChannels(nSig));
+      snprintf(pBuf+2, bufSize-2, "%04X", icNumColorSpaceChannels(nSig));
       return pBuf;
 
     default:
@@ -1179,7 +1186,7 @@ const icChar *icGetColorSigStr(icChar *pBuf, icUInt32Number nSig)
         }
 
         if (bGetHexVal)
-          sprintf(pBuf, "%08Xh", nSig);
+          snprintf(pBuf, bufSize, "%08Xh", nSig);
         else
           pBuf[4] = '\0';
       }
@@ -1194,7 +1201,7 @@ std::string icGetSigPath(icUInt32Number nSig)
   char buf[20];
   std::string rv = ":";
 
-  rv += icGetSigStr(buf, nSig);
+  rv += icGetSigStr(buf, 20, nSig);
 
   return rv;
 }
@@ -1421,7 +1428,7 @@ const icChar *CIccInfo::GetUnknownName(icUInt32Number val)
   // if (!val)
   //  return "Unknown";
 
-  sprintf(m_szStr, "Unknown %s", icGetSig(buf, val)); 
+  snprintf(m_szStr, m_bufSize, "Unknown %s", icGetSig(buf, 24, val));
 
   return m_szStr;
 }
@@ -1431,7 +1438,7 @@ const icChar *CIccInfo::GetVersionName(icUInt32Number val)
   icFloatNumber ver = (icFloatNumber)(((val>>28)&0xf)*10.0 + ((val>>24)&0xf) +
                                       ((val>>20)&0xf)/10.0 + ((val>>16)&0xf)/100.0);
 
-  sprintf(m_szStr, "%.2lf", ver);
+  snprintf(m_szStr, m_bufSize, "%.2lf", ver);
 
   return m_szStr;
 }
@@ -1441,7 +1448,7 @@ const icChar *CIccInfo::GetSubClassVersionName(icUInt32Number val)
   icFloatNumber ver = (icFloatNumber)(((val >> 12) & 0xf)*10.0 + ((val >> 8) & 0xf) +
     ((val >> 4) & 0xf) / 10.0 + (val & 0xf) / 100.0);
 
-  sprintf(m_szStr, "%.2lf", ver);
+  snprintf(m_szStr, m_bufSize, "%.2lf", ver);
 
   return m_szStr;
 }
@@ -1733,33 +1740,33 @@ const icChar *CIccInfo::GetColorSpaceSigName(icColorSpaceSignature sig)
   default:
     switch(icGetColorSpaceType(sig)) {
     case icSigNChannelData:
-      sprintf(m_szStr, "0x%04XChannelData", icNumColorSpaceChannels(sig));
+      snprintf(m_szStr, m_bufSize, "0x%04XChannelData", icNumColorSpaceChannels(sig));
       return m_szStr;
 
     case icSigReflectanceSpectralData:
-      sprintf(m_szStr, "0x%04XChannelReflectanceData", icNumColorSpaceChannels(sig));
+      snprintf(m_szStr, m_bufSize, "0x%04XChannelReflectanceData", icNumColorSpaceChannels(sig));
       return m_szStr;
 
     case icSigTransmisionSpectralData:
-      sprintf(m_szStr, "0x%04XChannelTransmissionData", icNumColorSpaceChannels(sig));
+      snprintf(m_szStr, m_bufSize, "0x%04XChannelTransmissionData", icNumColorSpaceChannels(sig));
       return m_szStr;
 
     case icSigRadiantSpectralData:
-      sprintf(m_szStr, "0x%04XChannelRadiantData", icNumColorSpaceChannels(sig));
+      snprintf(m_szStr, m_bufSize, "0x%04XChannelRadiantData", icNumColorSpaceChannels(sig));
       return m_szStr;
 
     case icSigBiSpectralReflectanceData:
-      sprintf(m_szStr, "0x%04XChannelBiDirReflectanceData", icNumColorSpaceChannels(sig));
+      snprintf(m_szStr, m_bufSize, "0x%04XChannelBiDirReflectanceData", icNumColorSpaceChannels(sig));
       return m_szStr;
 
     case icSigSparseMatrixReflectanceData:
-      sprintf(m_szStr, "0x%04XChannelSparseMatrixReflectanceData", icNumColorSpaceChannels(sig));
+      snprintf(m_szStr, m_bufSize, "0x%04XChannelSparseMatrixReflectanceData", icNumColorSpaceChannels(sig));
       return m_szStr;
 
     default:
       icUInt32Number nChan = icGetSpaceSamples(sig);
       if (nChan>0) {
-        sprintf(m_szStr, "0x%XColorData", nChan);
+        snprintf(m_szStr, m_bufSize, "0x%XColorData", nChan);
         return m_szStr;
       }
       return GetUnknownName(sig);
@@ -1774,27 +1781,27 @@ const icChar *CIccInfo::GetSpectralColorSigName(icSpectralColorSignature sig)
     return "NoSpectralData";
 
    case icSigNChannelData:
-     sprintf(m_szStr, "0x%04XChannelData", icNumColorSpaceChannels(sig));
+     snprintf(m_szStr, m_bufSize, "0x%04XChannelData", icNumColorSpaceChannels(sig));
      return m_szStr;
 
    case icSigReflectanceSpectralData:
-     sprintf(m_szStr, "0x%04XChannelReflectanceData", icNumColorSpaceChannels(sig));
+     snprintf(m_szStr, m_bufSize, "0x%04XChannelReflectanceData", icNumColorSpaceChannels(sig));
      return m_szStr;
 
    case icSigTransmisionSpectralData:
-     sprintf(m_szStr, "0x%04XChannelTransmissionData", icNumColorSpaceChannels(sig));
+     snprintf(m_szStr, m_bufSize, "0x%04XChannelTransmissionData", icNumColorSpaceChannels(sig));
      return m_szStr;
 
    case icSigRadiantSpectralData:
-     sprintf(m_szStr, "0x%04XChannelRadiantData", icNumColorSpaceChannels(sig));
+     snprintf(m_szStr, m_bufSize, "0x%04XChannelRadiantData", icNumColorSpaceChannels(sig));
      return m_szStr;
 
    case icSigBiSpectralReflectanceData:
-     sprintf(m_szStr, "0x%04XChannelBiSpectralReflectanceData", icNumColorSpaceChannels(sig));
+     snprintf(m_szStr, m_bufSize, "0x%04XChannelBiSpectralReflectanceData", icNumColorSpaceChannels(sig));
      return m_szStr;
 
    case icSigSparseMatrixReflectanceData:
-     sprintf(m_szStr, "0x%04XChannelSparseMatrixReflectanceData", icNumColorSpaceChannels(sig));
+     snprintf(m_szStr, m_bufSize, "0x%04XChannelSparseMatrixReflectanceData", icNumColorSpaceChannels(sig));
      return m_szStr;
 
   default:
@@ -2114,7 +2121,7 @@ const icChar *CIccInfo::GetRenderingIntentName(icRenderingIntent val, bool bIsV5
       return "Absolute Colorimetric";
 
   default:
-    sprintf(m_szStr, "Unknown Intent '%d", val);
+    snprintf(m_szStr, m_bufSize, "Unknown Intent '%d", val);
     return m_szStr;
   }
 }
@@ -2147,7 +2154,7 @@ const icChar *CIccInfo::GetSpotShapeName(icSpotShape val)
     return "Spot Shape Cross";
 
   default:
-    sprintf(m_szStr, "Unknown Spot Shape '%d", val);
+    snprintf(m_szStr, m_bufSize, "Unknown Spot Shape '%d", val);
     return m_szStr;
   }
 }
@@ -2165,7 +2172,7 @@ const icChar *CIccInfo::GetStandardObserverName(icStandardObserver val)
     return "CIE 1964 (ten degree) standard observer";
 
   default:
-    sprintf(m_szStr, "Unknown Observer '%d", val);
+    snprintf(m_szStr, m_bufSize, "Unknown Observer '%d", val);
     return m_szStr;
   }
 }
@@ -2243,7 +2250,7 @@ const icChar *CIccInfo::GetIlluminantName(icIlluminant val)
     return "Illuminant F12";
 
   default:
-    sprintf(m_szStr, "Unknown Illuminant '%d", val);
+    snprintf(m_szStr, m_bufSize, "Unknown Illuminant '%d", val);
     return m_szStr;
   }
 }
@@ -2287,7 +2294,7 @@ const icChar *CIccInfo::GetMeasurementUnit(icSignature sig)
       buf[3] = (char)(sig);
       buf[4] = '\0';
 
-      sprintf(m_szStr, "Unknown Measurement Type '%s'", buf);
+      snprintf(m_szStr, m_bufSize, "Unknown Measurement Type '%s'", buf);
       return m_szStr;
     }
   }
@@ -2300,7 +2307,7 @@ const icChar *CIccInfo::GetProfileID(icProfileID *profileID)
   int i;
 
   for (i=0; i<16; i++, ptr+=2) {
-    sprintf(ptr, "%02x", profileID->ID8[i]);
+    snprintf(ptr, m_bufSize-i*2, "%02x", profileID->ID8[i]);
   }
 
   return m_szStr;
@@ -2425,11 +2432,12 @@ icValidateStatus CIccInfo::CheckData(std::string &sReport, const icDateTimeNumbe
   time( &long_time );                /* Get time as long integer. */
   newtime = localtime( &long_time );
 
-  icChar buf[128];
+  const size_t bufSize = 128;
+  icChar buf[bufSize];
   if (dateTime.year<1992) {
     sReport += icMsgValidateWarning;
     sReport += sDesc;
-    sprintf(buf," - %u: Invalid year!\n",dateTime.year);
+    snprintf(buf, bufSize, " - %u: Invalid year!\n",dateTime.year);
     sReport += buf;
     rv = icValidateWarning;
   }
@@ -2439,7 +2447,7 @@ icValidateStatus CIccInfo::CheckData(std::string &sReport, const icDateTimeNumbe
     if (dateTime.year>(year+1)) {
       sReport += icMsgValidateWarning;
       sReport += sDesc;
-      sprintf(buf," - %u: Invalid year!\n",dateTime.year);
+      snprintf(buf, bufSize, " - %u: Invalid year!\n",dateTime.year);
       sReport += buf;
       rv = icMaxStatus(rv, icValidateWarning);
     }
@@ -2448,7 +2456,7 @@ icValidateStatus CIccInfo::CheckData(std::string &sReport, const icDateTimeNumbe
     if (dateTime.year>year) {
       sReport += icMsgValidateWarning;
       sReport += sDesc;
-      sprintf(buf," - %u: Invalid year!\n",dateTime.year);
+      snprintf(buf, bufSize, " - %u: Invalid year!\n",dateTime.year);
       sReport += buf;
       rv = icMaxStatus(rv, icValidateWarning);
     }
@@ -2457,7 +2465,7 @@ icValidateStatus CIccInfo::CheckData(std::string &sReport, const icDateTimeNumbe
   if (dateTime.month<1 || dateTime.month>12) {
     sReport += icMsgValidateWarning;
     sReport += sDesc;
-    sprintf(buf," - %u: Invalid month!\n",dateTime.month);
+    snprintf(buf, bufSize, " - %u: Invalid month!\n",dateTime.month);
     sReport += buf;
     rv = icMaxStatus(rv, icValidateWarning);
   }
@@ -2465,7 +2473,7 @@ icValidateStatus CIccInfo::CheckData(std::string &sReport, const icDateTimeNumbe
   if (dateTime.day<1 || dateTime.day>31) {
     sReport += icMsgValidateWarning;
     sReport += sDesc;
-    sprintf(buf," - %u: Invalid day!\n",dateTime.day);
+    snprintf(buf, bufSize, " - %u: Invalid day!\n",dateTime.day);
     sReport += buf;
     rv = icMaxStatus(rv, icValidateWarning);
   }
@@ -2474,7 +2482,7 @@ icValidateStatus CIccInfo::CheckData(std::string &sReport, const icDateTimeNumbe
     if (dateTime.day>29) {
       sReport += icMsgValidateWarning;
       sReport += sDesc;
-      sprintf(buf," - %u: Invalid day for February!\n",dateTime.day);
+      snprintf(buf, bufSize, " - %u: Invalid day for February!\n",dateTime.day);
       sReport += buf;
       rv = icMaxStatus(rv, icValidateWarning);
     }
@@ -2483,7 +2491,7 @@ icValidateStatus CIccInfo::CheckData(std::string &sReport, const icDateTimeNumbe
       if ((dateTime.year%4)!=0) {
         sReport += icMsgValidateWarning;
         sReport += sDesc;
-        sprintf(buf," - %u: Invalid day for February, year is not a leap year(%u)!\n",dateTime.day, dateTime.year);
+        snprintf(buf, bufSize, " - %u: Invalid day for February, year is not a leap year(%u)!\n",dateTime.day, dateTime.year);
         sReport += buf;
         rv = icMaxStatus(rv, icValidateWarning);
       }
@@ -2493,7 +2501,7 @@ icValidateStatus CIccInfo::CheckData(std::string &sReport, const icDateTimeNumbe
   if (dateTime.hours>23) {
     sReport += icMsgValidateWarning;
     sReport += sDesc;
-    sprintf(buf," - %u: Invalid hour!\n",dateTime.hours);
+    snprintf(buf, bufSize, " - %u: Invalid hour!\n",dateTime.hours);
     sReport += buf;
     rv = icMaxStatus(rv, icValidateWarning);
   }
@@ -2501,7 +2509,7 @@ icValidateStatus CIccInfo::CheckData(std::string &sReport, const icDateTimeNumbe
   if (dateTime.minutes>59) {
     sReport += icMsgValidateWarning;
     sReport += sDesc;
-    sprintf(buf," - %u: Invalid minutes!\n",dateTime.minutes);
+    snprintf(buf, bufSize, " - %u: Invalid minutes!\n",dateTime.minutes);
     sReport += buf;
     rv = icMaxStatus(rv, icValidateWarning);
   }
@@ -2509,7 +2517,7 @@ icValidateStatus CIccInfo::CheckData(std::string &sReport, const icDateTimeNumbe
   if (dateTime.seconds>59) {
     sReport += icMsgValidateWarning;
     sReport += sDesc;
-    sprintf(buf," - %u: Invalid seconds!\n",dateTime.hours);
+    snprintf(buf, bufSize, " - %u: Invalid seconds!\n",dateTime.hours);
     sReport += buf;
     rv = icMaxStatus(rv, icValidateWarning);
   }

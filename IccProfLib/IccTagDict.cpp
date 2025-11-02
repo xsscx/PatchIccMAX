@@ -456,9 +456,10 @@ icUInt32Number CIccTagDict::MaxPosRecSize()
  ******************************************************************************/
 void CIccTagDict::Describe(std::string &sDescription, int nVerboseness)
 {
-  icChar buf[128];
+  const size_t bufSize = 128;
+  icChar buf[bufSize];
 
-  sprintf(buf, "BEGIN DICT_TAG\n");
+  snprintf(buf, bufSize, "BEGIN DICT_TAG\n");
   sDescription += buf;
 
   CIccNameValueDict::iterator i;
@@ -468,7 +469,7 @@ void CIccTagDict::Describe(std::string &sDescription, int nVerboseness)
     i->ptr->Describe(sDescription, nVerboseness);
   }
 
-  sprintf(buf, "\nEND DICT_TAG\n");
+  snprintf(buf, bufSize, "\nEND DICT_TAG\n");
   sDescription += buf;
 }
 

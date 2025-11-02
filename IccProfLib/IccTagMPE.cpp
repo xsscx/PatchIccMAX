@@ -143,7 +143,7 @@ CIccMultiProcessElement* CIccMultiProcessElement::Create(icElemTypeSignature sig
  * 
  * Return: 
 ******************************************************************************/
-CIccApplyMpe* CIccMultiProcessElement::GetNewApply( CIccApplyTagMpe *pApplyTag )
+CIccApplyMpe* CIccMultiProcessElement::GetNewApply( CIccApplyTagMpe * /* 'pApplyTag */ )
 {
   return new CIccApplyMpe(this);
 }
@@ -285,10 +285,11 @@ void CIccMpeUnknown::SetChannels(icUInt16Number nInputChannels, icUInt16Number n
  ******************************************************************************/
 void CIccMpeUnknown::Describe(std::string &sDescription, int nVerboseness)
 {
-  icChar buf[128], sigbuf[40];
+  const size_t bufSize = 128;
+  icChar buf[bufSize], sigbuf[40];
 
-  sprintf(buf, "Unknown Element(%s) Type of %u Bytes.", 
-          icGetSig(sigbuf, m_sig), m_nSize);
+  snprintf(buf, bufSize, "Unknown Element(%s) Type of %u Bytes.",
+          icGetSig(sigbuf, 40, m_sig), m_nSize);
   sDescription += buf;
 
   if (nVerboseness > 50) {
@@ -308,7 +309,7 @@ void CIccMpeUnknown::Describe(std::string &sDescription, int nVerboseness)
  * 
  * Return: 
  ******************************************************************************/
-bool CIccMpeUnknown::SetDataSize(icUInt32Number nSize, bool bZeroData/*=true*/)
+bool CIccMpeUnknown::SetDataSize(icUInt32Number nSize, bool /* bZeroData =true */)
 {
   bool rv = true;
   if (m_pData)
@@ -424,7 +425,7 @@ bool CIccMpeUnknown::Write(CIccIO *pIO)
  * 
  * Return: 
  ******************************************************************************/
-icValidateStatus CIccMpeUnknown::Validate(std::string sigPath, std::string &sReport, const CIccTagMultiProcessElement* pMPE/*=NULL*/, const CIccProfile *pProfile/*=NULL*/) const
+icValidateStatus CIccMpeUnknown::Validate(std::string sigPath, std::string &sReport, const CIccTagMultiProcessElement* /* pMPE =NULL */, const CIccProfile * /* pProfile =NULL */) const
 {
   CIccInfo Info;
   icChar buf[40];
@@ -451,7 +452,7 @@ icValidateStatus CIccMpeUnknown::Validate(std::string sigPath, std::string &sRep
  * 
  * Return: 
  ******************************************************************************/
-icValidateStatus CIccMultiProcessElement::Validate(std::string sigPath, std::string &sReport, const CIccTagMultiProcessElement* pMPE/*=NULL*/, const CIccProfile *pProfile/*=NULL*/) const
+icValidateStatus CIccMultiProcessElement::Validate(std::string sigPath, std::string &sReport, const CIccTagMultiProcessElement* /* pMPE =NULL */, const CIccProfile * /* pProfile =NULL */) const
 {
   icValidateStatus rv = icValidateOK;
 
@@ -891,9 +892,10 @@ bool CIccTagMultiProcessElement::IsSupported()
  ******************************************************************************/
 void CIccTagMultiProcessElement::Describe(std::string &sDescription, int nVerboseness)
 {
-  icChar buf[128];
+  const size_t bufSize = 128;
+  icChar buf[bufSize];
 
-  sprintf(buf, "BEGIN MULTI_PROCESS_ELEMENT_TAG %d %d\n", m_nInputChannels, m_nOutputChannels);
+  snprintf(buf, bufSize, "BEGIN MULTI_PROCESS_ELEMENT_TAG %d %d\n", m_nInputChannels, m_nOutputChannels);
   sDescription += buf;
   sDescription += "\n";
 
@@ -901,7 +903,7 @@ void CIccTagMultiProcessElement::Describe(std::string &sDescription, int nVerbos
   int j;
 
   for (j=0, i=m_list->begin(); i!=m_list->end(); j++, i++) {
-    sprintf(buf, "PROCESS_ELEMENT #%d\n", j+1);
+    snprintf(buf, bufSize, "PROCESS_ELEMENT #%d\n", j+1);
     sDescription += buf;
     i->ptr->Describe(sDescription, nVerboseness);
     sDescription += "\n";

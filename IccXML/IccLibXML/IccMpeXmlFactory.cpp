@@ -131,7 +131,7 @@ CIccMultiProcessElement* CIccMpeXmlFactory::CreateElement(icElemTypeSignature el
   }
 }
 
-bool CIccMpeXmlFactory::GetElementSigName(std::string &elemName, icElemTypeSignature elemTypeSig)
+bool CIccMpeXmlFactory::GetElementSigName(std::string & /*elemName*/, icElemTypeSignature /*elemTypeSig*/)
 {
   return false;
 }

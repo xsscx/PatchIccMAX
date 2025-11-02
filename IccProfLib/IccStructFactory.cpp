@@ -138,7 +138,7 @@ bool CIccBasicStructFactory::GetStructSigName(std::string &structName, icStructS
   if (!bFindUnknown) {
     char sig[20];
     structName = "UnknownStruct_";
-    icGetSigStr(sig, structTypeSig);
+    icGetSigStr(sig, 20, structTypeSig);
     structName += sig;
   }
   else {
@@ -226,7 +226,7 @@ void CIccStructCreator::DoPushFactory(IIccStructFactory *pFactory)
   factoryStack.push_front(pFactory);
 }
 
-IIccStructFactory* CIccStructCreator::DoPopFactory(bool bAll /*=false*/)
+IIccStructFactory* CIccStructCreator::DoPopFactory(bool /* bAll =false*/)
 {
   if (factoryStack.size()>0) {
     CIccStructFactoryList::iterator i=factoryStack.begin();

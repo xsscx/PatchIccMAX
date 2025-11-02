@@ -114,7 +114,8 @@ IIccStruct* CIccStructUnknown::NewCopy(CIccTagStruct *pTagStruct) const
 
 void CIccStructUnknown::Describe(std::string &sDescription, int nVerboseness) const
 {
-  char buf[256];
+  const size_t bufSize = 256;
+  char buf[bufSize];
   CIccInfo info;
   int n;
 
@@ -126,10 +127,10 @@ void CIccStructUnknown::Describe(std::string &sDescription, int nVerboseness) co
       if (i->pTag) {
         if (n)
           sDescription += "\n";
-        sprintf(buf, "Begin SubTag(%s)\n", GetElemName(i->TagInfo.sig).c_str());
+        snprintf(buf, bufSize, "Begin SubTag(%s)\n", GetElemName(i->TagInfo.sig).c_str());
         sDescription += buf;
         i->pTag->Describe(sDescription, nVerboseness);
-        sprintf(buf, "End SubTag(%s)\n", GetElemName(i->TagInfo.sig).c_str());
+        snprintf(buf, bufSize, "End SubTag(%s)\n", GetElemName(i->TagInfo.sig).c_str());
         sDescription += buf;
       }
     }
@@ -497,7 +498,7 @@ bool CIccStructNamedColor::GetTint(icFloatNumber *dstColor,
   if (!pData || !nSamples)
     return false;
 
-  int nEntries = pData->GetNumValues()/nSamples;
+  icUInt32Number nEntries = pData->GetNumValues()/nSamples;
   if (nEntries<1)
     return false;
 

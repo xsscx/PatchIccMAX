@@ -339,7 +339,7 @@ static std::string fillColumns(std::string tag, std::string id, std::string offs
 *  sDescription - string to concatenate tag dump to
 *****************************************************************************
 */
-void CIccTagEmbeddedProfile::Describe(std::string& sDescription, int nVerboseness)
+void CIccTagEmbeddedProfile::Describe(std::string& sDescription, int /* nVerboseness */)
 {
   if (m_pProfile) {
     sDescription += "Embedded profile in Tag\n";
@@ -347,7 +347,8 @@ void CIccTagEmbeddedProfile::Describe(std::string& sDescription, int nVerbosenes
     // Code below is copied from iccDumpProfile.cpp
     icHeader* pHdr = &m_pProfile->m_Header;
     CIccInfo Fmt;
-    char buf[180], sigbuf[180];
+    const size_t bufSize = 180;
+    char buf[bufSize], sigbuf[180], buf2[bufSize];
 
     if (Fmt.IsProfileIDCalculated(&pHdr->profileID)) {
       sDescription += "Profile ID:         ";
@@ -357,53 +358,53 @@ void CIccTagEmbeddedProfile::Describe(std::string& sDescription, int nVerbosenes
     else
       sDescription += "Profile ID:         Profile ID not calculated.\n";
     sDescription += "Size:               ";
-    sprintf(buf, "%d(0x%x) bytes\n", pHdr->size, pHdr->size);
+    snprintf(buf, bufSize, "%d(0x%x) bytes\n", pHdr->size, pHdr->size);
     sDescription += buf;
     sDescription += "\nHeader\n";
     sDescription += "------\n";
-    sprintf(buf, "Attributes:         %s\n", Fmt.GetDeviceAttrName(pHdr->attributes));
+    snprintf(buf, bufSize, "Attributes:         %s\n", Fmt.GetDeviceAttrName(pHdr->attributes));
     sDescription += buf;
-    sprintf(buf, "Cmm:                %s\n", Fmt.GetCmmSigName((icCmmSignature)(pHdr->cmmId)));
+    snprintf(buf, bufSize, "Cmm:                %s\n", Fmt.GetCmmSigName((icCmmSignature)(pHdr->cmmId)));
     sDescription += buf;
-    sprintf(buf, "Creation Date:      %d/%d/%d  %02u:%02u:%02u\n",
+    snprintf(buf, bufSize, "Creation Date:      %d/%d/%d  %02u:%02u:%02u\n",
       pHdr->date.month, pHdr->date.day, pHdr->date.year,
       pHdr->date.hours, pHdr->date.minutes, pHdr->date.seconds);
     sDescription += buf;
-    sprintf(buf, "Creator:            %s\n", icGetSig(buf, pHdr->creator));
+    snprintf(buf, bufSize, "Creator:            %s\n", icGetSig(buf2, bufSize, pHdr->creator));
     sDescription += buf;
-    sprintf(buf, "Data Color Space:   %s\n", Fmt.GetColorSpaceSigName(pHdr->colorSpace));
+    snprintf(buf, bufSize, "Data Color Space:   %s\n", Fmt.GetColorSpaceSigName(pHdr->colorSpace));
     sDescription += buf;
-    sprintf(buf, "Flags               %s\n", Fmt.GetProfileFlagsName(pHdr->flags));
+    snprintf(buf, bufSize, "Flags               %s\n", Fmt.GetProfileFlagsName(pHdr->flags));
     sDescription += buf;
-    sprintf(buf, "PCS Color Space:    %s\n", Fmt.GetColorSpaceSigName(pHdr->pcs));
+    snprintf(buf, bufSize, "PCS Color Space:    %s\n", Fmt.GetColorSpaceSigName(pHdr->pcs));
     sDescription += buf;
-    sprintf(buf, "Platform:           %s\n", Fmt.GetPlatformSigName(pHdr->platform));
+    snprintf(buf, bufSize, "Platform:           %s\n", Fmt.GetPlatformSigName(pHdr->platform));
     sDescription += buf;
-    sprintf(buf, "Rendering Intent:   %s\n", Fmt.GetRenderingIntentName((icRenderingIntent)(pHdr->renderingIntent)));
+    snprintf(buf, bufSize, "Rendering Intent:   %s\n", Fmt.GetRenderingIntentName((icRenderingIntent)(pHdr->renderingIntent)));
     sDescription += buf;
-    sprintf(buf, "Profile Class:      %s\n", Fmt.GetProfileClassSigName(pHdr->deviceClass));
+    snprintf(buf, bufSize, "Profile Class:      %s\n", Fmt.GetProfileClassSigName(pHdr->deviceClass));
     sDescription += buf;
     if (pHdr->deviceSubClass) {
-      sprintf(buf, "Profile SubClass:   %s\n", icGetSig(buf, pHdr->deviceSubClass));
+      snprintf(buf, bufSize, "Profile SubClass:   %s\n", icGetSig(buf2, bufSize, pHdr->deviceSubClass));
       sDescription += buf;
     }
     else
       sDescription += "Profile SubClass:   Not Defined\n";
-    sprintf(buf, "Version:            %s\n", Fmt.GetVersionName(pHdr->version));
+    snprintf(buf, bufSize, "Version:            %s\n", Fmt.GetVersionName(pHdr->version));
     sDescription += buf;
     if (pHdr->version >= icVersionNumberV5 && pHdr->deviceSubClass) {
-      sprintf(buf, "SubClass Version:   %s\n", Fmt.GetSubClassVersionName(pHdr->version));
+      snprintf(buf, bufSize, "SubClass Version:   %s\n", Fmt.GetSubClassVersionName(pHdr->version));
       sDescription += buf;
     }
-    sprintf(buf, "Illuminant:         X=%.4lf, Y=%.4lf, Z=%.4lf\n",
+    snprintf(buf, bufSize, "Illuminant:         X=%.4lf, Y=%.4lf, Z=%.4lf\n",
       icFtoD(pHdr->illuminant.X),
       icFtoD(pHdr->illuminant.Y),
       icFtoD(pHdr->illuminant.Z));
     sDescription += buf;
-    sprintf(buf, "Spectral PCS:       %s\n", Fmt.GetSpectralColorSigName(pHdr->spectralPCS));
+    snprintf(buf, bufSize, "Spectral PCS:       %s\n", Fmt.GetSpectralColorSigName(pHdr->spectralPCS));
     sDescription += buf;
     if (pHdr->spectralRange.start || pHdr->spectralRange.end || pHdr->spectralRange.steps) {
-      sprintf(buf, "Spectral PCS Range: start=%.1fnm, end=%.1fnm, steps=%d\n",
+      snprintf(buf, bufSize, "Spectral PCS Range: start=%.1fnm, end=%.1fnm, steps=%d\n",
         icF16toF(pHdr->spectralRange.start),
         icF16toF(pHdr->spectralRange.end),
         pHdr->spectralRange.steps);
@@ -414,7 +415,7 @@ void CIccTagEmbeddedProfile::Describe(std::string& sDescription, int nVerbosenes
     }
 
     if (pHdr->biSpectralRange.start || pHdr->biSpectralRange.end || pHdr->biSpectralRange.steps) {
-      sprintf(buf, "BiSpectral Range:     start=%.1fnm, end=%.1fnm, steps=%d\n",
+      snprintf(buf, bufSize, "BiSpectral Range:     start=%.1fnm, end=%.1fnm, steps=%d\n",
         icF16toF(pHdr->biSpectralRange.start),
         icF16toF(pHdr->biSpectralRange.end),
         pHdr->biSpectralRange.steps);
@@ -424,7 +425,7 @@ void CIccTagEmbeddedProfile::Describe(std::string& sDescription, int nVerbosenes
       sDescription += "BiSpectral Range:   Not Defined\n";
     }
     if (pHdr->mcs) {
-      sprintf(buf, "MCS Color Space:    %s\n", Fmt.GetColorSpaceSigName((icColorSpaceSignature)pHdr->mcs));
+      snprintf(buf, bufSize, "MCS Color Space:    %s\n", Fmt.GetColorSpaceSigName((icColorSpaceSignature)pHdr->mcs));
       sDescription += buf;
     }
     else {
@@ -453,10 +454,11 @@ void CIccTagEmbeddedProfile::Describe(std::string& sDescription, int nVerbosenes
       // Should be 0-3 if compliant. Negative number if tags overlap!
       pad = closest - i->TagInfo.offset - i->TagInfo.size;
 
-      char sOffset[20], sSize[20], sPad[20];
-      sprintf(sOffset, "%u", i->TagInfo.offset);
-      sprintf(sSize, "%u", i->TagInfo.size);
-      sprintf(sPad, "%u", pad);
+      const size_t tempSize = 20;
+      char sOffset[tempSize], sSize[tempSize], sPad[tempSize];
+      snprintf(sOffset, tempSize, "%u", i->TagInfo.offset);
+      snprintf(sSize, tempSize, "%u", i->TagInfo.size);
+      snprintf(sPad, tempSize, "%u", pad);
       sDescription += fillColumns(Fmt.GetTagSigName(i->TagInfo.sig), icGetSig(sigbuf, i->TagInfo.sig, false), sOffset, sSize, sPad) + "\n";
     }
   }

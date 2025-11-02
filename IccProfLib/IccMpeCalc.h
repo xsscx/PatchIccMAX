@@ -297,7 +297,7 @@ public:
 
   virtual bool IsValid(CIccMpeCalculator *pCalc, SIccCalcOp &op) { return op.IsValidOp(pCalc); }
 
-  virtual bool Exec(SIccCalcOp *op, SIccOpState &s) {return false;}
+  virtual bool Exec(SIccCalcOp * /*op*/, SIccOpState & /*s*/) {return false;}
 };
 
 

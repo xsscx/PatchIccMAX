@@ -190,8 +190,9 @@ public:
     fprintf(m_f, "LUT_3D_SIZE %d\n", m_grid);
 
     if (!icIsNear(m_fMinInput, 0.0f) || !icIsNear(m_fMaxInput, 1.0f)) {
-      char fmt[100];
-      sprintf(fmt, "LUT_3D_INPUT_RANGE %%.%df %%.%df\n", m_precision, m_precision);
+      const size_t fmtSize = 100;
+      char fmt[fmtSize];
+      snprintf(fmt, fmtSize, "LUT_3D_INPUT_RANGE %%.%df %%.%df\n", m_precision, m_precision);
       fprintf(m_f, fmt, m_fMinInput, m_fMaxInput);
     }
 
@@ -217,8 +218,9 @@ public:
 
   virtual void setNextNode(icFloatNumber* pPixel)
   {
-    char fmt[30];
-    sprintf(fmt, "%%.%df", m_precision);
+    const size_t fmtSize = 30;
+    char fmt[fmtSize];
+    snprintf(fmt, fmtSize, "%%.%df", m_precision);
 
     for (int i = 0; i < 3; i++) {
       if (i)

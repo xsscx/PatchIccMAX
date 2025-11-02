@@ -219,7 +219,7 @@ namespace iccDEV {
     virtual icFloatNumber costFunc(CIccSearchVec &point) = 0;
 
     //Set bUsebouds true, and override boundsCheck to implement bounds checking setting boundsCost with "distance" out of bounds
-    virtual bool boundsCheck(const CIccSearchVec& point, icFloatNumber& boundsCost) const {
+    virtual bool boundsCheck(const CIccSearchVec& /*point*/, icFloatNumber& boundsCost) const {
       boundsCost = 0;
       return false;
     }
@@ -304,22 +304,22 @@ namespace iccDEV {
         idxBiggest = 0;
         idxSmallest = 0;
         for (size_t i = 1; i < simplex.size(); i++) {
-          icFloatNumber val;
+          icFloatNumber valLocal;
           if (!valueCache[i].first) {
-            val = f(simplex[i]);
+            valLocal = f(simplex[i]);
             valueCache[i].first = true;
-            valueCache[i].second = val;
+            valueCache[i].second = valLocal;
           }
           else {
-            val = valueCache[i].second;
+            valLocal = valueCache[i].second;
           }
-          if (val > valBiggest) {
+          if (valLocal > valBiggest) {
             idxBiggest = (unsigned int)i;
-            valBiggest = val;
+            valBiggest = valLocal;
           }
-          else if (val < valSmallest) {
+          else if (valLocal < valSmallest) {
             idxSmallest = (unsigned int)i;
-            valSmallest = val;
+            valSmallest = valLocal;
           }
         }
 
@@ -329,13 +329,13 @@ namespace iccDEV {
         icFloatNumber maxValDiff = 0;
         icFloatNumber maxPointDiff = 0;
         for (size_t i = 0; i < simplex.size(); i++) {
-          icFloatNumber val = valueCache[i].second;
-          if (i != idxBiggest && val > valSecondBiggest) {
-            valSecondBiggest = val;
+          icFloatNumber valLocal = valueCache[i].second;
+          if (i != idxBiggest && valLocal > valSecondBiggest) {
+            valSecondBiggest = valLocal;
           }
           else if (i != idxSmallest) {
-            if (std::abs(val - valSmallest) > maxValDiff)
-              maxValDiff = std::abs(val - valSmallest);
+            if (std::abs(valLocal - valSmallest) > maxValDiff)
+              maxValDiff = std::abs(valLocal - valSmallest);
             icFloatNumber diff = (simplex[i] - simplex[idxSmallest]).length();
             if (diff > maxPointDiff)
               maxPointDiff = diff;

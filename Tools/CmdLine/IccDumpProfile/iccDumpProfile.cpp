@@ -90,23 +90,24 @@
 void DumpTag(CIccProfile *pIcc, icTagSignature sig, int nVerboseness)
 {
   CIccTag *pTag = pIcc->FindTag(sig);
-  char buf[64];
+  const size_t bufSize = 64;
+  char buf[bufSize];
   CIccInfo Fmt;
 
   std::string contents;
 
   if (pTag) {
-    printf("\nContents of %s tag (%s)\n", Fmt.GetTagSigName(sig), icGetSig(buf, sig));
+    printf("\nContents of %s tag (%s)\n", Fmt.GetTagSigName(sig), icGetSig(buf, bufSize, sig));
     printf("Type: ");
     if (pTag->IsArrayType()) {
       printf("Array of ");
     }
-    printf("%s (%s)\n", Fmt.GetTagTypeSigName(pTag->GetType()), icGetSig(buf, pTag->GetType()));
+    printf("%s (%s)\n", Fmt.GetTagTypeSigName(pTag->GetType()), icGetSig(buf, bufSize, pTag->GetType()));
     pTag->Describe(contents, nVerboseness);
     fwrite(contents.c_str(), contents.length(), 1, stdout);
   }
   else {
-    printf("Tag (%s) not found in profile\n", icGetSig(buf, sig));
+    printf("Tag (%s) not found in profile\n", icGetSig(buf, bufSize, sig));
   }
 }
 
@@ -131,7 +132,7 @@ int main(int argc, char* argv[])
 #endif // MEMORY_LEAK_CHECK && _DEBUG
 
   int nArg = 1;
-  long int verbosity = 100; // default is maximum verbosity (old behaviour)
+  int verbosity = 100; // default is maximum verbosity (old behaviour)
 
   if (argc <= 1) {
 print_usage:
@@ -156,7 +157,7 @@ print_usage:
 
     // support case where ICC filename starts with an integer: e.g. "123.icc"
     char *endptr = nullptr;
-    verbosity = strtol(argv[nArg], &endptr, 10);
+    verbosity = (int)strtol(argv[nArg], &endptr, 10);
     if ((verbosity != 0L) && (errno != ERANGE) && ((endptr == nullptr) || (*endptr == '\0'))) {
       // clamp verbosity to 1-100 inclusive
       if (verbosity < 0)
@@ -177,7 +178,7 @@ print_usage:
   else {
     // support case where ICC filename starts with an integer: e.g. "123.icc"
     char* endptr = nullptr;
-    verbosity = strtol(argv[nArg], &endptr, 10);
+    verbosity = (int)strtol(argv[nArg], &endptr, 10);
     if ((verbosity != 0L) && (errno != ERANGE) && ((endptr == nullptr) || (*endptr == '\0'))) {
       // clamp verbosity to 1-100 inclusive
       if (verbosity < 0)
@@ -203,7 +204,8 @@ print_usage:
   }
   else {
     pHdr = &pIcc->m_Header;
-    char buf[64];
+    const size_t bufSize = 64;
+    char buf[bufSize];
 
     printf("Profile:            '%s'\n", argv[nArg]);
     if(Fmt.IsProfileIDCalculated(&pHdr->profileID))
@@ -219,8 +221,8 @@ print_usage:
     printf("Creation Date:      %d/%d/%d (M/D/Y)  %02u:%02u:%02u\n",
                                pHdr->date.month, pHdr->date.day, pHdr->date.year,
                                pHdr->date.hours, pHdr->date.minutes, pHdr->date.seconds);
-    printf("Creator:            %s\n", icGetSig(buf, pHdr->creator));
-    printf("Device Manufacturer:%s\n", icGetSig(buf, pHdr->manufacturer));
+    printf("Creator:            %s\n", icGetSig(buf, bufSize, pHdr->creator));
+    printf("Device Manufacturer:%s\n", icGetSig(buf, bufSize, pHdr->manufacturer));
     printf("Data Color Space:   %s\n", Fmt.GetColorSpaceSigName(pHdr->colorSpace));
     printf("Flags:              %s\n", Fmt.GetProfileFlagsName(pHdr->flags));
     printf("PCS Color Space:    %s\n", Fmt.GetColorSpaceSigName(pHdr->pcs));
@@ -228,7 +230,7 @@ print_usage:
     printf("Rendering Intent:   %s\n", Fmt.GetRenderingIntentName((icRenderingIntent)(pHdr->renderingIntent)));
     printf("Profile Class:      %s\n", Fmt.GetProfileClassSigName(pHdr->deviceClass));
     if (pHdr->deviceSubClass)
-      printf("Profile SubClass:   %s\n", icGetSig(buf, pHdr->deviceSubClass));
+      printf("Profile SubClass:   %s\n", icGetSig(buf, bufSize, pHdr->deviceSubClass));
     else
       printf("Profile SubClass:   Not Defined\n");
     printf("Version:            %s\n", Fmt.GetVersionName(pHdr->version));
@@ -319,7 +321,8 @@ print_usage:
     // - Tags with overlapping tag data are considered highly suspect (but officially valid)
     // - 1-3 padding bytes after each tag's data need to be all zero *** NOT DONE - TODO ***
     if (bDumpValidation) {
-      char str[256];
+      const size_t strSize = 256;
+      char str[strSize];
       int  rndup, smallest_offset = pHdr->size;
 
       // File size is required to be a multiple of 4 bytes according to clause 7.2.1 bullet (c):
@@ -338,7 +341,7 @@ print_usage:
         // Is the Tag offset + Tag Size beyond EOF?
         if (i->TagInfo.offset + i->TagInfo.size > pHdr->size) {
             sReport += icMsgValidateNonCompliant;
-            sprintf(str, "Tag %s (offset %d, size %d) ends beyond EOF.\n",
+            snprintf(str, strSize, "Tag %s (offset %d, size %d) ends beyond EOF.\n",
                     Fmt.GetTagSigName(i->TagInfo.sig), i->TagInfo.offset, i->TagInfo.size);
             sReport += str;
             nStatus = icMaxStatus(nStatus, icValidateNonCompliant);
@@ -360,7 +363,7 @@ print_usage:
         // Check if closest tag after this tag is less than offset+size - in which case it overlaps! Ignore last tag.
         if ((closest < (int)i->TagInfo.offset + (int)i->TagInfo.size) && (closest < (int)pHdr->size)) {
             sReport += icMsgValidateWarning;
-            sprintf(str, "Tag %s (offset %d, size %d) overlaps with following tag data starting at offset %d.\n",
+            snprintf(str, strSize, "Tag %s (offset %d, size %d) overlaps with following tag data starting at offset %d.\n",
                 Fmt.GetTagSigName(i->TagInfo.sig), i->TagInfo.offset, i->TagInfo.size, closest);
             sReport += str;
             nStatus = icMaxStatus(nStatus, icValidateWarning);
@@ -369,7 +372,7 @@ print_usage:
         // Check for gaps between tag data (accounting for 4-byte alignment)
         if (closest > (int)i->TagInfo.offset + rndup) {
           sReport += icMsgValidateWarning;
-          sprintf(str, "Tag %s (size %d) is followed by %d unnecessary additional bytes (from offset %d).\n",
+          snprintf(str, strSize, "Tag %s (size %d) is followed by %d unnecessary additional bytes (from offset %d).\n",
                 Fmt.GetTagSigName(i->TagInfo.sig), i->TagInfo.size, closest-(i->TagInfo.offset+rndup), (i->TagInfo.offset+rndup));
           sReport += str;
           nStatus = icMaxStatus(nStatus, icValidateWarning);
@@ -380,7 +383,7 @@ print_usage:
       // 1st tag offset should be = Header (128) + Tag Count (4) + Tag Table (n*12)
       if ((n > 0) && (smallest_offset > 128 + 4 + (n * 12))) {
         sReport += icMsgValidateNonCompliant;
-        sprintf(str, "First tag data is at offset %d rather than immediately after tag table (offset %d).\n",
+        snprintf(str, strSize, "First tag data is at offset %d rather than immediately after tag table (offset %d).\n",
             smallest_offset, 128 + 4 + (n * 12));
         sReport += str;
         nStatus = icMaxStatus(nStatus, icValidateNonCompliant);
@@ -389,7 +392,7 @@ print_usage:
 
     if (argc>nArg+1) {
       if (!stricmp(argv[nArg+1], "ALL")) {
-        for (i=pIcc->m_Tags->begin(); i!=pIcc->m_Tags->end(); i++) {
+        for (i = pIcc->m_Tags->begin(); i!=pIcc->m_Tags->end(); i++) {
           DumpTag(pIcc, i->TagInfo.sig, verbosity);
         }
       }

@@ -82,36 +82,37 @@ bool CIccProfileXml::ToXml(std::string &xml)
 bool CIccProfileXml::ToXmlWithBlanks(std::string &xml, std::string blanks)
 {
   CIccInfo info;
-  char line[256];
-  char buf[256];
-  char fix[256];
-  int n;
+  const size_t bufSize = 256;
+  char line[bufSize];
+  char buf[bufSize];
+  char fix[bufSize];
+  size_t n;
   bool nonzero;
 
   xml += blanks + "<IccProfile>\n";
   xml += blanks + "  <Header>\n";
-  sprintf(line, "    <PreferredCMMType>%s</PreferredCMMType>\n", icFixXml(fix, icGetColorSigStr(buf, m_Header.cmmId)));
+  snprintf(line, bufSize, "    <PreferredCMMType>%s</PreferredCMMType>\n", icFixXml(fix, icGetColorSigStr(buf, bufSize, m_Header.cmmId)));
   xml += blanks + line;
-  sprintf(line, "    <ProfileVersion>%s</ProfileVersion>\n", info.GetVersionName(m_Header.version));
+  snprintf(line, bufSize, "    <ProfileVersion>%s</ProfileVersion>\n", info.GetVersionName(m_Header.version));
   xml += blanks + line;
   if (m_Header.version & 0x0000ffff) {
-    sprintf(line, "    <ProfileSubClassVersion>%s</ProfileSubClassVersion>\n", info.GetSubClassVersionName(m_Header.version));
+    snprintf(line, bufSize,"    <ProfileSubClassVersion>%s</ProfileSubClassVersion>\n", info.GetSubClassVersionName(m_Header.version));
     xml += blanks + line;
   }
-  sprintf(line, "    <ProfileDeviceClass>%s</ProfileDeviceClass>\n", icFixXml(fix, icGetSigStr(buf, m_Header.deviceClass)));
+  snprintf(line, bufSize, "    <ProfileDeviceClass>%s</ProfileDeviceClass>\n", icFixXml(fix, icGetSigStr(buf, bufSize, m_Header.deviceClass)));
   xml += blanks + line;
 
   if (m_Header.deviceSubClass) {
-    sprintf(line, "    <ProfileDeviceSubClass>%s</ProfileDeviceSubClass>\n", icFixXml(fix, icGetSigStr(buf, m_Header.deviceSubClass)));
+    snprintf(line, bufSize, "    <ProfileDeviceSubClass>%s</ProfileDeviceSubClass>\n", icFixXml(fix, icGetSigStr(buf, bufSize, m_Header.deviceSubClass)));
     xml += blanks + line;
   }
 
-  sprintf(line, "    <DataColourSpace>%s</DataColourSpace>\n", icFixXml(fix, icGetColorSigStr(buf, m_Header.colorSpace)));
+  snprintf(line, bufSize, "    <DataColourSpace>%s</DataColourSpace>\n", icFixXml(fix, icGetColorSigStr(buf, bufSize, m_Header.colorSpace)));
   xml += blanks + line;
-  sprintf(line, "    <PCS>%s</PCS>\n",  icFixXml(fix, icGetColorSigStr(buf, m_Header.pcs)));
+  snprintf(line, bufSize, "    <PCS>%s</PCS>\n",  icFixXml(fix, icGetColorSigStr(buf, bufSize, m_Header.pcs)));
   xml += blanks + line;
 
-  sprintf(line, "    <CreationDateTime>%d-%02d-%02dT%02d:%02d:%02d</CreationDateTime>\n", 
+  snprintf(line, bufSize, "    <CreationDateTime>%d-%02d-%02dT%02d:%02d:%02d</CreationDateTime>\n",
 										m_Header.date.year,
 										m_Header.date.month,
 										m_Header.date.day,
@@ -126,7 +127,7 @@ bool CIccProfileXml::ToXmlWithBlanks(std::string &xml, std::string blanks)
  // }
 
   if (m_Header.platform != icSigUnknownPlatform){
-	sprintf(line, "    <PrimaryPlatform>%s</PrimaryPlatform>\n", icFixXml(fix, icGetSigStr(buf, m_Header.platform)));
+	snprintf(line, bufSize, "    <PrimaryPlatform>%s</PrimaryPlatform>\n", icFixXml(fix, icGetSigStr(buf, bufSize, m_Header.platform)));
 	xml += blanks + line;
   }
  
@@ -134,21 +135,21 @@ bool CIccProfileXml::ToXmlWithBlanks(std::string &xml, std::string blanks)
   xml+= icGetHeaderFlagsName(m_Header.flags, m_Header.mcs!=0);
 
   if (m_Header.manufacturer != 0){
-	  sprintf(line, "    <DeviceManufacturer>%s</DeviceManufacturer>\n", icFixXml(fix, icGetSigStr(buf, m_Header.manufacturer)));
+	  snprintf(line, bufSize, "    <DeviceManufacturer>%s</DeviceManufacturer>\n", icFixXml(fix, icGetSigStr(buf, bufSize, m_Header.manufacturer)));
 	  xml += blanks + line;
   }
   
   if (m_Header.model != 0){
-	sprintf(line, "    <DeviceModel>%s</DeviceModel>\n", icFixXml(fix, icGetSigStr(buf, m_Header.model)));
+	snprintf(line, bufSize, "    <DeviceModel>%s</DeviceModel>\n", icFixXml(fix, icGetSigStr(buf, bufSize, m_Header.model)));
 	xml += blanks + line;
   }
 
   xml+= "    ";
   xml += blanks + icGetDeviceAttrName(m_Header.attributes);
 
-  sprintf(line, "    <RenderingIntent>%s</RenderingIntent>\n", info.GetRenderingIntentName((icRenderingIntent)m_Header.renderingIntent, m_Header.version>=icVersionNumberV5));
+  snprintf(line, bufSize, "    <RenderingIntent>%s</RenderingIntent>\n", info.GetRenderingIntentName((icRenderingIntent)m_Header.renderingIntent, m_Header.version>=icVersionNumberV5));
   xml += blanks + line;
-  sprintf(line, "    <PCSIlluminant>\n%s      <XYZNumber X=\"" icXmlFloatFmt "\" Y=\"" icXmlFloatFmt "\" Z=\"" icXmlFloatFmt "\"/>\n%s    </PCSIlluminant>\n", blanks.c_str(),
+  snprintf(line, bufSize, "    <PCSIlluminant>\n%s      <XYZNumber X=\"" icXmlFloatFmt "\" Y=\"" icXmlFloatFmt "\" Z=\"" icXmlFloatFmt "\"/>\n%s    </PCSIlluminant>\n", blanks.c_str(),
                                                              (float)icFtoD(m_Header.illuminant.X),
                                                              (float)icFtoD(m_Header.illuminant.Y),
                                                              (float)icFtoD(m_Header.illuminant.Z),
@@ -156,14 +157,14 @@ bool CIccProfileXml::ToXmlWithBlanks(std::string &xml, std::string blanks)
 
   xml += blanks + line;
   
-  sprintf(line, "    <ProfileCreator>%s</ProfileCreator>\n", icFixXml(fix, icGetSigStr(buf, m_Header.creator)));
+  snprintf(line, bufSize, "    <ProfileCreator>%s</ProfileCreator>\n", icFixXml(fix, icGetSigStr(buf, bufSize, m_Header.creator)));
   xml += blanks + line;
 
   if (m_Header.profileID.ID32[0] || m_Header.profileID.ID32[1] || 
       m_Header.profileID.ID32[2] || m_Header.profileID.ID32[3]) {
     xml += blanks;
     for (n=0; n<16; n++) {
-      sprintf(buf + n*2, "%02X", m_Header.profileID.ID8[n]);
+      snprintf(buf + n*2, bufSize-n*2, "%02X", m_Header.profileID.ID8[n]);
     }
     buf[n*2]='\0';
     xml += "    <ProfileID>";
@@ -173,19 +174,19 @@ bool CIccProfileXml::ToXmlWithBlanks(std::string &xml, std::string blanks)
   nonzero = false;
 
   if (m_Header.spectralPCS) {
-    sprintf(line, "    <SpectralPCS>%s</SpectralPCS>\n",  icFixXml(fix, icGetColorSigStr(buf, m_Header.spectralPCS)));
+    snprintf(line, bufSize, "    <SpectralPCS>%s</SpectralPCS>\n",  icFixXml(fix, icGetColorSigStr(buf, bufSize, m_Header.spectralPCS)));
     xml += blanks + line;
 
     if (m_Header.spectralRange.steps) {
       xml += blanks + "    <SpectralRange>\n";
-      sprintf(line, "     <Wavelengths start=\"" icXmlHalfFmt "\" end=\"" icXmlHalfFmt "\" steps=\"%d\"/>\n",
+      snprintf(line, bufSize, "     <Wavelengths start=\"" icXmlHalfFmt "\" end=\"" icXmlHalfFmt "\" steps=\"%d\"/>\n",
               icF16toF(m_Header.spectralRange.start), icF16toF(m_Header.spectralRange.end), m_Header.spectralRange.steps);
       xml += blanks + line;
       xml += blanks + "    </SpectralRange>\n";
     }
     if (m_Header.biSpectralRange.steps) {
       xml += blanks + "    <BiSpectralRange>\n";
-      sprintf(line, "     <Wavelengths start=\"" icXmlHalfFmt "\" end=\"" icXmlHalfFmt "\" steps=\"%d\"/>\n)",
+      snprintf(line, bufSize, "     <Wavelengths start=\"" icXmlHalfFmt "\" end=\"" icXmlHalfFmt "\" steps=\"%d\"/>\n)",
               icF16toF(m_Header.biSpectralRange.start), icF16toF(m_Header.biSpectralRange.end), m_Header.biSpectralRange.steps);
       xml += blanks + line;
       xml += blanks + "    </BiSpectralRange>\n";
@@ -193,14 +194,14 @@ bool CIccProfileXml::ToXmlWithBlanks(std::string &xml, std::string blanks)
   }
 
   if (m_Header.mcs) {
-    sprintf(line, "    <MCS>%s</MCS>\n",  icFixXml(fix, icGetColorSigStr(buf, m_Header.mcs)));
+    snprintf(line, bufSize, "    <MCS>%s</MCS>\n",  icFixXml(fix, icGetColorSigStr(buf, bufSize, m_Header.mcs)));
     xml += blanks + line;
   }
 
   for (n=0; n<sizeof(m_Header.reserved); n++) {
     if (m_Header.reserved[n])
       nonzero = true;
-    sprintf(buf + n*2, "%02X", m_Header.reserved[n]);
+    snprintf(buf + n*2, bufSize-n*2, "%02X", m_Header.reserved[n]);
   }
   buf[n*2]='\0';
   if (nonzero) {
@@ -229,25 +230,25 @@ bool CIccProfileXml::ToXmlWithBlanks(std::string &xml, std::string blanks)
             const icChar* tagSig = icGetTagSigTypeName(pTag->GetType());
 
             if (tagName && strncmp(tagName, "Unknown ", 8)) {
-              sprintf(line, "    <%s> ", icFixXml(fix, tagName));
+              snprintf(line, bufSize, "    <%s> ", icFixXml(fix, tagName));
             }
             else {
-              sprintf(line, "    <PrivateTag TagSignature=\"%s\"> ", icFixXml(fix, icGetSigStr(buf, i->TagInfo.sig)));
+              snprintf(line, bufSize, "    <PrivateTag TagSignature=\"%s\"> ", icFixXml(fix, icGetSigStr(buf, bufSize, i->TagInfo.sig)));
               tagName = "PrivateTag";
             }
             xml += blanks + line;
             // PrivateType - a type that does not belong to the list in the icc specs - custom for vendor.
             if (pTag->m_nReserved) {
               if (!strcmp("PrivateType", tagSig))
-                sprintf(line, "<PrivateType type=\"%s\" reserved=\"%08x\">\n", icFixXml(fix, icGetSigStr(buf, pTag->GetType())), pTag->m_nReserved);
+                snprintf(line, bufSize, "<PrivateType type=\"%s\" reserved=\"%08x\">\n", icFixXml(fix, icGetSigStr(buf, bufSize, pTag->GetType())), pTag->m_nReserved);
               else
-                sprintf(line, "<%s reserved=\"%08x\">\n", tagSig, pTag->m_nReserved); //parent node is the tag type
+                snprintf(line, bufSize, "<%s reserved=\"%08x\">\n", tagSig, pTag->m_nReserved); //parent node is the tag type
             }
             else {
               if (!strcmp("PrivateType", tagSig))
-                sprintf(line, "<PrivateType type=\"%s\">\n", icFixXml(fix, icGetSigStr(buf, pTag->GetType())));
+                snprintf(line, bufSize, "<PrivateType type=\"%s\">\n", icFixXml(fix, icGetSigStr(buf, bufSize, pTag->GetType())));
               else
-                sprintf(line, "<%s>\n", tagSig); //parent node is the tag type
+                snprintf(line, bufSize, "<%s>\n", tagSig); //parent node is the tag type
             }
 
             xml += line;
@@ -270,10 +271,10 @@ bool CIccProfileXml::ToXmlWithBlanks(std::string &xml, std::string blanks)
 #endif
             //convert the rest of the tag to xml
             if (!pTagXml->ToXml(xml, blanks + "      ")) {
-              printf("Unable to output tag with type %s\n", icGetSigStr(buf, i->TagInfo.sig));
+              printf("Unable to output tag with type %s\n", icGetSigStr(buf, bufSize, i->TagInfo.sig));
               return false;
             }
-            sprintf(line, "    </%s> </%s>\n\n", tagSig, tagName);
+            snprintf(line, bufSize, "    </%s> </%s>\n\n", tagSig, tagName);
             xml += blanks + line;
             offsetTags[i->TagInfo.offset] = i->TagInfo.sig;
           }
@@ -286,13 +287,13 @@ bool CIccProfileXml::ToXmlWithBlanks(std::string &xml, std::string blanks)
             }
 
             if (tagName && strncmp(tagName, "Unknown ", 8))
-              sprintf(line, "    <%s SameAs=\"%s\"", icFixXml(fix, tagName), icFixXml(fix2, prevTagName)); //parent node is the tag type
+              snprintf(line, bufSize, "    <%s SameAs=\"%s\"", icFixXml(fix, tagName), icFixXml(fix2, prevTagName)); //parent node is the tag type
             else
-              sprintf(line, "    <PrivateTag TagSignature=\"%s\" SameAs=\"%s\"", icFixXml(fix2, icGetSigStr(buf, i->TagInfo.sig)), icFixXml(fix, prevTagName));
+              snprintf(line, bufSize, "    <PrivateTag TagSignature=\"%s\" SameAs=\"%s\"", icFixXml(fix2, icGetSigStr(buf, bufSize, i->TagInfo.sig)), icFixXml(fix, prevTagName));
             
             xml += blanks + line;
             if (prevTagName == nameBuf) {
-              sprintf(line, " SameAsSignature=\"%s\"", icFixXml(fix2, icGetSigStr(buf, prevTag->second)));
+              snprintf(line, bufSize, " SameAsSignature=\"%s\"", icFixXml(fix2, icGetSigStr(buf, bufSize, prevTag->second)));
               xml += blanks + line;
             }
 
@@ -300,12 +301,12 @@ bool CIccProfileXml::ToXmlWithBlanks(std::string &xml, std::string blanks)
           }
         }
         else {
-          printf("Non XML tag in list with tag %s!\n", icGetSigStr(buf, i->TagInfo.sig));
+          printf("Non XML tag in list with tag %s!\n", icGetSigStr(buf, bufSize, i->TagInfo.sig));
           return false;
         }
       }
       else {
-        printf("Unable to find tag with tag %s!\n", icGetSigStr(buf, i->TagInfo.sig));
+        printf("Unable to find tag with tag %s!\n", icGetSigStr(buf, bufSize, i->TagInfo.sig));
         return false;
       }
     }
@@ -386,7 +387,7 @@ bool CIccProfileXml::ParseBasic(xmlNode *pNode, std::string &parseStr)
         }
       }
 
-      m_Header.version = (verMajor << 24) | (verMinor << 16) | (verClassMajor << 8) | verClassMinor;
+      m_Header.version = icUInt32Number( (verMajor << 24) | (verMinor << 16) | (verClassMajor << 8) | verClassMinor );
 		}
     else if (!icXmlStrCmp((const char*)pNode->name, "ProfileSubClassVersion")) {
       const char *szVer = (const char*)pNode->children->content;
@@ -664,6 +665,9 @@ bool CIccProfileXml::ParseTag(xmlNode *pNode, std::string &parseStr)
       pTag = CIccTag::Create(sigType);
 
       IIccExtensionTag *pExt;
+      
+      const size_t strSize = 100;
+      char str[strSize];
 
       if (pTag && (pExt = pTag->GetExtension()) && !strcmp(pExt->GetExtClassName(), "CIccTagXml")) {
         CIccTagXml* pXmlTag = (CIccTagXml*)pExt;
@@ -675,12 +679,11 @@ bool CIccProfileXml::ParseTag(xmlNode *pNode, std::string &parseStr)
           AttachTag(sigTag, pTag);
         }
         else {
-          char str[100];
           parseStr += "Unable to Parse \"";
           parseStr += (const char*)pTypeNode->name;
           parseStr += "\" (";
           parseStr += nodeName;
-          sprintf(str, ") Tag on line %d\n", pTypeNode->line);
+          snprintf(str, strSize, ") Tag on line %d\n", pTypeNode->line);
           parseStr += str;
           return false;
         }
@@ -690,7 +693,7 @@ bool CIccProfileXml::ParseTag(xmlNode *pNode, std::string &parseStr)
         parseStr += "Invalid tag extension for \"";
         parseStr += (const char*)pTypeNode->name;
         parseStr += "\" (";
-        sprintf(str, ") Tag on line %d\n", pTypeNode->line);
+        snprintf(str, strSize, ") Tag on line %d\n", pTypeNode->line);
         parseStr += str;
         return false;
       }
@@ -712,6 +715,8 @@ bool CIccProfileXml::ParseTag(xmlNode *pNode, std::string &parseStr)
     pTag = CIccTag::Create(sigType);
 
     IIccExtensionTag *pExt;
+    const size_t strSize = 100;
+    char str[strSize];
 
     if (pTag && (pExt = pTag->GetExtension()) && !strcmp(pExt->GetExtClassName(), "CIccTagXml")) {
       CIccTagXml* pXmlTag = (CIccTagXml*)pExt;
@@ -729,23 +734,21 @@ bool CIccProfileXml::ParseTag(xmlNode *pNode, std::string &parseStr)
         }
       }
       else {
-        char str[100];
         parseStr += "Unable to Parse \"";
         parseStr += info.GetTagTypeSigName(sigType);
         parseStr += "\" (";
         parseStr += nodeName;
-        sprintf(str, ") Tag on line %d\n", pNode->line);
+        snprintf(str, strSize, ") Tag on line %d\n", pNode->line);
         parseStr += str;
         return false;
       }
     }
     else {
-      char str[100];
       parseStr += "Invalid tag extension for \"";
       parseStr += info.GetTagTypeSigName(sigType);
       parseStr += "\" (";
       parseStr += nodeName;
-      sprintf(str, ") Tag on line %d\n", pNode->line);
+      snprintf(str, strSize, ") Tag on line %d\n", pNode->line);
       parseStr += str;
       return false;
     }

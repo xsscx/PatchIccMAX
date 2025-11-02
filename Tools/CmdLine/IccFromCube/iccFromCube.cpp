@@ -332,9 +332,6 @@ protected:
 
 int main(int argc, char* argv[])
 {
-  int nArg = 1;
-  long int verbosity = 100; // default is maximum verbosity (old behaviour)
-
   if (argc <= 2) {
     printf("Usage: iccFromCube cube_file output_icc_file\n");
     printf("Built with IccProfLib version " ICCPROFLIBVER "\n");

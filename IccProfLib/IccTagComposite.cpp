@@ -86,10 +86,11 @@
 void IIccStruct::Describe(std::string &sDescription, int nVerboseness) const
 {
   if (m_pTagStruct) {
-    char buf[256];
+    const size_t bufSize = 256;
+    char buf[bufSize];
     CIccInfo info;
 
-    sprintf(buf, "BEGIN UNKNOWN_TAG_STRUCT ");
+    snprintf(buf, bufSize, "BEGIN UNKNOWN_TAG_STRUCT ");
     sDescription += buf;
     sDescription += info.GetStructSigName(m_pTagStruct->GetTagStructType());
     sDescription += "\n\n";
@@ -101,7 +102,7 @@ void IIccStruct::Describe(std::string &sDescription, int nVerboseness) const
     }
 
     sDescription += "\n";
-    sprintf(buf, "END TAG_STRUCT\n");
+    snprintf(buf, bufSize, "END TAG_STRUCT\n");
     sDescription += buf;
     sDescription += "\n";
   }
@@ -1168,10 +1169,11 @@ bool CIccTagArray::AreAllOfType(icTagTypeSignature sigTagType)
 void CIccTagArray::Describe(std::string &sDescription, int nVerboseness)
 {
   std::string name;
-  icChar buf[128];
+  const size_t bufSize = 128;
+  icChar buf[bufSize];
   CIccInfo info;
 
-  IIccArray *pArrayObj = GetArrayHandler();
+ // IIccArray *pArrayObj = GetArrayHandler();       // unused, appears to be a memory leak
   CIccArrayCreator::GetArraySigName(name, m_sigArrayType);
 
   sDescription += "BEGIN TAG_ARRAY \"";
@@ -1183,13 +1185,13 @@ void CIccTagArray::Describe(std::string &sDescription, int nVerboseness)
   for (i=0; i<m_nSize; i++) {
     if (i)
       sDescription += "\n";
-    sprintf(buf, "BEGIN INDEX[%d]\n", i);
+    snprintf(buf, bufSize, "BEGIN INDEX[%d]\n", i);
     sDescription +=  buf;
     
     if (m_TagVals[i].ptr) {
       m_TagVals[i].ptr->Describe(sDescription, nVerboseness);
     }
-    sprintf(buf, "END INDEX[%d]\n", i);
+    snprintf(buf, bufSize, "END INDEX[%d]\n", i);
     sDescription += buf;
   }
 

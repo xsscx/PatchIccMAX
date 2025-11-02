@@ -110,7 +110,7 @@ CIccMinMaxEval::CIccMinMaxEval()
   memset(&maxLab2[0], 0, sizeof(maxLab2));
 }
 
-void CIccMinMaxEval::Compare(icFloatNumber *pixel, icFloatNumber *deviceLab, icFloatNumber *lab1, icFloatNumber *lab2)
+void CIccMinMaxEval::Compare(icFloatNumber * /*pixel*/, icFloatNumber *deviceLab, icFloatNumber *lab1, icFloatNumber *lab2)
 {
   icFloatNumber DE1 = icDeltaE(deviceLab, lab1);
   icFloatNumber DE2 = icDeltaE(lab1, lab2);

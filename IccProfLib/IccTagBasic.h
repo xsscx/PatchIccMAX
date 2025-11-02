@@ -160,7 +160,7 @@ public:
   *
   * Returns true if Read is successful.
   */
-  virtual bool Read(icUInt32Number size, CIccIO *pIO) { return false; }
+  virtual bool Read(icUInt32Number /*size*/, CIccIO * /*pIO*/) { return false; }
 
   /**
   * Function: ReadAll() - Read All sub data for tag from file.
@@ -190,7 +190,7 @@ public:
   *
   * Returns true if Read is successful.
   */
-  virtual bool Read(icUInt32Number size, CIccIO *pIO, CIccProfile *pProfile) { return Read(size, pIO); }
+  virtual bool Read(icUInt32Number size, CIccIO *pIO, CIccProfile * /*pProfile*/) { return Read(size, pIO); }
 
 
   /**
@@ -204,7 +204,7 @@ public:
   *
   * Returns true if Write is successful.
   */
-  virtual bool Write(CIccIO *pIO) { return false; }
+  virtual bool Write(CIccIO * /*pIO*/) { return false; }
 
   /**
   * Function: Describe(sDescription)
@@ -214,7 +214,7 @@ public:
   * sDescription - A string to put the tag's description into.
 * * verbosenss   - integer value. Default=0. The larger the value, the more verbose the output. 
   */
-  virtual void Describe(std::string &sDescription, int nVerboseness=0) { sDescription.clear(); }
+  virtual void Describe(std::string &sDescription, int /*nVerboseness=0*/) { sDescription.clear(); }
 
   /**
    ******************************************************************************
@@ -829,7 +829,7 @@ public:
   CIccTagSparseMatrixArray(int nNumMatrices=1, int nChannelsPerMatrix=4);
   CIccTagSparseMatrixArray(const CIccTagSparseMatrixArray &ITSMA);
   CIccTagSparseMatrixArray &operator=(const CIccTagSparseMatrixArray &ITSMA);
-  virtual CIccTag* NewCopy() { return new CIccTagSparseMatrixArray(*this); }
+  virtual CIccTag* NewCopy() const { return new CIccTagSparseMatrixArray(*this); }
   virtual ~CIccTagSparseMatrixArray();
 
   virtual bool IsArrayType() { return m_nSize > 1; }

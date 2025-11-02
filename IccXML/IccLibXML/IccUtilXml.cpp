@@ -432,10 +432,11 @@ public:
     m_nCurPixel = 0;
   }
 
-  virtual void PixelOp(icFloatNumber* pGridAdr, icFloatNumber* pData)
+  virtual void PixelOp(icFloatNumber* /*pGridAdr*/, icFloatNumber* pData)
   {
     int i;
-    char buf[128];
+    const size_t bufSize = 128;
+    char buf[bufSize];
 
     if (!(m_nCurPixel % m_nPixelsPerRow))
       *m_xml += m_blanks;
@@ -443,20 +444,20 @@ public:
     switch(m_nType) {
       case icConvert8Bit:
         for (i=0; i<m_nSamples; i++) {
-          sprintf(buf, " %3d", (icUInt8Number)(pData[i]*255.0 + 0.5));
+          snprintf(buf, bufSize, " %3d", (icUInt8Number)(pData[i]*255.0 + 0.5));
           *m_xml += buf;
         }
         break;
       case icConvert16Bit:
         for (i=0; i<m_nSamples; i++) {
-          sprintf(buf, " %5d", (icUInt16Number)(pData[i]*65535.0 + 0.5));
+          snprintf(buf, bufSize, " %5d", (icUInt16Number)(pData[i]*65535.0 + 0.5));
           *m_xml += buf;
         }
         break;
       case icConvertFloat:
       default:
         for (i=0; i<m_nSamples; i++) {
-          sprintf(buf, " %13.8f", pData[i]);
+          snprintf(buf, bufSize, " %13.8f", pData[i]);
           *m_xml += buf;
         }
         break;
@@ -485,7 +486,8 @@ public:
 bool icCLUTDataToXml(std::string &xml, CIccCLUT *pCLUT, icConvertType nType, std::string blanks, 
                      bool bSaveGridPoints/*=false*/)
 {
-  char buf[128];
+  const size_t bufSize = 128;
+  char buf[bufSize];
   int nStartType = nType;
   if (nType == icConvertVariable) {
     nType = pCLUT->GetPrecision()==1 ? icConvert8Bit : icConvert16Bit;
@@ -497,9 +499,9 @@ bool icCLUTDataToXml(std::string &xml, CIccCLUT *pCLUT, icConvertType nType, std
 
     for (i=0; i<pCLUT->GetInputDim(); i++) {
       if (i)
-        sprintf(buf, " %d", pCLUT->GridPoint(i));
+        snprintf(buf, bufSize, " %d", pCLUT->GridPoint(i));
       else
-        sprintf(buf, "%d", pCLUT->GridPoint(i));
+        snprintf(buf, bufSize, "%d", pCLUT->GridPoint(i));
       xml += buf;
     }
     xml += "</GridPoints>\n";
@@ -518,7 +520,7 @@ bool icCLUTDataToXml(std::string &xml, CIccCLUT *pCLUT, icConvertType nType, std
   xml += blanks + "  <TableData";
 
   if (nStartType == icConvertVariable && nType == icConvert8Bit) {
-    sprintf(buf, " Precision=\"1\"");
+    snprintf(buf, bufSize, " Precision=\"1\"");
     xml += buf;
   }
 
@@ -537,11 +539,12 @@ bool icCLUTDataToXml(std::string &xml, CIccCLUT *pCLUT, icConvertType nType, std
 bool icCLUTToXml(std::string &xml, CIccCLUT *pCLUT, icConvertType nType, std::string blanks, 
                  bool bSaveGridPoints/*=false*/, const char *szExtraAttrs/*=""*/, const char *szName/*="CLUT"*/)
 {
-  char buf[128];
+  const size_t bufSize = 128;
+  char buf[bufSize];
   xml += blanks + "<" + szName;
 
   if (!bSaveGridPoints) {
-    sprintf(buf, " GridGranularity=\"%d\"", pCLUT->GridPoint(0));
+    snprintf(buf, bufSize, " GridGranularity=\"%d\"", pCLUT->GridPoint(0));
     xml += buf;
   }
 
@@ -648,7 +651,8 @@ icUInt32Number icXmlGetHexDataSize(const char *szText)
 icUInt32Number icXmlDumpHexData(std::string &xml, std::string blanks, void *pBuf, icUInt32Number nBufSize)
 {
   icUInt8Number *m_ptr = (icUInt8Number *)pBuf;
-  char buf[15];
+  const size_t bufSize = 15;
+  char buf[bufSize];
   icUInt32Number i;
 
   for (i=0; i<nBufSize; i++, m_ptr++) {
@@ -657,8 +661,8 @@ icUInt32Number icXmlDumpHexData(std::string &xml, std::string blanks, void *pBuf
         xml += "\n";
       xml += blanks;
     }
-    sprintf(buf, "%02x", *m_ptr);
-    xml += buf; 
+    snprintf(buf, bufSize, "%02x", *m_ptr);
+    xml += buf;
   }
   if (i) {
     xml += "\n";
@@ -820,7 +824,8 @@ template <class T, icTagTypeSignature Tsig>
 bool CIccXmlArrayType<T, Tsig>::DumpArray(std::string &xml, std::string blanks, T *buf, icUInt32Number nBufSize, 
                                           icConvertType nType,  icUInt8Number nColumns)
 {
-  char str[200];
+  const size_t strSize = 200;
+  char str[strSize];
 
   if (!nColumns) nColumns = 1;
   icUInt32Number i;
@@ -838,15 +843,15 @@ bool CIccXmlArrayType<T, Tsig>::DumpArray(std::string &xml, std::string blanks, 
         switch (nType) {
           case icConvert8Bit:
           default:
-            sprintf(str, "%u", (icUInt8Number)buf[i]);
+            snprintf(str, strSize, "%u", (icUInt8Number)buf[i]);
             break;
 
           case icConvert16Bit:
-            sprintf(str, "%u", (icUInt16Number)((icFloatNumber)buf[i] * 65535.0 / 255.0 + 0.5));
+            snprintf(str, strSize, "%u", (icUInt16Number)((icFloatNumber)buf[i] * 65535.0 / 255.0 + 0.5));
             break;
 
           case icConvertFloat:
-            sprintf(str, icXmlFloatFmt, (icFloatNumber)buf[i] / 255.0);
+            snprintf(str, strSize, icXmlFloatFmt, (icFloatNumber)buf[i] / 255.0);
             break;
         }
         break;
@@ -854,22 +859,22 @@ bool CIccXmlArrayType<T, Tsig>::DumpArray(std::string &xml, std::string blanks, 
       case icSigUInt16ArrayType:
         switch (nType) {
           case icConvert8Bit:
-            sprintf(str, "%u", (icUInt16Number)((icFloatNumber)buf[i] * 255.0 / 65535.0 + 0.5));
+            snprintf(str, strSize, "%u", (icUInt16Number)((icFloatNumber)buf[i] * 255.0 / 65535.0 + 0.5));
             break;
 
           case icConvert16Bit:
           default:
-            sprintf(str, "%u", (icUInt16Number)buf[i]);
+            snprintf(str, strSize, "%u", (icUInt16Number)buf[i]);
             break;
 
           case icConvertFloat:
-            sprintf(str, icXmlFloatFmt, (icFloatNumber)buf[i] / 65535.0);
+            snprintf(str, strSize, icXmlFloatFmt, (icFloatNumber)buf[i] / 65535.0);
             break;
         }
         break;
 
       case icSigUInt32ArrayType:
-        sprintf(str, "%u", (icUInt32Number)buf[i]);
+        snprintf(str, strSize, "%u", (icUInt32Number)buf[i]);
         break;
       
       case icSigUInt64ArrayType:
@@ -881,16 +886,16 @@ bool CIccXmlArrayType<T, Tsig>::DumpArray(std::string &xml, std::string blanks, 
       case icSigFloat64ArrayType:
         switch (nType) {
           case icConvert8Bit:
-            sprintf(str, "%u", (icUInt8Number)(buf[i] * 255.0 + 0.5));
+            snprintf(str, strSize, "%u", (icUInt8Number)(buf[i] * 255.0 + 0.5));
             break;
 
           case icConvert16Bit:
-            sprintf(str, "%u", (icUInt16Number)(buf[i] * 65535.0 + 0.5));
+            snprintf(str, strSize, "%u", (icUInt16Number)(buf[i] * 65535.0 + 0.5));
             break;
 
           case icConvertFloat:
           default:
-            sprintf(str, icXmlFloatFmt, (icFloatNumber)buf[i]);
+            snprintf(str, strSize, icXmlFloatFmt, (icFloatNumber)buf[i]);
         }
         break;
     }
@@ -938,8 +943,9 @@ icUInt32Number CIccXmlArrayType<T, Tsig>::ParseTextCountNum(const char *szText, 
     }
 	  // an invalid character is encountered (not digit and not space)
 	  else if (!isspace(*szText) && i <= num ){
-		  char line[100];
-		  sprintf(line, "Data '%c' in position %d is not a number. ", *szText, i);
+          const size_t lineSize = 100;
+		  char line[lineSize];
+		  snprintf(line, lineSize, "Data '%c' in position %d is not a number. ", *szText, i);
 		  parseStr += line;
 		  return false;
 	  }
@@ -1425,39 +1431,40 @@ icMeasurementUnitSig icGetMeasurementValue(const icChar* str)
 
 const std::string icGetDeviceAttrName(icUInt64Number devAttr)
 {
-	char line[256];
+    const size_t lineSize = 256;
+	char line[lineSize];
 	std::string xml;
 		
 	if (devAttr & icTransparency)
-		sprintf(line, "<DeviceAttributes ReflectiveOrTransparency=\"transparency\"");
+		snprintf(line, lineSize, "<DeviceAttributes ReflectiveOrTransparency=\"transparency\"");
 	else
-		sprintf(line, "<DeviceAttributes ReflectiveOrTransparency=\"reflective\"");	 
+		snprintf(line, lineSize, "<DeviceAttributes ReflectiveOrTransparency=\"reflective\"");
 	xml += line;
  
 	
 	if (devAttr & icMatte)
-		sprintf(line, " GlossyOrMatte=\"matte\"");
+		snprintf(line, lineSize, " GlossyOrMatte=\"matte\"");
 	else
-		sprintf(line, " GlossyOrMatte=\"glossy\"");	
+		snprintf(line, lineSize, " GlossyOrMatte=\"glossy\"");
 	xml += line;
 	
 	
 	if (devAttr & icMediaNegative)
-		sprintf(line, " MediaPolarity=\"negative\"");
+		snprintf(line, lineSize, " MediaPolarity=\"negative\"");
 	else
-		sprintf(line, " MediaPolarity=\"positive\"");
+		snprintf(line, lineSize, " MediaPolarity=\"positive\"");
 	xml += line;
 	
 	if (devAttr & icMediaBlackAndWhite)
-		sprintf(line, " MediaColour=\"blackAndwhite\"");		
+		snprintf(line, lineSize, " MediaColour=\"blackAndwhite\"");
 	else
-		sprintf(line, " MediaColour=\"colour\"");	
+		snprintf(line, lineSize, " MediaColour=\"colour\"");
 	xml += line;
 
   icUInt64Number otherAttr = ~((icUInt64Number)icTransparency|icMatte|icMediaNegative|icMediaBlackAndWhite);
 
   if (devAttr & otherAttr) {
-    sprintf(line, " VendorSpecific=\"%016llx\"", devAttr & otherAttr);
+    snprintf(line, lineSize, " VendorSpecific=\"%016llx\"", devAttr & otherAttr);
     xml += line;
   }
 
@@ -1468,23 +1475,24 @@ const std::string icGetDeviceAttrName(icUInt64Number devAttr)
 
 const std::string icGetHeaderFlagsName(icUInt32Number flags, bool bUsesMCS)
 {
-	char line[256];
+    const size_t lineSize = 256;
+	char line[lineSize];
 	std::string xml;	
 
   if (flags & icEmbeddedProfileTrue)
-		sprintf(line, "<ProfileFlags EmbeddedInFile=\"true\"");
+		snprintf(line, lineSize, "<ProfileFlags EmbeddedInFile=\"true\"");
 	else
-	  sprintf(line, "<ProfileFlags EmbeddedInFile=\"false\"");	
+	  snprintf(line, lineSize, "<ProfileFlags EmbeddedInFile=\"false\"");
 	xml += line;
 
   if (flags & icUseWithEmbeddedDataOnly)
-		sprintf(line, " UseWithEmbeddedDataOnly=\"true\"");
+		snprintf(line, lineSize, " UseWithEmbeddedDataOnly=\"true\"");
 	else
-		sprintf(line, " UseWithEmbeddedDataOnly=\"false\"");
+		snprintf(line, lineSize, " UseWithEmbeddedDataOnly=\"false\"");
 	xml += line;
 
   if (flags & icExtendedRangePCS) {
-    sprintf(line, " ExtendedRangePCS=\"true\"");
+    snprintf(line, lineSize, " ExtendedRangePCS=\"true\"");
     xml += line;
   }
 
@@ -1492,16 +1500,16 @@ const std::string icGetHeaderFlagsName(icUInt32Number flags, bool bUsesMCS)
 
   if (bUsesMCS) {
     if (flags & icMCSNeedsSubsetTrue)
-      sprintf(line, " MCSNeedsSubset=\"true\"");
+      snprintf(line, lineSize, " MCSNeedsSubset=\"true\"");
     else
-      sprintf(line, " MCSNeedsSubset=\"false\"");
+      snprintf(line, lineSize, " MCSNeedsSubset=\"false\"");
     xml += line;
 
     otherFlags &= ~icMCSNeedsSubsetTrue;
   }
 
   if (flags & otherFlags) {
-    sprintf(line, " VendorFlags=\"%08x\"", flags & otherFlags);
+    snprintf(line, lineSize, " VendorFlags=\"%08x\"", flags & otherFlags);
     xml += line;  		
   }
 

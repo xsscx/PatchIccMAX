@@ -126,8 +126,8 @@ template std::string valueToJson<icInt8Number>(const char*, icInt8Number);
 template std::string valueToJson<icInt16Number>(const char*, icInt16Number);
 template std::string valueToJson<icInt32Number>(const char*, icInt32Number);
 template std::string valueToJson<icInt64Number>(const char*, icInt64Number);
-template std::string valueToJson<float>(const char*, float);
-template std::string valueToJson<double>(const char*, double);
+//template std::string valueToJson<float>(const char*, float);      // already explict specialization above
+//template std::string valueToJson<double>(const char*, double);    // already explict specialization above
 
 
 std::string fixJsonString(const char* v)
@@ -263,7 +263,7 @@ template <typename T>
 bool jsonToArray(const json& v, T* vals, int n)
 {
   if (v.is_array()) {
-    int nValid = 0;
+    size_t nValid = 0;
     auto e = v.begin();
     for (int i = 0; e != v.end() && i < n; e++, i++) {
       if (e->is_number()) {
@@ -293,7 +293,7 @@ bool jsonToArray(const json& v, std::vector<std::string>& vals)
 {
   if (v.is_array()) {
     size_t nSize = v.size();
-    int nValid = 0;
+    size_t nValid = 0;
     vals.resize(nSize);
     auto e = v.begin();
     for (int i = 0; e != v.end(); e++, i++) {
@@ -315,7 +315,7 @@ bool jsonToList(const json& v, std::list<std::string>& vals)
 {
   if (v.is_array()) {
     size_t nSize = v.size();
-    int nValid = 0;
+    size_t nValid = 0;
     auto e = v.begin();
     for (int i = 0; e != v.end(); e++, i++) {
       if (e->is_string()) {
@@ -334,7 +334,7 @@ bool jsonToArray(const json& v, std::vector<T>& a)
 {
   if (v.is_array()) {
     size_t nSize = v.size();
-    int nValid = 0;
+    size_t nValid = 0;
     a.resize(nSize);
     auto e = v.begin();
     for (int i = 0; e != v.end(); e++, i++) {
@@ -418,7 +418,7 @@ bool saveJsonAs(const json& j, const char* szFname, int indent)
   if (f) {
     std::string str = j.dump(indent);
 
-    if (fwrite((void*)(str.c_str()), 1, (unsigned long)str.size(), f) == (long)str.size())
+    if ( (size_t)fwrite((void*)(str.c_str()), 1, (unsigned long)str.size(), f) == str.size())
       rv = true;
 
     if (f!=stdout)

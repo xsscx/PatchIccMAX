@@ -136,7 +136,7 @@ class CIccXmlToneMapFunc : public CIccToneMapFunc
 public:
   virtual ~CIccXmlToneMapFunc() {}
 
-  virtual CIccToneMapFunc* NewCopy();
+  virtual CIccToneMapFunc* NewCopy() const;
 
   virtual const char* GetClassName() const { return "CIccXmlToneMapFunc"; }
 
@@ -254,7 +254,6 @@ class CIccMpePtr
 {
 public:
   CIccMpePtr(CIccMultiProcessElement *pMpe = NULL, int nIndex = -1) { m_ptr = pMpe; m_nIndex = nIndex; }
-  CIccMpePtr(const CIccMpePtr &mptr) { m_ptr = mptr.m_ptr; m_nIndex = mptr.m_nIndex; }
   
   CIccMultiProcessElement *m_ptr;
   int m_nIndex;
@@ -267,7 +266,6 @@ class CIccTempVar
 {
 public:
   CIccTempVar(std::string name = "", int pos = -1, icUInt16Number size = 1) { m_name = name; m_pos = pos; m_size = size;}
-  CIccTempVar(const CIccTempVar &temp) { m_name = temp.m_name; m_pos = temp.m_pos; m_size = temp.m_size; }
   std::string m_name;
   int m_pos;
   icUInt16Number m_size;
@@ -281,8 +279,11 @@ typedef std::map<std::string, IndexSizePair> ChanVarMap;
 class CIccTempDeclVar
 {
 public:
-  CIccTempDeclVar(std::string name = "", int pos = -1, icUInt16Number size = 1) { m_name = ""; m_pos = pos; m_size = size; }
+  CIccTempDeclVar(std::string name = "", int pos = -1, icUInt16Number size = 1) { m_name = name; m_pos = pos; m_size = size; }
+  
+  // TODO - an STL template needs this explicit copy, for unknown reasons
   CIccTempDeclVar(const CIccTempDeclVar &temp) { m_name = temp.m_name; m_pos = temp.m_pos; m_size = temp.m_size; m_members = temp.m_members; }
+  
   std::string m_name;
   int m_pos;
   icUInt16Number m_size;

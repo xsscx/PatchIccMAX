@@ -287,7 +287,7 @@ void CIccCfgDataApply::toJson(json& j) const
 
   jsonSetValue(j, "srcType", m_srcType);
   if (m_srcSpace != icSigUnknownData)
-    j["srcSpace"] = icGetColorSigStr(buf, m_srcSpace);
+    j["srcSpace"] = icGetColorSigStr(buf, 30, m_srcSpace);
 
   if (m_srcFile.size())
     j["srcFile"] = m_srcFile;
@@ -668,7 +668,7 @@ static bool jsonFromEnvMap(json& j, const icCmmEnvSigMap& map)
   j.clear();
   for (auto e = map.begin(); e != map.end(); e++) {
     json var;
-    var["name"] = icGetSigStr(buf, e->first);
+    var["name"] = icGetSigStr(buf, 30, e->first);
     var["value"] = e->second;
     j.push_back(var);
   }
@@ -843,7 +843,7 @@ void CIccCfgPccWeight::reset()
 
 }
 
-int CIccCfgPccWeight::fromArgs(const char** args, int nArg, bool bReset)
+int CIccCfgPccWeight::fromArgs(const char** args, int nArg, bool /*bReset*/)
 {
   int nUsed = 0;
 
@@ -859,7 +859,7 @@ int CIccCfgPccWeight::fromArgs(const char** args, int nArg, bool bReset)
   return nUsed;
 }
 
-bool CIccCfgPccWeight::fromJson(json j, bool bReset)
+bool CIccCfgPccWeight::fromJson(json j, bool /*bReset*/)
 {
   if (!j.is_object())
     return false;
@@ -1408,7 +1408,7 @@ typedef std::vector<CIccIndexValue> icValueVector;
 static void setSampleIndex(std::vector<icValueVector>& samples, int index, const char* szFmt, const char** szChannels)
 {
   size_t nPos = samples.size() - 1;
-  for (int i = 0; i < samples[nPos].size(); i++) {
+  for (size_t i = 0; i < samples[nPos].size(); i++) {
     if (!strcmp(szFmt, szChannels[i])) {
       samples[nPos][i].nIndex = index;
     }
@@ -1430,9 +1430,9 @@ bool CIccCfgColorData::fromIt8(const char* filename, bool bReset)
     return false;
   if (!f.findTokenLine(line, "NUBER_OF_FIELDS"))
     return false;
-  int nFields = 0;
+  size_t nFields = 0;
   if (line.size() >= 2) {
-    nFields = atoi(line[1].c_str());
+    nFields = (size_t)atoi(line[1].c_str());
   }
   if (!f.findTokenLine(line, "BEGIN_DATA_FORMAT"))
     return false;
@@ -1446,8 +1446,6 @@ bool CIccCfgColorData::fromIt8(const char* filename, bool bReset)
   std::vector<icValueVector> samples;
   std::vector<std::string> spaces;
   std::vector<icIndexName> names;
-  int nSpace = 0;
-  int nName = 0;
 
   int nId = -1;
   int nLabel = -1;
@@ -1535,8 +1533,9 @@ bool CIccCfgColorData::fromIt8(const char* filename, bool bReset)
       else {
       int nColor = -1;
       if (sscanf(szFmt, "%uCOLOR_", &nColor) && nColor >= 1) {
-        char buf[30];
-        sprintf(buf, "%uCOLOR", nColor);
+        const size_t bufSize = 30;
+        char buf[bufSize];
+        snprintf(buf, bufSize, "%uCOLOR", nColor);
         space += buf;
 
         if (space != lastSpace) {
@@ -1550,7 +1549,7 @@ bool CIccCfgColorData::fromIt8(const char* filename, bool bReset)
         szFmt = strchr(szFmt, '_');
         if (szFmt) {
           szFmt++;
-          int nChannel = atoi(szFmt);
+          size_t nChannel = (size_t)atoi(szFmt);
           size_t last = samples.size() - 1;
           if (nChannel > 0 && samples[last].size() >= nChannel) {
             samples[samples.size() - 1][nChannel - 1].nIndex = index;
@@ -1567,9 +1566,9 @@ bool CIccCfgColorData::fromIt8(const char* filename, bool bReset)
   if (!f.findTokenLine(line, "NUMBER_OF_SETS"))
     return false;
 
-  int nSets = 0;
+  size_t nSets = 0;
   if (line.size() > 1) {
-    nSets = atoi(line[1].c_str());
+    nSets = (size_t)atoi(line[1].c_str());
   }
 
   if (!f.findTokenLine(line, "BEGIN_DATA"))
@@ -1580,10 +1579,10 @@ bool CIccCfgColorData::fromIt8(const char* filename, bool bReset)
       break;
     CIccCfgDataEntryPtr pData(new CIccCfgDataEntry);
 
-    if (nId >= 0 && nId < line.size()) {
+    if (nId >= 0 && nId < (int)line.size()) {
       pData->m_index = atoi(line[nId].c_str());
     }
-    else if (nLabel >= 0 && nLabel < line.size()) {
+    else if (nLabel >= 0 && nLabel < (int)line.size()) {
       pData->m_label = line[nLabel];
     }
 
@@ -1606,14 +1605,14 @@ bool CIccCfgColorData::fromIt8(const char* filename, bool bReset)
       }
     }
 
-    int nValueIdx;
+    size_t nValueIdx;
     for (nValueIdx = 0; nValueIdx < samples.size(); nValueIdx++) {
       if (samples[nValueIdx][0].space == m_space)
         break;
     }
     if (nValueIdx != samples.size()) {
-      for (int i = 0; i < samples[nValueIdx].size(); i++) {
-        int nPos = samples[nValueIdx][i].nIndex;
+      for (size_t i = 0; i < samples[nValueIdx].size(); i++) {
+        size_t nPos = samples[nValueIdx][i].nIndex;
         if (nPos < line.size()) {
           pData->m_values.push_back((icFloatNumber)atof(line[nPos].c_str()));
         }
@@ -1626,8 +1625,8 @@ bool CIccCfgColorData::fromIt8(const char* filename, bool bReset)
       }
       if (nValueIdx != spaces.size() && nValueIdx < samples.size()) {
         m_space = samples[nValueIdx][0].space;
-        for (int j = 0; j < samples[nValueIdx].size(); j++) {
-          int nPos = samples[nValueIdx][j].nIndex;
+        for (size_t j = 0; j < samples[nValueIdx].size(); j++) {
+          size_t nPos = samples[nValueIdx][j].nIndex;
           if (nPos < line.size()) {
             pData->m_values.push_back((icFloatNumber)atof(line[nPos].c_str()));
           }
@@ -1635,14 +1634,14 @@ bool CIccCfgColorData::fromIt8(const char* filename, bool bReset)
       }
     }
 
-    int nSrcIndex;
+    size_t nSrcIndex;
     for (nSrcIndex = 0; nSrcIndex < samples.size(); nSrcIndex++) {
       if (samples[nSrcIndex][0].space == m_srcSpace)
         break;
     }
     if (nSrcIndex != samples.size() && nSrcIndex != nValueIdx) {
-      for (int i = 0; i < samples[nSrcIndex].size(); i++) {
-        int nPos = samples[nSrcIndex][i].nIndex;
+      for (size_t i = 0; i < samples[nSrcIndex].size(); i++) {
+        size_t nPos = samples[nSrcIndex][i].nIndex;
         if (nPos < line.size()) {
           pData->m_values.push_back((icFloatNumber)atof(line[nPos].c_str()));
         }
@@ -1655,8 +1654,8 @@ bool CIccCfgColorData::fromIt8(const char* filename, bool bReset)
       }
       if (nSrcIndex != spaces.size() && nSrcIndex < samples.size()) {
         m_srcSpace = samples[nSrcIndex][0].space;
-        for (int j = 0; j < samples[nValueIdx].size(); j++) {
-          int nPos = samples[nValueIdx][j].nIndex;
+        for (size_t j = 0; j < samples[nValueIdx].size(); j++) {
+          size_t nPos = samples[nValueIdx][j].nIndex;
           if (nPos < line.size()) {
             pData->m_srcValues.push_back((icFloatNumber)atof(line[nPos].c_str()));
           }
@@ -1669,8 +1668,8 @@ bool CIccCfgColorData::fromIt8(const char* filename, bool bReset)
         }
         if (nSrcIndex < samples.size()) {
           m_srcSpace = samples[nSrcIndex][0].space;
-          for (int j = 0; j < samples[nValueIdx].size(); j++) {
-            int nPos = samples[nValueIdx][j].nIndex;
+          for (size_t j = 0; j < samples[nValueIdx].size(); j++) {
+            size_t nPos = samples[nValueIdx][j].nIndex;
             if (nPos < line.size()) {
               pData->m_srcValues.push_back((icFloatNumber)atof(line[nPos].c_str()));
             }
@@ -1729,12 +1728,14 @@ bool CIccCfgColorData::fromJson(json j, bool bReset)
 bool CIccCfgColorData::toLegacy(const char* filename, const CIccCfgProfileArray &profiles, icUInt8Number nDigits, icUInt8Number nPrecision, bool bShowDebug)
 {
   FILE* f;
-  char tempBuf[256];
-  char fmt[20];
+  const size_t tempSize = 256;
+  char tempBuf[tempSize];
+  const size_t fmtSize = 20;
+  char fmt[fmtSize];
   if (!nDigits)
-    sprintf(fmt, " %%.%df", nPrecision);
+    snprintf(fmt, fmtSize, " %%.%df", nPrecision);
   else
-    sprintf(fmt, " %%%d.%df", nDigits, nPrecision);
+    snprintf(fmt, fmtSize, " %%%d.%df", nDigits, nPrecision);
 
   if (!filename || !filename[0])
     f = stdout;
@@ -1745,23 +1746,23 @@ bool CIccCfgColorData::toLegacy(const char* filename, const CIccCfgProfileArray 
     return false;
 
   std::string out;
-  sprintf(tempBuf, "%s\t; ", icGetColorSig(tempBuf, m_space, false));
+  snprintf(tempBuf, tempSize, "%s\t; ", icGetColorSig(tempBuf, m_space, false));
   out = tempBuf;
   out += "Data Format\n";
   fwrite(out.c_str(), out.size(), 1, f);
 
-  sprintf(tempBuf, "%s\t; ", CIccCmm::GetFloatColorEncoding(m_encoding));
+  snprintf(tempBuf, tempSize, "%s\t; ", CIccCmm::GetFloatColorEncoding(m_encoding));
   out = tempBuf;
   out += "Encoding\n\n";
   fwrite(out.c_str(), out.size(), 1, f);
 
   out = ";Source Data Format: ";
-  sprintf(tempBuf, "%s\n", icGetColorSig(tempBuf, m_srcSpace, false));
+  snprintf(tempBuf, tempSize, "%s\n", icGetColorSig(tempBuf, m_srcSpace, false));
   out += tempBuf;
   fwrite(out.c_str(), out.size(), 1, f);
 
   out = ";Source Data Encoding: ";
-  sprintf(tempBuf, "%s\n", CIccCmm::GetFloatColorEncoding(m_srcEncoding));
+  snprintf(tempBuf, tempSize, "%s\n", CIccCmm::GetFloatColorEncoding(m_srcEncoding));
   out += tempBuf;
   fwrite(out.c_str(), out.size(), 1, f);
 
@@ -1796,7 +1797,7 @@ fprintf(f, "\n");
       fprintf(f, "{ \"%s\" }\t;", pData->m_name.c_str());
     }
     else {
-      for (int i = 0; i < pData->m_values.size(); i++) {
+      for (size_t i = 0; i < pData->m_values.size(); i++) {
         fprintf(f, fmt, pData->m_values[i]);
       }
       fprintf(f, "\t;");
@@ -1809,7 +1810,7 @@ fprintf(f, "\n");
       }
     }
     else {
-      for (int i = 0; i < pData->m_srcValues.size(); i++) {
+      for (size_t i = 0; i < pData->m_srcValues.size(); i++) {
         fprintf(f, fmt, pData->m_srcValues[i]);
       }
     }
@@ -1842,8 +1843,9 @@ std::string CIccCfgColorData::spaceName(icColorSpaceSignature sig)
     default:
     {
       int nSamples = icGetSpaceSamples(sig);
-      char buf[32];
-      sprintf(buf, "%dCOLOR", nSamples);
+      const size_t bufSize = 32;
+      char buf[bufSize];
+      snprintf(buf, bufSize, "%dCOLOR", nSamples);
       return buf;
     }
   }
@@ -1852,6 +1854,7 @@ std::string CIccCfgColorData::spaceName(icColorSpaceSignature sig)
 void CIccCfgColorData::addFields(std::string& dataFormat, int& nFields, int& nSamples, icColorSpaceSignature sig, std::string prefix)
 {
   std::string tabStr = "\t";
+  const size_t bufSize = 32;
   char buf[32];
 
   switch (sig) {
@@ -1908,7 +1911,7 @@ void CIccCfgColorData::addFields(std::string& dataFormat, int& nFields, int& nSa
       nSamples = icGetSpaceSamples(sig);
       if (nFields) dataFormat += tabStr;
       for (int i = 0; i < nSamples; i++) {
-        sprintf(buf, "%dCOLOR_%d", nSamples, i + 1);
+        snprintf(buf, bufSize, "%dCOLOR_%d", nSamples, i + 1);
         if (i)
           dataFormat += tabStr;
         dataFormat += buf;
@@ -1924,11 +1927,12 @@ bool CIccCfgColorData::toIt8(const char* filename, icUInt8Number nDigits, icUInt
     return false;
 
   FILE* f;
-  char fmt[64];
+  const size_t fmtSize = 64;
+  char fmt[fmtSize];
   if (!nDigits)
-    sprintf(fmt, " %%.%df", nPrecision);
+    snprintf(fmt, fmtSize, " %%.%df", nPrecision);
   else
-    sprintf(fmt, " %%%d.%df", nDigits, nPrecision);
+    snprintf(fmt, fmtSize, " %%%d.%df", nDigits, nPrecision);
 
   auto first = m_data.begin();
   CIccCfgDataEntry* pEntry = first->get();
@@ -2009,7 +2013,8 @@ bool CIccCfgColorData::toIt8(const char* filename, icUInt8Number nDigits, icUInt
   fprintf(f, "NUMBER_OF_SETS\t%u\n", (int)m_data.size());
 
   CIccCfgDataEntry blank;
-  char buf[256];
+  const size_t bufSize = 256;
+  char buf[bufSize];
 
   fprintf(f, "BEGIN_DATA\n");
   for (auto e = m_data.begin(); e != m_data.end(); e++) {
@@ -2020,7 +2025,7 @@ bool CIccCfgColorData::toIt8(const char* filename, icUInt8Number nDigits, icUInt
       pEntry = &blank;
 
     if (bShowIndex) {
-      sprintf(buf, "%d", pEntry->m_index);
+      snprintf(buf, bufSize, "%d", pEntry->m_index);
       line += buf;
     }
 
@@ -2042,9 +2047,9 @@ bool CIccCfgColorData::toIt8(const char* filename, icUInt8Number nDigits, icUInt
 
     if (bShowValues) {
       if (line.size()) line += "\t";
-      for (int i = 0; i < nDstSamples; i++) {
-        icFloatNumber v = i >= pEntry->m_values.size() ? 0 : pEntry->m_values[i];
-        sprintf(buf, fmt, v);
+      for (size_t i = 0; i < (size_t)nDstSamples; i++) {
+        icFloatNumber v = (i >= pEntry->m_values.size()) ? 0 : pEntry->m_values[i];
+        snprintf(buf, bufSize, fmt, v);
         if (i)
           line += "\t";
         line += buf;
@@ -2061,9 +2066,9 @@ bool CIccCfgColorData::toIt8(const char* filename, icUInt8Number nDigits, icUInt
 
     if (bShowSrcValues) {
       if (line.size()) line += "\t";
-      for (int i = 0; i < nSrcSamples; i++) {
-        icFloatNumber v = i >= pEntry->m_srcValues.size() ? 0 : pEntry->m_srcValues[i];
-        sprintf(buf, fmt, v);
+      for (size_t i = 0; i < (size_t)nSrcSamples; i++) {
+        icFloatNumber v = (i >= pEntry->m_srcValues.size()) ? 0 : pEntry->m_srcValues[i];
+        snprintf(buf, bufSize, fmt, v);
         if (i)
           line += "\t";
         line += buf;
@@ -2083,9 +2088,9 @@ bool CIccCfgColorData::toIt8(const char* filename, icUInt8Number nDigits, icUInt
 void CIccCfgColorData::toJson(json& obj) const
 {
   char buf[32];
-  obj["space"] = icGetColorSigStr(buf, m_space);
+  obj["space"] = icGetColorSigStr(buf, 32, m_space);
   obj["encoding"] = icGetJsonFloatColorEncoding(m_encoding);
-  obj["srcSpace"] = icGetColorSigStr(buf, m_srcSpace);
+  obj["srcSpace"] = icGetColorSigStr(buf, 32, m_srcSpace);
   obj["srcEncoding"] = icGetJsonFloatColorEncoding(m_srcEncoding);
 
   json data;

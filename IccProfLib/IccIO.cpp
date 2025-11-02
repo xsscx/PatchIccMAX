@@ -847,7 +847,7 @@ icInt32Number CIccNullIO::Read8(void *pBuf, icInt32Number nNum)
 }
 
 
-icInt32Number CIccNullIO::Write8(void *pBuf, icInt32Number nNum)
+icInt32Number CIccNullIO::Write8(void * /* pBuf */, icInt32Number nNum)
 {
   m_nPos += nNum;
   if (m_nPos > m_nSize)

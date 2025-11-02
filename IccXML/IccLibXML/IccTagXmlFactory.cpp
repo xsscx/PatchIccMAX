@@ -226,22 +226,22 @@ CIccTag* CIccTagXmlFactory::CreateTag(icTagTypeSignature tagSig)
   }
 }
 
-const icChar* CIccTagXmlFactory::GetTagSigName(icTagSignature tagSig)
+const icChar* CIccTagXmlFactory::GetTagSigName(icTagSignature /*tagSig*/)
 {
   return NULL;
 }
 
-icTagSignature CIccTagXmlFactory::GetTagNameSig(const icChar *szName)
+icTagSignature CIccTagXmlFactory::GetTagNameSig(const icChar * /*szName*/)
 {
   return icSigUnknownTag;
 }
 
-const icChar* CIccTagXmlFactory::GetTagTypeSigName(icTagTypeSignature tagSig)
+const icChar* CIccTagXmlFactory::GetTagTypeSigName(icTagTypeSignature /*tagSig*/)
 {
   return NULL;
 }
 
-icTagTypeSignature CIccTagXmlFactory::GetTagTypeNameSig(const icChar *szName)
+icTagTypeSignature CIccTagXmlFactory::GetTagTypeNameSig(const icChar * /*szName*/)
 {
   return icSigUnknownType;
 }

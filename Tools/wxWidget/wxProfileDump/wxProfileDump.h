@@ -113,11 +113,10 @@ class MyDnDFile : public wxFileDropTarget
 public:
   MyDnDFile(MyFrame *owner) { m_owner = owner; }
 
-  virtual bool OnDropFiles(wxCoord x, wxCoord y,
+  virtual bool OnDropFiles(wxCoord /*x*/, wxCoord /*y*/,
                            const wxArrayString& filenames)
   {
      size_t nFiles = filenames.GetCount();
-     wxString str;
      for (size_t n=0; n<nFiles; n++) {
        m_owner->OpenFile(filenames[n]);
      }

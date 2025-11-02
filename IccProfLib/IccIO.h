@@ -97,8 +97,9 @@ public:
 
   virtual void Close() {}
 
-  virtual icInt32Number Read8(void *pBuf8, icInt32Number nNum=1) { return 0; }
-  virtual icInt32Number Write8(void *pBuf8, icInt32Number nNum=1) { return 0; }
+// unused param is needed to define default value for overrides, changing would require a lot of additional changes
+  virtual icInt32Number Read8(void * /*pBuf8*/, icInt32Number nNum=1) { (void)nNum; return 0; }
+  virtual icInt32Number Write8(void * /*pBuf8*/, icInt32Number nNum=1) { (void)nNum; return 0; }
 
   icInt32Number ReadLine(void *pBuf8, icInt32Number nNum=256);
 
@@ -125,7 +126,7 @@ public:
 
   virtual icInt32Number GetLength() {return 0;}
 
-  virtual icInt32Number Seek(icInt32Number nOffset, icSeekVal pos) {return -1;}
+  virtual icInt32Number Seek(icInt32Number /*nOffset*/, icSeekVal /*pos*/) {return -1;}
   virtual icInt32Number Tell() {return 0;}
 
   ///Write operation to make sure that filelength is evenly divisible by 4

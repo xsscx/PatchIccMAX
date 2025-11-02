@@ -114,17 +114,18 @@ public:
     m_log.push_back("");
   }
 
-  virtual bool BeforeOp(SIccCalcOp* op, SIccOpState& os, SIccCalcOp* ops)
+  virtual bool BeforeOp(SIccCalcOp* op, SIccOpState& os, SIccCalcOp* /*ops*/)
   {
     if (op->sig == icSigIfOp || op->sig == icSigSelectOp) {
       std::string str = "Start:";
       std::string opDesc;
       op->Describe(opDesc, 100);
-      char buf[200];
-      sprintf(buf, "%7s    ", opDesc.c_str());
+      const size_t bufSize = 200;
+      char buf[bufSize];
+      snprintf(buf, bufSize, "%7s    ", opDesc.c_str());
       str += buf;
       for (int j = 0; j < (int)os.pStack->size(); j++) {
-        sprintf(buf, " %.4f", (*os.pStack)[j]);
+        snprintf(buf, bufSize, " %.4f", (*os.pStack)[j]);
         str += buf;
       }
       m_log.push_back(str);
@@ -132,12 +133,13 @@ public:
     return false;
   }
 
-  virtual bool AfterOp(SIccCalcOp* op, SIccOpState& os, SIccCalcOp* ops)
+  virtual bool AfterOp(SIccCalcOp* op, SIccOpState& os, SIccCalcOp* /*ops*/)
   {
     std::string str;
-    char buf[200];
+    const size_t bufSize = 200;
+    char buf[bufSize];
     if (op->sig == icSigDataOp) {
-      sprintf(buf, "%13s    ", "data");
+      snprintf(buf, bufSize, "%13s    ", "data");
       str = buf;
     }
     else {
@@ -150,14 +152,14 @@ public:
       op->Describe(opDesc, 100);
       
       if (bEnd)
-        sprintf(buf, "%7s    ", opDesc.c_str());
+        snprintf(buf, bufSize, "%7s    ", opDesc.c_str());
       else
-        sprintf(buf, "%13s    ", opDesc.c_str());
+        snprintf(buf, bufSize, "%13s    ", opDesc.c_str());
       str += buf;
     }
 
     for (int j = 0; j < (int)os.pStack->size(); j++) {
-      sprintf(buf, " %.4f", (*os.pStack)[j]);
+      snprintf(buf, bufSize, " %.4f", (*os.pStack)[j]);
       str += buf;
     }
     m_log.push_back(str);
@@ -312,8 +314,9 @@ int main(int argc, const char* argv[])
     IIccCalcDebugger::SetDebugger(pDebugger.get());
   }
 
-  char precisionStr[30];
-  sprintf(precisionStr, "%%%d.%dlf ", cfgApply.m_dstDigits, cfgApply.m_dstPrecision);
+  const size_t precSize = 30;
+  char precisionStr[precSize];
+  snprintf(precisionStr, precSize, "%%%d.%dlf ", cfgApply.m_dstDigits, cfgApply.m_dstPrecision);
 
   icFloatColorEncoding srcEncoding, destEncoding;
 
@@ -338,7 +341,6 @@ int main(int argc, const char* argv[])
   IccProfilePtrList pccList;
 
   icCmmEnvSigMap sigMap;
-  bool bUseSubProfile = false;
 
   for (auto pProfIter = cfgProfiles.m_profiles.begin(); pProfIter != cfgProfiles.m_profiles.end(); pProfIter++) {
     CIccCfgProfile* pProfCfg = pProfIter->get();
@@ -410,7 +412,7 @@ int main(int argc, const char* argv[])
 
   //Get and validate the source color space from namedCmm.
   SrcspaceSig = namedCmm.GetSourceSpace();
-  int nSrcSamples = icGetSpaceSamples(SrcspaceSig);
+  icUInt32Number nSrcSamples = icGetSpaceSamples(SrcspaceSig);
 
   bool bClip = true;
   //We don't want to interpret device data as pcs encoded data
@@ -512,7 +514,7 @@ int main(int argc, const char* argv[])
       }      
     }
     else {
-      for (i = 0; i < nSrcSamples && i < pData->m_values.size(); i++) {
+      for (icUInt32Number i = 0; i < nSrcSamples && i < pData->m_values.size(); i++) {
         Pixel[i] = pData->m_values[i];
       }
 

@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
 
     CTiffImg infile[100], outfile;
     char filename[_MAX_PATH];
-    int i, j, k;
+    int i, j;
     long bpl, bps;
     bool invert = false;
     int start, end, step, n;
@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
     n = (end - start) / step + 1;  // Safe to perform division now
 
   for (i=0; i<n; i++) {
-    sprintf(filename, argv[4], i*step + start);
+    snprintf(filename, _MAX_PATH, argv[4], i*step + start);
     if (!infile[i].Open(filename)) {
       printf("Cannot open %s\n", filename);
       return -1;
@@ -188,8 +188,8 @@ int main(int argc, char* argv[]) {
         length = io.GetLength();
         pDestProfile = (icUInt8Number *)malloc(length);
         if (pDestProfile) {
-          io.Read8(pDestProfile, length);
-          outfile.SetIccProfile(pDestProfile, length);
+          io.Read8(pDestProfile, (icInt32Number)length);
+          outfile.SetIccProfile(pDestProfile, (unsigned int)length);
           free(pDestProfile);
         }
         io.Close();
@@ -204,14 +204,14 @@ int main(int argc, char* argv[]) {
           goto cleanup;
         }
         if (invert) {
-          for (k=bpl; k>0; k--) {
+          for (long k=bpl; k>0; k--) {
             *sptr ^= 0xff;
             sptr++;
           }
         }
       }
       tptr = buf;
-      for (k=0; k<(int)f->GetWidth(); k++) {
+      for (unsigned int k=0; k<f->GetWidth(); k++) {
         for (j=0; j<n; j++) {
           sptr = inbuf + j*bpl + k*bps;
           memcpy(tptr, sptr, bps);

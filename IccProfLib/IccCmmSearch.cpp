@@ -1,4 +1,4 @@
-﻿/** @file
+/** @file
     File:       IccCmm.cpp
 
     Contains:   Implementation of the CIccCmm class.
@@ -233,10 +233,10 @@ CIccCmmSearch::~CIccCmmSearch()
 icStatusCMM CIccCmmSearch::AddXform(CIccProfile* pProfile,
   icRenderingIntent nIntent,
   icXformInterp nInterp,
-  IIccProfileConnectionConditions* pPc,
+  IIccProfileConnectionConditions* /* pPc */,
   icXformLutType nLutType,
   bool bUseD2BxB2DxTags,
-  CIccCreateXformHintManager* pHintManager)
+  CIccCreateXformHintManager* /* pHintManager */)
 {
   if (pProfile->m_Header.deviceClass == icSigNamedColorClass)
     return icCmmStatInvalidLut;
@@ -305,7 +305,7 @@ icStatusCMM CIccCmmSearch::AttachPCC(IIccProfileConnectionConditions* pPCC, icFl
 
 #define checkCmmStatus(rv) if (rv != icCmmStatOk) return rv
 
-icStatusCMM CIccCmmSearch::Begin(bool bAllocNewApply, bool bUsePcsConversion)
+icStatusCMM CIccCmmSearch::Begin(bool /* bAllocNewApply */, bool /* bUsePcsConversion */)
 {
   icStatusCMM rv;
 

@@ -622,7 +622,7 @@ void CIccTagCreator::DoPushFactory(IIccTagFactory *pFactory)
   factoryStack.push_front(pFactory);
 }
 
-IIccTagFactory* CIccTagCreator::DoPopFactory(bool bAll /*=false*/)
+IIccTagFactory* CIccTagCreator::DoPopFactory(bool /* bAll =false */)
 {
 //  int nNum = (bAll ? 0 : 1);
 

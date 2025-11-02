@@ -124,10 +124,6 @@ IMPLEMENT_APP(MyApp)
 MyFrame *my_frame = (MyFrame *) NULL;
 wxList my_children;
 
-// For drawing lines in a canvas
-static long xpos = -1;
-static long ypos = -1;
-
 static int gs_nFrames = 0;
 
 // ---------------------------------------------------------------------------
@@ -387,12 +383,12 @@ void MyFrame::InitToolBar(wxToolBar* toolBar)
     //bitmaps[index++] = new wxBitmap( paste_xpm );
     bitmaps[index++] = new wxBitmap( help_xpm );
 
-    int width = 24;
-    int currentX = 5;
+    //int width = 24;
+    //int currentX = 5;
 
     index = 0;
     toolBar->AddTool(MDI_OPEN_PROFILE, _T("Open"), *(bitmaps[index]), _T("Open Profile"));
-    currentX += width + 5;
+    //currentX += width + 5;
 
     //index++;
     //toolBar->AddTool(index+1,_T("Save"), *bitmaps[index], _T("Save Profile"));
@@ -528,7 +524,8 @@ MyChild::MyChild(wxMDIParentFrame *parent, const wxString& title, CIccProfile *p
 	m_panel->SetSizer(sizerTop);
 
 	CIccInfo Fmt;
-	char buf[64];
+    const size_t bufSize = 64;
+	char buf[bufSize];
 	int n;
     wxString str;
 
@@ -536,7 +533,7 @@ MyChild::MyChild(wxMDIParentFrame *parent, const wxString& title, CIccProfile *p
         // Make things the same as CLI "iccDumpProfile" for easy comparison
         str.Empty();
         for (n = 0; n < 16; n++) {
-            sprintf(buf, "%02x", pHdr->profileID.ID8[n]);
+            snprintf(buf, bufSize, "%02x", pHdr->profileID.ID8[n]);
             if (n && !(n % 4))
                 str += " ";
             str += buf;
@@ -548,8 +545,8 @@ MyChild::MyChild(wxMDIParentFrame *parent, const wxString& title, CIccProfile *p
 	    m_textCreationDate->SetLabel(wxString::Format(wxT("%d/%d/%d (M/D/Y) %02u:%02u:%02u"),
     	    pHdr->date.month, pHdr->date.day, pHdr->date.year,
 		    pHdr->date.hours, pHdr->date.minutes, pHdr->date.seconds));
-	    m_textCreator->SetLabel(icGetSig(buf, pHdr->creator));
-        m_textDeviceManufacturer->SetLabel(icGetSig(buf, pHdr->manufacturer));
+	    m_textCreator->SetLabel(icGetSig(buf, bufSize, pHdr->creator));
+        m_textDeviceManufacturer->SetLabel(icGetSig(buf, bufSize, pHdr->manufacturer));
         m_textColorSpace->SetLabel(Fmt.GetColorSpaceSigName(pHdr->colorSpace));
 	    m_textFlags->SetLabel(Fmt.GetProfileFlagsName(pHdr->flags, pHdr->mcs!=0));
 	    m_textPCS->SetLabel(Fmt.GetColorSpaceSigName(pHdr->pcs));
@@ -557,7 +554,7 @@ MyChild::MyChild(wxMDIParentFrame *parent, const wxString& title, CIccProfile *p
 	    m_textRenderingIntent->SetLabel(Fmt.GetRenderingIntentName((icRenderingIntent)(pHdr->renderingIntent)));
 	    m_textClass->SetLabel(Fmt.GetProfileClassSigName(pHdr->deviceClass));
         if (pHdr->deviceSubClass) 
-            m_textSubClass->SetLabel(icGetSig(buf, pHdr->deviceSubClass));
+            m_textSubClass->SetLabel(icGetSig(buf, bufSize, pHdr->deviceSubClass));
         else
             m_textSubClass->SetLabel(_T("Not Defined"));
 
@@ -598,14 +595,13 @@ MyChild::MyChild(wxMDIParentFrame *parent, const wxString& title, CIccProfile *p
             m_textMaterialColorSpace->SetLabel(_T("Not Defined"));
         }
 
-        int item, closest, pad;
         TagEntryList::iterator i, j;
 
         for (n = 0, i = pIcc->m_Tags->begin(); i != pIcc->m_Tags->end(); i++, n++) {
-            item = m_tagsCtrl->InsertItem(n, wxString::Format("%d", n));
+            long item = m_tagsCtrl->InsertItem(n, wxString::Format("%d", n));
 
             // Find closest tag after this tag, by scanning all offsets of other tags
-            closest = pHdr->size;
+            int closest = pHdr->size;
             for (j = pIcc->m_Tags->begin(); j != pIcc->m_Tags->end(); j++) {
                 if ((i != j) && (j->TagInfo.offset >= i->TagInfo.offset + i->TagInfo.size) && ((int)j->TagInfo.offset <= closest)) {
                     closest = j->TagInfo.offset;
@@ -613,7 +609,7 @@ MyChild::MyChild(wxMDIParentFrame *parent, const wxString& title, CIccProfile *p
             }
             // Number of actual padding bytes between this tag and closest neighbour (or EOF)
             // Should be 0-3 if compliant. Negative number if tags overlap!
-            pad = closest - i->TagInfo.offset - i->TagInfo.size;
+            int pad = closest - i->TagInfo.offset - i->TagInfo.size;
 
             m_tagsCtrl->SetItem(item, 1, Fmt.GetTagSigName(i->TagInfo.sig));
             CIccTag* pTag = pIcc->FindTag(i->TagInfo.sig);
@@ -746,7 +742,8 @@ MyDialog::MyDialog(wxWindow *pParent, const wxString& title, wxString &profilePa
             int m, n;
             TagEntryList::iterator i, j;
             CIccInfo Fmt;
-            char str[256];
+            const size_t strSize = 256;
+            char str[strSize];
 
             icHeader* pHdr = &pIcc->m_Header;
             ver_str = " for version ";
@@ -757,7 +754,7 @@ MyDialog::MyDialog(wxWindow *pParent, const wxString& title, wxString &profilePa
             for (n = 0, i = pIcc->m_Tags->begin(); i != pIcc->m_Tags->end(); i++, n++)
                 for (m = 0, j = pIcc->m_Tags->begin(); j != pIcc->m_Tags->end(); j++, m++)
                     if ((i != j) && (i->TagInfo.sig == j->TagInfo.sig)) {
-                        sprintf(str, "%28s is duplicated at positions %d and %d!\n", Fmt.GetTagSigName(i->TagInfo.sig), n, m);
+                        snprintf(str, strSize, "%28s is duplicated at positions %d and %d!\n", Fmt.GetTagSigName(i->TagInfo.sig), n, m);
                         sReport += str;
                         nStat = icMaxStatus(nStat, icValidateWarning);
                     }
@@ -774,7 +771,7 @@ MyDialog::MyDialog(wxWindow *pParent, const wxString& title, wxString &profilePa
             //   occurs in real-world ICC profiles
             // - Tags with overlapping tag data are considered highly suspect (but officially valid)
             // - 1-3 padding bytes after each tag's data need to be all zero *** NOT DONE - TODO ***
-            int  closest, pad, rndup, smallest_offset = pHdr->size;
+            int  closest, rndup, smallest_offset = pHdr->size;
 
             // File size is required to be a multiple of 4 bytes according to clause 7.2.1 bullet (c):
             // "all tagged element data, including the last, shall be padded by no more than three
@@ -787,12 +784,12 @@ MyDialog::MyDialog(wxWindow *pParent, const wxString& title, wxString &profilePa
 
             for (i = pIcc->m_Tags->begin(); i != pIcc->m_Tags->end(); i++) {
                 rndup = 4 * ((i->TagInfo.size + 3) / 4); // Round up to a 4-byte aligned size as per ICC spec
-                pad = rndup - i->TagInfo.size;           // Optimal smallest number of bytes of padding for this tag (0-3)
+                //pad = rndup - i->TagInfo.size;           // Optimal smallest number of bytes of padding for this tag (0-3)
 
                 // Is the Tag offset + Tag Size beyond EOF?
                 if (i->TagInfo.offset + i->TagInfo.size > pHdr->size) {
                     sReport += icMsgValidateNonCompliant;
-                    sprintf(str, "Tag %s (offset %d, size %d) ends beyond EOF.\n",
+                    snprintf(str, strSize, "Tag %s (offset %d, size %d) ends beyond EOF.\n",
                         Fmt.GetTagSigName(i->TagInfo.sig), i->TagInfo.offset, i->TagInfo.size);
                     sReport += str;
                     nStat = icMaxStatus(nStat, icValidateNonCompliant);
@@ -814,7 +811,7 @@ MyDialog::MyDialog(wxWindow *pParent, const wxString& title, wxString &profilePa
                 // Check if closest tag after this tag is less than offset+size - in which case it overlaps! Ignore last tag.
                 if ((closest < (int)i->TagInfo.offset + (int)i->TagInfo.size) && (closest < (int)pHdr->size)) {
                     sReport += icMsgValidateWarning;
-                    sprintf(str, "Tag %s (offset %d, size %d) overlaps with following tag data starting at offset %d.\n",
+                    snprintf(str, strSize, "Tag %s (offset %d, size %d) overlaps with following tag data starting at offset %d.\n",
                         Fmt.GetTagSigName(i->TagInfo.sig), i->TagInfo.offset, i->TagInfo.size, closest);
                     sReport += str;
                     nStat = icMaxStatus(nStat, icValidateWarning);
@@ -823,7 +820,7 @@ MyDialog::MyDialog(wxWindow *pParent, const wxString& title, wxString &profilePa
                 // Check for gaps between tag data (accounting for 4-byte alignment)
                 if (closest > (int)i->TagInfo.offset + rndup) {
                     sReport += icMsgValidateWarning;
-                    sprintf(str, "Tag %s (size %d) is followed by %d unnecessary additional bytes (from offset %d).\n",
+                    snprintf(str, strSize, "Tag %s (size %d) is followed by %d unnecessary additional bytes (from offset %d).\n",
                         Fmt.GetTagSigName(i->TagInfo.sig), i->TagInfo.size, closest - (i->TagInfo.offset + rndup), (i->TagInfo.offset + rndup));
                     sReport += str;
                     nStat = icMaxStatus(nStat, icValidateWarning);
@@ -834,7 +831,7 @@ MyDialog::MyDialog(wxWindow *pParent, const wxString& title, wxString &profilePa
             // 1st tag offset should be = Header (128) + Tag Count (4) + Tag Table (n*12)
             if ((n > 0) && (smallest_offset > 128 + 4 + (n * 12))) {
                 sReport += icMsgValidateNonCompliant;
-                sprintf(str, "First tag data is at offset %d rather than immediately after tag table (offset %d).\n",
+                snprintf(str, strSize, "First tag data is at offset %d rather than immediately after tag table (offset %d).\n",
                     smallest_offset, 128 + 4 + (n * 12));
                 sReport += str;
                 nStat = icMaxStatus(nStat, icValidateNonCompliant);
@@ -919,7 +916,7 @@ CIccMinMaxEval::CIccMinMaxEval()
   memset(&maxLab2[0], 0, sizeof(maxLab2));
 }
 
-void CIccMinMaxEval::Compare(icFloatNumber *pixel, icFloatNumber *deviceLab, icFloatNumber *lab1, icFloatNumber *lab2)
+void CIccMinMaxEval::Compare(icFloatNumber * /*pixel*/, icFloatNumber *deviceLab, icFloatNumber *lab1, icFloatNumber *lab2)
 {
   icFloatNumber DE1 = icDeltaE(deviceLab, lab1);
   icFloatNumber DE2 = icDeltaE(lab1, lab2);
@@ -1035,7 +1032,7 @@ MyRoundTripDialog::MyRoundTripDialog(wxWindow *pParent, const wxString& title, w
   wxDialog(pParent, wxID_ANY, title,wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
   wxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-  wxSize winSize = winSize = wxSize(500, 400);
+  wxSize winSize = wxSize(500, 400);
   wxTextCtrl *textReport = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, winSize,
     wxTE_MULTILINE |wxTE_READONLY | wxTE_RICH);
 

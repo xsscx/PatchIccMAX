@@ -213,8 +213,9 @@ bool CIccBasicMpeFactory::GetElementSigName(std::string &elemName, icElemTypeSig
       break;
 
     default:
-      char buf[30], str[100];
-      sprintf(str, "Unknown Element Type (%s)", icGetSig(buf, elemTypeSig));
+      const size_t strSize = 100;
+      char buf[30], str[strSize];
+      snprintf(str, strSize, "Unknown Element Type (%s)", icGetSig(buf, 30, elemTypeSig));
       elemName = str;
       return false;
   }
@@ -275,7 +276,7 @@ void CIccMpeCreator::DoPushFactory(IIccMpeFactory *pFactory)
   factoryStack.push_front(pFactory);
 }
 
-IIccMpeFactory* CIccMpeCreator::DoPopFactory(bool bAll /*=false*/)
+IIccMpeFactory* CIccMpeCreator::DoPopFactory(bool /* bAll =false*/)
 {
   if (factoryStack.size()>0) {
     CIccMpeFactoryList::iterator i=factoryStack.begin();

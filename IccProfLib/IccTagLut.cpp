@@ -317,24 +317,25 @@ bool CIccTagCurve::Write(CIccIO *pIO)
 */
 void CIccTagCurve::Describe(std::string &sDescription, int nVerboseness)
 {
-  icChar buf[128], *ptr;
+  const size_t bufSize = 128;
+  icChar buf[bufSize], *ptr;
 
   if (!m_nSize) {
-    sprintf(buf, "BEGIN_CURVE In_Out\n");
+    snprintf(buf, bufSize, "BEGIN_CURVE In_Out\n");
     sDescription += buf;
     sDescription += "Y = X\n";
   }
   else if (m_nSize==1) {
     icFloatNumber dGamma = (icFloatNumber)(m_Curve[0] * 256.0);
-    sprintf(buf, "BEGIN_CURVE In_Out\n");
+    snprintf(buf, bufSize, "BEGIN_CURVE In_Out\n");
     sDescription += buf;
-    sprintf(buf, "Y = X ^ %.4lf\n", dGamma);
+    snprintf(buf, bufSize, "Y = X ^ %.4lf\n", dGamma);
     sDescription += buf;
   }
   else {
     int i;
 
-    sprintf(buf, "BEGIN_LUT In_Out 1 1\n");
+    snprintf(buf, bufSize, "BEGIN_LUT In_Out 1 1\n");
     sDescription += buf;
 
     if (nVerboseness > 75) {
@@ -343,13 +344,13 @@ void CIccTagCurve::Describe(std::string &sDescription, int nVerboseness)
       for (i=0; i<(int)m_nSize; i++) {
         ptr = buf;
 
-        icColorValue(buf, (icFloatNumber)i/(m_nSize-1), icSigMCH1Data, 1);
+        icColorValue(buf, bufSize, (icFloatNumber)i/(m_nSize-1), icSigMCH1Data, 1);
         ptr += strlen(buf);
 
         strcpy(ptr, " ");
         ptr ++;
 
-        icColorValue(ptr, m_Curve[i], icSigMCH1Data, 1);
+        icColorValue(ptr, bufSize, m_Curve[i], icSigMCH1Data, 1);
 
         ptr += strlen(ptr);
 
@@ -378,24 +379,25 @@ void CIccTagCurve::Describe(std::string &sDescription, int nVerboseness)
 void CIccTagCurve::DumpLut(std::string &sDescription, const icChar *szName,
   icColorSpaceSignature csSig, int nIndex, int nVerboseness)
 {
-  icChar buf[128], *ptr;
+  const size_t bufSize = 128;
+  icChar buf[bufSize], *ptr;
 
   if (!m_nSize) {
-    sprintf(buf, "BEGIN_CURVE %s\n", szName);
+    snprintf(buf, bufSize, "BEGIN_CURVE %s\n", szName);
     sDescription += buf;
     sDescription += "Y = X\n";
   }
   else if (m_nSize==1) {
     icFloatNumber dGamma = (icFloatNumber)(m_Curve[0] * 256.0);
-    sprintf(buf, "BEGIN_CURVE %s\n", szName);
+    snprintf(buf, bufSize, "BEGIN_CURVE %s\n", szName);
     sDescription += buf;
-    sprintf(buf, "Y = X ^ %.4lf\n", dGamma);
+    snprintf(buf, bufSize, "Y = X ^ %.4lf\n", dGamma);
     sDescription += buf;
   }
   else {
     int i;
 
-    sprintf(buf, "BEGIN_LUT %s 1 1\n", szName);
+    snprintf(buf, bufSize, "BEGIN_LUT %s 1 1\n", szName);
 
     if (nVerboseness > 75) {
       sDescription += buf;
@@ -406,13 +408,14 @@ void CIccTagCurve::DumpLut(std::string &sDescription, const icChar *szName,
       for (i=0; i<(int)m_nSize; i++) {
         ptr = buf;
 
-        icColorValue(buf, (icFloatNumber)i/(m_nSize-1), csSig, nIndex);
+        icColorValue(buf, bufSize, (icFloatNumber)i/(m_nSize-1), csSig, nIndex);
         ptr += strlen(buf);
 
         strcpy(ptr, " ");
         ptr ++;
 
-        icColorValue(ptr, m_Curve[i], csSig, nIndex);
+// TODO - this length is wrong because we're mid buffer, needs work
+        icColorValue(ptr, bufSize, m_Curve[i], csSig, nIndex);
 
         ptr += strlen(ptr);
 
@@ -830,36 +833,37 @@ bool CIccTagParametricCurve::Write(CIccIO *pIO)
 *  sDescription - string to concatenate tag dump to
 *****************************************************************************
 */
-void CIccTagParametricCurve::Describe(std::string &sDescription, int nVerboseness)
+void CIccTagParametricCurve::Describe(std::string &sDescription, int /* nVerboseness */)
 {
-  icChar buf[128];
+  const size_t bufSize = 128;
+  icChar buf[bufSize];
 
-  sprintf(buf, "FunctionType: %04Xh\n", m_nFunctionType);
+  snprintf(buf, bufSize, "FunctionType: %04Xh\n", m_nFunctionType);
   sDescription += buf;
 
   switch(m_nFunctionType) {
 case 0x0000:
-  sprintf(buf, "Y = X ^ %.4lf\n", m_dParam[0]);
+  snprintf(buf, bufSize, "Y = X ^ %.4lf\n", m_dParam[0]);
   sDescription += buf;
   return;
 
 case 0x0001:
-  sprintf(buf, "Y = 0 when (X < %.4lf / %.4lf)\n",
+  snprintf(buf, bufSize, "Y = 0 when (X < %.4lf / %.4lf)\n",
     -m_dParam[2], m_dParam[1]);
   sDescription += buf;
 
-  sprintf(buf, "Y = (%.4lf * X + %.4lf) ^ %.4lf   when (X >= %.4lf / %.4lf)\n",
+  snprintf(buf, bufSize, "Y = (%.4lf * X + %.4lf) ^ %.4lf   when (X >= %.4lf / %.4lf)\n",
     m_dParam[1], m_dParam[2], m_dParam[0],
     m_dParam[2], m_dParam[1]);
   sDescription += buf;
   return;
 
 case 0x0002:
-  sprintf(buf, "Y = %.4lf   when (X < %.4lf / %.4lf)\n", m_dParam[3],
+  snprintf(buf, bufSize, "Y = %.4lf   when (X < %.4lf / %.4lf)\n", m_dParam[3],
     -m_dParam[2], m_dParam[1]);
   sDescription += buf;
 
-  sprintf(buf, "Y = (%.4lf * X + %.4lf) ^ %.4lf + %.4lf   when (X >= %.4lf / %.4lf)\n",
+  snprintf(buf, bufSize, "Y = (%.4lf * X + %.4lf) ^ %.4lf + %.4lf   when (X >= %.4lf / %.4lf)\n",
     m_dParam[1], m_dParam[2], m_dParam[0],
     m_dParam[3],
     -m_dParam[2], m_dParam[1]);
@@ -867,22 +871,22 @@ case 0x0002:
   return;
 
 case 0x0003:
-  sprintf(buf, "Y = %lf * X   when (X < %.4lf)\n",
+  snprintf(buf, bufSize, "Y = %lf * X   when (X < %.4lf)\n",
     m_dParam[3], m_dParam[4]);
   sDescription += buf;
 
-  sprintf(buf, "Y = (%.4lf * X + %.4lf) ^ %.4lf   when (X >= %.4lf)\n",
+  snprintf(buf, bufSize, "Y = (%.4lf * X + %.4lf) ^ %.4lf   when (X >= %.4lf)\n",
     m_dParam[1], m_dParam[2], m_dParam[0],
     m_dParam[4]);
   sDescription += buf;
   return;
 
 case 0x0004:
-  sprintf(buf, "Y = %lf * X + %.4lf  when (X < %.4lf)\n",
+  snprintf(buf, bufSize, "Y = %lf * X + %.4lf  when (X < %.4lf)\n",
     m_dParam[3], m_dParam[6], m_dParam[4]);
   sDescription += buf;
 
-  sprintf(buf, "Y = (%.4lf * X + %.4lf) ^ %.4lf + %.4lf  when (X >= %.4lf)\n",
+  snprintf(buf, bufSize, "Y = (%.4lf * X + %.4lf) ^ %.4lf + %.4lf  when (X >= %.4lf)\n",
     m_dParam[1], m_dParam[2], m_dParam[0],
     m_dParam[5], m_dParam[4]);
   sDescription += buf;
@@ -890,11 +894,11 @@ case 0x0004:
 
 default:
   int i;
-  sprintf(buf, "Unknown Function with %d parameters:\n", m_nNumParam);
+  snprintf(buf, bufSize, "Unknown Function with %d parameters:\n", m_nNumParam);
   sDescription += buf;
 
   for (i=0; i<m_nNumParam; i++) {
-    sprintf(buf, "Param[%d] = %.4lf\n", i, m_dParam[i]);
+    snprintf(buf, bufSize, "Param[%d] = %.4lf\n", i, m_dParam[i]);
     sDescription += buf;
   }
   }
@@ -915,11 +919,12 @@ default:
 *****************************************************************************
 */
 void CIccTagParametricCurve::DumpLut(std::string &sDescription, const icChar *szName,
-  icColorSpaceSignature csSig, int nIndex, int nVerboseness)
+  icColorSpaceSignature /* csSig */, int /* nIndex */, int nVerboseness)
 {
-  icChar buf[128];
+  const size_t bufSize = 128;
+  icChar buf[bufSize];
 
-  sprintf(buf, "BEGIN_CURVE %s\n", szName);
+  snprintf(buf, bufSize, "BEGIN_CURVE %s\n", szName);
   sDescription += buf;
   Describe(sDescription, nVerboseness);
 }
@@ -1264,11 +1269,12 @@ void CIccTagSegmentedCurve::Describe(std::string &sDescription, int nVerboseness
 *****************************************************************************
 */
 void CIccTagSegmentedCurve::DumpLut(std::string &sDescription, const icChar *szName, 
-                     icColorSpaceSignature csSig, int nIndex, int nVerboseness)
+                     icColorSpaceSignature /* csSig */, int /* nIndex */, int nVerboseness)
 {
-  icChar buf[128];
+  const size_t bufSize = 128;
+  icChar buf[bufSize];
 
-  sprintf(buf, "BEGIN_SEGMENTED_CURVE %s\n", szName);
+  snprintf(buf, bufSize, "BEGIN_SEGMENTED_CURVE %s\n", szName);
   sDescription += buf;
   Describe(sDescription, nVerboseness);
 }
@@ -1364,7 +1370,7 @@ icFloatNumber CIccTagSegmentedCurve::Apply(icFloatNumber v) const
 * 
 *****************************************************************************
 */
-icValidateStatus CIccTagSegmentedCurve::Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile/*=NULL*/) const
+icValidateStatus CIccTagSegmentedCurve::Validate(std::string sigPath, std::string &sReport, const CIccProfile* /* pProfile =NULL*/) const
 {
   if (!m_pCurve) {
     sReport += "Invalid Segmented Curve Data!\n";
@@ -1466,32 +1472,33 @@ CIccMatrix &CIccMatrix::operator=(const CIccMatrix &MatrixClass)
 *  szName = name of the curve to be printed
 *****************************************************************************
 */
-void CIccMatrix::DumpLut(std::string &sDescription, const icChar *szName, int nVerboseness)
+void CIccMatrix::DumpLut(std::string &sDescription, const icChar *szName, int /* nVerboseness */)
 {
-  icChar buf[128];
+  const size_t bufSize = 128;
+  icChar buf[bufSize];
 
-  sprintf(buf, "BEGIN_MATRIX %s\n", szName);
+  snprintf(buf, bufSize, "BEGIN_MATRIX %s\n", szName);
   sDescription += buf;
 
   if (!m_bUseConstants) {
-    sprintf(buf, "%8.4lf %8.4lf %8.4lf\n",
+    snprintf(buf, bufSize, "%8.4lf %8.4lf %8.4lf\n",
       m_e[0], m_e[1], m_e[2]);
     sDescription += buf;
-    sprintf(buf, "%8.4lf %8.4lf %8.4lf\n",
+    snprintf(buf, bufSize, "%8.4lf %8.4lf %8.4lf\n",
       m_e[3], m_e[4], m_e[5]);
     sDescription += buf;
-    sprintf(buf, "%8.4lf %8.4lf %8.4lf\n",
+    snprintf(buf, bufSize, "%8.4lf %8.4lf %8.4lf\n",
       m_e[6], m_e[7], m_e[8]);
     sDescription += buf;
   }
   else {
-    sprintf(buf, "%8.4lf %8.4lf %8.4lf  +  %8.4lf\n",
+    snprintf(buf, bufSize, "%8.4lf %8.4lf %8.4lf  +  %8.4lf\n",
       m_e[0], m_e[1], m_e[2], m_e[9]);
     sDescription += buf;
-    sprintf(buf, "%8.4lf %8.4lf %8.4lf  +  %8.4lf\n",
+    snprintf(buf, bufSize, "%8.4lf %8.4lf %8.4lf  +  %8.4lf\n",
       m_e[3], m_e[4], m_e[5], m_e[10]);
     sDescription += buf;
-    sprintf(buf, "%8.4lf %8.4lf %8.4lf  +  %8.4lf\n",
+    snprintf(buf, bufSize, "%8.4lf %8.4lf %8.4lf  +  %8.4lf\n",
       m_e[6], m_e[7], m_e[8], m_e[11]);
     sDescription += buf;
   }
@@ -2016,10 +2023,11 @@ bool CIccCLUT::Write(CIccIO *pIO)
  *  sDescription = string to concatenate data dump to,
  *  nIndex = the channel number,
  *  nPos = the current position in the CLUT
- * 
+ *  bufSize = the size of the buffer m_pOutText, for error checking
+ *
  *****************************************************************************
  */
-void CIccCLUT::Iterate(std::string &sDescription, icUInt8Number nIndex, icUInt32Number nPos, bool bUseLegacy)
+void CIccCLUT::Iterate(std::string &sDescription, icUInt8Number nIndex, icUInt32Number nPos, size_t bufSize, bool bUseLegacy )
 {
   if (nIndex < m_nInput) {
     int i;
@@ -2031,21 +2039,31 @@ void CIccCLUT::Iterate(std::string &sDescription, icUInt8Number nIndex, icUInt32
   }
   else {
     icChar *ptr = m_pOutText;
+    icChar *ptrEnd = ptr + bufSize;
     icFloatNumber *pData = &m_pData[nPos];
     int i;
 
     for (i=0; i<m_nInput; i++) {
-      icColorValue(m_pVal, (icFloatNumber)m_GridAdr[i] / (m_GridPoints[i]-1) , m_csInput, i, bUseLegacy);
+// TODO - hard coding size temporarily, really should be passed in
+      icColorValue(m_pVal, 40, (icFloatNumber)m_GridAdr[i] / (m_GridPoints[i]-1) , m_csInput, i, bUseLegacy);
 
-      ptr += sprintf(ptr, " %s", m_pVal);
+// TODO - this buffer handling is sloppy, but should be ok for now
+// really needs to be refactored, needs some sort of error return if buffer overflows
+// right now it will terminate the output when the buffer overflows
+      ptr += snprintf(ptr, size_t(ptrEnd-ptr), " %s", m_pVal);
+      if (ptr >= ptrEnd)
+            return;
     }
     strcpy(ptr, "  ");
     ptr += 2;
 
     for (i=0; i<m_nOutput; i++) {
-      icColorValue(m_pVal, pData[i], m_csOutput, i, bUseLegacy);
+// TODO - hard coding size temporarily, really should be passed in
+      icColorValue(m_pVal, 40, pData[i], m_csOutput, i, bUseLegacy);
 
-      ptr += sprintf(ptr, " %s", m_pVal);
+      ptr += snprintf(ptr, size_t(ptrEnd-ptr), " %s", m_pVal);
+      if (ptr >= ptrEnd)
+            return;
     }
     strcpy(ptr, "\n");
     sDescription += (const icChar*)m_pOutText;
@@ -2158,25 +2176,27 @@ void CIccCLUT::DumpLut(std::string  &sDescription, const icChar *szName,
                        icColorSpaceSignature csInput, icColorSpaceSignature csOutput,
                        int nVerboseness, bool bUseLegacy)
 {
-  icChar szOutText[200000], szColor[40];
+  const size_t outSize = 200000;
+  const size_t nameSize = 40;
+  icChar szOutText[outSize], szColor[nameSize];
   int i;
 
-  sprintf(szOutText, "BEGIN_LUT %s %d %d\n", szName, m_nInput, m_nOutput);
+  snprintf(szOutText, outSize, "BEGIN_LUT %s %d %d\n", szName, m_nInput, m_nOutput);
   sDescription += szOutText;
 
   if (nVerboseness > 75) {
 
     for (i=0; i<m_nInput; i++) {
-      icColorIndexName(szColor, csInput, i, m_nInput, "In");
-      sprintf(szOutText, " %s=%d", szColor, m_GridPoints[i]);
+      icColorIndexName(szColor, nameSize, csInput, i, m_nInput, "In");
+      snprintf(szOutText, outSize, " %s=%d", szColor, m_GridPoints[i]);
       sDescription += szOutText;
     }
 
     sDescription += "  ";
 
     for (i=0; i<m_nOutput; i++) {
-      icColorIndexName(szColor, csOutput, i, m_nOutput, "Out");
-      sprintf(szOutText, " %s", szColor);
+      icColorIndexName(szColor, nameSize, csOutput, i, m_nOutput, "Out");
+      snprintf(szOutText, outSize, " %s", szColor);
       sDescription += szOutText;
     }
 
@@ -2185,11 +2205,11 @@ void CIccCLUT::DumpLut(std::string  &sDescription, const icChar *szName,
     if (nVerboseness > 75) {
       size_t len = 0;
       for (i=0; i<m_nInput; i++) {
-        icColorValue(szColor, 1.0, csInput, i, bUseLegacy);
+        icColorValue(szColor, nameSize, 1.0, csInput, i, bUseLegacy);
         len += strlen(szColor);
       }
       for (i=0; i<m_nOutput; i++) {
-        icColorValue(szColor, 1.0, csOutput, i, bUseLegacy);
+        icColorValue(szColor, nameSize, 1.0, csOutput, i, bUseLegacy);
         len += strlen(szColor);
       }
       len += m_nInput + m_nOutput + 6;
@@ -2203,7 +2223,7 @@ void CIccCLUT::DumpLut(std::string  &sDescription, const icChar *szName,
       m_pVal = szColor;
       memset(m_GridAdr, 0, 16);
 
-      Iterate(sDescription, 0, 0, bUseLegacy);
+      Iterate(sDescription, 0, 0, outSize, bUseLegacy);
     }
   }
 }
@@ -3095,7 +3115,7 @@ void CIccCLUT::InterpND(icFloatNumber *destPixel, const icFloatNumber *srcPixel,
 *  icValidateStatusOK if valid, or other error status.
 ******************************************************************************
 */
-icValidateStatus CIccCLUT::Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile/*=NULL*/) const
+icValidateStatus CIccCLUT::Validate(std::string sigPath, std::string &sReport, const CIccProfile* /* pProfile =NULL */) const
 {
   icValidateStatus rv = icValidateOK;
   icSignature sig = icGetFirstSigPathSig(sigPath);
@@ -3111,12 +3131,13 @@ icValidateStatus CIccCLUT::Validate(std::string sigPath, std::string &sReport, c
   }
 
   if (sig==icSigLutAtoBType || sig==icSigLutBtoAType) {
-    char temp[256];
+    const size_t tempSize = 256;
+    char temp[tempSize];
     for (int i=0; i<m_nInput; i++) {
       if (m_GridPoints[i]<2) {
         sReport += icMsgValidateCriticalError;
         sReport += sSigPathName;
-        sprintf(temp, " - CLUT: At least 2 grid points should be present in dimension %u.\n",i );
+        snprintf(temp, tempSize, " - CLUT: At least 2 grid points should be present in dimension %u.\n",i );
         sReport += temp;
         rv = icMaxStatus(rv, icValidateCriticalError);
       }
@@ -3444,14 +3465,16 @@ void CIccMBB::SetColorSpaces(icColorSpaceSignature csInput, icColorSpaceSignatur
 void CIccMBB::Describe(std::string &sDescription, int nVerboseness)
 {
   int i;
-  icChar buf[128], color[40];
+  const size_t bufSize = 128;
+  const size_t nameSize = 40;
+  icChar buf[bufSize], color[nameSize];
 
 
   if (IsInputMatrix()) {
     if (m_CurvesB && !m_bUseMCurvesAsBCurves) {
       for (i=0; i<m_nInput; i++) {
-        icColorIndexName(color, m_csInput, i, m_nInput, "");
-        sprintf(buf, "B_Curve_%s", color);
+        icColorIndexName(color, nameSize, m_csInput, i, m_nInput, "");
+        snprintf(buf, bufSize, "B_Curve_%s", color);
         m_CurvesB[i]->DumpLut(sDescription, buf, m_csInput, i, nVerboseness);
       }
     }
@@ -3461,11 +3484,11 @@ void CIccMBB::Describe(std::string &sDescription, int nVerboseness)
 
     if (m_CurvesM) {
       for (i=0; i<m_nInput; i++) {
-        icColorIndexName(color, m_csInput, i, m_nInput, "");
+        icColorIndexName(color, nameSize, m_csInput, i, m_nInput, "");
         if (!m_bUseMCurvesAsBCurves)
-          sprintf(buf, "M_Curve_%s", color);
-        else 
-          sprintf(buf, "B_Curve_%s", color);
+          snprintf(buf, bufSize, "M_Curve_%s", color);
+        else
+          snprintf(buf, bufSize, "B_Curve_%s", color);
         m_CurvesM[i]->DumpLut(sDescription, buf, m_csInput, i, nVerboseness);
       }
     }
@@ -3475,8 +3498,8 @@ void CIccMBB::Describe(std::string &sDescription, int nVerboseness)
 
     if (m_CurvesA) {
       for (i=0; i<m_nOutput; i++) {
-        icColorIndexName(color, m_csOutput, i, m_nOutput, "");
-        sprintf(buf, "A_Curve_%s", color);
+        icColorIndexName(color, nameSize, m_csOutput, i, m_nOutput, "");
+        snprintf(buf, bufSize, "A_Curve_%s", color);
         m_CurvesA[i]->DumpLut(sDescription, buf, m_csOutput, i, nVerboseness);
       }
     }
@@ -3484,8 +3507,8 @@ void CIccMBB::Describe(std::string &sDescription, int nVerboseness)
   else {
     if (m_CurvesA) {
       for (i=0; i<m_nInput; i++) {
-        icColorIndexName(color, m_csInput, i, m_nInput, "");
-        sprintf(buf, "A_Curve_%s", color);
+        icColorIndexName(color, nameSize, m_csInput, i, m_nInput, "");
+        snprintf(buf, bufSize, "A_Curve_%s", color);
         m_CurvesA[i]->DumpLut(sDescription, buf, m_csInput, i, nVerboseness);
       }
     }
@@ -3495,8 +3518,8 @@ void CIccMBB::Describe(std::string &sDescription, int nVerboseness)
 
     if (m_CurvesM && this->GetType()!=icSigLut8Type) {
       for (i=0; i<m_nOutput; i++) {
-        icColorIndexName(color, m_csOutput, i, m_nOutput, "");
-        sprintf(buf, "M_Curve_%s", color);
+        icColorIndexName(color, nameSize, m_csOutput, i, m_nOutput, "");
+        snprintf(buf, bufSize, "M_Curve_%s", color);
         m_CurvesM[i]->DumpLut(sDescription, buf, m_csOutput, i, nVerboseness);
       }
     }
@@ -3506,8 +3529,8 @@ void CIccMBB::Describe(std::string &sDescription, int nVerboseness)
 
     if (m_CurvesB) {
       for (i=0; i<m_nOutput; i++) {
-        icColorIndexName(color, m_csOutput, i, m_nOutput, "");
-        sprintf(buf, "B_Curve_%s", color);
+        icColorIndexName(color, nameSize, m_csOutput, i, m_nOutput, "");
+        snprintf(buf, bufSize, "B_Curve_%s", color);
         m_CurvesB[i]->DumpLut(sDescription, buf, m_csOutput, i, nVerboseness);
       }
     }
@@ -4667,7 +4690,8 @@ bool CIccTagLut8::Write(CIccIO *pIO)
   icTagTypeSignature sig = GetType();
   icUInt8Number i, nGrid;
   icS15Fixed16Number XYZMatrix[9];
-  icUInt16Number nInputEntries, nOutputEntries;
+  //icUInt16Number nInputEntries;
+  //icUInt16Number nOutputEntries;
   LPIccCurve *pCurves;
   CIccTagCurve *pCurve;
   icFloat32Number v;
@@ -4693,8 +4717,8 @@ bool CIccTagLut8::Write(CIccIO *pIO)
 
   nGrid = m_CLUT->GridPoints();
 
-  nInputEntries = (icUInt16Number)(((CIccTagCurve*)pCurves[0])->GetSize());
-  nOutputEntries = (icUInt16Number)(((CIccTagCurve*)m_CurvesA[0])->GetSize());
+  //nInputEntries = (icUInt16Number)(((CIccTagCurve*)pCurves[0])->GetSize());
+  //nOutputEntries = (icUInt16Number)(((CIccTagCurve*)m_CurvesA[0])->GetSize());
 
   if (!pIO->Write32(&sig) ||
       !pIO->Write32(&m_nReserved) ||
@@ -4812,9 +4836,8 @@ icValidateStatus CIccTagLut8::Validate(std::string sigPath, std::string &sReport
         nOutput = 1;
       }
 
-      icUInt8Number i;
       if (m_CurvesB) {
-        for (i=0; i<nInput; i++) {
+        for (icUInt32Number i=0; i<nInput; i++) {
           if (m_CurvesB[i]) {
             rv = icMaxStatus(rv, m_CurvesB[i]->Validate(sigPath+icGetSigPath(GetType()), sReport, pProfile));
             if (m_CurvesB[i]->GetType()==icSigCurveType) {
@@ -4841,7 +4864,7 @@ icValidateStatus CIccTagLut8::Validate(std::string sigPath, std::string &sReport
       }
       else {
         int sum=0;
-        for (int i=0; i<9; i++) {
+        for (icUInt32Number i=0; i<9; i++) {
           sum += m_XYZMatrix[i];
         }
         if (m_XYZMatrix[0]!=1.0 || m_XYZMatrix[4]!=1.0 || m_XYZMatrix[8]!=1.0 || sum!=3.0) {
@@ -4854,7 +4877,7 @@ icValidateStatus CIccTagLut8::Validate(std::string sigPath, std::string &sReport
 
       if (m_CurvesA) {
 
-        for (i=0; i<nOutput; i++) {
+        for (icUInt32Number i=0; i<nOutput; i++) {
           if (m_CurvesA[i]) {
             rv = icMaxStatus(rv, m_CurvesA[i]->Validate(sigPath+icGetSigPath(GetType()), sReport, pProfile));
             if (m_CurvesA[i]->GetType()==icSigCurveType) {
@@ -5237,9 +5260,8 @@ icValidateStatus CIccTagLut16::Validate(std::string sigPath, std::string &sRepor
         nOutput = 1;
       }
 
-      icUInt8Number i;
       if (m_CurvesB) {
-        for (i=0; i<nInput; i++) {
+        for (icUInt32Number i=0; i<nInput; i++) {
           if (m_CurvesB[i]) {
             rv = icMaxStatus(rv, m_CurvesB[i]->Validate(sigPath+icGetSigPath(GetType()), sReport, pProfile));
             if (m_CurvesB[i]->GetType()==icSigCurveType) {
@@ -5266,7 +5288,7 @@ icValidateStatus CIccTagLut16::Validate(std::string sigPath, std::string &sRepor
       }
       else {
         int sum=0;
-        for (int i=0; i<9; i++) {
+        for (icUInt32Number i=0; i<9; i++) {
           sum += m_XYZMatrix[i];
         }
         if (m_XYZMatrix[0]!=1.0 || m_XYZMatrix[4]!=1.0 || m_XYZMatrix[8]!=1.0 || sum!=3.0) {
@@ -5279,7 +5301,7 @@ icValidateStatus CIccTagLut16::Validate(std::string sigPath, std::string &sRepor
 
       if (m_CurvesA) {
 
-        for (i=0; i<nOutput; i++) {
+        for (icUInt32Number i=0; i<nOutput; i++) {
           if (m_CurvesA[i]) {
             rv = icMaxStatus(rv, m_CurvesA[i]->Validate(sigPath+icGetSigPath(GetType()), sReport, pProfile));
             if (m_CurvesA[i]->GetType()==icSigCurveType) {
@@ -5582,12 +5604,11 @@ bool CIccTagGamutBoundaryDesc::Write(CIccIO *pIO)
 		return false;
 	}
 	
-	icUInt32Number startPos = pIO->GetLength();
+	//icUInt32Number startPos = pIO->GetLength();   // unused, and no side effets
 	
 	if (!pIO->Write32(&sig) ||
 		!pIO->Write32(&m_nReserved))
 		return false;
-	
 	
 	if (!pIO->Write16(&m_nPCSChannels) ||
 		!pIO->Write16(&m_nDeviceChannels))
@@ -5633,44 +5654,45 @@ bool CIccTagGamutBoundaryDesc::Write(CIccIO *pIO)
  */	
 void CIccTagGamutBoundaryDesc::Describe(std::string &sDescription, int nVerboseness)
 {
-	icChar buf[256];
+    const size_t bufSize = 256;
+	icChar buf[bufSize];
 	
-    sprintf(buf,"Number Of Vertices = %d, Number of Triangles = %d\n",m_NumberOfVertices,m_NumberOfTriangles);
+    snprintf(buf, bufSize, "Number Of Vertices = %d, Number of Triangles = %d\n",m_NumberOfVertices,m_NumberOfTriangles);
 	sDescription += buf;
 	
-	sprintf(buf,"Number Of Inputs = %d, Number of Outputs = %d\n",m_nPCSChannels,m_nDeviceChannels);
-	sDescription += buf;	
+	snprintf(buf,bufSize, "Number Of Inputs = %d, Number of Outputs = %d\n",m_nPCSChannels,m_nDeviceChannels);
+	sDescription += buf;
 	
     if (nVerboseness > 75) {
 	    int c = 0;
 	    int d = 0;
 	    for (int i=0; i<m_NumberOfVertices; i++)
 	    {
-            sprintf(buf,"V = %d:\t",i);
+            snprintf(buf,bufSize, "V = %d:\t",i);
 		    sDescription += buf;
 		    for (int j=0; j<m_nPCSChannels; j++)
 		    {
-			    sprintf(buf,"%.4lf\t",m_PCSValues[c++]);
+			    snprintf(buf,bufSize, "%.4lf\t",m_PCSValues[c++]);
 			    sDescription += buf;
 		    }
 		    if (m_nDeviceChannels > 0)
 		    {
-			    sprintf(buf,":\t");
+			    snprintf(buf,bufSize, ":\t");
 			    sDescription += buf;
 			
 			    for (int j=0; j<m_nDeviceChannels; j++)
 			    {
-				    sprintf(buf,"%.4lf\t",m_DeviceValues[d++]);
+				    snprintf(buf,bufSize, "%.4lf\t",m_DeviceValues[d++]);
 				    sDescription += buf;
 			    }
 		    }
-		    sprintf(buf,"\n");
-		    sDescription += buf;	
+		    snprintf(buf,bufSize, "\n");
+		    sDescription += buf;
 	    }
 	
 	    for (int i=0; i<m_NumberOfTriangles; i++)
 	    {
-            sprintf(buf,"V1 = %u\tV2 = %u\tV3 = %u\n",m_Triangles[i].m_VertexNumbers[0],m_Triangles[i].m_VertexNumbers[1],m_Triangles[i].m_VertexNumbers[2]);
+            snprintf(buf,bufSize, "V1 = %u\tV2 = %u\tV3 = %u\n",m_Triangles[i].m_VertexNumbers[0],m_Triangles[i].m_VertexNumbers[1],m_Triangles[i].m_VertexNumbers[2]);
 		        sDescription += buf;
 	    }
     }

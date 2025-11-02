@@ -189,7 +189,7 @@ int main(int argc, icChar* argv[])
   CTiffImg SrcImg;
   if (!SrcImg.Open(argv[1])) {
     printf("\nFile [%s] cannot be opened.\n", argv[1]);
-    return false;
+    return -1;
   }
 
   printf("-------------------->Tiff Image Dump<---------------------------\n");

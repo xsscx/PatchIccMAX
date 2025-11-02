@@ -140,13 +140,13 @@ public:
     icXformLutType nLutType = icXformLutColor,
     bool bUseD2BxB2DxTags = true,
     CIccCreateXformHintManager* pHintManager = NULL);  //Note: profile will be owned by the CMM
-  virtual icStatusCMM AddXform(CIccProfile* pProfile,
-    CIccTag* pXformTag,
-    icRenderingIntent nIntent = icUnknownIntent,
-    icXformInterp nInterp = icInterpLinear,
-    IIccProfileConnectionConditions* pPcc = NULL,
-    bool bUseD2BxB2DxTags = false,
-    CIccCreateXformHintManager* pHintManager = NULL) { return icCmmStatUnsupported; }
+  virtual icStatusCMM AddXform(CIccProfile* /*pProfile*/,
+    CIccTag* /*pXformTag*/,
+    icRenderingIntent /*nIntent = icUnknownIntent*/,
+    icXformInterp /*nInterp = icInterpLinear*/,
+    IIccProfileConnectionConditions* /*pPcc = NULL*/,
+    bool /*bUseD2BxB2DxTags = false*/,
+    CIccCreateXformHintManager* /*pHintManager = NULL*/) { return icCmmStatUnsupported; }
 
   void SetDstInitProfile(CIccProfile* pProfile,
     icRenderingIntent nIntent,
@@ -161,7 +161,7 @@ public:
   virtual icStatusCMM Begin(bool bAllocNewApply = true, bool bUsePcsConversion = false);
 
   //Get an additional Apply CMM object to apply pixels with.  The Apply object should be deleted by the caller.
-  virtual CIccApplyCmm* GetNewApplyCmm(icStatusCMM& status) { return nullptr; }
+  virtual CIccApplyCmm* GetNewApplyCmm(icStatusCMM& /*status*/) { return nullptr; }
 
   //Call to Detach and remove all pending IO objects attached to the profiles used by the CMM. Should be called only after Begin()
   virtual icStatusCMM RemoveAllIO();
@@ -169,7 +169,7 @@ public:
   ///Returns the number of profiles/transforms added 
   virtual icUInt32Number GetNumXforms() const { return m_nAttached; }
 
-  virtual void IterateXforms(IXformIterator* pIterater) const {}
+  virtual void IterateXforms(IXformIterator* /*pIterater*/) const {}
 
 protected:
 

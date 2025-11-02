@@ -381,7 +381,7 @@ public:
   virtual icValidateStatus Validate(std::string sigPath, std::string &sReport, const CIccTagMultiProcessElement* pMPE = NULL, const CIccProfile* pProfile = NULL) const;
 
 protected:
-  bool SetStorageType(icUInt16Number nStorateType) { return false; }
+  bool SetStorageType(icUInt16Number /*nStorateType*/) { return false; }
   icUInt16Number GetStorageType() { return 0; }
 
   icUInt32Number m_nReserved;

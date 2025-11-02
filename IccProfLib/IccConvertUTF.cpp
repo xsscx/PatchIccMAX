@@ -200,13 +200,13 @@ icUtfConversionResult icConvertUTF16toUTF32 (const UTF16** sourceStart, const UT
 }
 
 icUtfConversionResult icConvertUTF16toUTF32 (const UTF16* source, const UTF16* sourceEnd, 
-                                             icUtf32Vector target, UTF32* targetEnd, icUtfConversionFlags flags)
+                                             icUtf32Vector target, UTF32* /* targetEnd */, icUtfConversionFlags flags)
 {
   icUtfConversionResult result = conversionOK;
   target.clear();
   UTF32 ch, ch2;
   while (source < sourceEnd) {
-    const UTF16* oldSource = source; /*  In case we have to back up because of target overflow. */
+    //const UTF16* oldSource = source; /*  In case we have to back up because of target overflow. */
     ch = *source++;
     /* If we have a surrogate pair, convert to UTF32 first. */
     if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
@@ -352,9 +352,9 @@ icUtfConversionResult icConvertUTF16toUTF8 (const UTF16** sourceStart, const UTF
       target -= bytesToWrite; result = targetExhausted; break;
     }
     switch (bytesToWrite) { /* note: everything falls through. */
-      case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+      case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6; [[fallthrough]];
+      case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6; [[fallthrough]];
+      case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6; [[fallthrough]];
       case 1: *--target =  (UTF8)(ch | firstByteMark[bytesToWrite]);
     }
     target += bytesToWrite;
@@ -374,7 +374,7 @@ icUtfConversionResult icConvertUTF16toUTF8 (const UTF16* source, const UTF16* so
     unsigned short bytesToWrite = 0;
     const UTF32 byteMask = 0xBF;
     const UTF32 byteMark = 0x80; 
-    const UTF16* oldSource = source; /* In case we have to back up because of target overflow. */
+    //const UTF16* oldSource = source; /* In case we have to back up because of target overflow. */
     ch = *source++;
     /* If we have a surrogate pair, convert to UTF32 first. */
     if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
@@ -415,15 +415,15 @@ icUtfConversionResult icConvertUTF16toUTF8 (const UTF16* source, const UTF16* so
 
     UTF8 buf[5], *ptr = &buf[bytesToWrite];
     switch (bytesToWrite) { /* note: everything falls through. */
-      case 4: *--ptr = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 3: *--ptr = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 2: *--ptr = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+      case 4: *--ptr = (UTF8)((ch | byteMark) & byteMask); ch >>= 6; [[fallthrough]];
+      case 3: *--ptr = (UTF8)((ch | byteMark) & byteMask); ch >>= 6; [[fallthrough]];
+      case 2: *--ptr = (UTF8)((ch | byteMark) & byteMask); ch >>= 6; [[fallthrough]];
       case 1: *--ptr =  (UTF8)(ch | firstByteMark[bytesToWrite]);
     }
     switch(bytesToWrite) {
-      case 4: target.push_back(*ptr++);
-      case 3: target.push_back(*ptr++);
-      case 2: target.push_back(*ptr++);
+      case 4: target.push_back(*ptr++); [[fallthrough]];
+      case 3: target.push_back(*ptr++); [[fallthrough]];
+      case 2: target.push_back(*ptr++); [[fallthrough]];
       case 1: target.push_back(*ptr++);
     }
   }
@@ -451,7 +451,9 @@ static Boolean isLegalUTF8(const UTF8 *source, int length)
     default: return false;
       /* Everything else falls through when "true"... */
     case 4: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
+      [[fallthrough]];
     case 3: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
+      [[fallthrough]];
     case 2: if ((a = (*--srcptr)) > 0xBF) return false;
 
       switch (*source) {
@@ -462,7 +464,8 @@ static Boolean isLegalUTF8(const UTF8 *source, int length)
         case 0xF4: if (a > 0x8F) return false; break;
         default:   if (a < 0x80) return false;
       }
-
+      [[fallthrough]];
+    
     case 1: if (*source >= 0x80 && *source < 0xC2) return false;
   }
   if (*source > 0xF4) return false;
@@ -507,11 +510,11 @@ icUtfConversionResult icConvertUTF8toUTF16 (const UTF8** sourceStart, const UTF8
     * The cases all fall through. See "Note A" below.
     */
     switch (extraBytesToRead) {
-      case 5: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-      case 4: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-      case 3: ch += *source++; ch <<= 6;
-      case 2: ch += *source++; ch <<= 6;
-      case 1: ch += *source++; ch <<= 6;
+      case 5: ch += *source++; ch <<= 6; [[fallthrough]]; /* remember, illegal UTF-8 */
+      case 4: ch += *source++; ch <<= 6; [[fallthrough]]; /* remember, illegal UTF-8 */
+      case 3: ch += *source++; ch <<= 6; [[fallthrough]];
+      case 2: ch += *source++; ch <<= 6; [[fallthrough]];
+      case 1: ch += *source++; ch <<= 6; [[fallthrough]];
       case 0: ch += *source++;
     }
     ch -= offsetsFromUTF8[extraBytesToRead];
@@ -577,11 +580,11 @@ icUtfConversionResult icConvertUTF8toUTF16 (const UTF8* source, const UTF8* sour
     * The cases all fall through. See "Note A" below.
     */
     switch (extraBytesToRead) {
-      case 5: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-      case 4: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-      case 3: ch += *source++; ch <<= 6;
-      case 2: ch += *source++; ch <<= 6;
-      case 1: ch += *source++; ch <<= 6;
+      case 5: ch += *source++; ch <<= 6; [[fallthrough]]; /* remember, illegal UTF-8 */
+      case 4: ch += *source++; ch <<= 6; [[fallthrough]]; /* remember, illegal UTF-8 */
+      case 3: ch += *source++; ch <<= 6; [[fallthrough]];
+      case 2: ch += *source++; ch <<= 6; [[fallthrough]];
+      case 1: ch += *source++; ch <<= 6; [[fallthrough]];
       case 0: ch += *source++;
     }
     ch -= offsetsFromUTF8[extraBytesToRead];
@@ -658,9 +661,9 @@ icUtfConversionResult icConvertUTF32toUTF8 (const UTF32** sourceStart, const UTF
       target -= bytesToWrite; result = targetExhausted; break;
     }
     switch (bytesToWrite) { /* note: everything falls through. */
-      case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+      case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6; [[fallthrough]];
+      case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6; [[fallthrough]];
+      case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6; [[fallthrough]];
       case 1: *--target = (UTF8) (ch | firstByteMark[bytesToWrite]);
     }
     target += bytesToWrite;
@@ -704,15 +707,15 @@ icUtfConversionResult icConvertUTF32toUTF8 (const UTF32* source, const UTF32* so
 
     UTF8 buf[5], *ptr = &buf[bytesToWrite];
     switch (bytesToWrite) { /* note: everything falls through. */
-      case 4: *--ptr = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 3: *--ptr = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 2: *--ptr = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+      case 4: *--ptr = (UTF8)((ch | byteMark) & byteMask); ch >>= 6; [[fallthrough]];
+      case 3: *--ptr = (UTF8)((ch | byteMark) & byteMask); ch >>= 6; [[fallthrough]];
+      case 2: *--ptr = (UTF8)((ch | byteMark) & byteMask); ch >>= 6; [[fallthrough]];
       case 1: *--ptr =  (UTF8)(ch | firstByteMark[bytesToWrite]);
     }
     switch(bytesToWrite) {
-      case 4: target.push_back(*ptr++);
-      case 3: target.push_back(*ptr++);
-      case 2: target.push_back(*ptr++);
+      case 4: target.push_back(*ptr++); [[fallthrough]];
+      case 3: target.push_back(*ptr++); [[fallthrough]];
+      case 2: target.push_back(*ptr++); [[fallthrough]];
       case 1: target.push_back(*ptr++);
     }
   }
@@ -741,11 +744,11 @@ icUtfConversionResult icConvertUTF8toUTF32 (const UTF8** sourceStart, const UTF8
     * The cases all fall through. See "Note A" below.
     */
     switch (extraBytesToRead) {
-      case 5: ch += *source++; ch <<= 6;
-      case 4: ch += *source++; ch <<= 6;
-      case 3: ch += *source++; ch <<= 6;
-      case 2: ch += *source++; ch <<= 6;
-      case 1: ch += *source++; ch <<= 6;
+      case 5: ch += *source++; ch <<= 6; [[fallthrough]];
+      case 4: ch += *source++; ch <<= 6; [[fallthrough]];
+      case 3: ch += *source++; ch <<= 6; [[fallthrough]];
+      case 2: ch += *source++; ch <<= 6; [[fallthrough]];
+      case 1: ch += *source++; ch <<= 6; [[fallthrough]];
       case 0: ch += *source++;
     }
     ch -= offsetsFromUTF8[extraBytesToRead];
@@ -800,11 +803,11 @@ icUtfConversionResult icConvertUTF8toUTF32 (const UTF8* source, const UTF8* sour
     * The cases all fall through. See "Note A" below.
     */
     switch (extraBytesToRead) {
-      case 5: ch += *source++; ch <<= 6;
-      case 4: ch += *source++; ch <<= 6;
-      case 3: ch += *source++; ch <<= 6;
-      case 2: ch += *source++; ch <<= 6;
-      case 1: ch += *source++; ch <<= 6;
+      case 5: ch += *source++; ch <<= 6; [[fallthrough]];
+      case 4: ch += *source++; ch <<= 6; [[fallthrough]];
+      case 3: ch += *source++; ch <<= 6; [[fallthrough]];
+      case 2: ch += *source++; ch <<= 6; [[fallthrough]];
+      case 1: ch += *source++; ch <<= 6; [[fallthrough]];
       case 0: ch += *source++;
     }
     ch -= offsetsFromUTF8[extraBytesToRead];
