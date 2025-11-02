@@ -93,7 +93,53 @@ jobs:
           find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
             -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
           cd ..
+          echo "========= BEGIN INSIDE STUB ========="
+          cd Testing/
+          echo "=== Updating PATH ==="
+          for d in ../Build/Tools/*; do
+           [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
+          done 
+          sh CreateAllProfiles.sh
+          sh RunTests.sh
+          cd HDR
+          sh mkprofiles.sh
+          cd ..
+          cd hybrid
+          sh BuildAndTest.sh
+          cd ..
+          cd CalcTest
+          sh checkInvalidProfiles.sh
+          cd ..
+          cd mcs
+          sh updateprev.sh
+          sh updateprevWithBkgd.sh
+          cd ..
+          wget https://github.com/xsscx/PatchIccMAX/raw/refs/heads/re231/contrib/UnitTest/cve-2023-46602.icc
+          iccDumpProfile cve-2023-46602.icc
+          iccRoundTrip cve-2023-46602.icc
+          wget https://github.com/xsscx/PatchIccMAX/raw/refs/heads/re231/contrib/UnitTest/icPlatformSignature-ubsan-poc.icc
+          iccRoundTrip icPlatformSignature-ubsan-poc.icc
+          iccDumpProfile icPlatformSignature-ubsan-poc.icc
+          wget https://github.com/xsscx/PatchIccMAX/raw/refs/heads/re231/contrib/UnitTest/icSigMatrixElemType-Read-poc.icc
+          iccRoundTrip icSigMatrixElemType-Read-poc.icc
+          iccDumpProfile icSigMatrixElemType-Read-poc.icc
+          iccToXml icSigMatrixElemType-Read-poc.icc icSigMatrixElemType-Read-poc.xml
+          iccToXml icPlatformSignature-ubsan-poc.icc icPlatformSignature-ubsan-poc.xml
+          iccToXml cve-2023-46602.icc cve-2023-46602.xml
+          iccFromXml icSigMatrixElemType-Read-poc.xml icSigMatrixElemType-Read-rt.icc
+          iccFromXml icPlatformSignature-ubsan-poc.xml icPlatformSignature-ubsan-rt.icc
+          iccFromXml cve-2023-46602.xml cve-2023-46602-rt.icc
+          find . -iname "*.icc" | wc -l
+          iccRoundTrip PCC/Lab_float-D50_2deg.icc
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/iccDumpProfile_checks.zsh)"
+          cd ../Build
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/CalcTest/test_icc_apply_named_cmm.sh)"
           pwd
+          cd ..
+          pwd
+          cd ..
+          pwd
+          ls
           /usr/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/ubuntu24-runner-remote.zsh)"
           cat linux_build_report.html
       # ---------- macOS ----------
