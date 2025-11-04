@@ -1,20 +1,15 @@
 ###############################################################
 #
-## Copyright (©) 2025 International Color Consortium. 
-##                 All rights reserved. 
-##                 https://color.org
+## Copyright (©) 2024 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 23-OCT-2025 at 1500 EDT by David Hoyt (©)
 #
+## Intent: Little ICC Scanner | Work in Progress
 #
-## Intent: Icc Scanner Demo
+## TODO: Instrumentation for AFL=Bool Builds & Report
 #
-## Last Updated: 24-JULY-2025 0000Z by David Hoyt 
-#                Add Permission Block
-## TODO: Push binary releases, tags etc.. 
-#
-## Comment: Known good and working from PatchIccMax
-#
-#
-#
+
 #
 #
 ###############################################################
@@ -26,10 +21,8 @@ on:
 
 jobs:
   build-linux:
-    name: ICC Scanner Demo
+    name: Little ICC Scanner Demo
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     strategy:
       fail-fast: false
 
@@ -51,12 +44,25 @@ jobs:
           lcov gcovr tree moreutils liblcms2-utils liblcms2-dev liblcms2-2
     - name: Get research branch
       run: |
-        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
-        cd DemoIccMAX
-        git checkout research
+        git clone https://github.com/xsscx/PatchIccMAX.git
+        cd PatchIccMAX
+        git checkout re231
+    - name: Decscription
+      run: |
+          echo ""
+          echo "Little ICC Scanner v.02 [licc]"
+          echo "[Research Branch | v.2.3.1 | -lIccProfLib2 -lIccXML2 -llcms2]"
+          echo "Copyright (©) 2022-2025 David H Hoyt LLC. All rights reserved."
+          echo "Demonstration measurement and analysis toolchain for ICC profiles."
+          echo "Evaluate AToB/BToA transform integrity for RGB and CMYK workflows"
+          echo "Detect malformed, corrupted, or heuristics in ICC profiles"
+          echo "Log detailed tag structure and potential exploit vectors"
+          echo "Bug Class: Profile Bleed | https://srd.cx/cve-2022-26730"
+          echo ""
+
     - name: Configure & Build Little ICC Scanner Demo
       run: |
-        cd DemoIccMAX/contrib/Build/cmake/cov
+        cd PatchIccMAX/contrib/Build/cmake/cov
         export CC=clang
         export CXX=clang++
         export PATH="/usr/lib/llvm-17/bin:$PATH"
@@ -67,9 +73,9 @@ jobs:
         # cd iccRoundTrip
         # make -f Makefile.iccRoundTrip clean all AFL=0
         # tree -a 2>&1 | tee tree.log
-    - name: Run ICC Scanner Demo
+    - name: Run Little ICC Scanner Demo
       run: |
-          cd DemoIccMAX/contrib/Build/cmake/cov
+          cd PatchIccMAX/contrib/Build/cmake/cov
           # Add Tools/* to PATH
           for d in ./*; do
             [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
@@ -96,7 +102,7 @@ jobs:
           set +x
           echo "=== Compilation Complete ==="
           ls -lh licc || echo "ERROR: licc binary not created"
-          echo "=== ICC Scanner Demo Start | Analyze 3 Files | Raw Output ==="
+          echo "=== Little ICC Scanner Demo Start | Analyze 3 Files | Raw Output ==="
           echo "=== PoC's: cve-2023-46602, icPlatformSignature & icSigMatrixElemType ==="
           for f in \
             ../../../../UnitTest/cve-2023-46602.icc \
@@ -107,38 +113,40 @@ jobs:
           done
           exit 0
           echo "=== licc Testing DONE ==="
+
     - name: Upload binaries
       uses: actions/upload-artifact@v4
       with:
         name: iccmax-cov-binaries
-        path: DemoIccMAX/contrib/Build/cmake/cov/**/*
+        path: PatchIccMAX/contrib/Build/cmake/cov/**/*
 
     - name: Upload coverage HTML report
       uses: actions/upload-artifact@v4
       with:
         name: html-coverage-report
-        path: DemoIccMAX/contrib/Build/cmake/cov/cov_html/
+        path: PatchIccMAX/contrib/Build/cmake/cov/cov_html/
 
     - name: Upload build logs and tree
       uses: actions/upload-artifact@v4
       with:
         name: build-logs
         path: |
-          DemoIccMAX/contrib/Build/cmake/cov/build.log
-          DemoIccMAX/contrib/Build/cmake/cov/check.log
-          DemoIccMAX/contrib/Build/cmake/cov/tree.txt
+          PatchIccMAX/contrib/Build/cmake/cov/build.log
+          PatchIccMAX/contrib/Build/cmake/cov/check.log
+          PatchIccMAX/contrib/Build/cmake/cov/tree.txt
     - name: Upload diagnostics
       uses: actions/upload-artifact@v4
       with:
         name: diagnostics
         path: |
-          DemoIccMAX/contrib/Build/cmake/cov/sysinfo.txt
-          DemoIccMAX/contrib/Build/cmake/cov/env_dump.txt
+          PatchIccMAX/contrib/Build/cmake/cov/sysinfo.txt
+          PatchIccMAX/contrib/Build/cmake/cov/env_dump.txt
     - name: Summary Report
       if: always()
       run: |
         echo "### 🧪 Ubuntu CI Build Summary" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Instrumented Build: DemoIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Instrumented Build: PatchIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
         echo "- 📦 Binaries: iccmax-cov-binaries" >> $GITHUB_STEP_SUMMARY
         echo "- 📊 Coverage: html-coverage-report (LLVM format)" >> $GITHUB_STEP_SUMMARY
         echo "- 🧾 Logs: build.log, tree.txt, sysinfo.txt" >> $GITHUB_STEP_SUMMARY
+

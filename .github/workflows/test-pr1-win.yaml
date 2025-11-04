@@ -1,0 +1,125 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 04-NOV-2025 1200Z by David Hoyt
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: PR Windows
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - test
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number }}
+  cancel-in-progress: true
+
+env:
+  GH_REPO: ${{ github.repository }}
+  GH_NO_UPDATE_NOTIFIER: 1
+  GH_PROMPT_DISABLED: 1
+  RUN_URL: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}
+  PR: ${{ github.event.number }}
+
+jobs:
+  build:
+    name: Windows PR Runner
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: cmd
+    strategy:
+      matrix:
+        build_type: [Release]
+
+    steps:
+      - name: Checkout PR source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          fetch-depth: 0
+
+      - name: Verify Branch Context
+        run: |
+          echo Triggered by:  ${{ github.event_name }}
+          echo Base branch:   ${{ github.base_ref }}
+          echo Head branch:   ${{ github.head_ref }}
+          echo Commit SHA:    ${{ github.event.pull_request.head.sha }}
+          echo Build Type:    ${{ matrix.build_type }}
+          echo OS:            Windows
+          echo Compiler:      MSVC (Visual Studio 2022)
+
+      - name: Setup vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+          C:\vcpkg\bootstrap-vcpkg.bat
+          C:\vcpkg\vcpkg integrate install
+
+      - name: Install dependencies via vcpkg
+        run: |
+          if exist vcpkg.json (
+            C:\vcpkg\vcpkg install --clean-after-build
+          ) else (
+            echo No vcpkg.json found, skipping dependency install
+          )
+
+      - name: Configure with CMake
+        run: |
+          cd Build\Cmake
+          cmake -B build -S . -G "Visual Studio 17 2022" -A x64 ^
+            -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+
+      - name: Build
+        run: |
+          cd Build\Cmake
+          cmake --build build --config ${{ matrix.build_type }}
+          dir /s /b *.exe *.lib
+
+      - name: Run Unit Tests
+        run: |
+          if exist Build\Cmake\build\Debug\ctest.exe (
+            cd Build\Cmake\build
+            ctest -C ${{ matrix.build_type }} --output-on-failure
+          ) else (
+            echo No tests detected or ctest missing
+          )
+
+      - name: Upload Build Artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iccmax-windows-${{ matrix.build_type }}
+          path: Build\Cmake\build\**\*.exe
+
+      - name: Summary Report
+        if: always()
+        shell: pwsh
+        run: |
+          Add-Content $env:GITHUB_STEP_SUMMARY "### Windows Build Summary"
+          Add-Content $env:GITHUB_STEP_SUMMARY "- OS: Windows"
+          Add-Content $env:GITHUB_STEP_SUMMARY "- Compiler: MSVC (Visual Studio 2022)"
+          Add-Content $env:GITHUB_STEP_SUMMARY "- Build Type: ${{ matrix.build_type }}"
+          Add-Content $env:GITHUB_STEP_SUMMARY "- Status: ${{ job.status }}"
+          Add-Content $env:GITHUB_STEP_SUMMARY "- Run URL: $env:RUN_URL"
