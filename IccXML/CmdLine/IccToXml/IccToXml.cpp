@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  if (dstIO.Write8((char*)xml.c_str(), (icInt32Number)xml.size())==(icInt32Number)xml.size()) {
+  if (dstIO.Write8((char*)xml.c_str(), xml.size())== xml.size()) {
     printf("XML successfully created\n");
   }
   else {

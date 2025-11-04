@@ -100,7 +100,7 @@ public:
 
   virtual void Describe(std::string &sDescription, int nVerboseness)=0;
 
-  virtual bool Read(icUInt32Number size, CIccIO *pIO)=0;
+  virtual bool Read(size_t size, CIccIO *pIO)=0;
   virtual bool Write(CIccIO *pIO)=0;
 
   virtual bool Begin(CIccCurveSegment *pPrevSeg) = 0;
@@ -141,7 +141,7 @@ public:
 
   void SetFunction(icUInt16Number functionType, icUInt8Number num_parameters, icFloatNumber *parameters);
 
-  virtual bool Read(icUInt32Number size, CIccIO *pIO);
+  virtual bool Read(size_t size, CIccIO *pIO);
   virtual bool Write(CIccIO *pIO);
 
   virtual bool Begin(CIccCurveSegment *pPrevSeg);
@@ -183,7 +183,7 @@ public:
 
   virtual void Describe(std::string &sDescription, int nVerboseness);
 
-  virtual bool Read(icUInt32Number size, CIccIO *pIO);
+  virtual bool Read(size_t size, CIccIO *pIO);
   virtual bool Write(CIccIO *pIO);
 
   virtual bool Begin(CIccCurveSegment *pPrevSeg);

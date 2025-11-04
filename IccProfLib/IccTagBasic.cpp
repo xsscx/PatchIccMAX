@@ -285,7 +285,7 @@ bool CIccTagUnknown::Read(icUInt32Number size, CIccIO *pIO)
 
     m_pData = new icUInt8Number[m_nSize];
 
-    if (pIO->Read8(m_pData, m_nSize) != (icInt32Number)m_nSize) {
+    if (pIO->Read8(m_pData, m_nSize) != m_nSize) {
       return false;
     }
   } else {
@@ -318,7 +318,7 @@ bool CIccTagUnknown::Write(CIccIO *pIO)
    return false;
 
   if (m_nSize && m_pData) {
-   if (pIO->Write8(m_pData, m_nSize) != (icInt32Number)m_nSize)
+   if (pIO->Write8(m_pData, m_nSize) != m_nSize)
      return false;
   }
 
@@ -452,12 +452,12 @@ bool CIccTagText::Read(icUInt32Number size, CIccIO *pIO)
   if (!pIO->Read32(&m_nReserved))
     return false;
 
-  icUInt32Number nSize = size - sizeof(icTagTypeSignature) - sizeof(icUInt32Number);
+  size_t nSize = size - sizeof(icTagTypeSignature) - sizeof(icUInt32Number);
 
-  icChar *pBuf = GetBuffer(nSize);
+  icChar *pBuf = GetBuffer((icUInt32Number)nSize);
 
   if (nSize) {
-    if (pIO->Read8(pBuf, nSize) != (icInt32Number)nSize) {
+    if (pIO->Read8(pBuf, nSize) != nSize) {
       return false;
     }
   }
@@ -496,9 +496,9 @@ bool CIccTagText::Write(CIccIO *pIO)
   if (!m_szText)
     return false;
 
-  icUInt32Number nSize = (icUInt32Number)strlen(m_szText)+1;
+  size_t nSize = strlen(m_szText)+1;
 
-  if (pIO->Write8(m_szText, nSize) != (icInt32Number)nSize)
+  if (pIO->Write8(m_szText, nSize) != nSize)
     return false;
 
   return true;
@@ -800,12 +800,12 @@ bool CIccTagUtf8Text::Read(icUInt32Number size, CIccIO *pIO)
   if (size < sizeof(icTagTypeSignature) + sizeof(icUInt32Number))
     return false;
 
-  icUInt32Number nSize = size - sizeof(icTagTypeSignature) - sizeof(icUInt32Number);
+  size_t nSize = size - sizeof(icTagTypeSignature) - sizeof(icUInt32Number);
 
-  icUChar *pBuf = GetBuffer(nSize);
+  icUChar *pBuf = GetBuffer((icUInt32Number)nSize);
 
   if (nSize) {
-    if (pIO->Read8(pBuf, nSize) != (icInt32Number)nSize) {
+    if (pIO->Read8(pBuf, nSize) != nSize) {
       return false;
     }
   }
@@ -844,9 +844,9 @@ bool CIccTagUtf8Text::Write(CIccIO *pIO)
   if (!m_szText)
     return false;
 
-  icUInt32Number nSize = (icUInt32Number)strlen((icChar*)m_szText)+1;
+  size_t nSize = strlen((icChar*)m_szText)+1;
 
-  if (pIO->Write8(m_szText, nSize) != (icInt32Number)nSize)
+  if (pIO->Write8(m_szText, nSize) != nSize)
     return false;
 
   return true;
@@ -1154,7 +1154,7 @@ bool CIccTagZipUtf8Text::Read(icUInt32Number size, CIccIO *pIO)
   icUChar *pBuf = AllocBuffer(nSize);
 
   if (m_nBufSize && pBuf) {
-    if (pIO->Read8(pBuf, m_nBufSize) != (icInt32Number)m_nBufSize) {
+    if (pIO->Read8(pBuf, m_nBufSize) != m_nBufSize) {
       return false;
     }
   }
@@ -1189,7 +1189,7 @@ bool CIccTagZipUtf8Text::Write(CIccIO *pIO)
     return false;
 
   if (m_pZipBuf) {
-    if (pIO->Write8(m_pZipBuf, m_nBufSize) != (icInt32Number)m_nBufSize)
+    if (pIO->Write8(m_pZipBuf, m_nBufSize) != m_nBufSize)
       return false;
   }
   return true;
@@ -1623,12 +1623,12 @@ bool CIccTagUtf16Text::Read(icUInt32Number size, CIccIO *pIO)
   if (!pIO->Read32(&m_nReserved))
     return false;
 
-  icUInt32Number nSize = (size - sizeof(icTagTypeSignature) - sizeof(icUInt32Number))/sizeof(icUChar16);
+  size_t nSize = (size - sizeof(icTagTypeSignature) - sizeof(icUInt32Number))/sizeof(icUChar16);
 
-  icUChar16 *pBuf = GetBuffer(nSize);
+  icUChar16 *pBuf = GetBuffer((icUInt32Number)nSize);
 
   if (nSize) {
-    if (pIO->Read16(pBuf, nSize) != (icInt32Number)nSize) {
+    if (pIO->Read16(pBuf, nSize) != nSize) {
       return false;
     }
   }
@@ -1667,10 +1667,10 @@ bool CIccTagUtf16Text::Write(CIccIO *pIO)
   if (!m_szText)
     return false;
 
-  icUInt32Number nSize = GetLength();
+  size_t nSize = GetLength();
 
   if (nSize) {
-    if (pIO->Write16(m_szText, nSize) != (icInt32Number)nSize)
+    if (pIO->Write16(m_szText, nSize) != nSize)
       return false;
   }
 
@@ -2062,10 +2062,9 @@ CIccTagTextDescription::~CIccTagTextDescription()
 bool CIccTagTextDescription::Read(icUInt32Number size, CIccIO *pIO)
 {
   icTagTypeSignature sig;
-  icUInt32Number nEnd;
 
   m_szText[0] = '\0';
-  nEnd = pIO->Tell() + size;
+  size_t nEnd = pIO->Tell() + size;
 
   if (size<3*sizeof(icUInt32Number) || !pIO)
     return false;
@@ -2083,7 +2082,7 @@ bool CIccTagTextDescription::Read(icUInt32Number size, CIccIO *pIO)
   icChar *pBuf = GetBuffer(nSize);
 
   if (nSize) {
-    if (pIO->Read8(pBuf, nSize) != (icInt32Number)nSize) {
+    if (pIO->Read8(pBuf, nSize) != nSize) {
       return false;
     }
   }
@@ -2106,7 +2105,7 @@ bool CIccTagTextDescription::Read(icUInt32Number size, CIccIO *pIO)
   icUInt16Number *pBuf16 = GetUnicodeBuffer(nSize);
 
   if (nSize) {
-    if (pIO->Read16(pBuf16, nSize) != (icInt32Number)nSize) {
+    if (pIO->Read16(pBuf16, nSize) != nSize) {
       return false;
     }
   }
@@ -2115,18 +2114,18 @@ bool CIccTagTextDescription::Read(icUInt32Number size, CIccIO *pIO)
 
   ReleaseUnicode();
 
-  if (pIO->Tell()+3 > (icInt32Number)nEnd)
+  if (pIO->Tell()+3 > nEnd)
     return false;
 
   if (!pIO->Read16(&m_nScriptCode) ||
       !pIO->Read8(&m_nScriptSize))
      return false;
   
-  if (pIO->Tell() + m_nScriptSize> (icInt32Number)nEnd ||
+  if (pIO->Tell() + m_nScriptSize> nEnd ||
       m_nScriptSize > sizeof(m_szScriptText))
     return false;
 
-  int nScriptLen = pIO->Read8(m_szScriptText, 67);
+  size_t nScriptLen = pIO->Read8(m_szScriptText, 67);
 
   if (!nScriptLen)
     return false;
@@ -2166,7 +2165,7 @@ bool CIccTagTextDescription::Write(CIccIO *pIO)
     return false;
 
   if (m_nASCIISize) {
-    if (pIO->Write8(m_szText, m_nASCIISize) != (icInt32Number)m_nASCIISize)
+    if (pIO->Write8(m_szText, m_nASCIISize) != m_nASCIISize)
       return false;
   }
 
@@ -2175,7 +2174,7 @@ bool CIccTagTextDescription::Write(CIccIO *pIO)
 
   if (m_nUnicodeSize > 1) {
     if (!pIO->Write32(&m_nUnicodeSize) ||
-        pIO->Write16(m_uzUnicodeText, m_nUnicodeSize) != (icInt32Number)m_nUnicodeSize)
+        pIO->Write16(m_uzUnicodeText, m_nUnicodeSize) != m_nUnicodeSize)
       return false;
   }
   else {
@@ -2944,7 +2943,7 @@ bool CIccTagNamedColor2::Read(icUInt32Number size, CIccIO *pIO)
         pIO->ReadUInt16Float(&pNamedColor->pcsCoords, 3)!=3)
       return false;
     if (nCoords) {
-      if (pIO->ReadUInt16Float(&pNamedColor->deviceCoords, nCoords)!=(icInt32Number)nCoords)
+      if (pIO->ReadUInt16Float(&pNamedColor->deviceCoords, nCoords)!= nCoords)
         return false;
     }
     pNamedColor = (SIccNamedColorEntry*)((icChar*)pNamedColor + m_nColorEntrySize);
@@ -3003,7 +3002,7 @@ bool CIccTagNamedColor2::Write(CIccIO *pIO)
         pIO->WriteUInt16Float(&pNamedColor->pcsCoords, 3)!=3)
       return false;
     if (m_nDeviceCoords) {
-      if (pIO->WriteUInt16Float(&pNamedColor->deviceCoords, m_nDeviceCoords) != (icInt32Number)m_nDeviceCoords)
+      if (pIO->WriteUInt16Float(&pNamedColor->deviceCoords, m_nDeviceCoords) != m_nDeviceCoords)
         return false;
     }
     pNamedColor = (SIccNamedColorEntry*)((icChar*)pNamedColor + m_nColorEntrySize);
@@ -3624,7 +3623,7 @@ bool CIccTagXYZ::Read(icUInt32Number size, CIccIO *pIO)
   if (!SetSize(nNum))
     return false;
 
-  if (pIO->Read32(m_XYZ, nNum32) != (icInt32Number)nNum32 )
+  if (pIO->Read32(m_XYZ, nNum32) != nNum32 )
     return false;
 
   return true;
@@ -3660,7 +3659,7 @@ bool CIccTagXYZ::Write(CIccIO *pIO)
   icUInt32Number nNum32 = m_nSize * sizeof(icXYZNumber)/sizeof(icUInt32Number);
 
   if (
-    pIO->Write32(m_XYZ, nNum32) != (icInt32Number)nNum32)
+    pIO->Write32(m_XYZ, nNum32) != nNum32)
     return false;
 
   return true;
@@ -3899,7 +3898,7 @@ bool CIccTagChromaticity::Read(icUInt32Number size, CIccIO *pIO)
   if (!SetSize((icUInt16Number)nNum))
     return false;
 
-  if (pIO->Read32(&m_xy[0], nNum32) != (icInt32Number)nNum32 )
+  if (pIO->Read32(&m_xy[0], nNum32) != nNum32 )
     return false;
 
   return true;
@@ -3940,7 +3939,7 @@ bool CIccTagChromaticity::Write(CIccIO *pIO)
 
   icUInt32Number nNum32 = m_nChannels*sizeof(icChromaticityNumber)/sizeof(icU16Fixed16Number);
 
-  if (pIO->Write32(&m_xy[0], nNum32) != (icInt32Number)nNum32)
+  if (pIO->Write32(&m_xy[0], nNum32) != nNum32)
     return false;
 
   return true;
@@ -5283,7 +5282,7 @@ bool CIccTagFixedNum<T, Tsig>::Read(icUInt32Number size, CIccIO *pIO)
   if (!SetSize(nSize))
     return false;
 
-  if (pIO->Read32(m_Num, nSize) != (icInt32Number)nSize )
+  if (pIO->Read32(m_Num, nSize) != nSize )
     return false;
 
   return true;
@@ -5317,7 +5316,7 @@ bool CIccTagFixedNum<T, Tsig>::Write(CIccIO *pIO)
   if (!pIO->Write32(&m_nReserved))
     return false;
 
-  if (pIO->Write32(m_Num, m_nSize) != (icInt32Number)m_nSize)
+  if (pIO->Write32(m_Num, m_nSize) != m_nSize)
     return false;
  
   return true;
@@ -5748,19 +5747,19 @@ bool CIccTagNum<T, Tsig>::Read(icUInt32Number size, CIccIO *pIO)
     return false;
 
   if (sizeof(T)==sizeof(icUInt8Number)) {
-    if (pIO->Read8(m_Num, nSize) != (icInt32Number)nSize )
+    if (pIO->Read8(m_Num, nSize) != nSize )
       return false;
   }
   else if (sizeof(T)==sizeof(icUInt16Number)) {
-    if (pIO->Read16(m_Num, nSize) != (icInt32Number)nSize )
+    if (pIO->Read16(m_Num, nSize) != nSize )
       return false;
   }
   else if (sizeof(T)==sizeof(icUInt32Number)) {
-    if (pIO->Read32(m_Num, nSize) != (icInt32Number)nSize )
+    if (pIO->Read32(m_Num, nSize) != nSize )
       return false;
   }
   else if (sizeof(T)==sizeof(icUInt64Number)) {
-    if (pIO->Read64(m_Num, nSize) != (icInt32Number)nSize )
+    if (pIO->Read64(m_Num, nSize) != nSize )
       return false;
   }
   else
@@ -5798,19 +5797,19 @@ bool CIccTagNum<T, Tsig>::Write(CIccIO *pIO)
     return false;
 
   if (sizeof(T)==sizeof(icUInt8Number)) {
-    if (pIO->Write8(m_Num, m_nSize) != (icInt32Number)m_nSize)
+    if (pIO->Write8(m_Num, m_nSize) != m_nSize)
       return false;
   }
   else if (sizeof(T)==sizeof(icUInt16Number)) {
-    if (pIO->Write16(m_Num, m_nSize) != (icInt32Number)m_nSize)
+    if (pIO->Write16(m_Num, m_nSize) != m_nSize)
       return false;
   }
   else if (sizeof(T)==sizeof(icUInt32Number)) {
-    if (pIO->Write32(m_Num, m_nSize) != (icInt32Number)m_nSize)
+    if (pIO->Write32(m_Num, m_nSize) != m_nSize)
       return false;
   }
   else if (sizeof(T)==sizeof(icUInt64Number)) {
-    if (pIO->Write64(m_Num, m_nSize) != (icInt32Number)m_nSize)
+    if (pIO->Write64(m_Num, m_nSize) != m_nSize)
       return false;
   }
   else
@@ -6363,7 +6362,7 @@ bool CIccTagFloatNum<T, Tsig>::Read(icUInt32Number size, CIccIO *pIO)
     if (!SetSize(nSize))
       return false;
 
-    if (pIO->ReadFloat16Float(&m_Num[0], nSize) != (icInt32Number)nSize)
+    if (pIO->ReadFloat16Float(&m_Num[0], nSize) != nSize)
       return false;
   }
   else if (Tsig==icSigFloat32ArrayType) {
@@ -6372,7 +6371,7 @@ bool CIccTagFloatNum<T, Tsig>::Read(icUInt32Number size, CIccIO *pIO)
     if (!SetSize(nSize))
       return false;
 
-    if (pIO->Read32(m_Num, nSize) != (icInt32Number)nSize )
+    if (pIO->Read32(m_Num, nSize) != nSize )
       return false;
   }
   else if (Tsig==icSigFloat64ArrayType) {
@@ -6381,7 +6380,7 @@ bool CIccTagFloatNum<T, Tsig>::Read(icUInt32Number size, CIccIO *pIO)
     if (!SetSize(nSize))
       return false;
 
-    if (pIO->Read64(m_Num, nSize) != (icInt32Number)nSize )
+    if (pIO->Read64(m_Num, nSize) != nSize )
       return false;
   }
   else
@@ -6419,15 +6418,15 @@ bool CIccTagFloatNum<T, Tsig>::Write(CIccIO *pIO)
     return false;
 
   if (Tsig==icSigFloat16ArrayType) {
-    if (pIO->WriteFloat16Float(m_Num, m_nSize) != (icInt32Number)m_nSize)
+    if (pIO->WriteFloat16Float(m_Num, m_nSize) != m_nSize)
       return false;
   }
   else if (Tsig == icSigFloat32ArrayType) {
-    if (pIO->Write32(m_Num, m_nSize) != (icInt32Number)m_nSize)
+    if (pIO->Write32(m_Num, m_nSize) != m_nSize)
       return false;
   }
   else if (Tsig == icSigFloat64ArrayType) {
-    if (pIO->Write64(m_Num, m_nSize) != (icInt32Number)m_nSize)
+    if (pIO->Write64(m_Num, m_nSize) != m_nSize)
       return false;
   }
   else
@@ -6825,7 +6824,7 @@ bool CIccTagMeasurement::Read(icUInt32Number size, CIccIO *pIO)
 
   icUInt32Number nSize=sizeof(m_Data)/sizeof(icUInt32Number);
 
-  if (pIO->Read32(&m_Data,nSize) != (icInt32Number)nSize)
+  if (pIO->Read32(&m_Data,nSize) != nSize)
     return false;
 
   return true;
@@ -6860,7 +6859,7 @@ bool CIccTagMeasurement::Write(CIccIO *pIO)
 
   icUInt32Number nSize=sizeof(m_Data)/sizeof(icUInt32Number);
 
-  if (pIO->Write32(&m_Data,nSize) != (icInt32Number)nSize)
+  if (pIO->Write32(&m_Data,nSize) != nSize)
     return false;
 
   return true;
@@ -7492,7 +7491,7 @@ bool CIccTagMultiLocalizedUnicode::Read(icUInt32Number size, CIccIO *pIO)
     return false;
   }
 
-  icUInt32Number nTagPos = pIO->Tell();
+  size_t nTagPos = pIO->Tell();
   
   if (!pIO->Read32(&sig) ||
       !pIO->Read32(&m_nReserved) ||
@@ -7538,7 +7537,7 @@ bool CIccTagMultiLocalizedUnicode::Read(icUInt32Number size, CIccIO *pIO)
 
     pIO->Seek(nTagPos+nOffset, icSeekSet);
 
-    if (pIO->Read16(Unicode.GetBuf(), nNumChar) != (icInt32Number)nNumChar)
+    if (pIO->Read16(Unicode.GetBuf(), nNumChar) != nNumChar)
       return false;
 
     m_Strings->push_back(Unicode);
@@ -7601,7 +7600,7 @@ bool CIccTagMultiLocalizedUnicode::Write(CIccIO *pIO)
     nLength = i->GetLength();
 
     if (nLength) {
-      if (pIO->Write16(i->GetBuf(), nLength) != (icInt32Number)nLength)
+      if (pIO->Write16(i->GetBuf(), nLength) != nLength)
         return false;
     }
   }
@@ -7943,7 +7942,7 @@ bool CIccTagData::Read(icUInt32Number size, CIccIO *pIO)
   if (!SetSize(nNum))
     return false;
 
-  if (pIO->Read8(m_pData, nNum) != (icInt32Number)nNum)
+  if (pIO->Read8(m_pData, nNum) != nNum)
     return false;
 
   if (IsTypeCompressed()) {
@@ -7985,14 +7984,15 @@ bool CIccTagData::Write(CIccIO *pIO)
 
   if (IsTypeCompressed()) {
     icUInt32Number *pData = NULL;
-    icInt32Number nSize = 0;
-    //Compress data here
+    size_t nSize = 0;
 
-    if (pIO->Write8(pData, nSize) != (icInt32Number)nSize)
+// TODO, UNFINISHED - Compress data here
+
+    if (pIO->Write8(pData, nSize) != nSize)
       return false;
   }
   else {
-    if (pIO->Write8(m_pData, m_nSize) != (icInt32Number)m_nSize)
+    if (pIO->Write8(m_pData, m_nSize) != m_nSize)
       return false;
   }
 
@@ -8243,12 +8243,12 @@ bool CIccTagDateTime::Read(icUInt32Number size, CIccIO *pIO)
     return false;
 
 
-  icUInt32Number nsize = (size-2*sizeof(icUInt32Number))/sizeof(icUInt16Number);
+  size_t nsize = (size-2*sizeof(icUInt32Number))/sizeof(icUInt16Number);
 
   if (nsize > sizeof(m_DateTime) / sizeof(icUInt16Number))
     return false;
 
-  if (pIO->Read16(&m_DateTime,nsize) != (icInt32Number)nsize)
+  if (pIO->Read16(&m_DateTime,nsize) != nsize)
     return false;
 
   return true;
@@ -8468,7 +8468,7 @@ bool CIccTagColorantOrder::Read(icUInt32Number size, CIccIO *pIO)
   if (!SetSize((icUInt16Number)nCount))
     return false;
 
-  if (pIO->Read8(&m_pData[0], m_nCount) != (icInt32Number)m_nCount)
+  if (pIO->Read8(&m_pData[0], m_nCount) != m_nCount)
     return false;
 
   return true;
@@ -8505,7 +8505,7 @@ bool CIccTagColorantOrder::Write(CIccIO *pIO)
   if (!pIO->Write32(&m_nCount))
     return false;
 
-  if (pIO->Write8(&m_pData[0], m_nCount) != (icInt32Number)m_nCount)
+  if (pIO->Write8(&m_pData[0], m_nCount) != m_nCount)
     return false;
   
   return true;
@@ -8751,8 +8751,8 @@ bool CIccTagColorantTable::Read(icUInt32Number size, CIccIO *pIO)
     return false;
 
   icUInt32Number nNum = (size - 3*sizeof(icUInt32Number))/sizeof(icColorantTableEntry);
-  icUInt32Number nNum8 = sizeof(m_pData->name);
-  icUInt32Number nNum16 = sizeof(m_pData->data)/sizeof(icUInt16Number);
+  size_t nNum8 = sizeof(m_pData->name);
+  size_t nNum16 = sizeof(m_pData->data)/sizeof(icUInt16Number);
 
   if (nNum < nCount || nCount > 0xffff)
     return false;
@@ -8761,10 +8761,10 @@ bool CIccTagColorantTable::Read(icUInt32Number size, CIccIO *pIO)
     return false;
 
   for (icUInt32Number i=0; i<nCount; i++) {
-    if (pIO->Read8(&m_pData[i].name[0], nNum8) != (icInt32Number)nNum8)
+    if (pIO->Read8(&m_pData[i].name[0], nNum8) != nNum8)
       return false;
 
-    if (pIO->Read16(&m_pData[i].data[0], nNum16) != (icInt32Number)nNum16)
+    if (pIO->Read16(&m_pData[i].data[0], nNum16) != nNum16)
       return false;
   }
 
@@ -8801,14 +8801,14 @@ bool CIccTagColorantTable::Write(CIccIO *pIO)
   if (!pIO->Write32(&m_nCount))
     return false;
 
-  icUInt32Number nNum8 = sizeof(m_pData->name);
-  icUInt32Number nNum16 = sizeof(m_pData->data)/sizeof(icUInt16Number);
+  size_t nNum8 = sizeof(m_pData->name);
+  size_t nNum16 = sizeof(m_pData->data)/sizeof(icUInt16Number);
 
   for (icUInt32Number i=0; i<m_nCount; i++) {
-    if (pIO->Write8(&m_pData[i].name[0],nNum8) != (icInt32Number)nNum8)
+    if (pIO->Write8(&m_pData[i].name[0],nNum8) != nNum8)
       return false;
 
-    if (pIO->Write16(&m_pData[i].data[0],nNum16) != (icInt32Number)nNum16)
+    if (pIO->Write16(&m_pData[i].data[0],nNum16) != nNum16)
       return false;
   }
 
@@ -9361,10 +9361,9 @@ void CIccProfileDescText::Describe(std::string &sDescription, int nVerboseness)
 bool CIccProfileDescText::Read(icUInt32Number size, CIccIO *pIO)
 {
   icTagTypeSignature sig;
-  icUInt32Number nPos;
 
   //Check for description tag type signature
-  nPos = pIO->Tell();
+  size_t nPos = pIO->Tell();
 
   if ((nPos&0x03) != 0)
     m_bNeedsPading = true;
@@ -9574,9 +9573,9 @@ CIccTagProfileSeqDesc::~CIccTagProfileSeqDesc()
 bool CIccTagProfileSeqDesc::Read(icUInt32Number size, CIccIO *pIO)
 {
   icTagTypeSignature sig;
-  icUInt32Number nCount, nEnd;
+  icUInt32Number nCount;
 
-  nEnd = pIO->Tell() + size;
+  size_t nEnd = pIO->Tell() + size;
 
   if (sizeof(icTagTypeSignature) + 
       sizeof(icUInt32Number)*2 > size)
@@ -9599,7 +9598,8 @@ bool CIccTagProfileSeqDesc::Read(icUInt32Number size, CIccIO *pIO)
     sizeof(CIccProfileDescStruct) > size)
     return false;
 
-  icUInt32Number i, nPos; 
+  icUInt32Number i;
+  size_t nPos;
   CIccProfileDescStruct ProfileDescStruct;
 
   for (i=0; i<nCount; i++) {
@@ -9612,11 +9612,11 @@ bool CIccTagProfileSeqDesc::Read(icUInt32Number size, CIccIO *pIO)
 
     nPos = pIO->Tell();
 
-    if (!ProfileDescStruct.m_deviceMfgDesc.Read(nEnd - nPos, pIO))
+    if (!ProfileDescStruct.m_deviceMfgDesc.Read((icUInt32Number)(nEnd - nPos), pIO))
       return false;
     
     nPos = pIO->Tell();
-    if (!ProfileDescStruct.m_deviceModelDesc.Read(nEnd - nPos, pIO))
+    if (!ProfileDescStruct.m_deviceModelDesc.Read((icUInt32Number)(nEnd - nPos), pIO))
       return false;
 
     m_Descriptions->push_back(ProfileDescStruct);
@@ -9962,7 +9962,7 @@ bool CIccResponseCurveStruct::Read(icUInt32Number size, CIccIO *pIO)
   }
 
   icUInt32Number nNum32 = m_nChannels*sizeof(icXYZNumber)/sizeof(icS15Fixed16Number);
-  if (pIO->Read32(&m_maxColorantXYZ[0], nNum32) != (icInt32Number)nNum32) {
+  if (pIO->Read32(&m_maxColorantXYZ[0], nNum32) != nNum32) {
     delete[] nMeasurements;
     return false;
   }
@@ -10028,7 +10028,7 @@ bool CIccResponseCurveStruct::Write(CIccIO *pIO)
     delete [] nMeasurements;
 
     icUInt32Number nNum32 = m_nChannels*sizeof(icXYZNumber)/sizeof(icS15Fixed16Number);
-    if (pIO->Write32(&m_maxColorantXYZ[0], nNum32) != (icInt32Number)nNum32)
+    if (pIO->Write32(&m_maxColorantXYZ[0], nNum32) != nNum32)
       return false;
   }
   else
@@ -10251,7 +10251,7 @@ bool CIccTagResponseCurveSet16::Read(icUInt32Number size, CIccIO *pIO)
 {
   icTagTypeSignature sig;
 
-  icUInt32Number startPos = pIO->Tell();
+  size_t startPos = pIO->Tell();
 
   unsigned long headerSize = sizeof(icTagTypeSignature) +
                              sizeof(icUInt32Number) +
@@ -10330,7 +10330,7 @@ bool CIccTagResponseCurveSet16::Write(CIccIO *pIO)
     return false;
   }
 
-  icUInt32Number startPos = pIO->GetLength();
+  size_t startPos = pIO->GetLength();
 
   if (!pIO->Write32(&sig) ||
       !pIO->Write32(&m_nReserved))
@@ -10341,7 +10341,7 @@ bool CIccTagResponseCurveSet16::Write(CIccIO *pIO)
       !pIO->Write16(&nCountMeasmntTypes))
     return false;
 
-  icUInt32Number offsetPos = pIO->GetLength();
+  size_t offsetPos = pIO->GetLength();
   icUInt32Number* nOffset = new icUInt32Number[nCountMeasmntTypes];
 
 
@@ -10355,12 +10355,12 @@ bool CIccTagResponseCurveSet16::Write(CIccIO *pIO)
   CIccResponseCurveSet::iterator i;
 
   for (i=m_ResponseCurves->begin(), j=0; i!=m_ResponseCurves->end(); i++, j++) {
-    nOffset[j] = pIO->GetLength() - startPos;
+    nOffset[j] = (icUInt32Number)(pIO->GetLength() - startPos);
     if (!i->Write(pIO))
       return false;
   }
 
-  icUInt32Number curPOs = pIO->GetLength();
+  size_t curPOs = pIO->GetLength();
 
   pIO->Seek(offsetPos,icSeekSet);
 
@@ -11870,7 +11870,7 @@ bool CIccTagEmbeddedHeightImage::Read(icUInt32Number size, CIccIO *pIO)
   if (!SetSize(nNum))
     return false;
 
-  if (pIO->Read8(m_pData, nNum) != (icInt32Number)nNum)
+  if (pIO->Read8(m_pData, nNum) != nNum)
     return false;
 
   return true;
@@ -11915,7 +11915,7 @@ bool CIccTagEmbeddedHeightImage::Write(CIccIO *pIO)
   if (!pIO->WriteFloat32Float(&m_fMetersMaxPixelValue))
     return false;
 
-  if (pIO->Write8(m_pData, m_nSize) != (icInt32Number)m_nSize)
+  if (pIO->Write8(m_pData, m_nSize) != m_nSize)
     return false;
 
   return true;
@@ -12179,7 +12179,7 @@ bool CIccTagEmbeddedNormalImage::Read(icUInt32Number size, CIccIO *pIO)
   if (!SetSize(nNum))
     return false;
 
-  if (pIO->Read8(m_pData, nNum) != (icInt32Number)nNum)
+  if (pIO->Read8(m_pData, nNum) != nNum)
     return false;
 
   return true;
@@ -12218,7 +12218,7 @@ bool CIccTagEmbeddedNormalImage::Write(CIccIO *pIO)
   if (!pIO->Write32(&m_nEncodingFormat))
     return false;
 
-  if (pIO->Write8(m_pData, m_nSize) != (icInt32Number)m_nSize)
+  if (pIO->Write8(m_pData, m_nSize) != m_nSize)
     return false;
 
   return true;

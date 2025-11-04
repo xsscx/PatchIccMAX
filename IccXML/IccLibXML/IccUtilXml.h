@@ -125,7 +125,7 @@ icUInt32Number icXmlGetHexData(void *pBuf, const char *szText, icUInt32Number nB
 
 icUInt32Number icXmlGetHexDataSize(const char *szText);
 
-icUInt32Number icXmlDumpHexData(std::string &xml, std::string blanks, void *pBuf, icUInt32Number nBufSize);
+size_t icXmlDumpHexData(std::string &xml, std::string blanks, void *pBuf, size_t nBufSize);
 
 #define icXmlStrCmp(x, y) strcmp((const char *)(x), (const char*)(y))
 
@@ -149,12 +149,12 @@ public:
 
   static icUInt32Number ParseTextCount(const char *szText);
   static icUInt32Number ParseText(T *buf, icUInt32Number nBufSize, const char *szText);
-  static icUInt32Number ParseTextCountNum(const char *szText, icUInt32Number num, std::string &parseStr);
+  static icUInt32Number ParseTextCountNum(const char *szText, size_t num, std::string &parseStr);
 
   bool ParseArray(xmlNode *pNode);
   bool ParseTextArray(const char *szText);
   bool ParseTextArray(xmlNode *pNode);
-  bool ParseTextArrayNum(const char *szText, icUInt32Number num, std::string &parseStr);
+  bool ParseTextArrayNum(const char *szText, size_t num, std::string &parseStr);
 
   bool SetSize(icUInt32Number nSize);
 

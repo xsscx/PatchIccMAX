@@ -305,7 +305,7 @@ bool CIccSampledCurveSegmentXml::ParseXml(xmlNode *pNode, std::string &parseStr)
 
     // format is text
     if (!strcmp(format, "text")) {
-      icUInt32Number num = file->GetLength();
+      size_t num = file->GetLength();
       char *buf = new char[num];
 
       if (!buf) {          
@@ -370,10 +370,10 @@ bool CIccSampledCurveSegmentXml::ParseXml(xmlNode *pNode, std::string &parseStr)
       }
 
       if (storageType == icValueTypeUInt8){
-        icUInt32Number num = file->GetLength();
+        size_t num = file->GetLength();
         icUInt8Number value;
 
-        SetSize(num);
+        SetSize((icUInt32Number)num);
         icFloatNumber *dst =  m_pSamples;
         icUInt32Number i;
         for (i=0; i<num; i++) {
@@ -391,11 +391,11 @@ bool CIccSampledCurveSegmentXml::ParseXml(xmlNode *pNode, std::string &parseStr)
         return true;
       }        
       else if (storageType == icValueTypeUInt16){
-        icUInt32Number num = file->GetLength() / sizeof(icUInt16Number);
+        size_t num = file->GetLength() / sizeof(icUInt16Number);
         icUInt16Number value;
         icUInt8Number *m_ptr = (icUInt8Number*)&value;
 
-        SetSize(num);
+        SetSize((icUInt32Number)num);
         icFloatNumber *dst = m_pSamples;
         icUInt32Number i;
         for (i=0; i<num; i++) {
@@ -422,11 +422,11 @@ bool CIccSampledCurveSegmentXml::ParseXml(xmlNode *pNode, std::string &parseStr)
         return true;
       }
       else if (storageType == icValueTypeFloat16){
-        icUInt32Number num = file->GetLength() / sizeof(icFloat16Number);
+        size_t num = file->GetLength() / sizeof(icFloat16Number);
         icFloat16Number value;
         icUInt8Number *m_ptr = (icUInt8Number*)&value;
 
-        SetSize(num);
+        SetSize((icUInt32Number)num);
         icFloatNumber *dst = m_pSamples;
         icUInt32Number i;
         for (i=0; i<num; i++) {
@@ -453,11 +453,11 @@ bool CIccSampledCurveSegmentXml::ParseXml(xmlNode *pNode, std::string &parseStr)
         return true;
       }
       else if (storageType == icValueTypeFloat32) {
-        icUInt32Number num = file->GetLength()/sizeof(icFloat32Number);
+        size_t num = file->GetLength()/sizeof(icFloat32Number);
         icFloat32Number value;
         icUInt8Number *m_ptr = (icUInt8Number*)&value;
 
-        SetSize(num);
+        SetSize((icUInt32Number)num);
         icFloatNumber *dst = m_pSamples;
 
         icUInt32Number i;
@@ -687,7 +687,7 @@ bool CIccSinglSampledeCurveXml::ParseXml(xmlNode *pNode, std::string &parseStr)
 
     // format is text
     if (!strcmp(format, "text")) {
-      icUInt32Number num = file->GetLength();
+      size_t num = file->GetLength();
       char *buf = new char[num];
 
       if (!buf) {
@@ -823,10 +823,10 @@ bool CIccSinglSampledeCurveXml::ParseXml(xmlNode *pNode, std::string &parseStr)
       bool little_endian = !strcmp(order, "little");
 
       if (m_storageType == icValueTypeUInt8) {
-        icUInt32Number num = file->GetLength();
+        size_t num = file->GetLength();
         icUInt8Number value;
 
-        SetSize(num);
+        SetSize((icUInt32Number)num);
         icFloatNumber *dst = m_pSamples;
         icUInt32Number i;
         for (i = 0; i < num; i++) {
@@ -844,11 +844,11 @@ bool CIccSinglSampledeCurveXml::ParseXml(xmlNode *pNode, std::string &parseStr)
         return true;
       }
       else if (m_storageType == icValueTypeUInt16) {
-        icUInt32Number num = file->GetLength() / sizeof(icUInt16Number);
+        size_t num = file->GetLength() / sizeof(icUInt16Number);
         icUInt16Number value;
         icUInt8Number *m_ptr = (icUInt8Number*)&value;
 
-        SetSize(num);
+        SetSize((icUInt32Number)num);
         icFloatNumber *dst = m_pSamples;
         icUInt32Number i;
         for (i = 0; i < num; i++) {
@@ -875,11 +875,11 @@ bool CIccSinglSampledeCurveXml::ParseXml(xmlNode *pNode, std::string &parseStr)
         return true;
         }
       else if (m_storageType == icValueTypeFloat16) {
-        icUInt32Number num = file->GetLength() / sizeof(icFloat16Number);
+        size_t num = file->GetLength() / sizeof(icFloat16Number);
         icFloat16Number value;
         icUInt8Number *m_ptr = (icUInt8Number*)&value;
 
-        SetSize(num);
+        SetSize((icUInt32Number)num);
         icFloatNumber *dst = m_pSamples;
         icUInt32Number i;
         for (i = 0; i < num; i++) {
@@ -906,11 +906,11 @@ bool CIccSinglSampledeCurveXml::ParseXml(xmlNode *pNode, std::string &parseStr)
         return true;
         }
       else if (m_storageType == icValueTypeFloat32) {
-        icUInt32Number num = file->GetLength() / sizeof(icFloat32Number);
+        size_t num = file->GetLength() / sizeof(icFloat32Number);
         icFloat32Number value;
         icUInt8Number *m_ptr = (icUInt8Number*)&value;
 
-        SetSize(num);
+        SetSize((icUInt32Number)num);
         icFloatNumber *dst = m_pSamples;
 
         icUInt32Number i;

@@ -158,7 +158,7 @@ ICCPROFLIB_API icFloatNumber icDeltaE(const icFloatNumber *Lab1, const icFloatNu
 
 ICCPROFLIB_API icFloatNumber icRmsDif(const icFloatNumber *v1, const icFloatNumber *v2, icUInt32Number nSample);
 
-ICCPROFLIB_API bool icValidTagPos(const icPositionNumber& pos, icUInt32Number nTagHeaderSize, icUInt32Number nTagSize, bool bAllowEmpty=false);
+ICCPROFLIB_API bool icValidTagPos(const icPositionNumber& pos, size_t nTagHeaderSize, size_t nTagSize, bool bAllowEmpty=false);
 ICCPROFLIB_API bool icValidOverlap(const icPositionNumber& pos1, const icPositionNumber& pos2, bool bAllowSame=true);
 
 /**Floating point encoding of Lab in PCS is in range 0.0 to 1.0 */
@@ -173,7 +173,7 @@ ICCPROFLIB_API void icXyzFromPcs(icFloatNumber *XYZ);
 ICCPROFLIB_API void icXyzToPcs(icFloatNumber *XYZ);
 
 
-ICCPROFLIB_API void icMemDump(std::string &sDump, void *pBuf, icUInt32Number nNum);
+ICCPROFLIB_API void icMemDump(std::string &sDump, void *pBuf, size_t nNum);
 ICCPROFLIB_API void icMatrixDump(std::string &sDump, icS15Fixed16Number *pMatrix);
 ICCPROFLIB_API const icChar* icGetSig(icChar *pBuf, size_t bufSize, icUInt32Number sig, bool bGetHexVal=true);
 ICCPROFLIB_API const icChar* icGet16bitSig(icChar* pBuf, size_t bufSize, icUInt16Number sig, bool bGetHexVal=true);
@@ -211,7 +211,7 @@ inline void icSwab16Ptr(void *pVoid)
   tmp = ptr[0]; ptr[0] = ptr[1]; ptr[1] = tmp;
 }
 
-inline void icSwab16Array(void *pVoid, int num)
+inline void icSwab16Array(void *pVoid, size_t num)
 {
   icUInt8Number *ptr = (icUInt8Number*)pVoid;
   icUInt8Number tmp;
@@ -232,7 +232,7 @@ inline void icSwab32Ptr(void *pVoid)
   tmp = ptr[1]; ptr[1] = ptr[2]; ptr[2] = tmp;
 }
 
-inline void icSwab32Array(void *pVoid, int num)
+inline void icSwab32Array(void *pVoid, size_t num)
 {
   icUInt8Number *ptr = (icUInt8Number*)pVoid;
   icUInt8Number tmp;
@@ -257,7 +257,7 @@ inline void icSwab64Ptr(void *pVoid)
   tmp = ptr[3]; ptr[3] = ptr[4]; ptr[4] = tmp;
 }
 
-inline void icSwab64Array(void *pVoid, int num)
+inline void icSwab64Array(void *pVoid, size_t num)
 {
   icUInt8Number *ptr = (icUInt8Number*)pVoid;
   icUInt8Number tmp;

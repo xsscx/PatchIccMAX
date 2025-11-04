@@ -258,7 +258,7 @@ bool CIccTagCurve::Read(icUInt32Number size, CIccIO *pIO)
     return false;
 
   if (m_nSize) {
-    if (pIO->ReadUInt16Float(m_Curve, m_nSize)!=(icInt32Number)m_nSize)
+    if (pIO->ReadUInt16Float(m_Curve, m_nSize)!= m_nSize)
       return false;
   }
 
@@ -296,7 +296,7 @@ bool CIccTagCurve::Write(CIccIO *pIO)
     return false;
 
   if (m_nSize)
-    if (pIO->WriteUInt16Float(m_Curve, m_nSize)!=(icInt32Number)m_nSize)
+    if (pIO->WriteUInt16Float(m_Curve, m_nSize)!= m_nSize)
       return false;
 
   pIO->Align32();
@@ -1911,11 +1911,11 @@ bool CIccCLUT::ReadData(icUInt32Number size, CIccIO *pIO, icUInt8Number nPrecisi
     return false;
 
   if (nPrecision==1) {
-    if (pIO->ReadUInt8Float(m_pData, nNum)!=(icInt32Number)nNum)
+    if (pIO->ReadUInt8Float(m_pData, nNum)!= nNum)
       return false;
   }
   else if (nPrecision==2) {
-    if (pIO->ReadUInt16Float(m_pData, nNum)!=(icInt32Number)nNum)
+    if (pIO->ReadUInt16Float(m_pData, nNum)!= nNum)
       return false;
   }
   else
@@ -1945,11 +1945,11 @@ bool CIccCLUT::WriteData(CIccIO *pIO, icUInt8Number nPrecision)
   icUInt32Number nNum=NumPoints() * m_nOutput;
 
   if (nPrecision==1) {
-    if (pIO->WriteUInt8Float(m_pData, nNum)!=(icInt32Number)nNum)
+    if (pIO->WriteUInt8Float(m_pData, nNum)!= nNum)
       return false;
   }
   else if (nPrecision==2) {
-    if (pIO->WriteUInt16Float(m_pData, nNum)!=(icInt32Number)nNum)
+    if (pIO->WriteUInt16Float(m_pData, nNum)!= nNum)
       return false;
   }
   else
@@ -3930,15 +3930,16 @@ CIccTagLutAtoB::~CIccTagLutAtoB()
 bool CIccTagLutAtoB::Read(icUInt32Number size, CIccIO *pIO)
 {
   icTagTypeSignature sig;
-  icUInt32Number Offset[5], nStart, nEnd, nPos;
+  icUInt32Number Offset[5];
   icUInt8Number nCurves, i;
+  size_t nPos;
 
   if (size<8*sizeof(icUInt32Number) || !pIO) {
     return false;
   }
 
-  nStart = pIO->Tell();
-  nEnd = nStart + size;
+  size_t nStart = pIO->Tell();
+  size_t nEnd = nStart + size;
 
   if (!pIO->Read32(&sig) ||
       !pIO->Read32(&m_nReserved) ||
@@ -3974,7 +3975,7 @@ bool CIccTagLutAtoB::Read(icUInt32Number size, CIccIO *pIO)
 
       pCurves[i] = (CIccCurve*)CIccTag::Create(sig);
 
-      if (!pCurves[i]->Read(nEnd - pIO->Tell(), pIO))
+      if (!pCurves[i]->Read( (icUInt32Number)(nEnd - pIO->Tell()), pIO))
         return false;
 
       if (!pIO->Sync32(Offset[0]))
@@ -4025,7 +4026,7 @@ bool CIccTagLutAtoB::Read(icUInt32Number size, CIccIO *pIO)
 
       pCurves[i] = (CIccCurve*)CIccTag::Create(sig);
 
-      if (!pCurves[i]->Read(nEnd - pIO->Tell(), pIO))
+      if (!pCurves[i]->Read( (icUInt32Number)(nEnd - pIO->Tell()), pIO))
         return false;
 
       if (!pIO->Sync32(Offset[2]))
@@ -4040,7 +4041,7 @@ bool CIccTagLutAtoB::Read(icUInt32Number size, CIccIO *pIO)
 
     m_CLUT = new CIccCLUT(m_nInput, m_nOutput);
 
-    if (!m_CLUT->Read(nEnd - pIO->Tell(), pIO))
+    if (!m_CLUT->Read( (icUInt32Number)(nEnd - pIO->Tell()), pIO))
       return false;
   }
 
@@ -4067,7 +4068,7 @@ bool CIccTagLutAtoB::Read(icUInt32Number size, CIccIO *pIO)
 
       pCurves[i] = (CIccCurve*)CIccTag::Create(sig);
 
-      if (!pCurves[i]->Read(nEnd - pIO->Tell(), pIO))
+      if (!pCurves[i]->Read( (icUInt32Number)(nEnd - pIO->Tell()), pIO))
         return false;
 
       if (!pIO->Sync32(Offset[4]))
@@ -4095,10 +4096,10 @@ bool CIccTagLutAtoB::Read(icUInt32Number size, CIccIO *pIO)
 bool CIccTagLutAtoB::Write(CIccIO *pIO)
 {
   icTagTypeSignature sig = GetType();
-  icUInt32Number Offset[5], nStart, nEnd, nOffsetPos;
+  icUInt32Number Offset[5];
   icUInt8Number nCurves, i;
 
-  nStart = pIO->Tell();
+  size_t nStart = pIO->Tell();
   memset(&Offset[0], 0, sizeof(Offset));
   
   if (!pIO->Write32(&sig) ||
@@ -4108,13 +4109,13 @@ bool CIccTagLutAtoB::Write(CIccIO *pIO)
       !pIO->Write16(&m_nReservedWord))
     return false;
 
-  nOffsetPos = pIO->Tell();
+  size_t nOffsetPos = pIO->Tell();
   if (pIO->Write32(Offset, 5)!=5)
     return false;
 
   //B Curves
   if (m_CurvesB) {
-    Offset[0] = pIO->Tell() - nStart;
+    Offset[0] = (icUInt32Number)(pIO->Tell() - nStart);
     nCurves = IsInputB() ? m_nInput : m_nOutput;
 
     for (i=0; i<nCurves; i++) {
@@ -4133,7 +4134,7 @@ bool CIccTagLutAtoB::Write(CIccIO *pIO)
   if (m_Matrix) {
     icS15Fixed16Number tmp;
 
-    Offset[1] = pIO->Tell() - nStart;
+    Offset[1] = (icUInt32Number)(pIO->Tell() - nStart);
 
     for (i=0; i<12; i++) {
       tmp = icDtoF(m_Matrix->m_e[i]);
@@ -4145,7 +4146,7 @@ bool CIccTagLutAtoB::Write(CIccIO *pIO)
 
   //M Curves
   if (m_CurvesM) {
-    Offset[2] = pIO->Tell() - nStart;
+    Offset[2] = (icUInt32Number)(pIO->Tell() - nStart);
     nCurves = IsInputMatrix() ? m_nInput : m_nOutput;
 
     for (i=0; i<nCurves; i++) {
@@ -4162,7 +4163,7 @@ bool CIccTagLutAtoB::Write(CIccIO *pIO)
 
   //CLUT
   if (m_CLUT) {
-    Offset[3] = pIO->Tell() - nStart;
+    Offset[3] = (icUInt32Number)(pIO->Tell() - nStart);
 
     if (!m_CLUT->Write(pIO))
       return false;
@@ -4173,7 +4174,7 @@ bool CIccTagLutAtoB::Write(CIccIO *pIO)
 
   //A Curves
   if (m_CurvesA) {
-    Offset[4] = pIO->Tell() - nStart;
+    Offset[4] = (icUInt32Number)(pIO->Tell() - nStart);
     nCurves = !IsInputB() ? m_nInput : m_nOutput;
 
     for (i=0; i<nCurves; i++) {
@@ -4188,7 +4189,7 @@ bool CIccTagLutAtoB::Write(CIccIO *pIO)
     }
   }
 
-  nEnd = pIO->Tell();
+  size_t nEnd = pIO->Tell();
 
   if (!pIO->Seek(nOffsetPos, icSeekSet))
     return false;
@@ -4550,7 +4551,6 @@ CIccTagLut8::~CIccTagLut8()
 bool CIccTagLut8::Read(icUInt32Number size, CIccIO *pIO)
 {
   icTagTypeSignature sig;
-  icUInt32Number nStart, nEnd;
   icUInt8Number i, nGrid;
   LPIccCurve *pCurves;
   CIccTagCurve *pCurve;
@@ -4559,8 +4559,8 @@ bool CIccTagLut8::Read(icUInt32Number size, CIccIO *pIO)
     return false;
   }
 
-  nStart = pIO->Tell();
-  nEnd = nStart + size;
+  size_t nStart = pIO->Tell();
+  size_t nEnd = nStart + size;
  
   if (!pIO->Read32(&sig) ||
       !pIO->Read32(&m_nReserved) ||
@@ -4595,10 +4595,10 @@ bool CIccTagLut8::Read(icUInt32Number size, CIccIO *pIO)
   if (m_CLUT == NULL)
     return false;
 
-  if (!m_CLUT->Init(nGrid, nEnd - pIO->Tell(), 1))
+  if (!m_CLUT->Init(nGrid, (icUInt32Number)(nEnd - pIO->Tell()), 1))
     return false;
 
-  if (!m_CLUT->ReadData(nEnd - pIO->Tell(), pIO, 1))
+  if (!m_CLUT->ReadData( (icUInt32Number)(nEnd - pIO->Tell()), pIO, 1))
     return false;
 
   //A Curves
@@ -4997,7 +4997,6 @@ CIccTagLut16::~CIccTagLut16()
 bool CIccTagLut16::Read(icUInt32Number size, CIccIO *pIO)
 {
   icTagTypeSignature sig;
-  icUInt32Number nStart, nEnd;
   icUInt8Number i, nGrid;
   icUInt16Number nInputEntries, nOutputEntries;
   LPIccCurve *pCurves;
@@ -5007,8 +5006,8 @@ bool CIccTagLut16::Read(icUInt32Number size, CIccIO *pIO)
     return false;
   }
 
-  nStart = pIO->Tell();
-  nEnd = nStart + size;
+  size_t nStart = pIO->Tell();
+  size_t nEnd = nStart + size;
  
   if (!pIO->Read32(&sig) ||
       !pIO->Read32(&m_nReserved) ||
@@ -5044,10 +5043,10 @@ bool CIccTagLut16::Read(icUInt32Number size, CIccIO *pIO)
   //CLUT
   m_CLUT = new CIccCLUT(m_nInput, m_nOutput);
 
-  if (!m_CLUT->Init(nGrid, nEnd - pIO->Tell(), 2))
+  if (!m_CLUT->Init(nGrid, (icUInt32Number)(nEnd - pIO->Tell()), 2))
     return false;
 
-  if (!m_CLUT->ReadData(nEnd - pIO->Tell(), pIO, 2))
+  if (!m_CLUT->ReadData( (icUInt32Number)(nEnd - pIO->Tell()), pIO, 2))
     return false;
 
   //A Curves

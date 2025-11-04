@@ -363,11 +363,11 @@ void CIccFormulaCurveSegment::SetFunction(icUInt16Number functionType, icUInt8Nu
  * 
  * Return: 
  ******************************************************************************/
-bool CIccFormulaCurveSegment::Read(icUInt32Number size, CIccIO *pIO)
+bool CIccFormulaCurveSegment::Read(size_t size, CIccIO *pIO)
 {
   icCurveSegSignature sig;
 
-  icUInt32Number headerSize = sizeof(icTagTypeSignature) + 
+  size_t headerSize = sizeof(icTagTypeSignature) + 
     sizeof(icUInt32Number) + 
     sizeof(icUInt16Number) + 
     sizeof(icUInt16Number);
@@ -1067,11 +1067,11 @@ void CIccSampledCurveSegment::Describe(std::string &sDescription, int /* nVerbos
  * 
  * Return: 
  ******************************************************************************/
-bool CIccSampledCurveSegment::Read(icUInt32Number size, CIccIO *pIO)
+bool CIccSampledCurveSegment::Read(size_t size, CIccIO *pIO)
 {
   icCurveSegSignature sig;
 
-  icUInt32Number headerSize = sizeof(icTagTypeSignature) + 
+  size_t headerSize = sizeof(icTagTypeSignature) + 
     sizeof(icUInt32Number) + 
     sizeof(icUInt32Number);
 
@@ -1101,7 +1101,7 @@ bool CIccSampledCurveSegment::Read(icUInt32Number size, CIccIO *pIO)
     return false;
 
   if (m_nCount) {
-    if (pIO->ReadFloat32Float(m_pSamples+1, m_nCount-1)!=(icInt32Number)(m_nCount-1))
+    if (pIO->ReadFloat32Float(m_pSamples+1, m_nCount-1) != (m_nCount-1))
       return false;
   }
 
@@ -1134,7 +1134,7 @@ bool CIccSampledCurveSegment::Write(CIccIO *pIO)
   if (!pIO->Write32(&m_nReserved))
     return false;
 
-  icUInt32Number nCount;
+  size_t nCount;
 
   if (m_nCount)
     nCount = m_nCount -1;
@@ -1146,7 +1146,7 @@ bool CIccSampledCurveSegment::Write(CIccIO *pIO)
 
   //First point in samples is ONLY for interpolation (not saved)
   if (nCount) {
-    if (pIO->WriteFloat32Float(m_pSamples+1, nCount)!=(icInt32Number)nCount)
+    if (pIO->WriteFloat32Float(m_pSamples+1, nCount)!= nCount)
       return false;
   }
 
@@ -1596,7 +1596,7 @@ void CIccSingleSampledCurve::Describe(std::string &sDescription, int /* nVerbose
 ******************************************************************************/
 bool CIccSingleSampledCurve::Read(icUInt32Number size, CIccIO *pIO)
 {
-  icCurveSegSignature sig;
+  icCurveElemSignature sig;
 
   icUInt32Number headerSize = sizeof(icTagTypeSignature) + 
     sizeof(icUInt32Number) + 
@@ -1613,7 +1613,6 @@ bool CIccSingleSampledCurve::Read(icUInt32Number size, CIccIO *pIO)
     return false;
   }
 
-  // ERROR - comparison of different enum types!
   if (!pIO->Read32(&sig) || sig!=GetType())
     return false;
 
@@ -1647,28 +1646,28 @@ bool CIccSingleSampledCurve::Read(icUInt32Number size, CIccIO *pIO)
         if (m_nCount * sizeof(icUInt8Number) > size - headerSize)
           return false;
 
-        if (pIO->ReadUInt8Float(m_pSamples, m_nCount)!=(icInt32Number)(m_nCount))
+        if (pIO->ReadUInt8Float(m_pSamples, m_nCount)!= m_nCount)
           return false;
         break;
       case icValueTypeUInt16:
         if (m_nCount * 2 > size - headerSize)
           return false;
 
-        if (pIO->ReadUInt16Float(m_pSamples, m_nCount)!=(icInt32Number)(m_nCount))
+        if (pIO->ReadUInt16Float(m_pSamples, m_nCount)!= m_nCount)
           return false;
         break;
       case icValueTypeFloat16:
         if (m_nCount * 2 > size - headerSize)
           return false;
 
-        if (pIO->ReadFloat16Float(m_pSamples, m_nCount)!=(icInt32Number)(m_nCount))
+        if (pIO->ReadFloat16Float(m_pSamples, m_nCount)!= m_nCount)
           return false;
         break;
       case icValueTypeFloat32:
         if (m_nCount * sizeof(icFloat32Number) > size - headerSize)
           return false;
 
-        if (pIO->ReadFloat32Float(m_pSamples, m_nCount)!=(icInt32Number)(m_nCount))
+        if (pIO->ReadFloat32Float(m_pSamples, m_nCount)!= m_nCount)
           return false;
         break;
       default:
@@ -1721,19 +1720,19 @@ bool CIccSingleSampledCurve::Write(CIccIO *pIO)
 
     switch(m_storageType) {
       case icValueTypeUInt8:
-        if (pIO->WriteUInt8Float(m_pSamples, m_nCount)!=(icInt32Number)(m_nCount))
+        if (pIO->WriteUInt8Float(m_pSamples, m_nCount)!= m_nCount)
           return false;
         break;
       case icValueTypeUInt16:
-        if (pIO->WriteUInt16Float(m_pSamples, m_nCount)!=(icInt32Number)(m_nCount))
+        if (pIO->WriteUInt16Float(m_pSamples, m_nCount)!= m_nCount)
           return false;
         break;
       case icValueTypeFloat16:
-        if (pIO->WriteFloat16Float(m_pSamples, m_nCount)!=(icInt32Number)(m_nCount))
+        if (pIO->WriteFloat16Float(m_pSamples, m_nCount)!= m_nCount)
           return false;
         break;
       case icValueTypeFloat32:
-        if (pIO->WriteFloat32Float(m_pSamples, m_nCount)!=(icInt32Number)(m_nCount))
+        if (pIO->WriteFloat32Float(m_pSamples, m_nCount)!= m_nCount)
           return false;
         break;
       default:
@@ -2237,7 +2236,7 @@ void CIccSampledCalculatorCurve::Describe(std::string &sDescription, int nVerbos
 ******************************************************************************/
 bool CIccSampledCalculatorCurve::Read(icUInt32Number size, CIccIO *pIO)
 {
-  icCurveSegSignature sig;
+  icCurveElemSignature sig;
 
   icUInt32Number headerSize = sizeof(icTagTypeSignature) +
     sizeof(icUInt32Number) +
@@ -2254,7 +2253,6 @@ bool CIccSampledCalculatorCurve::Read(icUInt32Number size, CIccIO *pIO)
     return false;
   }
 
-  // ERROR - comparison of different enum types!
   if (!pIO->Read32(&sig) || sig != GetType())
     return false;
 
@@ -2639,9 +2637,9 @@ bool CIccSegmentedCurve::Read(icUInt32Number size, CIccIO *pIO)
 {
   icCurveElemSignature sig;
 
-  icUInt32Number startPos = pIO->Tell();
+  size_t startPos = pIO->Tell();
   
-  icUInt32Number headerSize = sizeof(icCurveElemSignature) + 
+  size_t headerSize = sizeof(icCurveElemSignature) + 
     sizeof(icUInt32Number) + 
     sizeof(icUInt16Number) + 
     sizeof(icUInt16Number);
@@ -2672,7 +2670,7 @@ bool CIccSegmentedCurve::Read(icUInt32Number size, CIccIO *pIO)
 
   Reset();
 
-  icUInt32Number pos = pIO->Tell();
+  size_t pos = pIO->Tell();
   icCurveSegSignature segSig;
   CIccCurveSegment *pSeg;
 
@@ -2716,7 +2714,7 @@ bool CIccSegmentedCurve::Read(icUInt32Number size, CIccIO *pIO)
         free(breakpoints);
         return false;
       }
-      if (pIO->Seek(pos, icSeekSet)!=(icInt32Number)pos)
+      if (pIO->Seek(pos, icSeekSet) != pos)
         return false;;
 
       if (!i)
@@ -3228,9 +3226,9 @@ bool CIccMpeCurveSet::Read(icUInt32Number size, CIccIO *pIO)
 {
   icElemTypeSignature sig;
 
-  icUInt32Number startPos = pIO->Tell();
+  size_t startPos = pIO->Tell();
   
-  icUInt32Number headerSize = sizeof(icTagTypeSignature) + 
+  size_t headerSize = sizeof(icTagTypeSignature) + 
     sizeof(icUInt32Number) + 
     sizeof(icUInt16Number) + 
     sizeof(icUInt16Number);
@@ -3284,13 +3282,13 @@ bool CIccMpeCurveSet::Read(icUInt32Number size, CIccIO *pIO)
     icCurveElemSignature curveSig;
     for (i=0; i<m_nInputChannels; i++) {
       if (!map[m_position[i].offset]) {
-        icUInt32Number pos;
+        size_t pos;
         if (!m_position[i].offset || !m_position[i].size) {
           return false;
         }
 
         pos = startPos + m_position[i].offset;
-        if (pIO->Seek(pos, icSeekSet)!=(icInt32Number)pos) {
+        if (pIO->Seek(pos, icSeekSet) != pos) {
           return false;
         }
         
@@ -3303,7 +3301,7 @@ bool CIccMpeCurveSet::Read(icUInt32Number size, CIccIO *pIO)
           return false;
         }
 
-        if (pIO->Seek(pos, icSeekSet)!=(icInt32Number)pos) {
+        if (pIO->Seek(pos, icSeekSet) != pos) {
           return false;
         }
       
@@ -3339,7 +3337,7 @@ bool CIccMpeCurveSet::Write(CIccIO *pIO)
   if (!pIO)
     return false;
 
-  icUInt32Number elemStart = pIO->Tell();
+  size_t elemStart = pIO->Tell();
 
   if (!pIO->Write32(&sig))
     return false;
@@ -3356,11 +3354,11 @@ bool CIccMpeCurveSet::Write(CIccIO *pIO)
   if (m_curve && m_nInputChannels) {
     int i;
     icCurvePtrMap map;
-    icUInt32Number start, end;
+    size_t start, end;
     icUInt32Number zeros[2] = { 0, 0};
     icPositionNumber position;
 
-    icUInt32Number startTable = pIO->Tell();
+    size_t startTable = pIO->Tell();
 
     //First write empty position table
     for (i=0; i<m_nInputChannels; i++) {
@@ -3376,8 +3374,8 @@ bool CIccMpeCurveSet::Write(CIccIO *pIO)
           m_curve[i]->Write(pIO);
           end = pIO->Tell();
           pIO->Align32();
-          position.offset = start - elemStart;
-          position.size = end - start;
+          position.offset = (icUInt32Number)(start - elemStart);
+          position.size = (icUInt32Number)(end - start);
           map[m_curve[i]] = position;
         }
         m_position[i] = map[m_curve[i]];
@@ -3691,7 +3689,7 @@ bool CIccMpeTintArray::Read(icUInt32Number size, CIccIO *pIO)
   m_nInputChannels = nInputChannels;
   m_nOutputChannels = nOutputChannels;
 
-  icUInt32Number arrayPos = pIO->Tell();
+  size_t arrayPos = pIO->Tell();
 
   icTagTypeSignature tagType;
   if (!pIO->Read32(&tagType))
@@ -3982,9 +3980,9 @@ void CIccToneMapFunc::Describe(std::string& sDescription, int /* nVerboseness */
 
 bool CIccToneMapFunc::Read(icUInt32Number size, CIccIO* pIO)
 {
-  icCurveSegSignature sig;
+  icToneFunctionSignature sig;
 
-  icUInt32Number headerSize = sizeof(icTagTypeSignature) +
+  size_t headerSize = sizeof(icTagTypeSignature) +
     sizeof(icUInt32Number) +
     sizeof(icUInt16Number) +
     sizeof(icUInt16Number);
@@ -3999,7 +3997,6 @@ bool CIccToneMapFunc::Read(icUInt32Number size, CIccIO* pIO)
   if (!pIO->Read32(&sig))
     return false;
 
-  // ERROR - comparison of different enum types!
   if (sig != icSigToneMapFunction)
     return false;
 
@@ -4424,9 +4421,9 @@ bool CIccMpeToneMap::Read(icUInt32Number size, CIccIO* pIO)
 
   icElemTypeSignature sig;
 
-  icUInt32Number startPos = pIO->Tell();
+  size_t startPos = pIO->Tell();
 
-  icUInt32Number headerSize = sizeof(icElemTypeSignature) +
+  size_t headerSize = sizeof(icElemTypeSignature) +
     sizeof(icUInt32Number) +
     sizeof(icUInt16Number) +
     sizeof(icUInt16Number) +
@@ -4465,7 +4462,7 @@ bool CIccMpeToneMap::Read(icUInt32Number size, CIccIO* pIO)
       !pIO->Read32(&lumPos.size))
     return false;
 
-  icUInt32Number curPos = pIO->Tell();
+  size_t curPos = pIO->Tell();
 
   //We need signature of curve type to construct and read it
   icCurveElemSignature curveSig;
@@ -4586,7 +4583,7 @@ bool CIccMpeToneMap::Write(CIccIO* pIO)
   if (!pIO)
     return false;
 
-  icUInt32Number nTagStartPos = pIO->Tell();
+  size_t nTagStartPos = pIO->Tell();
 
   if (!pIO->Write32(&sig))
     return false;
@@ -4600,7 +4597,7 @@ bool CIccMpeToneMap::Write(CIccIO* pIO)
   if (!pIO->Write16(&m_nOutputChannels))
     return false;
 
-  icUInt32Number lumOffset = pIO->Tell();
+  size_t lumOffset = pIO->Tell();
 
   //Reserve position entry for Luminance Curve
   icUInt32Number zero = 0;
@@ -4617,12 +4614,12 @@ bool CIccMpeToneMap::Write(CIccIO* pIO)
 
   //write out luminance curve
   icPositionNumber lumPos;
-  lumPos.offset = pIO->Tell()- nTagStartPos;
+  lumPos.offset = (icUInt32Number)(pIO->Tell()- nTagStartPos);
 
   if (!m_pLumCurve->Write(pIO))
     return false;
 
-  lumPos.size = pIO->Tell() - (lumPos.offset + nTagStartPos);
+  lumPos.size = (icUInt32Number)(pIO->Tell() - (lumPos.offset + nTagStartPos));
 
   //Keep track of tone function positions
   icPositionNumber* funcPos = new icPositionNumber[m_nOutputChannels];
@@ -4631,12 +4628,12 @@ bool CIccMpeToneMap::Write(CIccIO* pIO)
 
   //write out first tone function
   int j;
-  funcPos[0].offset = pIO->Tell() - nTagStartPos;
+  funcPos[0].offset = (icUInt32Number)(pIO->Tell() - nTagStartPos);
   if (!m_pToneFuncs[0]->Write(pIO)) {
     delete[] funcPos;
     return false;
   }
-  funcPos[0].size = pIO->Tell() - (funcPos[0].offset + nTagStartPos);
+  funcPos[0].size = (icUInt32Number)(pIO->Tell() - (funcPos[0].offset + nTagStartPos));
 
   //write out additional non-copied tone functions
   for (int i = 1; i < m_nOutputChannels; i++) {
@@ -4647,18 +4644,18 @@ bool CIccMpeToneMap::Write(CIccIO* pIO)
       funcPos[i] = funcPos[j];
     }
     else {
-      funcPos[i].offset = pIO->Tell() - nTagStartPos;
+      funcPos[i].offset = (icUInt32Number)(pIO->Tell() - nTagStartPos);
       if (!m_pToneFuncs[i]->Write(pIO)) {
         delete[] funcPos;
         return false;
       }
-      funcPos[i].size = pIO->Tell() - (funcPos[i].offset + nTagStartPos);
+      funcPos[i].size = (icUInt32Number)(pIO->Tell() - (funcPos[i].offset + nTagStartPos));
     }
   }
 
   //Everything but positions is written so make sure we end on 32 bit boundary
   pIO->Align32();
-  icUInt32Number endOffset = pIO->Tell();
+  size_t endOffset = pIO->Tell();
 
   //write out luminance curve position
   pIO->Seek(lumOffset, icSeekSet);
@@ -5086,7 +5083,7 @@ bool CIccMpeMatrix::Read(icUInt32Number size, CIccIO *pIO)
       return false;
 
     //Read Matrix data
-    if (pIO->ReadFloat32Float(m_pMatrix, m_size) != (icInt32Number)m_size)
+    if (pIO->ReadFloat32Float(m_pMatrix, m_size) != m_size)
       return false;
   }
   else if (dataSize < (icUInt32Number)nInputChannels * nOutputChannels *sizeof(icFloatNumber) &&
@@ -5118,7 +5115,7 @@ bool CIccMpeMatrix::Read(icUInt32Number size, CIccIO *pIO)
       return false;
 
     //Read Matrix data
-    if (pIO->ReadFloat32Float(m_pMatrix, m_size)!=(icInt32Number)m_size)
+    if (pIO->ReadFloat32Float(m_pMatrix, m_size)!= m_size)
       return false;
 
     //Read Constant data
@@ -5159,7 +5156,7 @@ bool CIccMpeMatrix::Write(CIccIO *pIO)
     return false;
 
   if (m_pMatrix) {
-    if (pIO->WriteFloat32Float(m_pMatrix, m_size)!=(icInt32Number)m_size)
+    if (pIO->WriteFloat32Float(m_pMatrix, m_size)!= m_size)
       return false;
   }
 
@@ -5612,7 +5609,7 @@ bool CIccMpeCLUT::Write(CIccIO *pIO)
       return false;
 
     icFloatNumber *pData = m_pCLUT->GetData(0);
-    icInt32Number nPoints = m_pCLUT->NumPoints()*m_nOutputChannels;
+    size_t nPoints = m_pCLUT->NumPoints()*m_nOutputChannels;
 
     if (pIO->WriteFloat32Float(pData, nPoints) != nPoints) 
       return false;
@@ -6065,7 +6062,7 @@ bool CIccMpeExtCLUT::Write(CIccIO *pIO)
       return false;
 
     icFloatNumber *pData = m_pCLUT->GetData(0);
-    icInt32Number nPoints = m_pCLUT->NumPoints()*m_nOutputChannels;
+    size_t nPoints = m_pCLUT->NumPoints()*m_nOutputChannels;
 
     switch(m_storageType) {
     case icValueTypeUInt8:
@@ -6142,7 +6139,7 @@ CIccMpeCAM::~CIccMpeCAM()
 
 bool CIccMpeCAM::Read(icUInt32Number size, CIccIO *pIO)
 {
-  icTagTypeSignature sig;
+  icElemTypeSignature sig;
 
   icUInt32Number headerSize = sizeof(icTagTypeSignature) + 
     sizeof(icUInt32Number) + 
@@ -6159,7 +6156,6 @@ bool CIccMpeCAM::Read(icUInt32Number size, CIccIO *pIO)
   if (!pIO->Read32(&sig))
     return false;
 
-    // ERROR - comparing different enum types!
   if (sig!=GetType())
     return false;
 

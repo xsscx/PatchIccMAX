@@ -4483,9 +4483,9 @@ bool CIccMpeCalculator::Read(icUInt32Number size, CIccIO *pIO)
 {
   icElemTypeSignature sig;
 
-  icUInt32Number startPos = pIO->Tell();
+  size_t startPos = pIO->Tell();
   
-  icUInt32Number headerSize = sizeof(icTagTypeSignature) + 
+  size_t headerSize = sizeof(icTagTypeSignature) + 
     sizeof(icUInt32Number) + 
     sizeof(icUInt16Number) + 
     sizeof(icUInt16Number) +
@@ -4610,7 +4610,7 @@ bool CIccMpeCalculator::Write(CIccIO *pIO)
   if (!pIO)
     return false;
 
-  icUInt32Number elemStart = pIO->Tell();
+  size_t elemStart = pIO->Tell();
 
   if (!pIO->Write32(&sig))
     return false;
@@ -4633,21 +4633,21 @@ bool CIccMpeCalculator::Write(CIccIO *pIO)
   if (!posvals) {
     return false;
   }
-  icUInt32Number nPositionStart = pIO->Tell();
+  size_t nPositionStart = pIO->Tell();
 
-  icUInt32Number n, np = nPos * (sizeof(icPositionNumber)/sizeof(icUInt32Number));
+  size_t n, np = nPos * (sizeof(icPositionNumber)/sizeof(icUInt32Number));
   if (pIO->Write32(posvals, np)!=np) {
     free(posvals);
     return false;
   }
 
   if (m_calcFunc) {
-    posvals[0].offset = pIO->Tell()-elemStart;
+    posvals[0].offset = (icUInt32Number)(pIO->Tell() - elemStart);
     if (!m_calcFunc->Write(pIO)) {
       free(posvals);
       return false;
     }
-    posvals[0].size = pIO->Tell()-elemStart - posvals[nPos-1].offset;
+    posvals[0].size = (icUInt32Number)(pIO->Tell() - elemStart - posvals[nPos-1].offset );
     pIO->Align32();
   }
 
@@ -4656,18 +4656,18 @@ bool CIccMpeCalculator::Write(CIccIO *pIO)
   if (m_nSubElem) {
     for(n=0; n<m_nSubElem; n++) {
       if (m_SubElem[n]) {
-        pos->offset = pIO->Tell()-elemStart;
+        pos->offset = (icUInt32Number)( pIO->Tell()-elemStart );
         if (!m_SubElem[n]->Write(pIO)) {
           free(posvals);
           return false;
         }
-        pos->size = pIO->Tell()-elemStart - pos->offset;
+        pos->size = (icUInt32Number)(pIO->Tell()-elemStart - pos->offset);
         pIO->Align32();
       }
       pos++;
     }
   }
-  icUInt32Number endPos = pIO->Tell();
+  size_t endPos = pIO->Tell();
 
   pIO->Seek(nPositionStart, icSeekSet);
 

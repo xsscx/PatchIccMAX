@@ -648,12 +648,12 @@ icUInt32Number icXmlGetHexDataSize(const char *szText)
   return rv;
 }
 
-icUInt32Number icXmlDumpHexData(std::string &xml, std::string blanks, void *pBuf, icUInt32Number nBufSize)
+size_t icXmlDumpHexData(std::string &xml, std::string blanks, void *pBuf, size_t nBufSize)
 {
   icUInt8Number *m_ptr = (icUInt8Number *)pBuf;
   const size_t bufSize = 15;
   char buf[bufSize];
-  icUInt32Number i;
+  size_t i;
 
   for (i=0; i<nBufSize; i++, m_ptr++) {
     if (!(i%32)) {
@@ -808,7 +808,7 @@ bool CIccXmlArrayType<T, Tsig>::ParseTextArray(xmlNode *pNode)
 }
 
 template <class T, icTagTypeSignature Tsig>
-bool CIccXmlArrayType<T, Tsig>::ParseTextArrayNum(const char *szText, icUInt32Number num, std::string &parseStr)
+bool CIccXmlArrayType<T, Tsig>::ParseTextArrayNum(const char *szText, size_t num, std::string &parseStr)
 {
   icUInt32Number n = ParseTextCountNum(szText, num, parseStr);
   if (n) {	  
@@ -924,7 +924,7 @@ static inline bool icIsNumChar(char c)
 // function used when checking contents of a file
 // count the number of entries.
 template <class T, icTagTypeSignature Tsig>
-icUInt32Number CIccXmlArrayType<T, Tsig>::ParseTextCountNum(const char *szText, icUInt32Number num, std::string &parseStr)
+icUInt32Number CIccXmlArrayType<T, Tsig>::ParseTextCountNum(const char *szText, size_t num, std::string &parseStr)
 {
   icUInt32Number n = 0;
   bool bInNum = false;

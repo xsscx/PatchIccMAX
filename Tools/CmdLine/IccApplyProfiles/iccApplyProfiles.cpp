@@ -438,7 +438,7 @@ int main(int argc, const char** argv)
 
   //Embed the last profile into output image as needed
   if (bEmbed && last_path) {
-    icInt32Number length = 0;
+    size_t length = 0;
     icUInt8Number *pDestProfile = NULL;
 
     CIccFileIO io;
@@ -447,7 +447,7 @@ int main(int argc, const char** argv)
       pDestProfile = (icUInt8Number *)malloc(length);
       if (pDestProfile) {
         io.Read8(pDestProfile, length);
-        DstImg.SetIccProfile(pDestProfile, length);
+        DstImg.SetIccProfile(pDestProfile, ( unsigned int) length);
         free(pDestProfile);
       }
       io.Close();

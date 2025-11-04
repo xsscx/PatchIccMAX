@@ -512,7 +512,7 @@ bool CIccTagDict::Read(icUInt32Number size, CIccIO *pIO)
 
   Cleanup();
 
-  m_tagStart = pIO->Tell();
+  m_tagStart = (icUInt32Number) pIO->Tell();
 
   if (!pIO->Read32(&sig))
     return false;
@@ -614,7 +614,7 @@ bool CIccTagDict::Read(icUInt32Number size, CIccIO *pIO)
         }
 
         num = pos[i].posName.size / sizeof(icUnicodeChar);
-        if (pIO->Read16(buf, num)!=(icInt32Number)num) {
+        if (pIO->Read16(buf, num)!= num) {
           free(pos);
           free(buf);
           delete ptr.ptr;
@@ -659,7 +659,7 @@ bool CIccTagDict::Read(icUInt32Number size, CIccIO *pIO)
         }
 
         num = pos[i].posValue.size / sizeof(icUnicodeChar);
-        if (pIO->Read16(buf, num)!=(icInt32Number)num) {
+        if (pIO->Read16(buf, num)!=num) {
           free(pos);
           free(buf);
           delete ptr.ptr;
@@ -798,7 +798,7 @@ bool CIccTagDict::Write(CIccIO *pIO)
   if (!pIO)
     return false;
 
-  m_tagStart = pIO->Tell();
+  m_tagStart = (icUInt32Number) pIO->Tell();
 
   if (!pIO->Write32(&sig))
     return false;
@@ -826,7 +826,8 @@ bool CIccTagDict::Write(CIccIO *pIO)
   if (!pos)
     return false;
 
-  icUInt32Number n, dirpos = pIO->Tell();
+  icUInt32Number n;
+  size_t dirpos = pIO->Tell();
 
   //Write Unintialized Dict rec offset array
   for (i=m_Dict->begin(); i!= m_Dict->end(); i++) {
@@ -840,42 +841,42 @@ bool CIccTagDict::Write(CIccIO *pIO)
   //Write Dict records
   for (n=0, i=m_Dict->begin(); i!= m_Dict->end(); i++) {
     if (i->ptr) {
-      pos[n].posName.offset = pIO->Tell()-m_tagStart;
+      pos[n].posName.offset = (icUInt32Number)( pIO->Tell()-m_tagStart );
 
       for(chrptr = i->ptr->GetName().begin(); chrptr!=i->ptr->GetName().end(); chrptr++) {
         c=(icUnicodeChar)*chrptr;
         pIO->Write16(&c, 1);
       }
-      pos[n].posName.size = pIO->Tell()-m_tagStart - pos[n].posName.offset;
+      pos[n].posName.size = (icUInt32Number)(pIO->Tell()-m_tagStart - pos[n].posName.offset);
       pIO->Align32();
 
       if (i->ptr->IsValueSet()) {
-        pos[n].posValue.offset = pIO->Tell()-m_tagStart;
+        pos[n].posValue.offset = (icUInt32Number)(pIO->Tell()-m_tagStart);
         for(chrptr = i->ptr->ValueBegin(); chrptr!=i->ptr->ValueEnd(); chrptr++) {
           c=(icUnicodeChar)*chrptr;
           pIO->Write16(&c, 1);
         }
-        pos[n].posValue.size = pIO->Tell()-m_tagStart - pos[n].posValue.offset;
+        pos[n].posValue.size = (icUInt32Number)(pIO->Tell()-m_tagStart - pos[n].posValue.offset);
         pIO->Align32();
       }
 
       if (recSize>16 && i->ptr->GetNameLocalized()) {
-        pos[n].posNameLocalized.offset = pIO->Tell()-m_tagStart;
+        pos[n].posNameLocalized.offset = (icUInt32Number)(pIO->Tell()-m_tagStart);
         i->ptr->GetNameLocalized()->Write(pIO);
-        pos[n].posNameLocalized.size = pIO->Tell()-m_tagStart - pos[n].posNameLocalized.offset;
+        pos[n].posNameLocalized.size = (icUInt32Number)(pIO->Tell()-m_tagStart - pos[n].posNameLocalized.offset);
         pIO->Align32();
       }
 
       if (recSize>24 && i->ptr->GetValueLocalized()) {
-        pos[n].posValueLocalized.offset = pIO->Tell()-m_tagStart;
+        pos[n].posValueLocalized.offset = (icUInt32Number)(pIO->Tell()-m_tagStart);
         i->ptr->GetValueLocalized()->Write(pIO);
-        pos[n].posValueLocalized.size = pIO->Tell()-m_tagStart - pos[n].posValueLocalized.offset;
+        pos[n].posValueLocalized.size = (icUInt32Number)(pIO->Tell()-m_tagStart - pos[n].posValueLocalized.offset);
         pIO->Align32();
       }
       n++;
     }
   }
-  icUInt32Number endpos = pIO->Tell();
+  size_t endpos = pIO->Tell();
 
   pIO->Seek(dirpos, icSeekSet);
 

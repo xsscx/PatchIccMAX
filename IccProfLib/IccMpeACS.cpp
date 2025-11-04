@@ -187,13 +187,13 @@ bool CIccMpeAcs::Read(icUInt32Number size, CIccIO *pIO)
   if (!pIO->Read32(&m_signature))
     return false;
 
-  icUInt32Number dataSize = size - headerSize;
+  size_t dataSize = size - headerSize;
 
   if (!AllocData(dataSize))
     return false;
 
   if (dataSize) {
-    if (pIO->Read8(m_pData, dataSize)!=(icInt32Number)dataSize)
+    if (pIO->Read8(m_pData, dataSize)!=dataSize)
       return false;
   }
 
@@ -235,7 +235,7 @@ bool CIccMpeAcs::Write(CIccIO *pIO)
   if (m_pData && m_nDataSize) {
     // ERROR - sign and unsigned comparison, this should be fixed at a higher level
     // cast type to get it compiling for now
-    if (pIO->Write8(m_pData, m_nDataSize) != (icInt32Number)m_nDataSize)
+    if (pIO->Write8(m_pData, m_nDataSize) != m_nDataSize)
       return false;
   }
 
@@ -302,7 +302,7 @@ icValidateStatus CIccMpeAcs::Validate(std::string sigPath, std::string &sReport,
 * 
 * Return: 
 ******************************************************************************/
-bool CIccMpeAcs::AllocData(icUInt32Number size)
+bool CIccMpeAcs::AllocData(size_t size)
 {
   if (m_pData)
     free(m_pData);

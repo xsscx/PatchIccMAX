@@ -100,9 +100,9 @@ public:
 
   virtual bool IsAcs() { return true; }
 
-  bool AllocData(icUInt32Number size);
+  bool AllocData(size_t size);
   icUInt8Number* GetData() { return m_pData; }
-  icUInt32Number GetDataSize() { return m_nDataSize; }
+  size_t GetDataSize() { return m_nDataSize; }
 
   virtual icAcsSignature GetAcsSig() { return m_signature; }
 
@@ -110,7 +110,7 @@ protected:
   CIccMpeAcs();
   icAcsSignature m_signature;
 
-  icUInt32Number m_nDataSize;
+  size_t m_nDataSize;
   icUInt8Number *m_pData;
 };
 

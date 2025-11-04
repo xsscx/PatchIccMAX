@@ -161,14 +161,15 @@ bool icIsNear(icFloatNumber v1, icFloatNumber v2, icFloatNumber nearRange /* = 1
 *  true pos is valid
 ******************************************************************************
 */
-bool icValidTagPos(const icPositionNumber& pos, icUInt32Number nTagHeaderSize, icUInt32Number nTagSize, bool bAllowEmpty)
+bool icValidTagPos(const icPositionNumber& pos, size_t nTagHeaderSize, size_t nTagSize, bool bAllowEmpty)
 {
   if ((bAllowEmpty && !pos.size) || !pos.offset)
     return true;
 
   if (pos.offset < nTagHeaderSize)
     return false;
-  if ((icUInt64Number)pos.offset + pos.size > (icUInt64Number)nTagSize)
+  
+  if ( ((size_t)pos.offset + pos.size) > nTagSize)
     return false;
 
   if (!pos.size && !bAllowEmpty)
@@ -948,7 +949,8 @@ void icXyzToPcs(icFloatNumber *XYZ)
 
 #define DUMPBYTESPERLINE 16
 
-void icMemDump(std::string &sDump, void *pBuf, icUInt32Number nNum)
+// This assumes that nNum is only 8 hex digits, 4 bytes, 32 bit value
+void icMemDump(std::string &sDump, void *pBuf, size_t nNum)
 {
   icUInt8Number *pData = (icUInt8Number *)pBuf;
   const size_t bufSize = 80;
@@ -956,13 +958,13 @@ void icMemDump(std::string &sDump, void *pBuf, icUInt32Number nNum)
   icChar buf[bufSize] = {0};
   icChar num[numSize] = {0};
 
-  icInt32Number i, j;
+  icInt32Number j;
   icUInt8Number c;
 
-  icInt32Number lines = (nNum + DUMPBYTESPERLINE - 1)/DUMPBYTESPERLINE;
+  size_t lines = (nNum + DUMPBYTESPERLINE - 1)/DUMPBYTESPERLINE;
   sDump.reserve(sDump.size() + lines*79);
 
-  for (i=0; i<(icInt32Number)nNum; i++, pData++) {
+  for (size_t i=0; i<nNum; i++, pData++) {
     j=i%DUMPBYTESPERLINE;
     if (!j) {
       if (i) {
@@ -972,7 +974,7 @@ void icMemDump(std::string &sDump, void *pBuf, icUInt32Number nNum)
       buf[76] = ' ';
       buf[77] = '\n';
       buf[78] = '\0';
-      snprintf(num, numSize, "%08X:", i);
+      snprintf(num, numSize, "%08lX:", i);
       strncpy(buf, num, 9);
     }
 

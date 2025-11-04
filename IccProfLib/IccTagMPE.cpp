@@ -371,7 +371,7 @@ bool CIccMpeUnknown::Read(icUInt32Number nSize, CIccIO *pIO)
     if (!SetDataSize(nDataSize, false))
       return false;
 
-    if (pIO->Read8(m_pData, nDataSize)!=(icInt32Number)nDataSize)
+    if (pIO->Read8(m_pData, nDataSize)!= nDataSize)
       return false;
   }
 
@@ -408,7 +408,7 @@ bool CIccMpeUnknown::Write(CIccIO *pIO)
     return false;
 
   if (m_nSize) {
-    if (pIO->Write8(m_pData, m_nSize)!=(icInt32Number)m_nSize)
+    if (pIO->Write8(m_pData, m_nSize)!= m_nSize)
       return false;
   }
 
@@ -987,7 +987,7 @@ bool CIccTagMultiProcessElement::Read(icUInt32Number size, CIccIO *pIO)
 
   Clean();
 
-  icUInt32Number tagStart = pIO->Tell();
+  size_t tagStart = pIO->Tell();
 
   if (!pIO->Read32(&sig))
     return false;
@@ -1039,9 +1039,9 @@ bool CIccTagMultiProcessElement::Read(icUInt32Number size, CIccIO *pIO)
     //Use hash to cache offset duplication
     CIccMultiProcessElement *element = loadedElements[m_position[i].offset];
     if (!element) {
-      icUInt32Number pos = tagStart + m_position[i].offset;
+      size_t pos = tagStart + m_position[i].offset;
 
-      if (pIO->Seek(pos, icSeekSet)!=(icInt32Number)pos) {
+      if (pIO->Seek(pos, icSeekSet)!= pos) {
         return false;
       }
 
@@ -1049,7 +1049,7 @@ bool CIccTagMultiProcessElement::Read(icUInt32Number size, CIccIO *pIO)
         return false;
       }
       
-      if (pIO->Seek(pos, icSeekSet)!=(icInt32Number)pos) {
+      if (pIO->Seek(pos, icSeekSet)!= pos) {
         return false;
       }
 
@@ -1090,7 +1090,7 @@ bool CIccTagMultiProcessElement::Write(CIccIO *pIO)
   if (!pIO)
     return false;
 
-  icUInt32Number tagStart = pIO->Tell();
+  size_t tagStart = pIO->Tell();
 
   if (!pIO->Write32(&sig))
     return false;
@@ -1115,7 +1115,7 @@ bool CIccTagMultiProcessElement::Write(CIccIO *pIO)
     return false;
 
   if (m_nProcElements) {
-    icUInt32Number offsetPos = pIO->Tell();
+    size_t offsetPos = pIO->Tell();
 
     if (m_position) {
       free(m_position);
@@ -1135,31 +1135,30 @@ bool CIccTagMultiProcessElement::Write(CIccIO *pIO)
 
     CIccLutPtrMap map;
     CIccMultiProcessElementList::iterator i;
-    icUInt32Number start, end;
     icPositionNumber position;
 
     //Write out each process element
     for (j=0, i=m_list->begin(); i!=m_list->end(); i++, j++) {
       if (map.find(i->ptr)==map.end()) {
-        start = pIO->Tell();
+        size_t start = pIO->Tell();
 
         if (!i->ptr->Write(pIO))
           return false;
 
-        end = pIO->Tell();
+        size_t end = pIO->Tell();
 
         if (!pIO->Align32())
           return false;
 
-        position.offset = start - tagStart;
-        position.size = end - start;
+        position.offset = (icUInt32Number)(start - tagStart);
+        position.size = (icUInt32Number)(end - start);
 
         map[i->ptr] = position;
       }
       m_position[j] = map[i->ptr];
     }
 
-    icUInt32Number endPos = pIO->Tell();
+    size_t endPos = pIO->Tell();
 
     if (pIO->Seek(offsetPos, icSeekSet)<0)
       return false;

@@ -476,7 +476,7 @@ bool CIccTagProfileSequenceId::Read(icUInt32Number size, CIccIO *pIO)
   m_list->clear();
 
   icUInt32Number sig;
-  icUInt32Number tagStart = pIO->Tell();
+  size_t tagStart = pIO->Tell();
 
   if (!pIO->Read32(&sig))
     return false;
@@ -548,7 +548,7 @@ bool CIccTagProfileSequenceId::Write(CIccIO *pIO)
   if (!pIO)
     return false;
 
-  icUInt32Number tagStart = pIO->Tell();
+  size_t tagStart = pIO->Tell();
 
   if (!pIO->Write32(&sig))
     return false;
@@ -564,7 +564,7 @@ bool CIccTagProfileSequenceId::Write(CIccIO *pIO)
   if (!pos)
     return false;
 
-  icUInt32Number dirpos = pIO->Tell();
+  size_t dirpos = pIO->Tell();
 
   //Write Unintialized TagDir
   for (i=0; i<count; i++) {
@@ -578,16 +578,16 @@ bool CIccTagProfileSequenceId::Write(CIccIO *pIO)
 
   //Write Tags
   for (i=0, j=m_list->begin(); j!= m_list->end(); i++, j++) {
-    pos[i].offset = pIO->Tell();
+    pos[i].offset = (icUInt32Number)pIO->Tell();
 
     j->Write(pIO);
-    pos[i].size = pIO->Tell() - pos[i].offset;
+    pos[i].size = (icUInt32Number)(pIO->Tell() - pos[i].offset);
     pos[i].offset -= tagStart;
 
     pIO->Align32();
   }
 
-  icUInt32Number endpos = pIO->Tell();
+  size_t endpos = pIO->Tell();
 
   pIO->Seek(dirpos, icSeekSet);
 

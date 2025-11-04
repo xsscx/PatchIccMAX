@@ -206,7 +206,7 @@ static std::string icXmlParseTextString(xmlNode *pNode, std::string &parseStr, b
             return str;
           }
 
-          icUInt32Number fileLength = file->GetLength();  
+          size_t fileLength = file->GetLength();
           char *ansiStr = (char *)malloc(fileLength+1);
 
           if (!ansiStr) {
@@ -403,7 +403,7 @@ bool CIccTagXmlTextDescription::ParseXml(xmlNode *pNode, std::string &parseStr)
       return false;
     }
 
-    icUInt32Number fileLength = file->GetLength();  
+    size_t fileLength = file->GetLength();
     char *buf = (char *)malloc(fileLength);
 
     if (!buf) {
@@ -1492,7 +1492,7 @@ bool CIccTagXmlFloatNum<T, A, Tsig>::ParseXml(xmlNode *pNode, std::string &parse
       return false;
     }
 
-    icUInt32Number len = file->GetLength();
+    size_t len = file->GetLength();
 
     if (!stricmp(icXmlAttrValue(pNode, "Format", "text"), "text")) {
       char *fbuf = (char*)malloc(len+1);
@@ -1533,7 +1533,7 @@ bool CIccTagXmlFloatNum<T, A, Tsig>::ParseXml(xmlNode *pNode, std::string &parse
       return true;
     }
     else if (Tsig==icSigFloat16ArrayType && sizeof(T)==sizeof(icFloat32Number)) {
-      icUInt32Number n = len/sizeof(icFloat32Number);
+      icUInt32Number n = (icUInt32Number)(len/sizeof(icFloat32Number));
       this->SetSize(n);
       if (file->ReadFloat16Float(&this->m_Num[0], n)!=n) {
         delete file;
@@ -1543,7 +1543,7 @@ bool CIccTagXmlFloatNum<T, A, Tsig>::ParseXml(xmlNode *pNode, std::string &parse
       return true;
     }
     else if (Tsig==icSigFloat32ArrayType && sizeof(T)==sizeof(icFloat32Number)) {
-      icUInt32Number n = len/sizeof(icFloat32Number);
+      icUInt32Number n =  (icUInt32Number)(len/sizeof(icFloat32Number));
       this->SetSize(n);
       if (file->ReadFloat32Float(&this->m_Num[0], n)!=n) {
         delete file;
@@ -1553,7 +1553,7 @@ bool CIccTagXmlFloatNum<T, A, Tsig>::ParseXml(xmlNode *pNode, std::string &parse
       return true;
     }
     else if (Tsig==icSigFloat64ArrayType && sizeof(T)==sizeof(icFloat64Number)) {
-      icUInt32Number n = len/sizeof(icFloat64Number);
+      icUInt32Number n =  (icUInt32Number)(len/sizeof(icFloat64Number));
       this->SetSize(n);
       if (file->Read64(&this->m_Num[0], n)!=n) {
         delete file;
@@ -2610,7 +2610,7 @@ bool CIccTagXmlCurve::ParseXml(xmlNode *pNode, icConvertType nType, std::string 
 
       // format is text
       if (!strcmp(format, "text")) {
-        icUInt32Number num = file->GetLength();
+        size_t num = file->GetLength();
         char *buf = (char *) new char[num];
 
         if (!buf) {          
@@ -2747,10 +2747,10 @@ bool CIccTagXmlCurve::ParseXml(xmlNode *pNode, icConvertType nType, std::string 
         bool little_endian = !strcmp(order, "little");    
 
         if (nType == icConvert8Bit){
-          icUInt32Number num = file->GetLength();
+          size_t num = file->GetLength();
           icUInt8Number value;
 
-          SetSize(num);
+          SetSize( (icUInt32Number)num);
           icFloatNumber *dst =  GetData(0);
           icUInt32Number i;
           for (i=0; i<num; i++) {
@@ -2768,13 +2768,13 @@ bool CIccTagXmlCurve::ParseXml(xmlNode *pNode, icConvertType nType, std::string 
           return true;
         }        
         else if (nType == icConvert16Bit || nType == icConvertVariable){
-          icUInt32Number num = file->GetLength() / sizeof(icUInt16Number);
+          size_t num = file->GetLength() / sizeof(icUInt16Number);
           icUInt16Number value;
           icUInt8Number *ptr = (icUInt8Number*)&value;
 
-          SetSize(num);
+          SetSize((icUInt32Number)num);
           icFloatNumber *dst = GetData(0);
-          icUInt32Number i;
+          size_t i;
           for (i=0; i<num; i++) {
             if (!file->Read16(&value)) {  //this assumes data is big endian
               perror("Read-File Error");
@@ -2799,14 +2799,14 @@ bool CIccTagXmlCurve::ParseXml(xmlNode *pNode, icConvertType nType, std::string 
           return true;
         }
         else if (nType == icConvertFloat) {
-          icUInt32Number num = file->GetLength()/sizeof(icFloat32Number);
+          size_t num = file->GetLength()/sizeof(icFloat32Number);
           icFloat32Number value;
           icUInt8Number *ptr = (icUInt8Number*)&value;
 
-          SetSize(num);
+          SetSize((icUInt32Number)num);
           icFloatNumber *dst = GetData(0);
 
-          icUInt32Number i;
+          size_t i;
           for (i=0; i<num; i++) {
             if (!file->ReadFloat32Float(&value)) { //assumes data is big endian
               perror("Read-File Error");
@@ -3438,7 +3438,7 @@ CIccCLUT *icCLutFromXml(xmlNode *pNode, int nIn, int nOut, icConvertType nType, 
       const char *format = icXmlAttrValue(table, "Format");
 
       if (!strcmp(format, "text")) {
-        icUInt32Number num = file->GetLength();
+        size_t num = file->GetLength();
         char *buf = (char *)malloc(num);
 
         if (!buf) {  
@@ -3608,8 +3608,8 @@ CIccCLUT *icCLutFromXml(xmlNode *pNode, int nIn, int nOut, icConvertType nType, 
         }
 
         if (nType == icConvert8Bit){
-          icUInt32Number num = file->GetLength();
-          icUInt8Number value;      
+          size_t num = file->GetLength();
+          icUInt8Number value;
           // if number of entries in file is not equal to size of CLUT table, flag as error
           if (num!=pCLUT->NumPoints()*pCLUT->GetOutputChannels()) {
             parseStr += "Error! - Number of entries in file '";
@@ -3637,7 +3637,7 @@ CIccCLUT *icCLutFromXml(xmlNode *pNode, int nIn, int nOut, icConvertType nType, 
           }
         }
         else if (nType == icConvert16Bit){
-          icUInt32Number num = file->GetLength() / sizeof(icUInt16Number);
+          size_t num = file->GetLength() / sizeof(icUInt16Number);
           icUInt16Number value;
           icUInt8Number *ptr = (icUInt8Number*)&value;
 
@@ -3677,7 +3677,7 @@ CIccCLUT *icCLutFromXml(xmlNode *pNode, int nIn, int nOut, icConvertType nType, 
           }
         }
         else if (nType == icConvertFloat){
-          icUInt32Number num = file->GetLength()/sizeof(icFloat32Number);
+          size_t num = file->GetLength()/sizeof(icFloat32Number);
           icFloat32Number value;
           icUInt8Number *ptr = (icUInt8Number*)&value;
 
@@ -5161,9 +5161,9 @@ bool CIccTagXmlEmbeddedHeightImage::ParseXml(xmlNode *pNode, std::string &parseS
         return false;
       }
 
-      icUInt32Number num = file->GetLength();
+      size_t num = file->GetLength();
 
-      SetSize(num);
+      SetSize((icUInt32Number)num);
       icUInt8Number *dst = GetData(0);
       if (file->Read8(dst, num)!=num) {
         perror("Read-File Error");
@@ -5256,9 +5256,9 @@ bool CIccTagXmlEmbeddedNormalImage::ParseXml(xmlNode *pNode, std::string &parseS
         return false;
       }
 
-      icUInt32Number num = file->GetLength();
+      size_t num = file->GetLength();
 
-      SetSize(num);
+      SetSize((icUInt32Number)num);
       icUInt8Number *dst = GetData(0);
       if (file->Read8(dst, num) != num) {
         perror("Read-File Error");

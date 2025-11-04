@@ -364,7 +364,7 @@ bool CIccTagStruct::Read(icUInt32Number size, CIccIO *pIO)
 
   Cleanup();
 
-  m_tagStart = pIO->Tell();
+  m_tagStart = (icUInt32Number) pIO->Tell();
 
   if (!pIO->Read32(&sig))
     return false;
@@ -430,7 +430,7 @@ bool CIccTagStruct::Write(CIccIO *pIO)
   if (!pIO)
     return false;
 
-  m_tagStart = pIO->Tell();
+  m_tagStart = (icUInt32Number) pIO->Tell();
 
   if (!pIO->Write32(&sig))
     return false;
@@ -451,7 +451,7 @@ bool CIccTagStruct::Write(CIccIO *pIO)
 
   pIO->Write32(&count);
 
-  icUInt32Number dirpos = pIO->Tell();
+  size_t dirpos = pIO->Tell();
 
   //Write Unintialized TagDir
   for (i=m_ElemEntries->begin(); i!= m_ElemEntries->end(); i++) {
@@ -474,9 +474,9 @@ bool CIccTagStruct::Write(CIccIO *pIO)
       }
 
       if (i==j) {
-        i->TagInfo.offset = pIO->GetLength();
+        i->TagInfo.offset = (icUInt32Number) pIO->GetLength();
         i->pTag->Write(pIO);
-        i->TagInfo.size = pIO->GetLength() - i->TagInfo.offset;
+        i->TagInfo.size = (icUInt32Number)( pIO->GetLength() - i->TagInfo.offset);
         i->TagInfo.offset -= m_tagStart;
 
         pIO->Align32();
@@ -487,7 +487,7 @@ bool CIccTagStruct::Write(CIccIO *pIO)
       }
     }
   }
-  icUInt32Number epos = pIO->Tell();
+  size_t epos = pIO->Tell();
 
   pIO->Seek(dirpos, icSeekSet);
 
@@ -1231,7 +1231,7 @@ bool CIccTagArray::Read(icUInt32Number size, CIccIO *pIO)
 
   Cleanup();
 
-  icUInt32Number nTagStart = pIO->Tell();
+  size_t nTagStart = pIO->Tell();
 
   if (!pIO->Read32(&sig))
     return false;
@@ -1334,7 +1334,7 @@ bool CIccTagArray::Write(CIccIO *pIO)
   if (!pIO)
     return false;
 
-  icUInt32Number nTagStart = pIO->Tell();
+  size_t nTagStart = pIO->Tell();
 
   if (!pIO->Write32(&sig))
     return false;
@@ -1351,7 +1351,7 @@ bool CIccTagArray::Write(CIccIO *pIO)
   if (m_nSize) {
     icUInt32Number i, j;
 
-    icUInt32Number pos = pIO->Tell();
+    size_t pos = pIO->Tell();
 
     //Write Unintialized TagPosition block
     icUInt32Number zero = 0;
@@ -1376,12 +1376,12 @@ bool CIccTagArray::Write(CIccIO *pIO)
           tagPos[i].size = tagPos[j].offset;
         }
         else {
-          tagPos[i].offset = pIO->Tell() - nTagStart;
+          tagPos[i].offset = (icUInt32Number)(pIO->Tell() - nTagStart);
           if (!m_TagVals[i].ptr->Write(pIO)) {
             delete [] tagPos;
             return false;
           }
-          tagPos[i].size =  pIO->Tell() - nTagStart - tagPos[i].offset;
+          tagPos[i].size = (icUInt32Number)( pIO->Tell() - nTagStart - tagPos[i].offset );
           pIO->Align32();
         }
       }
@@ -1390,7 +1390,7 @@ bool CIccTagArray::Write(CIccIO *pIO)
         tagPos[i].size = 0;
       }
     }
-    icUInt32Number endPos = pIO->Tell();
+    size_t endPos = pIO->Tell();
 
     //Update TagPosition block
     pIO->Seek(pos, icSeekSet);

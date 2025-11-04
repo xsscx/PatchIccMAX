@@ -428,7 +428,7 @@ bool CIccMpeSpectralMatrix::Read(icUInt32Number size, CIccIO *pIO)
     return false;
 
   //Read Matrix data
-  if (pIO->ReadFloat32Float(m_pMatrix, m_size)!=(icInt32Number)m_size)
+  if (pIO->ReadFloat32Float(m_pMatrix, m_size)!= m_size)
     return false;
 
   if (size>=headerSize + 2*(int)range.steps*sizeof(icFloatNumber) + m_size * sizeof(icFloatNumber)) {
@@ -492,7 +492,7 @@ bool CIccMpeSpectralMatrix::Write(CIccIO *pIO)
   }
 
   if (m_pMatrix) {
-    if (pIO->WriteFloat32Float(m_pMatrix, m_size)!=(icInt32Number)m_size)
+    if (pIO->WriteFloat32Float(m_pMatrix, m_size)!= m_size)
       return false;
   }
 
@@ -1060,7 +1060,7 @@ bool CIccMpeSpectralCLUT::Read(icUInt32Number size, CIccIO *pIO)
   if (!pData)
     return false;
 
-  icInt32Number nPoints = m_pCLUT->NumPoints()*(int)m_Range.steps;
+  size_t nPoints = m_pCLUT->NumPoints()*(int)m_Range.steps;
 
   switch(m_nStorageType) {
     case icValueTypeUInt8:
@@ -1178,7 +1178,7 @@ bool CIccMpeSpectralCLUT::Write(CIccIO *pIO)
       return false;
 
     icFloatNumber *pData = m_pCLUT->GetData(0);
-    icInt32Number nPoints = m_pCLUT->NumPoints()*(int)m_Range.steps;
+    size_t nPoints = m_pCLUT->NumPoints()*(int)m_Range.steps;
 
     switch(m_nStorageType) {
     case icValueTypeUInt8:
