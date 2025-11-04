@@ -1,0 +1,193 @@
+###############################################################
+#
+## Copyright (©) 2024 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 31-OCT-2025 at 1200Z by David Hoyt
+#
+#
+#
+## Intent: pr189-matrix
+#
+## TODO:  
+#
+#
+###############################################################
+
+name: pr189-matrix
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: "${{ matrix.os }} • ${{ matrix.compiler }} • ${{ matrix.build_type }}"
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        compiler: [gcc, clang]
+        build_type: [Release, Debug]
+        exclude:
+          - os: macos-latest
+            compiler: gcc
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prep log/artifact workspace
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          echo "ARTIFACT_PREFIX=iccdev-v231-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}" >> "$GITHUB_ENV"
+      # ---------- Linux ----------
+      - name: Install Dependencies (Linux)
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake gcc g++ clang clang-tools \
+            libpng-dev libxml2 libxml2-dev libtiff-dev \
+            nlohmann-json3-dev libwxgtk3.2-dev wx-common \
+            python3 python3-pip curl git llvm zsh
+      - name: Set Compiler (Linux)
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          set -euo pipefail
+          if [ "${{ matrix.compiler }}" = "gcc" ]; then
+            echo "CC=gcc"  >> $GITHUB_ENV
+            echo "CXX=g++" >> $GITHUB_ENV
+          else
+            echo "CC=clang"   >> $GITHUB_ENV
+            echo "CXX=clang++" >> $GITHUB_ENV
+          fi
+      - name: Print Compiler Version (Linux)
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          echo "Compiler Version:" >> $GITHUB_STEP_SUMMARY
+          $CC --version >> $GITHUB_STEP_SUMMARY
+      - name: Configure & Build PR189 (Linux)
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          set -euxo pipefail
+          git clone https://github.com/InternationalColorConsortium/iccDEV.git
+          cd iccDEV
+          git branch
+          git status
+          git fetch origin pull/189/head:pr-189
+          git checkout pr-189
+          cd Build
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
+                -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+                -DENABLE_TOOLS=ON \
+                -DENABLE_STATIC_LIBS=ON \
+                -DENABLE_SHARED_LIBS=ON \
+                -Wno-dev Cmake/
+          make -j"$(nproc)"
+          find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
+            -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
+          cd ..
+          echo "========= BEGIN INSIDE STUB ========="
+          cd Testing/
+          echo "=== Updating PATH ==="
+          for d in ../Build/Tools/*; do
+           [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
+          done 
+          sh CreateAllProfiles.sh
+          sh RunTests.sh
+          cd HDR
+          sh mkprofiles.sh
+          cd ..
+          cd CalcTest
+          sh checkInvalidProfiles.sh
+          cd ..
+          cd mcs
+          sh updateprev.sh
+          sh updateprevWithBkgd.sh
+          cd ..
+          find . -iname "*.icc" | wc -l
+          cd ../Build
+          pwd
+          cd ..
+          pwd
+          cd ..
+          pwd
+          ls
+          /usr/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/ubuntu24-runner-remote.zsh)"
+          cat linux_build_report.html
+      # ---------- macOS ----------
+      - name: Clone repository and install dependencies (macOS)
+        if: ${{ runner.os == 'macOS' }}
+        run: |
+          echo "📥 Building PR189"
+          git clone https://github.com/InternationalColorConsortium/iccDEV.git
+          cd iccDEV
+          git branch
+          git status
+          git fetch origin pull/189/head:pr-189
+          git checkout pr-189
+          cd Build
+          echo "📦 Installing Homebrew dependencies..."
+          brew install libpng nlohmann-json libxml2 wxwidgets libtiff jpeg zlib || echo "⚠️ Some dependencies might already be installed."
+          echo "✔ Dependency installation complete."
+      - name: Print Compiler Version (macOS)
+        if: ${{ runner.os == 'macOS' }}
+        run: |
+          echo "Compiler Version:" >> $GITHUB_STEP_SUMMARY
+          clang --version >> $GITHUB_STEP_SUMMARY
+      - name: Configure & Build (macOS)
+        if: ${{ runner.os == 'macOS' }}
+        run: |
+          echo "⚙️ Setting up CMake build configuration..."
+          cd iccDEV/Build
+          sudo rm -rf /Library/Frameworks/Mono.framework/Headers/png.h || true
+          echo 'export PATH="/opt/homebrew/opt/jpeg/bin:$PATH"' >> /Users/runner/.bash_profile
+          export PATH="/opt/homebrew/opt/jpeg/bin:$PATH"
+          export CPPFLAGS="-I/opt/homebrew/opt/jpeg/include ${CPPFLAGS}"
+          export PKG_CONFIG_PATH="/opt/homebrew/opt/jpeg/lib/pkgconfig:${PKG_CONFIG_PATH}"
+          export CFLAGS="-I$(brew --prefix libpng)/include -I$(brew --prefix jpeg)/include ${CFLAGS}"
+          export CXXFLAGS="${CXXFLAGS}"
+          export LDFLAGS="-L$(brew --prefix libpng)/lib -L$(brew --prefix jpeg)/lib ${LDFLAGS}"
+          export CPATH="$(brew --prefix nlohmann-json)/include:$(brew --prefix libpng)/include:$(brew --prefix zlib)/include:${CPATH}"
+          export CPLUS_INCLUDE_PATH="$(brew --prefix nlohmann-json)/include:${CPLUS_INCLUDE_PATH}"
+          export LIBRARY_PATH="$(brew --prefix libpng)/lib:$(brew --prefix zlib)/lib:${LIBRARY_PATH}"
+          cmake -S Cmake -B . \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCMAKE_INSTALL_PREFIX="$HOME/.local" \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix libpng);$(brew --prefix zlib);$(brew --prefix jpeg);$(brew --prefix nlohmann-json)" \
+            -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DPNG_PNG_INCLUDE_DIR="$(brew --prefix libpng)/include" \
+            -DPNG_LIBRARY="$(brew --prefix libpng)/lib/libpng16.dylib" \
+            -DZLIB_INCLUDE_DIR="$(brew --prefix zlib)/include" \
+            -DZLIB_LIBRARY="$(brew --prefix zlib)/lib/libz.dylib" \
+            -DJPEG_INCLUDE_DIR="$(brew --prefix jpeg)/include" \
+            -DJPEG_LIBRARY="$(brew --prefix jpeg)/lib/libjpeg.dylib" \
+            -DENABLE_TOOLS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_SHARED_LIBS=ON -Wno-dev
+          make -j$(sysctl -n hw.ncpu)
+          find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
+            -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
+          find . -type f '(' -perm -111 -o -name '*.dylib' -o -name '*.so' ')' ! -path '*/.git/*' ! -path '*/CMakeFiles/*' -exec otool -L {} +
+          cd ..
+          pwd
+          /bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/xnu_checks.zsh)" 
+          cat iccmax_build_report.html
+          echo "✔ Build process completed."
+      # ---------- Summary ----------
+      - name: Summary Report
+        if: always()
+        run: |
+          echo "### Build Summary (${{ matrix.os }} • ${{ matrix.compiler }} • ${{ matrix.build_type }})" >> $GITHUB_STEP_SUMMARY
+          echo "- OS: ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Compiler: ${{ matrix.compiler }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Type: ${{ matrix.build_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Directory: PatchIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts: ${{ env.ARTIFACT_PREFIX }}" >> $GITHUB_STEP_SUMMARY
+          test -f artifacts/LastTest-linux.log && echo "- CTest (Linux): attached" >> $GITHUB_STEP_SUMMARY || true
+          test -f artifacts/LastTest-macos.log && echo "- CTest (macOS): attached" >> $GITHUB_STEP_SUMMARY || true
