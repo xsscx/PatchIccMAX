@@ -1,25 +1,24 @@
 ###############################################################
 #
-## Copyright (©) 2025 International Color Consortium. 
-##                 All rights reserved. 
-##                 https://color.org
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 23-OCT-2025 1200Z by David Hoyt
+#
+## Intent: Cmake testing / build
+#
+## TODO: Add Unit Test Suite
 #
 #
-## Intent: iccMAX-CI Runner for Matrix OS
 #
-## Last Updated: 24-JULY-2025 0000Z by David Hoyt 
-#                Add Permission Block
-## TODO: Push binary releases, tags etc...
 #
-## Comment: Known good and working
 #
-# Notes - Uses a Cache, Delete on Fail, Windows
-#       - Uses a manual trigger to avoid wasting resources 
+#
+#
 #
 #
 ###############################################################
-
-name: iccMAX-CI
+name: 1iccdev-ci
 permissions:
   contents: read
   
