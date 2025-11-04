@@ -317,7 +317,7 @@ public:
   const icChar *GetCmmSigName(icCmmSignature sig);
   const icChar *GetReferenceMediumGamutSigNameName(icReferenceMediumGamutSignature sig);
   const icChar *GetColorimetricIntentImageStateName(icColorimetricIntentImageStateSignature sig);
-  const icChar *GetSpectralColorSigName(icSpectralColorSignature sig);
+  const icChar *GetSpectralColorSigName(icColorSpaceSignature sig);
   const icChar *GetElementTypeSigName(icElemTypeSignature sig);
 
   const icChar *GetSigName(icUInt32Number val);

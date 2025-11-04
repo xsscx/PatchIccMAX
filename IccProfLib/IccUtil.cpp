@@ -974,7 +974,7 @@ void icMemDump(std::string &sDump, void *pBuf, size_t nNum)
       buf[76] = ' ';
       buf[77] = '\n';
       buf[78] = '\0';
-      snprintf(num, numSize, "%08lX:", i);
+      snprintf(num, numSize, "%08zX:", i);
       strncpy(buf, num, 9);
     }
 
@@ -1776,7 +1776,7 @@ const icChar *CIccInfo::GetColorSpaceSigName(icColorSpaceSignature sig)
   }
 }
 
-const icChar *CIccInfo::GetSpectralColorSigName(icSpectralColorSignature sig)
+const icChar *CIccInfo::GetSpectralColorSigName(icColorSpaceSignature sig)
 {
   switch(icGetColorSpaceType(sig)) {
   case icSigNoSpectralData:
@@ -1962,7 +1962,7 @@ const icChar *CIccInfo::GetCmmSigName(icCmmSignature sig)
   case icSigWareToGo:
     return "Ware To Go";
 
-  case icSigMicrosoft:
+  case icSigMicrosoftCMM:
     return "Windows Color System";
 
   case icSigZoran:
@@ -2594,11 +2594,11 @@ bool CIccInfo::IsValidSpectralSpace(icColorSpaceSignature sig)
 {
   bool rv = true;
   switch (icGetColorSpaceType(sig)) {
-    case (icSpectralColorSignature)icSigReflectanceSpectralData:
-    case (icSpectralColorSignature)icSigTransmisionSpectralData:
-    case (icSpectralColorSignature)icSigRadiantSpectralData:
-    case (icSpectralColorSignature)icSigBiSpectralReflectanceData:
-    case (icSpectralColorSignature)icSigSparseMatrixReflectanceData:
+    case icSigReflectanceSpectralData:
+    case icSigTransmisionSpectralData:
+    case icSigRadiantSpectralData:
+    case icSigBiSpectralReflectanceData:
+    case icSigSparseMatrixReflectanceData:
       break;
 
     default:

@@ -248,7 +248,7 @@ public:
   virtual bool Write(CIccIO *pIO);
 
   virtual bool Begin(icElemInterp /*nIterp=icElemInterpLinear*/, CIccTagMultiProcessElement * /*pMPE=NULL*/) { return false; }
-  virtual CIccApplyMpe *GetNewApply() { return NULL; }
+  virtual CIccApplyMpe *GetNewApply(CIccApplyTagMpe * /* pApplyTag */) { return NULL; }
   virtual void Apply(CIccApplyMpe * /*pApply*/, icFloatNumber * /*pDestPixel*/, const icFloatNumber * /*pSrcPixel*/) const {}
 
   virtual icValidateStatus Validate(std::string sigPath, std::string &sReport, const CIccTagMultiProcessElement* pMPE=NULL, const CIccProfile* pProfile = NULL) const;

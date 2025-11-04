@@ -76,8 +76,8 @@ Copyright:  (c) see ICC Software License
 namespace iccDEV {
 #endif
 
-static const icFloatNumber SMALLNUM = (icFloatNumber)0.0001;
-static const icFloatNumber LESSTHANONE = (icFloatNumber)(1.0 - SMALLNUM);
+//static const icFloatNumber SMALLNUM = (icFloatNumber)0.0001; // currently unused
+//static const icFloatNumber LESSTHANONE = (icFloatNumber)(1.0 - SMALLNUM); // currently unused
 
 icStatusCMM CIccEvalCompare::EvaluateProfile(CIccProfile *pProfile, icUInt8Number nGran/* =0 */,
                                              icRenderingIntent nIntent/* =icUnknownIntent */, icXformInterp nInterp/* =icInterpLinear */,

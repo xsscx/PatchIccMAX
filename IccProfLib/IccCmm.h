@@ -229,7 +229,7 @@ public:
 
 	icColorSpaceSignature csPcs;
 	icColorSpaceSignature csDevice;
-  icSpectralColorSignature csSpectralPcs;
+  icColorSpaceSignature csSpectralPcs;
   icSpectralRange spectralRange;
   icSpectralRange biSpectralRange;
 };
@@ -1361,7 +1361,7 @@ class ICCPROFLIB_API CIccXformNamedColor : public CIccXform
 {
 public:
   CIccXformNamedColor(CIccTag *pTag, icColorSpaceSignature csPcs, icColorSpaceSignature csDevice, 
-                      icSpectralColorSignature csSpectralPcs=icSigNoSpectralData,
+                      icColorSpaceSignature csSpectralPcs=icSigNoSpectralData,
                       const icSpectralRange *pSpectralRange = NULL,
                       const icSpectralRange *pBiSPectralRange = NULL);
   virtual ~CIccXformNamedColor();
@@ -1963,21 +1963,56 @@ public:
   static CIccMruCmm* Attach(CIccCmm *pCmm, icUInt8Number nCacheSize=6, bool bDeleteCmm=true);  //The returned object will own pCmm, and pCmm is deleted on failure.
 
   //override AddXform/Begin functions to return bad status.
-  virtual icStatusCMM AddXform(const icChar * /* szProfilePath */, icRenderingIntent /* nIntent=icUnknownIntent */,
-    icXformInterp /* nInterp=icInterpLinear */, icXformLutType /* nLutType=icXformLutColor */,
-    bool /* bUseMpeTags=true */, CIccCreateXformHintManager * /* pHintManager=NULL */) { return icCmmStatBad; }
+  virtual icStatusCMM AddXform(const icChar * /* szProfilePath */,
+                                icRenderingIntent /* nIntent=icUnknownIntent */,
+                                icXformInterp /* nInterp=icInterpLinear */,
+                                IIccProfileConnectionConditions * /*pPcc=NULL*/,
+                                icXformLutType /* nLutType=icXformLutColor */,
+                                bool /* bUseMpeTags=true */,
+                                CIccCreateXformHintManager * /* pHintManager=NULL */,
+                                bool /*bUseSubProfile=false*/)
+                        { return icCmmStatBad; }
     
-  virtual icStatusCMM AddXform(icUInt8Number * /* pProfileMem */, icUInt32Number /*nProfileLen*/,
-    icRenderingIntent /*nIntent=icUnknownIntent*/, icXformInterp /*nInterp=icInterpLinear*/,
-    icXformLutType /*nLutType=icXformLutColor*/, bool /*bUseMpeTags=true*/, CIccCreateXformHintManager */*pHintManager=NULL*/)  { return icCmmStatBad; }
+  virtual icStatusCMM AddXform(icUInt8Number * /* pProfileMem */,
+                                icUInt32Number /*nProfileLen*/,
+                                icRenderingIntent /*nIntent=icUnknownIntent*/,
+                                icXformInterp /*nInterp=icInterpLinear*/,
+                                IIccProfileConnectionConditions * /*pPcc =NULL*/,
+                                icXformLutType /*nLutType=icXformLutColor*/,
+                                bool /*bUseMpeTags=true*/,
+                                CIccCreateXformHintManager * /*pHintManager=NULL*/,
+                                bool /*bUseSubProfile=false*/)
+                        { return icCmmStatBad; }
     
-  virtual icStatusCMM AddXform(CIccProfile */*pProfile*/, icRenderingIntent /*nIntent=icUnknownIntent*/,
-    icXformInterp /*nInterp=icInterpLinear*/, icXformLutType /*nLutType=icXformLutColor*/,
-    bool /*bUseMpeTags=true*/, CIccCreateXformHintManager */*pHintManager=NULL*/)  { return icCmmStatBad; }
+  virtual icStatusCMM AddXform(CIccProfile * /*pProfile*/,
+                                icRenderingIntent /*nIntent=icUnknownIntent*/,
+                                icXformInterp /*nInterp=icInterpLinear*/,
+                                IIccProfileConnectionConditions * /*pPcc =NULL*/,
+                                icXformLutType /*nLutType=icXformLutColor*/,
+                                bool /*bUseMpeTags=true*/,
+                                CIccCreateXformHintManager * /*pHintManager=NULL*/)
+                        { return icCmmStatBad; }
     
-  virtual icStatusCMM AddXform(CIccProfile &/*Profile*/, icRenderingIntent /*nIntent=icUnknownIntent*/,
-    icXformInterp /*nInterp=icInterpLinear*/, icXformLutType /*nLutType=icXformLutColor*/,
-    bool /*bUseMpeTags=true*/, CIccCreateXformHintManager */*pHintManager=NULL*/) { return icCmmStatBad; }
+  virtual icStatusCMM AddXform(CIccProfile & /*Profile*/,
+                                icRenderingIntent /*nIntent=icUnknownIntent*/,
+                                icXformInterp /*nInterp=icInterpLinear*/,
+                                IIccProfileConnectionConditions * /*pPcc =NULL*/,
+                                icXformLutType /*nLutType=icXformLutColor*/,
+                                bool /*bUseMpeTags=true*/,
+                                CIccCreateXformHintManager * /*pHintManager=NULL*/)
+                        { return icCmmStatBad; }
+    
+  virtual icStatusCMM AddXform(CIccProfile * /*pProfile*/,
+                               CIccTag * /*pXformTag*/,
+                                icRenderingIntent /*nIntent=icUnknownIntent*/,
+                                icXformInterp /*nInterp=icInterpLinear*/,
+                                IIccProfileConnectionConditions * /*pPcc =NULL*/,
+                                bool /*bUseMpeTags=true*/,
+                                CIccCreateXformHintManager */*pHintManager=NULL*/)
+                        { return icCmmStatBad; }
+
+  virtual icStatusCMM AddXform(CIccXform * /*pXform*/)
+                        { return icCmmStatBad; }
 
   virtual CIccApplyCmm *GetNewApplyCmm(icStatusCMM &status); 
 

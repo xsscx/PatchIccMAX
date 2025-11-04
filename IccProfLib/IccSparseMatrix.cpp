@@ -45,6 +45,7 @@ CIccSparseMatrix::CIccSparseMatrix(const CIccSparseMatrix &mtx)
       break;
     case icSparseMatrixFloatNum:
       m_Data = new CIccSparseMatrixFloatNum();
+      break;    // without this, we have a memory leak!
     default:
       m_Data = NULL;
     }
@@ -93,6 +94,7 @@ CIccSparseMatrix &CIccSparseMatrix::operator=(const CIccSparseMatrix &mtx)
       break;
     case icSparseMatrixFloatNum:
       m_Data = new CIccSparseMatrixFloatNum();
+      break;    // without this, we have a memory leak!
     default:
       m_Data = NULL;
     }

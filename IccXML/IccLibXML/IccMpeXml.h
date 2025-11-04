@@ -281,9 +281,6 @@ class CIccTempDeclVar
 public:
   CIccTempDeclVar(std::string name = "", int pos = -1, icUInt16Number size = 1) { m_name = name; m_pos = pos; m_size = size; }
   
-  // TODO - an STL template needs this explicit copy, for unknown reasons
-  CIccTempDeclVar(const CIccTempDeclVar &temp) { m_name = temp.m_name; m_pos = temp.m_pos; m_size = temp.m_size; m_members = temp.m_members; }
-  
   std::string m_name;
   int m_pos;
   icUInt16Number m_size;

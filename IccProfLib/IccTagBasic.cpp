@@ -4875,7 +4875,7 @@ icValidateStatus CIccTagSparseMatrixArray::Validate(std::string sigPath, std::st
   bool bCheckPCS=false;
 
   icSignature sig1 = icGetFirstSigPathSig(sigPath);
-  icSignature sig2 = icGetSecondSigPathSig(sigPath);    // TODO - unused, is this call needed for side effects?
+  //icSignature sig2 = icGetSecondSigPathSig(sigPath);    // TODO - unused, but is this call needed for side effects?
 
   if (sig1==icSigSpectralWhitePointTag) {
     bCheckPCS = true;
@@ -9747,7 +9747,7 @@ icValidateStatus CIccTagProfileSeqDesc::Validate(std::string sigPath, std::strin
   CIccProfileSeqDesc::iterator i;
   for (i=m_Descriptions->begin(); i!=m_Descriptions->end(); i++) {
     switch(i->m_technology) {
-    case 0x00000000:  //Technology not defined
+    case icSigUndefined:  //Technology not defined
     case icSigFilmScanner:
     case icSigDigitalCamera:
     case icSigReflectiveScanner:

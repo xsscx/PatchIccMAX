@@ -6694,7 +6694,7 @@ LPIccCurve* CIccXformNDLut::ExtractOutputCurves()
  **************************************************************************
  */
 CIccXformNamedColor::CIccXformNamedColor(CIccTag *pTag, icColorSpaceSignature csPcs, icColorSpaceSignature csDevice, 
-                                         icSpectralColorSignature csSpectralPcs/* =icSigNoSpectralData */,
+                                         icColorSpaceSignature csSpectralPcs/* =icSigNoSpectralData */,
                                          const icSpectralRange *pSpectralRange /* = NULL */,
                                          const icSpectralRange *pBiSpectralRange /* = NULL */)
 {
@@ -8211,8 +8211,7 @@ icStatusCMM CIccCmm::AddXform(CIccProfile *pProfile,
           CIccXformList::iterator prev = --(m_Xforms->end());
           
           //Make sure previous profile connects with an icXformLutMCS
-// ERROR - comparison of wrong enum types!
-          if (prev->ptr->GetXformType()!=icXformLutMCS) {
+          if ((icXformLutType)(prev->ptr->GetXformType()) != icXformLutMCS) {
             //check to see if we can convert previous xform to connect via an MCS
             if (!prev->ptr->GetProfile()->m_Header.mcs) {
               return icCmmStatBadMCSLink;

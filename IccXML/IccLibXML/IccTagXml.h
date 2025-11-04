@@ -487,6 +487,9 @@ public:
  
    virtual const char *GetExtDerivedClassName() const {return "CIccCurveXml"; }
  
+    // parent class doesn't use the  icConvertType nType argument, and only some children do
+   virtual bool ToXml(std::string &xml, std::string blanks) = 0;
+   virtual bool ParseXml(xmlNode *pNode, std::string &parseStr) = 0;
    virtual bool ToXml(std::string &xml, icConvertType nType, std::string blanks) = 0;
    virtual bool ParseXml(xmlNode *pNode, icConvertType nType, std::string &parseStr) = 0;
  };

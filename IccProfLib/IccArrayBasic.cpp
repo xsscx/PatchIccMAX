@@ -262,7 +262,7 @@ void CIccArrayNamedColor::Describe(std::string &sDescription, int /* nVerbosenes
 
 
 void CIccArrayNamedColor::SetColorSpaces(icColorSpaceSignature csPcs, icColorSpaceSignature csDevice, 
-                                         icSpectralColorSignature csSpectralPcs/* =icSigNoSpectralData */,
+                                         icColorSpaceSignature csSpectralPcs/* =icSigNoSpectralData */,
                                          const icSpectralRange *pSpectralRange /* = NULL */,
                                          const icSpectralRange *pBiSpectralRange /* = NULL */)
 {

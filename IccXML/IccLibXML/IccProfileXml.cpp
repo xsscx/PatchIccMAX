@@ -507,7 +507,7 @@ bool CIccProfileXml::ParseBasic(xmlNode *pNode, std::string &parseStr)
         memset(&m_Header.profileID.ID8, 0, sizeof(m_Header.profileID.ID8));
 		}
     else if (!icXmlStrCmp(pNode->name, "SpectralPCS")) {
-      m_Header.spectralPCS = (icSpectralColorSignature)icXmlGetChildSigVal(pNode);
+      m_Header.spectralPCS = (icColorSpaceSignature)icXmlGetChildSigVal(pNode);
     }
     else if (!icXmlStrCmp(pNode->name, "SpectralRange")) {
       xmlNode *xyzNode = icXmlFindNode(pNode->children, "Wavelengths");

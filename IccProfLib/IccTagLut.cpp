@@ -3552,7 +3552,7 @@ void CIccMBB::Describe(std::string &sDescription, int nVerboseness)
 *  icValidateStatusOK if valid, or other error status.
 ******************************************************************************
 */
-icValidateStatus CIccMBB::Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile/*=NULL*/)
+icValidateStatus CIccMBB::Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile/*=NULL*/) const
 {
   icValidateStatus rv = CIccTag::Validate(sigPath, sReport, pProfile);
 
@@ -4215,7 +4215,7 @@ bool CIccTagLutAtoB::Write(CIccIO *pIO)
 *  icValidateStatusOK if valid, or other error status.
 ******************************************************************************
 */
-icValidateStatus CIccTagLutAtoB::Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile/*=NULL*/)
+icValidateStatus CIccTagLutAtoB::Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile/*=NULL*/) const
 {
   icValidateStatus rv = CIccMBB::Validate(sigPath, sReport, pProfile);
 
@@ -4363,7 +4363,7 @@ CIccTagLutBtoA &CIccTagLutBtoA::operator=(const CIccTagLutBtoA &ITLB2A)
 *  icValidateStatusOK if valid, or other error status.
 ******************************************************************************
 */
-icValidateStatus CIccTagLutBtoA::Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile/*=NULL*/)
+icValidateStatus CIccTagLutBtoA::Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile/*=NULL*/) const
 {
   icValidateStatus rv = CIccMBB::Validate(sigPath, sReport, pProfile);
 
@@ -4801,7 +4801,7 @@ bool CIccTagLut8::Write(CIccIO *pIO)
 *  icValidateStatusOK if valid, or other error status.
 ******************************************************************************
 */
-icValidateStatus CIccTagLut8::Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile/*=NULL*/)
+icValidateStatus CIccTagLut8::Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile/*=NULL*/) const
 {
   icValidateStatus rv = CIccMBB::Validate(sigPath, sReport, pProfile);
 
@@ -5223,7 +5223,7 @@ bool CIccTagLut16::Write(CIccIO *pIO)
 *  icValidateStatusOK if valid, or other error status.
 ******************************************************************************
 */
-icValidateStatus CIccTagLut16::Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile/*=NULL*/)
+icValidateStatus CIccTagLut16::Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile/*=NULL*/) const
 {
   icValidateStatus rv = CIccMBB::Validate(sigPath, sReport, pProfile);
 

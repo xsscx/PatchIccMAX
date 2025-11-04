@@ -450,7 +450,7 @@ public:
   virtual void Describe(std::string &sDescription, int nVerboseness);
 
   virtual void SetColorSpaces(icColorSpaceSignature csInput, icColorSpaceSignature csOutput);
-  virtual icValidateStatus Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile=NULL);
+  virtual icValidateStatus Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile=NULL) const;
   icColorSpaceSignature GetCsInput() { return m_csInput; }
   icColorSpaceSignature GetCsOutput() { return m_csOutput; }
 
@@ -507,7 +507,7 @@ public:
 
   bool Read(icUInt32Number size, CIccIO *pIO);
   bool Write(CIccIO *pIO);
-  virtual icValidateStatus Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile=NULL);
+  virtual icValidateStatus Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile=NULL) const;
 
 protected:
   icUInt16Number m_nReservedWord;
@@ -529,7 +529,7 @@ public:
   virtual CIccTag* NewCopy() const { return new CIccTagLutBtoA(*this); }
 
   virtual icTagTypeSignature GetType() const { return icSigLutBtoAType; }
-  virtual icValidateStatus Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile=NULL);
+  virtual icValidateStatus Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile=NULL) const;
 };
 
 
@@ -556,7 +556,7 @@ public:
   bool Write(CIccIO *pIO);
 
   virtual void SetColorSpaces(icColorSpaceSignature csInput, icColorSpaceSignature csOutput);
-  virtual icValidateStatus Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile=NULL);
+  virtual icValidateStatus Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile=NULL) const;
 
 protected:
   icUInt8Number m_nReservedByte;
@@ -586,7 +586,7 @@ public:
   bool Write(CIccIO *pIO);
 
   virtual void SetColorSpaces(icColorSpaceSignature csInput, icColorSpaceSignature csOutput);
-  virtual icValidateStatus Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile=NULL);
+  virtual icValidateStatus Validate(std::string sigPath, std::string &sReport, const CIccProfile* pProfile=NULL) const;
 
 protected:
   icUInt8Number m_nReservedByte;

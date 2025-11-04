@@ -148,7 +148,7 @@ public:
   virtual const icChar *GetClassName() const { return "CIccArrayNamedColor"; }
 
   void SetColorSpaces(icColorSpaceSignature csPcs, icColorSpaceSignature csDevice, 
-                      icSpectralColorSignature csSpectralPCS=icSigNoSpectralData,
+                      icColorSpaceSignature csSpectralPCS=icSigNoSpectralData,
                       const icSpectralRange *pSpectralRange = NULL,
                       const icSpectralRange *pBiSPectralRange = NULL);
 
@@ -188,7 +188,7 @@ protected:
 
   icColorSpaceSignature m_csPcs;
   icColorSpaceSignature m_csDevice;
-  icSpectralColorSignature m_csSpectralPcs;
+  icColorSpaceSignature m_csSpectralPcs;
   icSpectralRange m_spectralRange;
   icSpectralRange m_biSpectralRange;
 

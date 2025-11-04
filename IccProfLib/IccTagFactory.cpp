@@ -411,10 +411,10 @@ CIccTag* CIccSpecTagFactory::CreateTag(icTagTypeSignature tagSig)
     case icSigViewingConditionsType:
       return new CIccTagViewingConditions;
 
-    case icSigSpectralDataInfoTag:
+    case icSigSpectralDataInfoType:
       return new CIccTagSpectralDataInfo;
 
-    case icSigSpectralViewingConditionsTag:
+    case icSigSpectralViewingConditionsType:
       return new CIccTagSpectralViewingConditions;
 
     case icSigProfileSequenceDescType:
