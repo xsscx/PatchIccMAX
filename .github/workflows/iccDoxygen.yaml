@@ -1,0 +1,70 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 23-OCT-2025 at 1500 EDT by David Hoyt (©)
+#
+## Intent: Build Doxygen HTML Outputs
+#
+##
+#
+
+#
+#
+###############################################################
+
+name: "iccDoxygen"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    name: "Generate Doxygen Documentation"
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the PatchIccMAX source code
+    - name: Checkout PatchIccMAX
+      uses: actions/checkout@v4
+      with:
+        repository: xsscx/PatchIccMAX
+        ref: master
+
+    # Configure Git identity for any automated commits or artifact tagging
+    - name: Set up Git identity
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+
+    # Install Doxygen and required dependencies
+    - name: Install Doxygen dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen graphviz libxml2-dev
+        echo "Installed Doxygen version:"
+        doxygen --version
+
+    # Basic banner
+    - name: Description
+      run: |
+        echo ""
+        echo "=================================="
+        echo "   iccDoxygen HTML Documentation  "
+        echo "=================================="
+        echo ""
+
+    # Generate docs
+    - name: Configure & Build Documentation
+      run: |
+        wget https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/re231/contrib/Doxyfile
+        wget https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/re231/contrib/header.html
+        doxygen Doxyfile
+
+    # Upload HTML 
+    - name: Upload generated documentation
+      uses: actions/upload-artifact@v4
+      with:
+        name: iccDoxygen-html
+        path: dgen/html
