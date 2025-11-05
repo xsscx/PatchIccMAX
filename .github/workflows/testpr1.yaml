@@ -24,7 +24,7 @@ name: test-pr1
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ master, research, re231 ]
+    branches: [ test ]
 
 jobs:
   build:
@@ -112,7 +112,7 @@ jobs:
       - name: Clone repository and install dependencies (macOS)
         if: ${{ runner.os == 'macOS' }}
         run: |
-          echo "📥 Cloning Issue188 repository..."
+          echo "Cloning HEAD repository..."
           git clone https://github.com/InternationalColorConsortium/iccDEV.git
           cd iccDEV
           git fetch origin pull/199/head:pr-199
@@ -120,8 +120,8 @@ jobs:
           git branch
           git status
           cd Build
-          echo "📦 Installing Homebrew dependencies..."
-          brew install libpng nlohmann-json libxml2 wxwidgets libtiff jpeg zlib || echo "⚠️ Some dependencies might already be installed."
+          echo "Installing Homebrew dependencies..."
+          brew install libpng nlohmann-json libxml2 wxwidgets libtiff jpeg zlib || echo "Some dependencies might already be installed."
           echo "✔ Dependency installation complete."
 
       - name: Print Compiler Version (macOS)
@@ -181,6 +181,3 @@ jobs:
           echo "- Artifacts: ${{ env.ARTIFACT_PREFIX }}" >> $GITHUB_STEP_SUMMARY
           test -f artifacts/LastTest-linux.log && echo "- CTest (Linux): attached" >> $GITHUB_STEP_SUMMARY || true
           test -f artifacts/LastTest-macos.log && echo "- CTest (macOS): attached" >> $GITHUB_STEP_SUMMARY || true
-
-
-
