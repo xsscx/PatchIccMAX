@@ -5,9 +5,9 @@
 ##
 ## Last Updated: 04-NOV-2025 1200Z by David Hoyt
 #
-## Intent: PR199 Windows
+## Intent: PR Trigger for Windows
 #
-## TODO: Add Unit Test Suite
+## TODO: 
 #
 #
 #
@@ -19,7 +19,7 @@
 #
 ###############################################################
 
-name: pr199-win
+name: head-win
 permissions:
   contents: read
 
@@ -57,12 +57,10 @@ jobs:
           key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
             cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
-      - name: Build PR199
+      - name: Build HEAD
         run: |
           git clone https://github.com/InternationalColorConsortium/iccDEV.git
           cd iccDEV
-          git fetch origin pull/199/head:pr-199
-          git checkout pr-199
           git branch
           git status
           vcpkg integrate install
@@ -80,6 +78,12 @@ jobs:
         run: |
           cd iccDEV\Testing
           dir
+      - name: Build
+        run: |
+          cd iccDEV\Build\Cmake
+          cmake --build build --config ${{ matrix.build_type }}
+          dir /s /b *.exe *.lib
+
           
           
           
