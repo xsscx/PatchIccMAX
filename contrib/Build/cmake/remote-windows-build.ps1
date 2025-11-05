@@ -48,4 +48,3 @@ cd hybrid
 .\BuildAndTest.bat
 cd ..
 cd ..
-iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/windows-build-report.ps1").Content
