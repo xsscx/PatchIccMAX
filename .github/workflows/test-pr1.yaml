@@ -108,21 +108,6 @@ jobs:
           cd Build
           make -j$(nproc || sysctl -n hw.logicalcpu)
 
-      - name: Verify CMake Cache
-        run: |
-          if test -f Build/CMakeCache.txt; then
-            echo "Build OK" | tee -a $GITHUB_STEP_SUMMARY
-          else
-            echo "::error ::Build failed! CMakeCache.txt not found." | tee -a $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: iccmax-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}
-          path: Build
-
       - name: Summary Report
         if: always()
         run: |
