@@ -19,7 +19,7 @@
 #
 ###############################################################
 
-name: test-pr1
+name: test-pr1a
 
 on:
   workflow_dispatch:
