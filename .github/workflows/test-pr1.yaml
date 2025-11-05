@@ -28,6 +28,20 @@ on:
       - test
     types: [opened, synchronize, reopened, ready_for_review]
 
+permissions:
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number }}
+  cancel-in-progress: true
+
+env:
+  GH_REPO: ${{ github.repository }}
+  GH_NO_UPDATE_NOTIFIER: 1
+  GH_PROMPT_DISABLED: 1
+  RUN_URL: ${{github.event.repository.html_url}}/actions/runs/${{github.run_id}}
+  PR: ${{ github.event.number }}
+
 jobs:
   build:
     name: "${{ matrix.os }} • ${{ matrix.compiler }} • ${{ matrix.build_type }}"
