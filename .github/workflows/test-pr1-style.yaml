@@ -88,18 +88,6 @@ jobs:
             -- -std=c++17 -I../include || true
           echo "::endgroup::"
 
-      - name: Run clang-format Diff (non-blocking)
-        continue-on-error: true
-        run: |
-          echo "::group::Checking formatting..."
-          run-clang-tidy -p Build -header-filter='.*' -checks='modernize-*,readability-*,cppcoreguidelines-*'
-          run-clang-tidy -p Build -header-filter='.*' -checks='modernize-*,readability-*,cppcoreguidelines-*'
-          run-clang-tidy -p Build -header-filter='.*' -checks='modernize-*,readability-*,cppcoreguidelines-*'
-          run-clang-tidy -p Build -header-filter='.*'
-          run-clang-tidy -p build -checks='modernize-*,readability-*,cppcoreguidelines-*' -quiet > reports/cppcheck/cppcheck/clang_tidy_report.txt
-          run-clang-tidy -p Build -checks='modernize-*,readability-*,cppcoreguidelines-*' -quiet > reports/cppcheck/cppcheck/clang_tidy_report.txt
-          echo "::endgroup::"
-
       - name: Run cppcheck (non-blocking)
         continue-on-error: true
         run: |
