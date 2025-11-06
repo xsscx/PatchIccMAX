@@ -19,11 +19,14 @@
 #
 ###############################################################
 
-name: test-pr1
+name: PR CI
 
 on:
   workflow_dispatch:
   pull_request:
+    branches:
+      - test
+      - master
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
@@ -37,7 +40,7 @@ env:
   GH_REPO: ${{ github.repository }}
   GH_NO_UPDATE_NOTIFIER: 1
   GH_PROMPT_DISABLED: 1
-  RUN_URL: ${{github.event.repository.html_url}}/actions/runs/${{github.run_id}}
+  RUN_URL: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}
   PR: ${{ github.event.number }}
 
 jobs:
@@ -62,21 +65,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          fetch-depth: 0
 
       - name: Verify Branch Context
         run: |
-          echo "Triggered by: ${{ github.event_name }}"
-          echo "Base branch:  ${{ github.base_ref }}"
-          echo "Head branch:  ${{ github.head_ref }}"
-          echo "Commit SHA:   ${{ github.event.pull_request.head.sha }}"
-          echo "Build Type:   ${{ matrix.build_type }}"
-          echo "Compiler:     ${{ matrix.compiler }}"
-          echo "OS:           ${{ matrix.os }}"
+          echo "Triggered by:  ${{ github.event_name }}"
+          echo "Base branch:   ${{ github.base_ref }}"
+          echo "Head branch:   ${{ github.head_ref }}"
+          echo "Commit SHA:    ${{ github.event.pull_request.head.sha }}"
+          echo "Build Type:    ${{ matrix.build_type }}"
+          echo "Compiler:      ${{ matrix.compiler }}"
+          echo "OS:            ${{ matrix.os }}"
 
       - name: Install Dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update
+          sudo apt-get update -qq
           sudo apt-get install -y \
             build-essential cmake gcc g++ clang clang-tools \
             libpng-dev libxml2 libxml2-dev libtiff-dev \
@@ -101,31 +105,51 @@ jobs:
 
       - name: Print Compiler Version
         run: |
-          echo "Compiler Version:" >> $GITHUB_STEP_SUMMARY
+          echo "### Compiler Info" >> $GITHUB_STEP_SUMMARY
+          echo "Using compiler: $CC / $CXX"
           $CC --version >> $GITHUB_STEP_SUMMARY
+          $CXX --version >> $GITHUB_STEP_SUMMARY
 
-      - name: CMake Configure
+      - name: Configure CMake
         run: |
+          echo "Configuring CMake project..."
           mkdir -p Build
           cd Build
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
                 -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+                -DCMAKE_C_COMPILER=$CC \
+                -DCMAKE_CXX_COMPILER=$CXX \
                 -DENABLE_TOOLS=ON \
                 -DENABLE_STATIC_LIBS=ON \
                 -DENABLE_SHARED_LIBS=ON \
                 -Wno-dev Cmake/
+          echo "::group::CMake Cache"
+          cat CMakeCache.txt || true
+          echo "::endgroup::"
 
       - name: Build
         run: |
+          echo "Starting build..."
           cd Build
+          echo "Compiler: $CC ($($CC --version | head -n 1))"
+          echo "CMake build type: ${{ matrix.build_type }}"
           make -j$(nproc || sysctl -n hw.logicalcpu)
+          echo "Build complete."
+
+      - name: Upload Build Artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iccmax-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}
+          path: Build/
 
       - name: Summary Report
         if: always()
         run: |
           echo "### Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- OS: ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Compiler: ${{ matrix.compiler }}" >> $GITHUB_STEP_SUMMARY
+          echo "- OS:         ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Compiler:   ${{ matrix.compiler }}" >> $GITHUB_STEP_SUMMARY
           echo "- Build Type: ${{ matrix.build_type }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Artifacts: iccmax-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Status: Success" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts:  iccmax-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Status:     ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Run URL:    $RUN_URL" >> $GITHUB_STEP_SUMMARY
