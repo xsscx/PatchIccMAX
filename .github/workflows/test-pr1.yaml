@@ -26,7 +26,6 @@ on:
   pull_request:
     branches:
       - test
-      - master
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
