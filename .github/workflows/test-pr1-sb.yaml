@@ -108,20 +108,6 @@ jobs:
           echo "::endgroup::"
           echo "scan-build finished (errors ignored for CI success)."
 
-      - name: Collect scan-build  output
-        if: always()
-        run: |
-          cd Build
-          if [ -d "scan-build-reports" ]; then
-            echo "Reports available at Build/scan-build-reports"
-            bug_count=$(grep -roh "<div class='bugDescriptionTitle'" scan-build-reports | wc -l)
-            echo "Detected $bug_count potential bugs."
-            echo "Bug count: $bug_count" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "No scan-build reports found — likely no issues."
-            echo "Bug count: 0" >> $GITHUB_STEP_SUMMARY
-          fi
-
       - name: Upload Reports
         if: always()
         uses: actions/upload-artifact@v4
