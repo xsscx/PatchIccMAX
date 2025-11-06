@@ -92,7 +92,7 @@ jobs:
         continue-on-error: true
         run: |
           echo "::group::Checking formatting..."
-          run-clang-tidy -p build -header-filter='.*' -checks='modernize-*,readability-*,cppcoreguidelines-*'
+          run-clang-tidy -p Build -header-filter='.*' -checks='modernize-*,readability-*,cppcoreguidelines-*'
           run-clang-tidy -p Build -header-filter='.*' -checks='modernize-*,readability-*,cppcoreguidelines-*'
           run-clang-tidy -p Build -header-filter='.*' -checks='modernize-*,readability-*,cppcoreguidelines-*'
           run-clang-tidy -p Build -header-filter='.*'
