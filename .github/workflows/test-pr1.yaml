@@ -134,6 +134,35 @@ jobs:
           echo "Compiler: $CC ($($CC --version | head -n 1))"
           echo "CMake build type: ${{ matrix.build_type }}"
           make -j$(nproc || sysctl -n hw.logicalcpu)
+                    find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
+            -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
+          cd ..
+          echo "========= BEGIN INSIDE STUB ========="
+          cd Testing/
+          echo "=== Updating PATH ==="
+          for d in ../Build/Tools/*; do
+           [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
+          done 
+          sh CreateAllProfiles.sh
+          sh RunTests.sh
+          cd HDR
+          sh mkprofiles.sh
+          cd ..
+          cd CalcTest
+          sh checkInvalidProfiles.sh
+          cd ..
+          cd mcs
+          sh updateprev.sh
+          sh updateprevWithBkgd.sh
+          cd ..
+          find . -iname "*.icc" | wc -l
+          cd ../Build
+          pwd
+          cd ..
+          pwd
+          cd ..
+          pwd
+          ls
           echo "Build complete."
 
       - name: Upload Build Artifacts
