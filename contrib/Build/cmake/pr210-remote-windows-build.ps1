@@ -11,7 +11,7 @@
 #
 #
 #
-# iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/re231/contrib/Build/cmake/remote-windows-build.ps1").Content
+# iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/re231/contrib/Build/cmake/pr210-remote-windows-build.ps1").Content
 #
 #
 #
@@ -21,6 +21,8 @@
 
           git clone https://github.com/InternationalColorConsortium/iccDEV.git
           cd iccDEV
+          git fetch origin pull/210/head:pr-210
+          git checkout pr-210
           git branch
           git status
           Write-Host "========= Fetching Deps... ================`n"
@@ -30,7 +32,6 @@
           cd Build/Cmake
           Write-Host "========= Building... ================`n"  
           cmake  -B build -S . -DCMAKE_TOOLCHAIN_FILE="..\..\scripts\buildsystems\vcpkg.cmake" -DVCPKG_MANIFEST_MODE=OFF -DCMAKE_BUILD_TYPE=Debug  -Wno-dev
-          cmake --build build -- /m /maxcpucount
           cmake --build build -- /m /maxcpucount
           $exeDirs = Get-ChildItem -Recurse -File -Include *.exe -Path .\build\ |
               Where-Object { $_.FullName -match 'iccdev' -and $_.FullName -notmatch '\\CMakeFiles\\' -and $_.Name -notmatch '^CMake(C|CXX)CompilerId\.exe$' } |
