@@ -1,0 +1,76 @@
+name: PR Status Labeler
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 */4 * * *'   # every 4 hours
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, ready_for_review]
+
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  label-status:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Determine PR number
+        id: get_pr
+        run: |
+          if [[ -n "${{ github.event.pull_request.number }}" ]]; then
+            echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "No PR context found — exiting."
+            exit 1
+          fi
+
+      - name: Fetch PR details
+        id: pr
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /repos/${{ github.repository }}/pulls/${{ steps.get_pr.outputs.pr_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Evaluate PR combined status
+        id: status
+        run: |
+          STATUS=$(gh api repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/status | jq -r '.state')
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "Detected status: $STATUS"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Relabel PR based on status
+        if: steps.status.outputs.status != ''
+        run: |
+          STATUS=${{ steps.status.outputs.status }}
+          PR=${{ github.event.pull_request.number }}
+
+          if [[ "$STATUS" == "success" ]]; then
+            gh pr edit "$PR" --add-label "passed" --remove-label "failed" || true
+          elif [[ "$STATUS" == "failure" ]] || [[ "$STATUS" == "error" ]]; then
+            gh pr edit "$PR" --add-label "failed" --remove-label "passed" || true
+          else
+            echo "No label change required for status: $STATUS"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Generate summary report
+        run: |
+          echo "### 🧾 PR Labeler Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**PR Number:** #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Detected Status:** ${{ steps.status.outputs.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Label Added:** ${{ steps.relabel.outputs.added_label }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Label Removed:** ${{ steps.relabel.outputs.removed_label }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Workflow completed successfully."
