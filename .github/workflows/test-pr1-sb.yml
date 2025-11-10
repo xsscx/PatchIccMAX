@@ -38,13 +38,6 @@ on:
         default: "Release"
         type: string
 
-  # Automatic PR trigger
-  pull_request:
-    branches:
-      - test
-      - master
-    types: [opened, synchronize, reopened, ready_for_review]
-
 concurrency:
   group: child-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.job }}
   cancel-in-progress: true
