@@ -48,13 +48,6 @@ on:
         default: '["gcc", "clang"]'
         type: string
 
-  # Trigger automatically on PRs
-  pull_request:
-    branches:
-      - test
-      - master
-    types: [opened, synchronize, reopened, ready_for_review]
-
 concurrency:
   group: child-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.job }}
   cancel-in-progress: true
