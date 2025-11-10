@@ -75,6 +75,7 @@ jobs:
         shell: bash
 
     strategy:
+      fail-fast: false
       matrix:
         os: ${{ fromJson(inputs.os-list || '["ubuntu-latest", "macos-latest"]') }}
         compiler: ${{ fromJson(inputs.compilers || '["gcc", "clang"]') }}
