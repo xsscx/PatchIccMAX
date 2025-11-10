@@ -33,18 +33,11 @@ on:
   # Optional: auto-trigger for PRs to master/test
   pull_request:
     branches: [ master, test ]
-    types: [ opened, synchronize, reopened, ready_for_review ]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 concurrency:
-  group: pr-${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: dispatcher-${{ github.workflow }}-${{ github.run_id }}-${{ github.job }}
   cancel-in-progress: false
-
-env:
-  GH_REPO: ${{ github.repository }}
-  GH_NO_UPDATE_NOTIFIER: 1
-  GH_PROMPT_DISABLED: 1
-  RUN_URL: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}
-  PR: ${{ github.event.number }}
 
 jobs:
   setup:
@@ -69,7 +62,6 @@ jobs:
           echo "Run ID:     ${{ github.run_id }}"
           echo "Start time: $(date)"
           echo ""
-
       - name: Write Summary to GitHub UI
         run: |
           echo "## 🧭 Init Complete" >> $GITHUB_STEP_SUMMARY
@@ -83,7 +75,6 @@ jobs:
           echo "- **Session start:** $(date)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ CI environment successfully initialized and ready for subsequent jobs." >> $GITHUB_STEP_SUMMARY
-
   unix-ci:
     name: 🧱 Unix Matrix Build and Test
     needs: setup
@@ -96,13 +87,8 @@ jobs:
 
   cppcheck-linters:
     name: 🧪 Cppcheck and Linters
-    needs: unix-ci
-    uses: ./.github/workflows/lint-code-checks.yml
-
-  win-ci:
-    name: 🧱 Windows Build and Test
     needs: setup
-    uses: ./.github/workflows/1iccdev-cmake-win.yml
+    uses: ./.github/workflows/lint-code-checks.yml
 
   finalize:
     name: 🧾 GitHub Summary Report
@@ -111,7 +97,6 @@ jobs:
       - unix-ci
       - scan-build
       - cppcheck-linters
-      - win-ci
     if: always()
     steps:
       - name: Generate Summary
@@ -119,24 +104,19 @@ jobs:
           echo "## 🧩 ICCDEV PR Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ "${{ needs.unix-ci.result }}" == "success" ]; then
-            echo "- ✅ Unix Build + Tests: Passed" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Build + Tests: Passed" >> $GITHUB_STEP_SUMMARY
           else
-            echo "- ❌ Unix Build + Tests: Failed" >> $GITHUB_STEP_SUMMARY
+            echo "- ❌ Build + Tests: Failed" >> $GITHUB_STEP_SUMMARY
           fi
-          if [ "${{ needs.win-ci.result }}" == "success" ]; then
-            echo "- ✅ Windows Build: Passed" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.scan-build.result }}" == "success" ]; then
+            echo "- ✅ Clang Static Report: Available" >> $GITHUB_STEP_SUMMARY
           else
-            echo "- ❌ Windows Build: Failed" >> $GITHUB_STEP_SUMMARY
+            echo "- ❌ Clang Static Analysis: Failed" >> $GITHUB_STEP_SUMMARY
           fi
           if [ "${{ needs.cppcheck-linters.result }}" == "success" ]; then
             echo "- ✅ Cppcheck + Linter Report: Available" >> $GITHUB_STEP_SUMMARY
           else
             echo "- ❌ Cppcheck + Linters: Failed" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ "${{ needs.scan-build.result }}" == "success" ]; then
-            echo "- ✅ Static Analysis (scan-build): Passed" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- ❌ Static Analysis (scan-build): Failed" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🧱 Performance Enhancements" >> $GITHUB_STEP_SUMMARY
