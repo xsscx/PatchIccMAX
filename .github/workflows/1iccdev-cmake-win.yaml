@@ -28,15 +28,9 @@ permissions:
 on:
   workflow_dispatch:
   workflow_call:
-    inputs:
-      build_type:
-        description: "CMake build configuration"
-        required: false
-        default: "Release"
-        type: string
 
 concurrency:
-  group: child-${{ github.workflow }}-${{ github.run_id }}-${{ github.job }}
+  group: child-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.job }}
   cancel-in-progress: true
 
 env:
@@ -44,84 +38,61 @@ env:
   GH_NO_UPDATE_NOTIFIER: 1
   GH_PROMPT_DISABLED: 1
   RUN_URL: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}
+  PR: ${{ github.event.number }}
 
 jobs:
   build:
-    name: 🧱 Windows CMake Build
     runs-on: windows-latest
     defaults:
       run:
         shell: cmd
-
     strategy:
-      matrix:
-        build_type: ${{ inputs.build_type }}
+      fail-fast: false
 
     steps:
-      - name: Checkout source
+      - name: Checkout PR source
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
           fetch-depth: 0
 
-      - name: Cache vcpkg packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            C:\vcpkg\installed
-            C:\vcpkg\buildtrees
-            C:\vcpkg\downloads
-          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
-          restore-keys: |
-            vcpkg-${{ runner.os }}-
-
-      - name: Cache build binaries
-        uses: actions/cache@v3
-        with:
-          path: DemoIccMAX\Build\Cmake\build
-          key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
-          restore-keys: |
-            cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
+      - name: Verify Branch Context
+        run: |
+          echo "Triggered by:  ${{ github.event_name }}"
+          echo "Base branch:   ${{ github.base_ref }}"
+          echo "Head branch:   ${{ github.head_ref }}"
+          echo "Commit SHA:    ${{ github.event.pull_request.head.sha }}"
+          echo "Build Type:    ${{ matrix.build_type }}"
+          echo "Compiler:      ${{ matrix.compiler }}"
+          echo "OS:            ${{ runner.os }}"
 
       - name: Install dependencies
         run: |
           vcpkg integrate install
           vcpkg install
 
-      - name: Configure with CMake
+      - name: Configure
         run: |
           cd Build\Cmake
           cmake -B build -S . -G "Visual Studio 17 2022" -A x64 ^
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ^
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
 
-      - name: Build project
+      - name: Build
         run: |
           cd Build\Cmake
           cmake --build build --config ${{ matrix.build_type }}
           dir /s /b *.exe *.lib
 
-      - name: Upload build artifacts
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-build-${{ matrix.build_type }}
-          path: |
-            Build\Cmake\build\*.exe
-            Build\Cmake\build\*.lib
-
-      - name: Windows Build Summary Report
+      - name: GitHub Summary
         if: always()
-        shell: bash
         run: |
-          echo "## 🧱 Windows CMake Build Summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Repository:** ${{ github.repository }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Run URL:** [View Logs](${{ env.RUN_URL }})" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Build Type:** ${{ matrix.build_type }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **OS:** ${{ runner.os }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          if [[ "${{ job.status }}" == "success" ]]; then
-            echo "✅ Build completed successfully with CMake and vcpkg." >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "❌ Build failed during execution." >> "$GITHUB_STEP_SUMMARY"
-          fi
+          echo "## 🧱 CMake Windows Build Summary" >> %GITHUB_STEP_SUMMARY%
+          echo "Repository: ${{ github.repository }}" >> %GITHUB_STEP_SUMMARY%
+          echo "Run URL: [View Logs](${{ env.RUN_URL }})" >> %GITHUB_STEP_SUMMARY%
+          echo "Triggered by: ${{ github.event_name }}" >> %GITHUB_STEP_SUMMARY%
+          echo "Commit SHA: ${{ github.event.pull_request.head.sha || github.sha }}" >> %GITHUB_STEP_SUMMARY%
+          echo "Build Type: ${{ matrix.build_type }}" >> %GITHUB_STEP_SUMMARY%
+          echo "Runner OS: ${{ runner.os }}" >> %GITHUB_STEP_SUMMARY%
+          echo "✅ Build completed successfully on Windows with CMake and vcpkg." >> %GITHUB_STEP_SUMMARY%
+          
