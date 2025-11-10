@@ -82,12 +82,12 @@ jobs:
 
   scan-build:
     name: 🔍 Clang Scan-Build Analysis
-    needs: setup
+    needs: unix-ci
     uses: ./.github/workflows/test-pr1-sb.yml
 
   cppcheck-linters:
     name: 🧪 Cppcheck and Linters
-    needs: setup
+    needs: unix-ci
     uses: ./.github/workflows/lint-code-checks.yml
 
   finalize:
