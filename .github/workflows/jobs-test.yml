@@ -1,0 +1,131 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 04-NOV-2025 1200Z by David Hoyt
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: "PR Soft Checks"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+  workflow_call:
+
+  # Optional: auto-trigger for PRs to master/test
+  pull_request:
+    branches: [ master, test ]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: dispatcher-${{ github.workflow }}-${{ github.run_id }}-${{ github.job }}
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    name: 🧭 Init
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Display Environment Info
+        run: |
+          echo "============================"
+          echo "   iccDEV PR Build & Check  "
+          echo "============================"
+          echo ""
+          echo "International Color Consortium"
+          echo "Thank you for opening a PR"
+          echo ""
+          echo "Trigger: manual (workflow_dispatch)"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch:     ${{ github.ref_name }}"
+          echo "Commit:     ${{ github.sha }}"
+          echo "Actor:      ${{ github.actor }}"
+          echo "Run ID:     ${{ github.run_id }}"
+          echo "Start time: $(date)"
+          echo ""
+      - name: Write Summary to GitHub UI
+        run: |
+          echo "## 🧭 Init Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow:** iccdev-pr-soft-checks" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Event type:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run ID:** ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Session start:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ CI environment successfully initialized and ready for subsequent jobs." >> $GITHUB_STEP_SUMMARY
+  unix-ci:
+    name: 🧱 Unix Matrix Build and Test
+    needs: setup
+    uses: ./.github/workflows/test-pr1.yml
+
+  scan-build:
+    name: 🔍 Clang Scan-Build Analysis
+    needs: unix-ci
+    uses: ./.github/workflows/test-pr1-sb.yml
+
+  cppcheck-linters:
+    name: 🧪 Cppcheck and Linters
+    needs: unix-ci
+    uses: ./.github/workflows/lint-code-checks.yml
+
+  finalize:
+    name: 🧾 GitHub Summary Report
+    runs-on: ubuntu-latest
+    needs:
+      - unix-ci
+      - scan-build
+      - cppcheck-linters
+    if: always()
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "## 🧩 ICCDEV PR Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.unix-ci.result }}" == "success" ]; then
+            echo "- ✅ Build + Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Build + Tests: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.scan-build.result }}" == "success" ]; then
+            echo "- ✅ Clang Static Report: Available" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Clang Static Analysis: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.cppcheck-linters.result }}" == "success" ]; then
+            echo "- ✅ Cppcheck + Linter Report: Available" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Cppcheck + Linters: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🧱 Performance Enhancements" >> $GITHUB_STEP_SUMMARY
+          echo "- Cached vcpkg dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "- Cached build directories" >> $GITHUB_STEP_SUMMARY
+          echo "- Uploaded artifacts for all stages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "### ✅ Overall Result: SUCCESS" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Overall Result: FAILURE" >> $GITHUB_STEP_SUMMARY
+          fi
