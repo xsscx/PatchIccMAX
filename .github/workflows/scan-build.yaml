@@ -5,10 +5,10 @@
 ##                 https://color.org
 #
 #
-## Intent: iccMAX Scan Build Runner for Matrix OS
+## Intent: scan-build on matrix
 #
-## Last Updated: 24-JULY-2025 0000Z by David Hoyt 
-##               Add Read Permission Block
+## Last Updated: 14-NOV-2025 0000Z by David Hoyt 
+##               Modify for nameroll
 ## TODO: Push binary releases, tags etc.. 
 #
 ## Comment: Known good and working from PatchIccMax
@@ -19,7 +19,7 @@
 #
 ###############################################################
 
-name: "iccMAX Scan Build"
+name: "scan-build"
 
 on:
   workflow_dispatch:
@@ -35,7 +35,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - name: 📥 Checkout master
+      - name: Checkout master
         uses: actions/checkout@v4
 
       # Install dependencies
@@ -47,8 +47,8 @@ jobs:
       - name: Ensure scan-build is installed and accessible
         run: |
           export PATH="/usr/lib/llvm-17/bin:$PATH"
-          which scan-build || echo "? scan-build not found"
-          scan-build --version || echo "? scan-build version check failed"
+          which scan-build || echo "scan-build not found"
+          scan-build --version || echo "scan-build version check failed"
       # Configure the build with scan-build
       - name: Configure the build with scan-build
         run: |
@@ -79,23 +79,10 @@ jobs:
           name: scan-build-reports
           path: Build/scan-build-reports
 
-      # Upload built binaries as artifacts
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: master-build-linux
-          path: Build
-
-      # Upload build logs
-      - name: Upload build logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-logs
-          path: DemoIccMAX/Build/CMakeCache.txt
       - name: Summary Report
         if: always()
         run: |
           echo "### Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- Build Directory: DemoIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
-          echo "- Artifacts Uploaded: iccmax-linux-clang" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Directory: Build/" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts Uploaded: scan-build" >> $GITHUB_STEP_SUMMARY
           echo "- Status: Success" >> $GITHUB_STEP_SUMMARY
