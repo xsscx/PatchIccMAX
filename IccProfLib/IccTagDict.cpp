@@ -76,17 +76,16 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include <codecvt>
+//#include <codecvt>
 #include <locale>
 #include "IccTagDict.h"
 #include "IccUtil.h"
 #include "IccIO.h"
+#include "IccConvertUTF.h"
 
 
 //MSVC 6.0 doesn't support std::string correctly so we disable support in this case
 #ifndef ICC_UNSUPPORTED_TAG_DICT
-
-using convert_type = std::codecvt_utf8<wchar_t>;
 
 
 /*=============================================================================
@@ -204,6 +203,53 @@ CIccDictEntry::~CIccDictEntry()
 
 /**
 ******************************************************************************
+* Name: wstringToUTF8Converter
+*
+* Purpose: convert wstring to UTF8 string for display
+*
+* Args: std::wstring
+*
+* Return: std::string
+******************************************************************************/
+static
+std::string wstringToUTF8Converter( std::wstring &input )
+{
+
+#if 1
+  size_t maxBufferSize = 6 * ( input.size() + 1 );  // assume worst case conversion to UTF8
+  std::vector<char> outputBuffer ( maxBufferSize );
+  UTF8 *output_data( (UTF8 *)outputBuffer.data() );
+  UTF8 *output_end = output_data + maxBufferSize;
+  UTF8 *output_start = output_data;  // because this will be modified in the conversion routine
+
+  // wstring can be 16 or 32 bits depending on platform - so we need a conditional implementation to convert to UTF8
+  static_assert( sizeof(wchar_t) == 4 || sizeof(wchar_t) == 2, "wchar_t has an unexpected size." );
+  if (sizeof(wchar_t) == 4) {
+    const UTF32 *input_data( (const UTF32 *)input.data() );
+    const UTF32 *input_end = input_data + input.size();
+    (void) icConvertUTF32toUTF8 ( &input_data, input_end, &output_start, output_end, lenientConversion );
+  } else  {
+    const UTF16 *input_data( (const UTF16 *)input.data() );
+    const UTF16 *input_end = input_data + input.size();
+    (void) icConvertUTF16toUTF8 ( &input_data, input_end, &output_start, output_end, lenientConversion );
+  }
+
+// output_start has been moved to point to the end of the output, and should have a terminating NULL
+
+  return std::string ( (char *)output_data );     // this makes a copy of the output string data
+#else
+// deprecated implementation that still works for now, but is marked for removal in C++26
+// saving this, just in case the new code fails in testing
+  using convert_type = std::codecvt_utf8<wchar_t>;
+  std::wstring_convert<convert_type, wchar_t> converter;
+  return converter.to_bytes( input );
+#endif
+
+}
+
+
+/**
+******************************************************************************
 * Name: CIccDictEntry::Describe
 * 
 * Purpose: 
@@ -216,15 +262,12 @@ void CIccDictEntry::Describe(std::string &sDescription, int nVerboseness)
 {
   std::wstring ws;
 
-  //setup converter
-  std::wstring_convert<convert_type, wchar_t> converter;
-
   sDescription += "BEGIN DICT_ENTRY\nName=";
   ws.assign(m_sName->begin(), m_sName->end());
-  sDescription += converter.to_bytes(ws);
+  sDescription += wstringToUTF8Converter(ws);
   sDescription += "\nValue=";
   ws.assign(m_sValue->begin(), m_sValue->end());
-  sDescription += converter.to_bytes(ws);
+  sDescription += wstringToUTF8Converter(ws);
   sDescription += "\n";
 
   if (m_pNameLocalized) {
