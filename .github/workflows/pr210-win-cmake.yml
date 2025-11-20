@@ -1,17 +1,17 @@
 ###############################################################
 #
-## Copyright (©) 2025 International Color Consortium. 
-##                 All rights reserved. 
-##                 https://color.org
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 01-NOV-2025 1200Z by David Hoyt
+#
+## Intent: PR210 Windows
+#
+## TODO: Add Unit Test Suite
 #
 #
-## Intent: iccMAX for Cmake Windows Build
 #
-## Last Updated: 24-JULY-2025 0000Z by David Hoyt 
-#                Add Permission Block
-## TODO: Push binary releases, tags etc.. 
 #
-## Comment: Known good and working from PatchIccMax
 #
 #
 #
@@ -19,7 +19,7 @@
 #
 ###############################################################
 
-name: WindowsCmake
+name: pr210-win
 permissions:
   contents: read
 
@@ -53,29 +53,32 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            DemoIccMAX\Build\Cmake\build
+            DiccDEV\Build\Cmake\build
           key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
             cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
-      - name: Install dependencies
+      - name: Build PR210
         run: |
-          git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
-          cd DemoIccMAX
+          echo "=== Configuring PR210 ==="
+          git clone https://github.com/InternationalColorConsortium/iccDEV.git
+          cd iccDEV
+          git fetch origin pull/210/head:pr-210
+          git checkout pr-210
+          git branch
+          git status
           vcpkg integrate install
           vcpkg install
-      - name: Configure
-        run: |
-          cd DemoIccMAX
           cd Build\Cmake
           cmake -B build -S . -G "Visual Studio 17 2022" -A x64 ^
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ^
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
       - name: Build
         run: |
-          cd DemoIccMAX\Build\Cmake
+          cd iccDEV\Build\Cmake
           cmake --build build --config ${{ matrix.build_type }}
           dir /s /b *.exe *.lib
       - name: Run Unit Tests
         run: |
-          cd DemoIccMAX\Testing
+          cd iccDEV\Testing
           dir
+          

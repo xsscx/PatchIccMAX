@@ -1,0 +1,125 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 19-NOV-2025 1200Z by David Hoyt
+#
+## Intent: PR Trigger for Windows
+#
+## TODO: 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: pwsh-win3
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    strategy:
+      matrix:
+        build_type: [Debug]
+    steps:
+      - name: Checkout PR source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          fetch-depth: 0
+
+      - name: Verify Branch Context
+        run: |
+          echo "Triggered by:  ${{ github.event_name }}"
+          echo "Base branch:   ${{ github.base_ref }}"
+          echo "Head branch:   ${{ github.head_ref }}"
+          echo "Commit SHA:    ${{ github.event.pull_request.head.sha }}"
+          echo "Build Type:    ${{ matrix.build_type }}"
+          echo "Compiler:      ${{ matrix.compiler }}"
+          echo "OS:            ${{ runner.os }}"
+
+      - name: Build HEAD
+        run: |
+          git clone https://github.com/InternationalColorConsortium/iccDEV.git
+          cd iccDEV
+          git branch
+          git status
+          Start-BitsTransfer -Source "https://xss.cx/2025/11/vcpkg/vcpkg-exported-deps.zip" -Destination "deps.zip"
+          tar -xf deps.zip
+          cd Build/Cmake
+          cmake  -B build -S . -DCMAKE_TOOLCHAIN_FILE="..\..\scripts\buildsystems\vcpkg.cmake" -DVCPKG_MANIFEST_MODE=OFF -Wno-dev -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build -- /m /maxcpucount
+          $exeDirs = Get-ChildItem -Recurse -File -Include *.exe -Path .\build\ |
+              Where-Object { $_.FullName -match 'iccdev' -and $_.FullName -notmatch '\\CMakeFiles\\' -and $_.Name -notmatch '^CMake(C|CXX)CompilerId\.exe$' } |
+              ForEach-Object { Split-Path $_.FullName -Parent } |
+              Sort-Object -Unique
+          $env:PATH = ($exeDirs -join ';') + ';' + $env:PATH
+          $env:PATH -split ';' | Select-String "icc"
+          $toolDirs = Get-ChildItem -Recurse -File -Include *.exe -Path .\Tools\ | ForEach-Object { Split-Path -Parent $_.FullName } | Sort-Object -Unique
+          $env:PATH = ($toolDirs -join ';') + ';' + $env:PATH
+          $env:PATH -split ';'
+          cd ..\..\Testing
+          .\CreateAllProfiles.bat
+          .\RunTests.bat
+          cd CalcTest\
+          .\checkInvalidProfiles.bat
+          .\runtests.bat
+          cd ..\Display
+          .\RunProtoTests.bat
+          cd ..\HDR
+          .\mkprofiles.bat
+          cd ..\mcs\
+          .\updateprev.bat
+          .\updateprevWithBkgd.bat
+          cd ..\Overprint
+          .\RunTests.bat
+          cd ..
+          cd hybrid
+          .\BuildAndTest.bat
+          cd ..
+                    # Collect .icc profile information
+          $profiles = Get-ChildItem -Path . -Filter "*.icc" -Recurse -File
+          $totalCount = $profiles.Count
+          
+          # Group profiles by directory
+          $groupedProfiles = $profiles | Group-Object { $_.Directory.FullName }
+          
+          # Generate Summary Report
+          Write-Host "`n========================="
+          Write-Host " ICC Profile Report"
+          Write-Host "========================="
+          
+          # Print count per subdirectory
+          foreach ($group in $groupedProfiles) {
+              Write-Host ("{0}: {1} .icc profiles" -f $group.Name, $group.Count)
+          }
+
+          Write-Host "`nTotal .icc profiles found: $totalCount"
+          Write-Host "=========================`n"
+          Write-Host "All Done!"
+          cd ..
+      - name: GitHub Summary
+        if: always()
+        run: |
+          echo "## 🧱 CMake Windows Build Summary" >> %GITHUB_STEP_SUMMARY%
+          echo "Repository: ${{ github.repository }}" >> %GITHUB_STEP_SUMMARY%
+          echo "Run URL: [View Logs](${{ env.RUN_URL }})" >> %GITHUB_STEP_SUMMARY%
+          echo "Triggered by: ${{ github.event_name }}" >> %GITHUB_STEP_SUMMARY%
+          echo "Commit SHA: ${{ github.event.pull_request.head.sha || github.sha }}" >> %GITHUB_STEP_SUMMARY%
+          echo "Build Type: ${{ matrix.build_type }}" >> %GITHUB_STEP_SUMMARY%
+          echo "Runner OS: ${{ runner.os }}" >> %GITHUB_STEP_SUMMARY%
+          echo "✅ Build completed successfully on Windows with CMake and vcpkg." >> %GITHUB_STEP_SUMMARY%
