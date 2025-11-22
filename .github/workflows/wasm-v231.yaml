@@ -53,8 +53,8 @@ jobs:
         emconfigure ./configure --static --prefix=$(pwd)/out
         emmake make -j$(nproc) && emmake make install
         cd ..
-        curl -LO https://download.sourceforge.net/libpng/libpng-1.6.43.tar.gz
-        tar -xzf libpng-1.6.43.tar.gz && mv libpng-1.6.43 libpng && cd libpng
+        curl -LO https://download.sourceforge.net/libpng/libpng-1.6.51.tar.gz
+        tar -xzf libpng-1.6.51.tar.gz && mv libpng-1.6.51 libpng && cd libpng
         CPPFLAGS="-I$(pwd)/../zlib" LDFLAGS="-L$(pwd)/../zlib/out/lib" emconfigure ./configure --disable-shared --enable-static --prefix=$(pwd)/out
         emmake make -j$(nproc) && emmake make install
         cd ..
