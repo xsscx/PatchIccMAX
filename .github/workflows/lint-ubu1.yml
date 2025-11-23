@@ -77,13 +77,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: iccmax-libs-${{ matrix.build_type }}-linux
+          name: iccdev-clang-tidy-${{ matrix.build_type }}-linux
           path: |
             tidy-out/*
-            iccDEV/Build/**/*.so
-            iccDEV/Build/**/*.a
-            iccDEV/Build/**/*.out
-            iccDEV/Build/**/*.bin
-            iccDEV/Build/**/*.o
-            iccDEV/Build/Tools/**/*
           if-no-files-found: warn
