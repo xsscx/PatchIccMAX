@@ -79,6 +79,7 @@ jobs:
         with:
           name: iccmax-libs-${{ matrix.build_type }}-linux
           path: |
+            tidy-out/*
             iccDEV/Build/**/*.so
             iccDEV/Build/**/*.a
             iccDEV/Build/**/*.out
