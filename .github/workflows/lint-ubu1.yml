@@ -19,7 +19,7 @@
 #
 ###############################################################
 
-name: lint-ubu1
+name: iccdev-tidy-coreguidelines
 
 on:
   workflow_dispatch:
