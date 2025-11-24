@@ -142,11 +142,12 @@ icFloatNumber CIccCurve::Find(icFloatNumber v,
 */
 CIccTagCurve::CIccTagCurve(int nSize/*=0*/)
 {
-    m_nSize = nSize <0 ? 0 : nSize;
-  if (m_nSize>0)
+  m_nSize = (nSize < 0) ? 0 : nSize;
+  m_nMaxIndex = 0;
+  m_Curve = NULL;
+  
+  if (m_nSize > 0)
     m_Curve = (icFloatNumber*)calloc(nSize, sizeof(icFloatNumber));
-  else
-    m_Curve = NULL;
 }
 
 
@@ -164,9 +165,12 @@ CIccTagCurve::CIccTagCurve(const CIccTagCurve &ITCurve)
 {
   m_nSize = ITCurve.m_nSize;
   m_nMaxIndex = ITCurve.m_nMaxIndex;
-
-  m_Curve = (icFloatNumber*)calloc(m_nSize, sizeof(icFloatNumber));
-  memcpy(m_Curve, ITCurve.m_Curve, m_nSize*sizeof(icFloatNumber));
+  m_Curve = NULL;
+  
+  if (m_nSize > 0) {
+    m_Curve = (icFloatNumber*)calloc(m_nSize, sizeof(icFloatNumber));
+    memcpy(m_Curve, ITCurve.m_Curve, m_nSize*sizeof(icFloatNumber));
+  }
 }
 
 
@@ -190,8 +194,12 @@ CIccTagCurve &CIccTagCurve::operator=(const CIccTagCurve &CurveTag)
 
   if (m_Curve)
     free(m_Curve);
-  m_Curve = (icFloatNumber*)calloc(m_nSize, sizeof(icFloatNumber));
-  memcpy(m_Curve, CurveTag.m_Curve, m_nSize*sizeof(icFloatNumber));
+  m_Curve = NULL;
+  
+  if (m_nSize > 0) {
+    m_Curve = (icFloatNumber*)calloc(m_nSize, sizeof(icFloatNumber));
+    memcpy(m_Curve, CurveTag.m_Curve, m_nSize*sizeof(icFloatNumber));
+  }
 
   return *this;
 }
@@ -696,8 +704,8 @@ CIccTagParametricCurve &CIccTagParametricCurve::operator=(const CIccTagParametri
 
   if (m_dParam)
     delete [] m_dParam;
-	m_dParam = new icFloatNumber[m_nNumParam];
-	memcpy(m_dParam, ParamCurveTag.m_dParam, m_nNumParam*sizeof(icFloatNumber));
+  m_dParam = new icFloatNumber[m_nNumParam];
+  memcpy(m_dParam, ParamCurveTag.m_dParam, m_nNumParam*sizeof(icFloatNumber));
 
   return *this;
 }
@@ -2502,33 +2510,29 @@ void CIccCLUT::Interp2d(icFloatNumber *destPixel, const icFloatNumber *srcPixel)
 
   icFloatNumber u = x - ix;
   icFloatNumber t = y - iy;
-
-  if (ix==mx) {
+ 
+  if (ix == mx) {
     ix--;
     u = 1.0f;
   }
-  if (iy==my) {
+  if (iy == my) {
     iy--;
     t = 1.0f;
   }
 
-  icFloatNumber nt = 1.0f - t;
-  icFloatNumber nu = 1.0f - u;
+  const icFloatNumber nt = 1.0f - t;
+  const icFloatNumber nu = 1.0f - u;
 
-  int i;
-  icFloatNumber *p = &m_pData[ix*n001 + iy*n010];
+  const icFloatNumber *p = &m_pData[ ix*n001 + iy*n010 ];
 
-  //Normalize grid units
-  icFloatNumber dF0, dF1, dF2, dF3, pv;
+  // Normalize grid units
+  const icFloatNumber dF0 = nt * nu;
+  const icFloatNumber dF1 = nt *  u;
+  const icFloatNumber dF2 =  t * nu;
+  const icFloatNumber dF3 =  t *  u;
 
-  dF0 = nt* nu;
-  dF1 = nt*  u;
-  dF2 =  t* nu;
-  dF3 =  t*  u;
-
-  for (i=0; i<m_nOutput; i++, p++) {
-    pv = p[n000]*dF0 + p[n001]*dF1 + p[n010]*dF2 + p[n011]*dF3;
-
+  for (int i=0; i<m_nOutput; i++) {
+    icFloatNumber pv = p[n000 + i]*dF0 + p[n001 + i]*dF1 + p[n010 + i]*dF2 + p[n011 + i]*dF3;
     destPixel[i] = pv;
   }
 }
@@ -3208,7 +3212,7 @@ CIccMBB::CIccMBB(const CIccMBB &IMBB)
 
     m_CurvesA = new LPIccCurve[nCurves];
     for (i=0; i<nCurves; i++)
-      m_CurvesA[i] = (CIccTagCurve*)IMBB.m_CurvesA[i]->NewCopy();
+      m_CurvesA[i] = (CIccCurve*)(IMBB.m_CurvesA[i]->NewCopy());
   }
   else {
     m_CurvesA = NULL;
@@ -3219,7 +3223,7 @@ CIccMBB::CIccMBB(const CIccMBB &IMBB)
 
     m_CurvesM = new LPIccCurve[nCurves];
     for (i=0; i<nCurves; i++)
-      m_CurvesM[i] = (CIccTagCurve*)IMBB.m_CurvesM[i]->NewCopy();
+      m_CurvesM[i] = (CIccCurve*)IMBB.m_CurvesM[i]->NewCopy();
   }
   else {
     m_CurvesM = NULL;
@@ -3230,7 +3234,7 @@ CIccMBB::CIccMBB(const CIccMBB &IMBB)
 
     m_CurvesB = new LPIccCurve[nCurves];
     for (i=0; i<nCurves; i++)
-      m_CurvesB[i] = (CIccTagCurve*)IMBB.m_CurvesB[i]->NewCopy();
+      m_CurvesB[i] = (CIccCurve*)IMBB.m_CurvesB[i]->NewCopy();
   }
   else {
     m_CurvesB = NULL;
@@ -3283,7 +3287,7 @@ CIccMBB &CIccMBB::operator=(const CIccMBB &IMBB)
 
     m_CurvesA = new LPIccCurve[nCurves];
     for (i=0; i<nCurves; i++)
-      m_CurvesA[i] = (CIccTagCurve*)IMBB.m_CurvesA[i]->NewCopy();
+      m_CurvesA[i] = (CIccCurve*)IMBB.m_CurvesA[i]->NewCopy();
   }
   else {
     m_CurvesA = NULL;
@@ -3294,7 +3298,7 @@ CIccMBB &CIccMBB::operator=(const CIccMBB &IMBB)
 
     m_CurvesM = new LPIccCurve[nCurves];
     for (i=0; i<nCurves; i++)
-      m_CurvesM[i] = (CIccTagCurve*)IMBB.m_CurvesM[i]->NewCopy();
+      m_CurvesM[i] = (CIccCurve*)IMBB.m_CurvesM[i]->NewCopy();
   }
   else {
     m_CurvesM = NULL;
@@ -3305,7 +3309,7 @@ CIccMBB &CIccMBB::operator=(const CIccMBB &IMBB)
 
     m_CurvesB = new LPIccCurve[nCurves];
     for (i=0; i<nCurves; i++)
-      m_CurvesB[i] = (CIccTagCurve*)IMBB.m_CurvesB[i]->NewCopy();
+      m_CurvesB[i] = (CIccCurve*)IMBB.m_CurvesB[i]->NewCopy();
   }
   else {
     m_CurvesB = NULL;
