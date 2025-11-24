@@ -170,7 +170,6 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "============================= Starting Build =============================" -ForegroundColor Green
-          Write-Host "Running Hoyt's Build Script..." -ForegroundColor Green
           iex (iwr -Uri "https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/re231/contrib/Build/cmake/remote-windows-build.ps1").Content
 
       - name: Host System Info
