@@ -4236,14 +4236,17 @@ icValidateStatus CIccTagLutAtoB::Validate(std::string sigPath, std::string &sRep
   case icSigAToB1Tag:
   case icSigAToB2Tag:
     {
-      icUInt32Number nInput = icGetSpaceSamples(pProfile->m_Header.colorSpace);
-
-      icUInt32Number nOutput = icGetSpaceSamples(pProfile->m_Header.pcs);
+//      icUInt32Number nInput = icGetSpaceSamples(pProfile->m_Header.colorSpace);
+//      icUInt32Number nOutput = icGetSpaceSamples(pProfile->m_Header.pcs);
+// m_nInput should match nInput, and m_nOutput should match nOutput
+// That is validated in CIccMBB::Validate
+// Here we don't want to crash while validating the curves, even if the count of them is incorrect, so we use the same counts obtained from reading the LUT.
 
       icUInt8Number i;
       if (m_CurvesB) {
-        for (i=0; i<nOutput; i++) {
-          if (m_CurvesB[i]) {
+        icUInt32Number nCurves = IsInputB() ? m_nInput : m_nOutput;
+        for (i=0; i<nCurves; i++) {
+          if (m_CurvesB[i]) {           // crash on i = 1, m_CurvesB only allocated a single channel
             rv = icMaxStatus(rv, m_CurvesB[i]->Validate(sigPath+icGetSigPath(GetType()), sReport, pProfile));
           }
           else {
@@ -4256,7 +4259,8 @@ icValidateStatus CIccTagLutAtoB::Validate(std::string sigPath, std::string &sRep
       }
 
       if (m_CurvesM) {
-        for (i=0; i<nOutput; i++) {
+        icUInt32Number nCurves = IsInputMatrix() ? m_nInput : m_nOutput;
+        for (i=0; i<nCurves; i++) {
           if (m_CurvesM[i]) {
             rv = icMaxStatus(rv, m_CurvesM[i]->Validate(sigPath+icGetSigPath(GetType()), sReport, pProfile));
           }
@@ -4278,7 +4282,8 @@ icValidateStatus CIccTagLutAtoB::Validate(std::string sigPath, std::string &sRep
           rv = icMaxStatus(rv, icValidateNonCompliant);
         }
 
-        for (i=0; i<nInput; i++) {
+        icUInt32Number nCurves = !IsInputB() ? m_nInput : m_nOutput;
+        for (i=0; i<nCurves; i++) {
           if (m_CurvesA[i]) {
             rv = icMaxStatus(rv, m_CurvesA[i]->Validate(sigPath+icGetSigPath(GetType()), sReport, pProfile));
           }
