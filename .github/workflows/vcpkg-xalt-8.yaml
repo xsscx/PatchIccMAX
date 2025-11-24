@@ -1,0 +1,48 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 02-NOV-2025 at 1900 EST by David Hoyt (©)
+#
+## Intent: vcpkg ports file XNU smoke test 8
+#
+## TODO: 
+#
+#
+###############################################################
+
+name: "VCPKG XNU Matrix"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    name: PoC on macOS ${{ matrix.macos }} ${{ matrix.arch }}
+    runs-on: macos-${{ matrix.macos }}
+    strategy:
+      fail-fast: false
+      matrix:
+        macos: [13, 14, latest]
+        arch: [x86_64, arm64]
+
+    steps:
+    # Checkout repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Set up Git anonymous identity
+    - name: Set up Git anonymous identity
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+    # Clone DemoIccMAX repository and checkout vcpkg branch
+    - name: Clone vcpkg test repository
+      run: |
+       git clone https://github.com/InternationalColorConsortium/vcpkg.git
+       cd vcpkg
+       git checkout iccdev
+       ./bootstrap-vcpkg.sh -disableMetrics
+       ./vcpkg integrate install
+       ./vcpkg install iccdev

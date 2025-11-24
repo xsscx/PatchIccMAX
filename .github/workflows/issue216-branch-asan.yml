@@ -1,0 +1,117 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 20-NOV-2025 1330Z by David Hoyt
+#
+## Intent: Cmake testing / build
+#
+## TODO: Add Unit Test Suite
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: issue216-branch-asan
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build_type: [Debug]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Collect Workflow Telemetry
+        uses: catchpoint/workflow-telemetry-action@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake git pkg-config
+          sudo apt-get install -y \
+            build-essential cmake gcc g++ clang clang-tools \
+            libpng-dev libxml2 libxml2-dev libtiff-dev \
+            nlohmann-json3-dev libwxgtk3.2-dev wx-common \
+            python3 python3-pip curl git llvm zsh
+          echo "Dependencies installed."
+      - name: Configure for Issue 216
+        run: |
+          git clone https://github.com/InternationalColorConsortium/iccDEV.git
+          cd iccDEV
+          git checkout issue-216
+          git branch
+          git status
+          cd Build
+          export CXX=clang++
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Debug -Wno-dev -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer" Cmake/
+          make -j$(nproc)
+          echo "========= BEGIN INSIDE STUB for issue-216 branch ========="
+          cd ../Testing/
+          echo "=== Updating PATH ==="
+           for d in ../Build/Tools/*; do
+            [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
+           done
+            echo "========= Create Profiles... =========" 
+            sh CreateAllProfiles.sh
+            echo "========= Running RunTests.sh... =========" 
+            sh RunTests.sh
+            echo "========= into HDR... =========" 
+            cd HDR
+            sh mkprofiles.sh
+            cd ..
+            echo "========= into hybrid... =========" 
+            cd hybrid
+            sh BuildAndTest.sh
+            cd ..
+            echo "========= into CalcTest... =========" 
+            cd CalcTest
+            sh checkInvalidProfiles.sh
+            cd ..
+            echo "========= into mcs... =========" 
+            cd mcs
+            sh updateprev.sh
+            sh updateprevWithBkgd.sh
+            echo "========= Back into Testing... =========" 
+            cd ..
+            echo "========= iccDumpProfile cve-2023-46602.icc. ========="
+            wget https://github.com/xsscx/PatchIccMAX/raw/refs/heads/re231/contrib/UnitTest/cve-2023-46602.icc
+            echo "========= into mcs... ========="
+            iccDumpProfile cve-2023-46602.icc
+            echo "========= iccRoundTrip cve-2023-46602.icc... ========="
+            iccRoundTrip cve-2023-46602.icc
+            echo "========= into icPlatformSignature PoC... ========="
+            wget https://github.com/xsscx/PatchIccMAX/raw/refs/heads/re231/contrib/UnitTest/icPlatformSignature-ubsan-poc.icc
+            iccRoundTrip icPlatformSignature-ubsan-poc.icc
+            iccDumpProfile icPlatformSignature-ubsan-poc.icc
+            echo "========= getting icSigMatriElemType PoC... ========="
+            wget https://github.com/xsscx/PatchIccMAX/raw/refs/heads/re231/contrib/UnitTest/icSigMatrixElemType-Read-poc.icc
+            echo "========= running last few checks... ========="
+            iccRoundTrip icSigMatrixElemType-Read-poc.icc
+            iccDumpProfile icSigMatrixElemType-Read-poc.icc
+            iccToXml icSigMatrixElemType-Read-poc.icc icSigMatrixElemType-Read-poc.xml
+            iccToXml icPlatformSignature-ubsan-poc.icc icPlatformSignature-ubsan-poc.xml
+            iccToXml cve-2023-46602.icc cve-2023-46602.xml
+            iccFromXml icSigMatrixElemType-Read-poc.xml icSigMatrixElemType-Read-rt.icc
+            iccFromXml icPlatformSignature-ubsan-poc.xml icPlatformSignature-ubsan-rt.icc
+            iccFromXml cve-2023-46602.xml cve-2023-46602-rt.icc
+            find . -iname "*.icc" | wc -l
+            iccRoundTrip PCC/Lab_float-D50_2deg.icc
+            bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/iccDumpProfile_checks.zsh)"
+            cd ../Build
+            bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/CalcTest/test_icc_apply_named_cmm.sh)"
+            cd ..
+            pwd
+            ls
+            echo "========= END INSIDE STUB for issue-216 branch ========="
