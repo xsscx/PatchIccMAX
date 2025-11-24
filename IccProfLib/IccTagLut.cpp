@@ -5011,7 +5011,7 @@ bool CIccTagLut16::Read(icUInt32Number size, CIccIO *pIO)
   LPIccCurve *pCurves;
   CIccTagCurve *pCurve;
 
-  if (size<13*sizeof(icUInt32Number) || !pIO) {
+  if (size < 13*sizeof(icUInt32Number) || !pIO) {
     return false;
   }
 
@@ -5045,7 +5045,7 @@ bool CIccTagLut16::Read(icUInt32Number size, CIccIO *pIO)
     if (!pCurve->SetSize(nInputEntries))
       return false;
 
-    if (pIO->ReadUInt16Float(&(*pCurve)[0], nInputEntries) != nInputEntries)
+    if ((nInputEntries > 0) && pIO->ReadUInt16Float(&(*pCurve)[0], nInputEntries) != nInputEntries)
       return false;
   }
 
@@ -5070,7 +5070,7 @@ bool CIccTagLut16::Read(icUInt32Number size, CIccIO *pIO)
     if (!pCurve->SetSize(nOutputEntries))
       return false;
 
-    if (pIO->ReadUInt16Float(&(*pCurve)[0], nOutputEntries) != nOutputEntries)
+    if ((nOutputEntries > 0) && pIO->ReadUInt16Float(&(*pCurve)[0], nOutputEntries) != nOutputEntries)
       return false;
   }
   return true;
