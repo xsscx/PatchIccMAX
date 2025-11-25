@@ -7,7 +7,7 @@
 #
 ## Intent: iccMAX Scan Build Runner for Matrix OS
 #
-## Last Updated: 24-JULY-2025 0000Z by David Hoyt 
+## Last Updated: 23-NOV-2025 1200Z by David Hoyt 
 ##               Add Read Permission Block
 ## TODO: Push binary releases, tags etc.. 
 #
@@ -19,7 +19,7 @@
 #
 ###############################################################
 
-name: "iccMAX Scan Build"
+name: "iccDEV Scan Build"
 
 on:
   workflow_dispatch:
