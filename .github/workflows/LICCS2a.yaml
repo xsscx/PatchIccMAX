@@ -103,10 +103,11 @@ jobs:
           echo "=== Compilation Complete ==="
           ls -lh licc || echo "ERROR: licc binary not created"
           echo "=== Little ICC Scanner Demo Start | Analyze 3 Files | Raw Output ==="
-          echo "=== PoC's: cve-2023-46602, icPlatformSignature & icSigMatrixElemType ==="
+          echo "=== PoC's: cve-2023-46602, icPlatformSignature & icSigMatrixElemType, Issue 55 ==="
           for f in \
             ../../../../UnitTest/cve-2023-46602.icc \
             ../../../../UnitTest/icPlatformSignature-ubsan-poc.icc \
+            ../../../../UnitTest/issue55.icc \
             ../../../../UnitTest/icSigMatrixElemType-Read-poc.icc; do
             echo "--- Running: $f ---"
             LLVM_PROFILE_FILE="licc.profraw" ./licc -v 1 "$f" || echo "Run on $f exited with code $?"
