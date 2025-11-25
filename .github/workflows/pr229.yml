@@ -7,14 +7,14 @@
 #
 #
 #
-## Intent: PR210-sb
+## Intent: PR229-sb
 #
 ## TODO:  
 #
 #
 ###############################################################
 
-name: "pr210-sb"
+name: "pr229-sb"
 
 on:
   workflow_dispatch:
@@ -42,16 +42,16 @@ jobs:
       - name: Ensure scan-build is installed and accessible
         run: |
           export PATH="/usr/lib/llvm-17/bin:$PATH"
-          which scan-build || echo "? scan-build not found"
-          scan-build --version || echo "? scan-build version check failed"
+          which scan-build || echo "scan-build not found"
+          scan-build --version || echo "scan-build version check failed"
       # Configure the build with scan-build
       - name: Configure the build with scan-build
         run: |
           echo "=== Configuring PR210 ==="
           git clone https://github.com/InternationalColorConsortium/iccDEV.git
           cd iccDEV
-          git fetch origin pull/210/head:pr-210
-          git checkout pr-210
+          git fetch origin pull/229/head:pr-229
+          git checkout pr-229
           git branch
           git status
           cd Build
