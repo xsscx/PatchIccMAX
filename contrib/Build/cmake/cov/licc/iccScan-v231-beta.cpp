@@ -1555,17 +1555,27 @@ static void checkProfileInformation(cmsHPROFILE h)
 
 // NOTE: Reuse existing 'buf' declared earlier in checkProfileInformation()
 //       to avoid redefinition errors under GCC/Clang.
-  std::memset(buf, 0, sizeof(buf));
 
-  const char* creatorSig = icGetSig(buf, pHdr->creator);
-  PrintTimestamp(stderr);
-  std::fprintf(stderr, "Creator:            %s\n", creatorSig ? creatorSig : "(none)");
+std::memset(buf, 0, sizeof(buf));
+const char* creatorSig =
+    icGetSig(buf, sizeof(buf), pHdr->creator);   // FIXED: added sizeof(buf)
 
-  std::memset(buf, 0, sizeof(buf));
-  const char* manufSig = icGetSig(buf, pHdr->manufacturer);
-  PrintTimestamp(stderr);
-  std::fprintf(stderr, "Device Manufacturer:%s\n", manufSig ? manufSig : "(none)");
-  std::fflush(stderr);
+PrintTimestamp(stderr);
+std::fprintf(stderr,
+             "Creator:            %s\n",
+             creatorSig ? creatorSig : "(none)");
+
+std::memset(buf, 0, sizeof(buf));
+const char* manufSig =
+    icGetSig(buf, sizeof(buf), pHdr->manufacturer);   // FIXED: added sizeof(buf)
+
+PrintTimestamp(stderr);
+std::fprintf(stderr,
+             "Device Manufacturer:%s\n",
+             manufSig ? manufSig : "(none)");
+
+std::fflush(stderr);
+
 
 // ------------------------------
 // ICC HEADER FUZZ DIAGNOSTICS (Hardened + Timestamped)
@@ -1864,17 +1874,26 @@ static void checkProfileInformation(cmsHPROFILE h)
     }
     std::fflush(stderr);
 
-    // ---- Subclass ----
-    if (pHdr->deviceSubClass != 0) {
-      std::memset(buf, 0, sizeof(buf));
-      const char* subSig = icGetSig(buf, pHdr->deviceSubClass);
-      PrintTimestamp(stderr);
-      std::fprintf(stderr, "Profile SubClass:   %s\n", subSig ? subSig : "(invalid)");
-    } else {
-      PrintTimestamp(stderr);
-      std::fprintf(stderr, "Profile SubClass:   Not Defined\n");
-    }
-    std::fflush(stderr);
+   // ---- Subclass ----
+if (pHdr->deviceSubClass != 0) {
+    std::memset(buf, 0, sizeof(buf));
+
+    const char* subSig =
+        icGetSig(buf, sizeof(buf), pHdr->deviceSubClass);   // FIXED
+
+    PrintTimestamp(stderr);
+    std::fprintf(stderr,
+                 "Profile SubClass:   %s\n",
+                 subSig ? subSig : "(invalid)");
+}
+else {
+    PrintTimestamp(stderr);
+    std::fprintf(stderr,
+                 "Profile SubClass:   Not Defined\n");
+}
+
+std::fflush(stderr);
+
 
     // ---- Version ----
     const char* verName = Fmt.GetVersionName(pHdr->version);

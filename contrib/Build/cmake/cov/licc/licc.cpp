@@ -835,8 +835,14 @@ printf("Creation Date:      %d/%d/%d (M/D/Y)  %02u:%02u:%02u\n",
 // -------------------------------
 // char buf[64] = {0};
 
-printf("Creator:            %s\n", icGetSig(buf, pHdr->creator));
-printf("Device Manufacturer:%s\n", icGetSig(buf, pHdr->manufacturer));
+printf("Creator:            %s\n",
+       icGetSig(buf, sizeof(buf), pHdr->creator));
+
+printf("Device Manufacturer:%s\n",
+       icGetSig(buf, sizeof(buf), pHdr->manufacturer));
+
+printf("Profile SubClass:   %s\n",
+       icGetSig(buf, sizeof(buf), pHdr->deviceSubClass));
 
 // ------------------------------
 // ICC HEADER FUZZ DIAGNOSTICS
@@ -925,12 +931,17 @@ else
     printf("Rendering Intent:   InvalidIntent (%u)\n", (unsigned)pHdr->renderingIntent);
 
 // Profile Class (basic signature range check)
-printf("Profile Class:      %s\n", Fmt.GetProfileClassSigName(pHdr->deviceClass));
+printf("Profile Class:      %s\n",
+       Fmt.GetProfileClassSigName(pHdr->deviceClass));
 
-if (pHdr->deviceSubClass)
-    printf("Profile SubClass:   %s\n", icGetSig(buf, pHdr->deviceSubClass));
-else
+if (pHdr->deviceSubClass) {
+    char buf[64] = {0};
+    printf("Profile SubClass:   %s\n",
+           icGetSig(buf, sizeof(buf), pHdr->deviceSubClass));
+}
+else {
     printf("Profile SubClass:   Not Defined\n");
+}
 
 printf("Version:            %s\n", Fmt.GetVersionName(pHdr->version));
 
