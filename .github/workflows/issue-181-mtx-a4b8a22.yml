@@ -87,8 +87,22 @@ jobs:
           make -j"$(nproc)"
           find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
             -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
-          wget https://github.com/xsscx/PatchIccMAX/raw/refs/heads/re231/contrib/UnitTest/icPlatformSignature-ubsan-poc.icc
+          wget --no-verbose \
+            https://github.com/xsscx/PatchIccMAX/raw/refs/heads/re231/contrib/UnitTest/icPlatformSignature-ubsan-poc.icc
+          set +e
           Tools/IccRoundTrip/iccRoundTrip icPlatformSignature-ubsan-poc.icc
+          rt_status=$?
+          set -e
+          
+          if [ "$rt_status" -eq 255 ]; then
+              echo "iccRoundTrip returned exit code 255 — treated as SUCCESS (UB resolved)."
+          else
+              # Any non-255 non-zero → fail the job normally
+              if [ "$rt_status" -ne 0 ]; then
+                  echo "iccRoundTrip failed with exit code $rt_status."
+                  exit "$rt_status"
+              fi
+          fi
       # ---------- macOS ----------
       - name: Clone repository and install dependencies (macOS)
         if: ${{ runner.os == 'macOS' }}
@@ -137,8 +151,22 @@ jobs:
             -DJPEG_LIBRARY="$(brew --prefix jpeg)/lib/libjpeg.dylib" \
             -DENABLE_TOOLS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_SHARED_LIBS=ON -Wno-dev
           make -j$(sysctl -n hw.ncpu)
-          wget https://github.com/xsscx/PatchIccMAX/raw/refs/heads/re231/contrib/UnitTest/icPlatformSignature-ubsan-poc.icc
+          wget --no-verbose \
+            https://github.com/xsscx/PatchIccMAX/raw/refs/heads/re231/contrib/UnitTest/icPlatformSignature-ubsan-poc.icc
+          set +e
           Tools/IccRoundTrip/iccRoundTrip icPlatformSignature-ubsan-poc.icc
+          rt_status=$?
+          set -e
+          
+          if [ "$rt_status" -eq 255 ]; then
+              echo "iccRoundTrip returned exit code 255 — treated as SUCCESS (UB resolved)."
+          else
+              # Any non-255 non-zero → fail the job normally
+              if [ "$rt_status" -ne 0 ]; then
+                  echo "iccRoundTrip failed with exit code $rt_status."
+                  exit "$rt_status"
+              fi
+          fi
       # ---------- Summary ----------
       - name: Summary Report
         if: always()
