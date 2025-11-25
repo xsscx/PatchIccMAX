@@ -21,7 +21,7 @@ on:
 
 jobs:
   build-linux:
-    name: Build and Test Linux with scan-build Pr229
+    name: Build and Test Linux with scan-build from HEAD
     runs-on: ubuntu-latest
     permissions:
       contents: read
