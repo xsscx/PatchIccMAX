@@ -87,7 +87,6 @@ jobs:
           make -j"$(nproc)"
           find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
             -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
-          cd ..
           echo "========= BEGIN INSIDE STUB ========="
           cd ../Testing/
           echo "=== Updating PATH ==="
@@ -149,13 +148,7 @@ jobs:
           find . -type f '(' -perm -111 -o -name '*.dylib' -o -name '*.so' ')' ! -path '*/.git/*' ! -path '*/CMakeFiles/*' -exec otool -L {} +
                     cd ..
           echo "========= BEGIN INSIDE STUB ========="
-          cd Testing/
-          echo "=== Updating PATH ==="
-          for d in ../Build/Tools/*; do
-           [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
-          done 
-          echo "========= BEGIN INSIDE STUB ========="
-          cd Testing/
+          cd ../Testing/
           echo "=== Updating PATH ==="
           for d in ../Build/Tools/*; do
            [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
