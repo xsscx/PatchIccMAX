@@ -89,7 +89,7 @@ jobs:
             -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
           cd ..
           echo "========= BEGIN INSIDE STUB ========="
-          cd Testing/
+          cd ../Testing/
           echo "=== Updating PATH ==="
           for d in ../Build/Tools/*; do
            [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
