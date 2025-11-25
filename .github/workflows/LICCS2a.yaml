@@ -84,7 +84,7 @@ jobs:
           cd licc || { echo "ERROR: 'licc' directory not found"; exit 0; }
           echo "=== Starting Compilation with g++ (with ASan/UBSan) ==="
           set -x
-          g++ \
+          clang++ \
             -fsanitize=address,undefined \
             -fno-omit-frame-pointer \
             -fno-optimize-sibling-calls \
