@@ -5,7 +5,7 @@
 ##
 ## Last Updated: 22-NOV-2025 2300Z by David Hoyt
 #
-## Intent: Cmake testing / build pr223
+## Intent: Cmake testing / build pr230
 #
 ## TODO: Add Unit Test Suite
 #
@@ -19,7 +19,7 @@
 #
 ###############################################################
 
-name: ci-pr223-latest
+name: ci-pr230-latest
 permissions:
   contents: read
   
@@ -63,8 +63,8 @@ jobs:
         run: |
           git clone https://github.com/InternationalColorConsortium/iccDEV.git
           cd iccDEV
-          git fetch origin pull/223/head:pr-223
-          git checkout pr-223
+          git fetch origin pull/230/head:pr-230
+          git checkout pr-230
           cd Build
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
                 -DCMAKE_BUILD_TYPE=Release \
@@ -104,8 +104,8 @@ jobs:
           echo "Setting up CMake build configuration for PR223..."
           git clone https://github.com/InternationalColorConsortium/iccDEV.git
           cd iccDEV
-          git fetch origin pull/223/head:pr-223
-          git checkout pr-223
+          git fetch origin pull/230/head:pr-230
+          git checkout pr-230
           cd Build
           sudo rm -rf /Library/Frameworks/Mono.framework/Headers/png.h
           echo 'export PATH="/opt/homebrew/opt/jpeg/bin:$PATH"' >> /Users/runner/.bash_profile
@@ -155,8 +155,8 @@ jobs:
           Write-Host "Copyright 2023-2025 David H Hoyt LLC. All rights reserved." -ForegroundColor Green
           git clone https://github.com/InternationalColorConsortium/iccDEV.git
           cd iccDEV
-          git fetch origin pull/223/head:pr-223
-          git checkout pr-223
+          git fetch origin pull/230/head:pr-230
+          git checkout pr-230
           git branch
           git status
           Write-Host "========= Fetching Deps... ================`n"
