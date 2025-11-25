@@ -66,7 +66,7 @@ jobs:
           cd Build
           pwd
           ls
-          scan-build  -stats --status-bugs --keep-going --keep-empty --force-analyze-debug-code  --show-description --use-cc=clang --use-c++=clang++ -analyzer-config clang-analyzer-optin.performance.Padding:Mode=on -stats --status-bugs --keep-going --keep-empty --use-cc=clang --use-c++=clang++ -o scan-build-reports make -j"$(nproc)"
+          scan-build  -stats --status-bugs --keep-going --keep-empty --force-analyze-debug-code  --show-description --use-cc=clang --use-c++=clang++  -stats --status-bugs --keep-going --keep-empty --use-cc=clang --use-c++=clang++ -o scan-build-reports make -j"$(nproc)"
         continue-on-error: true 
 
       # Upload scan-build reports
