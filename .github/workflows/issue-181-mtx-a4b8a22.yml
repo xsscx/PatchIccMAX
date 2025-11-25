@@ -87,14 +87,8 @@ jobs:
           make -j"$(nproc)"
           find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
             -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
-          echo "========= BEGIN INSIDE STUB ========="
-          cd ../Testing/
-          echo "=== Updating PATH ==="
-          for d in ../Build/Tools/*; do
-           [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
-          done 
           wget https://github.com/xsscx/PatchIccMAX/raw/refs/heads/re231/contrib/UnitTest/icPlatformSignature-ubsan-poc.icc
-          iccRoundTrip icPlatformSignature-ubsan-poc.icc
+          Tools/IccRoundTrip/iccRoundTrip icPlatformSignature-ubsan-poc.icc
       # ---------- macOS ----------
       - name: Clone repository and install dependencies (macOS)
         if: ${{ runner.os == 'macOS' }}
@@ -143,18 +137,8 @@ jobs:
             -DJPEG_LIBRARY="$(brew --prefix jpeg)/lib/libjpeg.dylib" \
             -DENABLE_TOOLS=ON -DENABLE_STATIC_LIBS=ON -DENABLE_SHARED_LIBS=ON -Wno-dev
           make -j$(sysctl -n hw.ncpu)
-          find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
-            -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" -print
-          find . -type f '(' -perm -111 -o -name '*.dylib' -o -name '*.so' ')' ! -path '*/.git/*' ! -path '*/CMakeFiles/*' -exec otool -L {} +
-                    cd ..
-          echo "========= BEGIN INSIDE STUB ========="
-          cd ../Testing/
-          echo "=== Updating PATH ==="
-          for d in ../Build/Tools/*; do
-           [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
-          done 
           wget https://github.com/xsscx/PatchIccMAX/raw/refs/heads/re231/contrib/UnitTest/icPlatformSignature-ubsan-poc.icc
-          iccRoundTrip icPlatformSignature-ubsan-poc.icc
+          Tools/IccRoundTrip/iccRoundTrip icPlatformSignature-ubsan-poc.icc
       # ---------- Summary ----------
       - name: Summary Report
         if: always()
