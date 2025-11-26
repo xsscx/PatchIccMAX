@@ -3650,7 +3650,7 @@ icValidateStatus CIccMBB::Validate(std::string sigPath, std::string &sReport, co
   }
   case icSigGamutTag:
     {
-      nInput = 1;
+      nInput = icGetSpaceSamples(pProfile->m_Header.pcs);
       if (m_nInput!=nInput) {
         sReport += icMsgValidateCriticalError;
         sReport += sSigPathName;
@@ -3658,7 +3658,7 @@ icValidateStatus CIccMBB::Validate(std::string sigPath, std::string &sReport, co
         rv = icMaxStatus(rv, icValidateCriticalError);
       }
 
-      nOutput = icGetSpaceSamples(pProfile->m_Header.colorSpace);
+      nOutput = 1;
       if (m_nOutput!=nOutput) {
         sReport += icMsgValidateCriticalError;
         sReport += sSigPathName;
@@ -4844,14 +4844,12 @@ icValidateStatus CIccTagLut8::Validate(std::string sigPath, std::string &sReport
   case icSigGamutTag:
     {
       icUInt32Number nInput, nOutput;
-      if (sig==icSigAToB0Tag || sig==icSigAToB1Tag || sig==icSigAToB2Tag || sig==icSigGamutTag) {
-        nInput = icGetSpaceSamples(pProfile->m_Header.pcs);
-        nOutput = icGetSpaceSamples(pProfile->m_Header.colorSpace);
-      }
-      else {
-        nInput = icGetSpaceSamples(pProfile->m_Header.colorSpace);
-        nOutput = icGetSpaceSamples(pProfile->m_Header.pcs);
-      }
+      
+      nInput = icGetSpaceSamples(pProfile->m_Header.pcs);
+      nOutput = icGetSpaceSamples(pProfile->m_Header.colorSpace);
+      
+      if (sig==icSigAToB0Tag || sig==icSigAToB1Tag || sig==icSigAToB2Tag)
+        std::swap(nInput,nOutput);
 
       if (sig==icSigGamutTag) {
         nOutput = 1;
@@ -4884,11 +4882,12 @@ icValidateStatus CIccTagLut8::Validate(std::string sigPath, std::string &sReport
         rv = icMaxStatus(rv, m_Matrix->Validate(sigPath + icGetSigPath(GetType()), sReport, pProfile));
       }
       else {
-        int sum=0;
+        const int s15dot16Unity = 65536;
+        int sum = 0;
         for (icUInt32Number i=0; i<9; i++) {
           sum += m_XYZMatrix[i];
         }
-        if (m_XYZMatrix[0]!=1.0 || m_XYZMatrix[4]!=1.0 || m_XYZMatrix[8]!=1.0 || sum!=3.0) {
+        if (m_XYZMatrix[0]!=s15dot16Unity || m_XYZMatrix[4]!=s15dot16Unity || m_XYZMatrix[8]!=s15dot16Unity || sum!=3*s15dot16Unity) {
           sReport += icMsgValidateWarning;
           sReport += sSigPathName;
           sReport += " - Matrix must be identity.\n";
@@ -5270,14 +5269,12 @@ icValidateStatus CIccTagLut16::Validate(std::string sigPath, std::string &sRepor
   case icSigGamutTag:
     {
       icUInt32Number nInput, nOutput;
-      if (sig==icSigAToB0Tag || sig==icSigAToB1Tag || sig==icSigAToB2Tag || sig==icSigGamutTag) {
-        nInput = icGetSpaceSamples(pProfile->m_Header.pcs);
-        nOutput = icGetSpaceSamples(pProfile->m_Header.colorSpace);
-      }
-      else {
-        nInput = icGetSpaceSamples(pProfile->m_Header.colorSpace);
-        nOutput = icGetSpaceSamples(pProfile->m_Header.pcs);
-      }
+      
+      nInput = icGetSpaceSamples(pProfile->m_Header.pcs);
+      nOutput = icGetSpaceSamples(pProfile->m_Header.colorSpace);
+      
+      if (sig==icSigAToB0Tag || sig==icSigAToB1Tag || sig==icSigAToB2Tag)
+        std::swap(nInput,nOutput);
 
       if (sig==icSigGamutTag) {
         nOutput = 1;
@@ -5310,11 +5307,12 @@ icValidateStatus CIccTagLut16::Validate(std::string sigPath, std::string &sRepor
         rv = icMaxStatus(rv, m_Matrix->Validate(sigPath + icGetSigPath(GetType()), sReport, pProfile));
       }
       else {
-        int sum=0;
+        const int s15dot16Unity = 65536;
+        int sum = 0;
         for (icUInt32Number i=0; i<9; i++) {
           sum += m_XYZMatrix[i];
         }
-        if (m_XYZMatrix[0]!=1.0 || m_XYZMatrix[4]!=1.0 || m_XYZMatrix[8]!=1.0 || sum!=3.0) {
+        if (m_XYZMatrix[0]!=s15dot16Unity || m_XYZMatrix[4]!=s15dot16Unity || m_XYZMatrix[8]!=s15dot16Unity || sum!=3*s15dot16Unity) {
           sReport += icMsgValidateWarning;
           sReport += sSigPathName;
           sReport += " - Matrix must be identity.\n";
