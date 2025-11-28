@@ -1,4 +1,3 @@
-﻿#!/bin/bash
 ##########################################################################################################
 #
 # 
@@ -18,6 +17,7 @@
 # Usage:
 #   Run this script in a terminal from project_root with:
 #    bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/re231/contrib/UnitTest/ubu-alt-summary.sh)"
+##########################################################################################################
 
 set -euo pipefail
 
