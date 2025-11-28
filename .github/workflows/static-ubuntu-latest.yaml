@@ -1,0 +1,106 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 23-OCT-2025 1200Z by David Hoyt
+#
+## Intent: Cmake testing / build
+#
+## TODO: Add Unit Test Suite
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: 23102005-ubu-static
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build_type: [Release]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Collect Workflow Telemetry
+        uses: catchpoint/workflow-telemetry-action@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake git pkg-config
+          sudo apt-get install -y \
+            build-essential cmake gcc g++ clang clang-tools \
+            libpng-dev libxml2 libxml2-dev libtiff-dev \
+            nlohmann-json3-dev libwxgtk3.2-dev wx-common \
+            python3 python3-pip curl git llvm zsh
+          git clone https://github.com/xsscx/PatchIccMAX.git
+          echo "Dependencies installed."
+
+      - name: Configure
+        run: |
+          cd PatchIccMAX/Build
+          cmake -S Cmake -B .   -DCMAKE_BUILD_TYPE=Release   -DENABLE_TOOLS=ON    -DENABLE_STATIC_LIBS=ON   -DENABLE_SHARED_LIBS=OFF   -DBUILD_SHARED_LIBS=OFF   -DCMAKE_FIND_LIBRARY_SUFFIXES=".a"
+          cmake -DCMAKE_EXE_LINKER_FLAGS="-Wl,-Bstatic ${PWD}/IccProfLib/libIccProfLib2-static.a ${PWD}/IccXML/libIccXML2-static.a -Wl,-Bdynamic" .
+          cmake --build . -j1
+          find . -type f \( -perm -111 -o -name "*.a" \) ! -path "*/CMakeFiles/*" -printf "%p\n" | tee /tmp/artifacts.txt && echo && echo "=== Static lib check ===" && file Icc*/libIcc*static.a && echo && echo "=== Executable dynamic check ===" && while read f; do if [[ -x "$f" && ! "$f" =~ \.a$ ]]; then echo "→ $f"; ldd "$f" 2>/dev/null | grep -E "Icc|not a dynamic" || echo "✓ no dynamic ICC linkage"; fi; done < /tmp/artifacts.txt
+          cp ../LICENSE.md Tools
+          cp ../README.md Tools
+          cp -r ../docs .
+          cp -r ../Testing .
+          ls -l Tools
+          find . -type f -perm -111 -mmin -1440 ! -path "*/.git/*" ! -path "*/CMakeFiles/*" ! -name "*.sh" ! -name "*.a" ! -name "*.so" ! -name "*.dylib" -print -exec ldd {} \;
+          cd ..
+          cd Testing/
+          for d in ../Build/Tools/*; do
+          [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
+          done
+          sh CreateAllProfiles.sh
+          sh RunTests.sh
+          cd HDR
+          sh mkprofiles.sh
+          cd ..
+          # cd hybrid
+          # sh BuildAndTest.sh
+          # cd ..
+          cd CalcTest
+          sh checkInvalidProfiles.sh
+          cd ..
+          cd mcs
+          sh updateprev.sh
+          sh updateprevWithBkgd.sh
+          cd ..
+          ../Build/Tools/IccRoundTrip/iccRoundTrip PCC/Lab_float-D50_2deg.icc
+          cd ..
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/re231/contrib/UnitTest/ubu-alt-summary.sh)"
+          cat ubuntu_build_report.html
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: iccdev-v231-${{ matrix.build_type }}-linux-x64
+          path: |
+            # Core compiled libraries
+            PatchIccMAX/Build/IccProfLib/*.a
+            PatchIccMAX/Build/IccXML/*.a
+
+            # Tool executables (e.g. iccApplyProfiles, iccDumpProfile, etc.)
+            PatchIccMAX/README.md
+            PatchIccMAX/LICENSE.md
+            PatchIccMAX/Build/Tools/**/icc*
+            PatchIccMAX/Build/Testing/**/*
+            PatchIccMAX/Build/docs/**/*
+      
+          if-no-files-found: warn
+          retention-days: 7
