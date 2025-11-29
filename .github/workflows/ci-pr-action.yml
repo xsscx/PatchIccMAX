@@ -7,8 +7,8 @@
 #
 ## Intent: iccDEV ci-pr-action
 #
-## Last Updated: 21-NOV-2025 1800Z by David Hoyt 
-##               Change Banners
+## Last Updated: 28-NOV-2025 2300Z by David Hoyt 
+##               Added uci checks
 ## TODO: Push binary releases, tags etc.. 
 #
 ## Comment: Known good and working from PatchIccMax
@@ -19,7 +19,7 @@
 #
 ###############################################################
 
-name: "ci-pr-action2"
+name: "ci-pr-action"
 
 permissions:
   contents: read
@@ -79,9 +79,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
           # Clear the in-shell GITHUB_TOKEN
           unset GITHUB_TOKEN || true
-          
+
           git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
 
           # If not a pull_request event (e.g., workflow_dispatch or workflow_call),
@@ -93,9 +94,11 @@ jobs:
           fi
 
           base_ref="${{ github.base_ref }}"
-          # Validate branch ref to avoid user-injected ref fetch
+
+          # check to avoid uci ref fetch
           case "$base_ref" in
-            master|re231|uci-testing) ;;
+            master|re231|uci-testing)
+              ;;
             *)
               echo "Ref blocked or unsupported: $base_ref" >&2
               echo "src_changed=false" >> "$GITHUB_OUTPUT"
@@ -103,17 +106,18 @@ jobs:
               ;;
           esac
 
-          # short fetch, single ref; avoid tags, history
+          # Short fetch, single ref; avoid tags and deep history
           git -c protocol.version=2 fetch --no-tags origin "${base_ref}" --depth=1
 
-          # Case-insensitive extension match to catch .CPP/.H etc.  Add other extensions as needed.
+          # Case-insensitive extension match (c/h/cpp variants)
           if git diff --name-only "origin/${base_ref}"...HEAD |
              grep -Ei '\.(cpp|cxx|cc|c|h|hpp|hh)$' >/dev/null; then
             echo "src_changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
           fi
-          
+
+
   setup:
     name: Init
     runs-on: ubuntu-latest
@@ -148,61 +152,46 @@ jobs:
             echo "- Source changed: ${{ needs.detect-src.outputs.src_changed }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
-       validate-inputs:
-          name: Validate Matrix Inputs
-          runs-on: ubuntu-latest
-          permissions:
-            contents: read
-            pull-requests: read
-      
-          outputs:
-            os-list: ${{ steps.v.outputs.os }}
-            compilers: ${{ steps.v.outputs.comp }}
-            build-types: ${{ steps.v.outputs.bt }}
-      
-          steps:
-            - name: Validate fixed or upstream inputs
-              id: v
-              shell: bash
-              run: |
-                set -euo pipefail
-      
-                # --- Fixed allow-lists for all child workflows ---
-                allowed_os=( "ubuntu-latest" "macos-latest" )
-                allowed_comp=( "gcc" "clang" )
-                allowed_bt=( "Release" "Debug" )
-      
-                # These originate from the controller, but validate anyway:
-                os_raw='["ubuntu-latest","macos-latest"]'
-                comp_raw='["gcc","clang"]'
-                bt_raw='["Release","Debug"]'
-      
-                validate() {
-                  local json="$1"; shift
-                  local allowed=("$@")
-      
-                  readarray -t vals < <(jq -r '.[]' <<<"$json")
-      
-                  for v in "${vals[@]}"; do
-                    local ok=0
-                    for a in "${allowed[@]}"; do
-                      [[ "$v" == "$a" ]] && ok=1
-                    done
-                    if [[ $ok -eq 0 ]]; then
-                      echo "Invalid matrix value: $v" >&2
-                      exit 1
-                    fi
-                  done
-                }
-      
-                validate "$os_raw"   "${allowed_os[@]}"
-                validate "$comp_raw" "${allowed_comp[@]}"
-                validate "$bt_raw"   "${allowed_bt[@]}"
-      
-                echo "os=$os_raw"   >> "$GITHUB_OUTPUT"
-                echo "comp=$comp_raw" >> "$GITHUB_OUTPUT"
-                echo "bt=$bt_raw"     >> "$GITHUB_OUTPUT"
+  validate-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      os-list: ${{ steps.v.outputs.os }}
+      build-types: ${{ steps.v.outputs.bt }}
+      compilers: ${{ steps.v.outputs.comp }}
+    steps:
+      - id: v
+        shell: bash
+        run: |
+          set -euo pipefail
 
+          allowed_os=("ubuntu-latest" "macos-latest")
+          allowed_bt=("Release" "Debug")
+          allowed_comp=("gcc" "clang")
+
+          os_raw='${{ inputs.os-list || "[\"ubuntu-latest\",\"macos-latest\"]" }}'
+          bt_raw='${{ inputs.build-types || "[\"Release\",\"Debug\"]" }}'
+          comp_raw='${{ inputs.compilers || "[\"gcc\",\"clang\"]" }}'
+
+          validate() {
+            local json="$1"; shift
+            local allowed=("$@")
+            readarray -t vals < <(jq -r '.[]' <<<"$json")
+            for v in "${vals[@]}"; do
+              local ok=0
+              for a in "${allowed[@]}"; do
+                [[ "$v" == "$a" ]] && ok=1
+              done
+              [[ $ok -eq 1 ]] || { echo "Invalid value: $v" >&2; exit 1; }
+            done
+          }
+
+          validate "$os_raw"   "${allowed_os[@]}"
+          validate "$bt_raw"   "${allowed_bt[@]}"
+          validate "$comp_raw" "${allowed_comp[@]}"
+
+          echo "os=$os_raw"     >> $GITHUB_OUTPUT
+          echo "bt=$bt_raw"     >> $GITHUB_OUTPUT
+          echo "comp=$comp_raw" >> $GITHUB_OUTPUT
 
   unix-ci:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
@@ -235,7 +224,7 @@ jobs:
   win-ci:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
     name: 🧱 Windows Build and Test
-    needs: [setup, detect-src]
+    needs: [setup, detect-src, validate-inputs]
     uses: ./.github/workflows/ci-pr-win.yml
     
   finalize:
@@ -246,6 +235,7 @@ jobs:
       - unix-ci
       - scan-build
       - cppcheck-linters
+      - win-ci
 
     if: always()
     permissions:
