@@ -153,45 +153,60 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   validate-inputs:
+    name: Validate Matrix Inputs
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    needs: [setup, detect-src]
+
     outputs:
       os-list: ${{ steps.v.outputs.os }}
-      build-types: ${{ steps.v.outputs.bt }}
       compilers: ${{ steps.v.outputs.comp }}
+      build-types: ${{ steps.v.outputs.bt }}
+
     steps:
-      - id: v
+      - name: Validate fixed or upstream inputs
+        id: v
         shell: bash
         run: |
           set -euo pipefail
 
-          allowed_os=("ubuntu-latest" "macos-latest")
-          allowed_bt=("Release" "Debug")
-          allowed_comp=("gcc" "clang")
-
-          os_raw='${{ inputs.os-list || "[\"ubuntu-latest\",\"macos-latest\"]" }}'
-          bt_raw='${{ inputs.build-types || "[\"Release\",\"Debug\"]" }}'
-          comp_raw='${{ inputs.compilers || "[\"gcc\",\"clang\"]" }}'
+          # --- Define for child workflows ---
+          allowed_os=( "ubuntu-latest" "macos-latest" )
+          allowed_comp=( "gcc" "clang" )
+          allowed_bt=( "Release" "Debug" )
+          # --- Define for child workflows ---
+          os_raw='["ubuntu-latest","macos-latest"]'
+          comp_raw='["gcc","clang"]'
+          bt_raw='["Release","Debug"]'
 
           validate() {
             local json="$1"; shift
             local allowed=("$@")
+
             readarray -t vals < <(jq -r '.[]' <<<"$json")
+
             for v in "${vals[@]}"; do
               local ok=0
               for a in "${allowed[@]}"; do
                 [[ "$v" == "$a" ]] && ok=1
               done
-              [[ $ok -eq 1 ]] || { echo "Invalid value: $v" >&2; exit 1; }
+              if [[ $ok -eq 0 ]]; then
+                echo "Invalid matrix value: $v" >&2
+                exit 1
+              fi
             done
           }
 
           validate "$os_raw"   "${allowed_os[@]}"
-          validate "$bt_raw"   "${allowed_bt[@]}"
           validate "$comp_raw" "${allowed_comp[@]}"
+          validate "$bt_raw"   "${allowed_bt[@]}"
 
-          echo "os=$os_raw"     >> $GITHUB_OUTPUT
-          echo "bt=$bt_raw"     >> $GITHUB_OUTPUT
-          echo "comp=$comp_raw" >> $GITHUB_OUTPUT
+          echo "os=$os_raw"   >> "$GITHUB_OUTPUT"
+          echo "comp=$comp_raw" >> "$GITHUB_OUTPUT"
+          echo "bt=$bt_raw"     >> "$GITHUB_OUTPUT"
+
 
   unix-ci:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
