@@ -181,3 +181,13 @@ jobs:
           free -m || true
           df -h
 
+      # ---------- Summary ----------
+      - name: Summary Report
+        if: always()
+        run: |
+          echo "### Build Summary (${{ matrix.os }} • ${{ matrix.compiler }} • ${{ matrix.build_type }})" >> $GITHUB_STEP_SUMMARY
+          echo "- OS: ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Compiler: ${{ matrix.compiler }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Type: ${{ matrix.build_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Directory: PatchIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts: ${{ env.ARTIFACT_PREFIX }}" >> $GITHUB_STEP_SUMMARY
