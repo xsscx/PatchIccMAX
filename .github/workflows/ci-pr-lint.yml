@@ -44,7 +44,22 @@ jobs:
     runs-on: ${{ inputs.ubuntu-version || 'ubuntu-latest' }}
 
     steps:
-      - uses: actions/checkout@v4
+
+      # --- Bump any Self-Hosted ---
+      - name: Validate ubuntu-version input
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${{ inputs.ubuntu-version }}" in
+            ubuntu-latest|ubuntu-22.04|ubuntu-24.04|"")
+              ;;
+            *)
+              echo "ERROR: Invalid runner: '${{ inputs.ubuntu-version }}' — blocked." >&2
+              exit 1
+              ;;
+          esac
+
+      - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
         with:
           fetch-depth: 2
 
@@ -64,43 +79,86 @@ jobs:
         id: diff
         shell: bash
         run: |
+          set -euo pipefail
+
           git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
+
           base_ref="${{ github.base_ref }}"
-          git fetch origin "${base_ref}" --depth=1
-          CHANGED=$(git diff --name-only "origin/${base_ref}"...HEAD | grep -E '\.(cpp|cxx|cc|h|hpp)$' || true)
-          if [ -z "$CHANGED" ]; then
+
+          # --- List the allowed base branches ---
+          case "$base_ref" in
+            master|re231|uci-testing)
+              ;;
+            *)
+              echo "Blocked or unsupported base_ref: $base_ref" >&2
+              echo "no_src_changes=true" >> "$GITHUB_OUTPUT"
+              exit 0
+              ;;
+          esac
+
+          # Minimal fetch
+          git -c protocol.version=2 fetch --no-tags origin "${base_ref}" --depth=1
+
+          # --- filename list ---
+          git diff --name-only "origin/${base_ref}"...HEAD \
+            | grep -Ei '\.(cpp|cxx|cc|h|hpp)$' \
+            | tr '\n' '\0' > changed_files.txt
+
+          if [ ! -s changed_files.txt ]; then
             echo "no_src_changes=true" >> "$GITHUB_OUTPUT"
           else
-            echo "$CHANGED" > changed_files.txt
             echo "no_src_changes=false" >> "$GITHUB_OUTPUT"
           fi
+
 
       - name: Lint & code checks
         if: ${{ steps.diff.outputs.no_src_changes == 'false' }}
         run: |
-          mkdir -p lint_reports
+          set -euo pipefail
+
+          mkdir -p lint_reports Build
+
           echo "Running cppcheck on modified source files..."
-          xargs cppcheck --enable=warning --quiet --std=c++17 --output-file=lint_reports/cppcheck.txt < changed_files.txt || true
+
+          # --- SECURITY: null-delimited xargs ---
+          xargs -0 cppcheck \
+            --enable=warning \
+            --quiet \
+            --std=c++17 \
+            --output-file=lint_reports/cppcheck.txt \
+            < changed_files.txt || true
+
+          # Prepare clang-tidy
           cd Build
           cmake Cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
           make
           cd ..
-          run-clang-tidy -p Build -checks='modernize-*,readability-*,cppcoreguidelines-*' < changed_files.txt || true
+
+          # --- clang-tidy ---
+          xargs -0 run-clang-tidy \
+            -p Build \
+            -checks='modernize-*,readability-*,cppcoreguidelines-*' \
+            < changed_files.txt || true
+
 
       - name: Skip lint (no source changes)
         if: ${{ steps.diff.outputs.no_src_changes == 'true' }}
         run: |
+          mkdir -p lint_reports
           echo "No .cpp/.h changes detected; skipping lint." > lint_reports/cppcheck.txt
+
 
       - uses: actions/upload-artifact@v4
         with:
           name: cppcheck-report
           path: lint_reports/cppcheck.txt
 
+
       - name: Generate GitHub summary
         if: always()
         run: |
           echo "## 🧹 Lint Report Summary" >> $GITHUB_STEP_SUMMARY
+
           if [ "${{ steps.diff.outputs.no_src_changes }}" == "true" ]; then
             echo "🟦 Skipped — no modified source files detected." >> $GITHUB_STEP_SUMMARY
           elif [ -s lint_reports/cppcheck.txt ]; then
