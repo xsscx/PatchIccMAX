@@ -79,7 +79,7 @@ jobs:
 
     steps:
       - name: Checkout PR source
-        uses: actions/checkout@v4
+        uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           fetch-depth: 0

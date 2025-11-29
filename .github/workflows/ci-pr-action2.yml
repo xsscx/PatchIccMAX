@@ -148,66 +148,10 @@ jobs:
             echo "- Source changed: ${{ needs.detect-src.outputs.src_changed }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
-       validate-inputs:
-          name: Validate Matrix Inputs
-          runs-on: ubuntu-latest
-          permissions:
-            contents: read
-            pull-requests: read
-      
-          outputs:
-            os-list: ${{ steps.v.outputs.os }}
-            compilers: ${{ steps.v.outputs.comp }}
-            build-types: ${{ steps.v.outputs.bt }}
-      
-          steps:
-            - name: Validate fixed or upstream inputs
-              id: v
-              shell: bash
-              run: |
-                set -euo pipefail
-      
-                # --- Fixed allow-lists for all child workflows ---
-                allowed_os=( "ubuntu-latest" "macos-latest" )
-                allowed_comp=( "gcc" "clang" )
-                allowed_bt=( "Release" "Debug" )
-      
-                # These originate from the controller, but validate anyway:
-                os_raw='["ubuntu-latest","macos-latest"]'
-                comp_raw='["gcc","clang"]'
-                bt_raw='["Release","Debug"]'
-      
-                validate() {
-                  local json="$1"; shift
-                  local allowed=("$@")
-      
-                  readarray -t vals < <(jq -r '.[]' <<<"$json")
-      
-                  for v in "${vals[@]}"; do
-                    local ok=0
-                    for a in "${allowed[@]}"; do
-                      [[ "$v" == "$a" ]] && ok=1
-                    done
-                    if [[ $ok -eq 0 ]]; then
-                      echo "Invalid matrix value: $v" >&2
-                      exit 1
-                    fi
-                  done
-                }
-      
-                validate "$os_raw"   "${allowed_os[@]}"
-                validate "$comp_raw" "${allowed_comp[@]}"
-                validate "$bt_raw"   "${allowed_bt[@]}"
-      
-                echo "os=$os_raw"   >> "$GITHUB_OUTPUT"
-                echo "comp=$comp_raw" >> "$GITHUB_OUTPUT"
-                echo "bt=$bt_raw"     >> "$GITHUB_OUTPUT"
-
-
   unix-ci:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
     name: 🧱 Unix Matrix Build and Test
-    needs: [setup, detect-src, validate-inputs]
+    needs: [setup, detect-src]
     uses: ./.github/workflows/ci-pr-unix.yml
     # pass minimized inputs
     with:
