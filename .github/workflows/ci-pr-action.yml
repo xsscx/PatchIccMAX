@@ -64,6 +64,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
           origin_url=$(git remote get-url origin || true)
           echo "Remote origin: $origin_url"
           # Enforce that origin points to the expected GitHub repository for this workflow run
