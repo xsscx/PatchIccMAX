@@ -88,6 +88,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
           
+
           # Clear the in-shell GITHUB_TOKEN
           unset GITHUB_TOKEN || true
 
