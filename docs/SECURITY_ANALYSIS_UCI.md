@@ -73,18 +73,34 @@ if (filename[0]) {
 User-controlled filename attributes from XML are passed directly to file operations without validation. An attacker could use path traversal sequences like `../../../etc/passwd` to read sensitive files.
 
 **Recommendation:**  
-Implement path validation:
+Implement robust path validation using canonical path resolution:
 ```cpp
-bool isValidPath(const char* path) {
-    // Reject absolute paths
-    if (path[0] == '/' || path[0] == '\\') return false;
-    // Reject path traversal
-    if (strstr(path, "..")) return false;
-    // Reject Windows absolute paths
-    if (isalpha(path[0]) && path[1] == ':') return false;
+#include <limits.h>
+#include <stdlib.h>
+
+bool isValidPath(const char* userPath, const char* baseDir) {
+    // Get canonical paths
+    char resolvedPath[PATH_MAX];
+    char resolvedBase[PATH_MAX];
+    
+    if (!realpath(userPath, resolvedPath)) return false;
+    if (!realpath(baseDir, resolvedBase)) return false;
+    
+    // Ensure resolved path is within base directory
+    size_t baseLen = strlen(resolvedBase);
+    if (strncmp(resolvedPath, resolvedBase, baseLen) != 0) {
+        return false; // Path escapes base directory
+    }
+    
+    // Basic sanity checks
+    if (strstr(userPath, "..")) return false;  // Reject obvious traversal
+    if (userPath[0] == '/' || userPath[0] == '\\') return false; // Reject absolute
+    
     return true;
 }
 ```
+
+For defense-in-depth, also consider a whitelist approach restricting allowed file extensions.
 
 ---
 
@@ -110,11 +126,19 @@ Usage of `strcpy()`, `sprintf()`, and similar unbounded string functions can lea
 **Recommendation:**  
 Replace with bounded alternatives:
 ```cpp
-// Instead of strcpy
-strncpy(dest, src, dest_size - 1);
-dest[dest_size - 1] = '\0';
+// Instead of strcpy - use safe wrapper
+void safe_strcpy(char* dest, size_t dest_size, const char* src) {
+    if (dest_size == 0) return;
+    strncpy(dest, src, dest_size - 1);
+    dest[dest_size - 1] = '\0';
+}
 
-// Instead of sprintf
+// Or use strlcpy where available (BSD/macOS)
+#ifdef HAVE_STRLCPY
+strlcpy(dest, src, dest_size);
+#endif
+
+// Instead of sprintf - always use snprintf
 snprintf(buf, sizeof(buf), format, ...);
 ```
 
@@ -142,9 +166,19 @@ m_pData = new icUInt8Number[nNum * sizeof(element_type)];
 Implement overflow-safe size calculations:
 ```cpp
 #include <stdint.h>
+#include <stdbool.h>
 
+// Safe multiplication that detects overflow
 bool safeMul(size_t a, size_t b, size_t *result) {
-    if (a != 0 && b != 0 && a > SIZE_MAX / b) return false; // overflow
+    // Handle zero cases first to avoid division issues
+    if (a == 0 || b == 0) {
+        *result = 0;
+        return true;
+    }
+    // Check for overflow: a * b > SIZE_MAX
+    if (a > SIZE_MAX / b) {
+        return false; // Overflow would occur
+    }
     *result = a * b;
     return true;
 }
