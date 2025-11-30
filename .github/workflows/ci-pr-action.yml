@@ -61,7 +61,7 @@ jobs:
           persist-credentials: false
 
       - name: Verify remote origin URL (opt out of malicious git configs)
-        shell: bash
+        shell: bash --noprofile --norc
         run: |
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -78,10 +78,12 @@ jobs:
           fi
 
       - id: diffcheck
-        shell: bash
+        shell: bash --noprofile --norc
         run: |
           set -euo pipefail
-
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          
           # Clear the in-shell GITHUB_TOKEN
           unset GITHUB_TOKEN || true
 
