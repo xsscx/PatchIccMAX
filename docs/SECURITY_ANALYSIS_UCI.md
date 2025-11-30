@@ -41,13 +41,17 @@ options |= XML_PARSE_NOXXE;     // Disable XXE (libxml2 2.9.0+)
 doc = xmlReadFile(szFilename, NULL, options);
 ```
 
-For older libxml2 versions without `XML_PARSE_NOXXE`, disable entity substitution:
+For older libxml2 versions without `XML_PARSE_NOXXE`, use context-specific settings:
 ```cpp
-int options = XML_PARSE_NONET | XML_PARSE_NOENT;
-doc = xmlReadFile(szFilename, NULL, options);
-// Additionally, disable DTD loading and external entities globally:
-xmlLoadExtDtdDefaultValue = 0;
-xmlSubstituteEntitiesDefault(0);
+// Create parser context with security options
+xmlParserCtxtPtr ctx = xmlNewParserCtxt();
+if (ctx) {
+    xmlCtxtUseOptions(ctx, XML_PARSE_NONET | XML_PARSE_NOENT);
+    doc = xmlCtxtReadFile(ctx, szFilename, NULL, XML_PARSE_NONET);
+    xmlFreeParserCtxt(ctx);
+}
+// Note: Avoid global settings (xmlLoadExtDtdDefaultValue, 
+// xmlSubstituteEntitiesDefault) as they can affect other threads
 ```
 
 ---
@@ -73,29 +77,42 @@ if (filename[0]) {
 User-controlled filename attributes from XML are passed directly to file operations without validation. An attacker could use path traversal sequences like `../../../etc/passwd` to read sensitive files.
 
 **Recommendation:**  
-Implement robust path validation using canonical path resolution:
+Implement robust path validation. For read operations where files must exist:
 ```cpp
 #include <limits.h>
 #include <stdlib.h>
 
-bool isValidPath(const char* userPath, const char* baseDir) {
-    // Get canonical paths
+bool isValidReadPath(const char* userPath, const char* baseDir) {
     char resolvedPath[PATH_MAX];
     char resolvedBase[PATH_MAX];
     
+    // Get canonical paths (requires files to exist)
     if (!realpath(userPath, resolvedPath)) return false;
     if (!realpath(baseDir, resolvedBase)) return false;
     
     // Ensure resolved path is within base directory
     size_t baseLen = strlen(resolvedBase);
-    if (strncmp(resolvedPath, resolvedBase, baseLen) != 0) {
-        return false; // Path escapes base directory
+    return strncmp(resolvedPath, resolvedBase, baseLen) == 0;
+}
+```
+
+For write operations or paths where files may not exist yet, use path normalization:
+```cpp
+bool isValidWritePath(const char* userPath) {
+    // Reject absolute paths
+    if (userPath[0] == '/' || userPath[0] == '\\') return false;
+    if (strlen(userPath) > 1 && userPath[1] == ':') return false; // Windows
+    
+    // Reject directory traversal patterns (specifically ../ or ..\)
+    const char* p = userPath;
+    while (*p) {
+        if (p[0] == '.' && p[1] == '.') {
+            if (p[2] == '/' || p[2] == '\\' || p[2] == '\0') {
+                return false;
+            }
+        }
+        p++;
     }
-    
-    // Basic sanity checks
-    if (strstr(userPath, "..")) return false;  // Reject obvious traversal
-    if (userPath[0] == '/' || userPath[0] == '\\') return false; // Reject absolute
-    
     return true;
 }
 ```
@@ -183,7 +200,7 @@ bool safeMul(size_t a, size_t b, size_t *result) {
     return true;
 }
 
-// Usage example:
+// Usage example with proper error handling:
 size_t allocSize;
 if (!safeMul(nCount, sizeof(element_type), &allocSize)) {
     return false; // Overflow detected
@@ -191,7 +208,11 @@ if (!safeMul(nCount, sizeof(element_type), &allocSize)) {
 if (allocSize > MAX_ALLOCATION_SIZE) {
     return false; // Too large
 }
-m_pData = new icUInt8Number[allocSize];
+// Use nothrow to avoid exceptions
+m_pData = new(std::nothrow) icUInt8Number[allocSize];
+if (!m_pData) {
+    return false; // Allocation failed
+}
 ```
 
 ---
