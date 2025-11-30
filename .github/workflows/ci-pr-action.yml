@@ -78,7 +78,6 @@ jobs:
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
             exit 1
           fi
-
       - id: diffcheck
         shell: bash
         env:
@@ -88,12 +87,9 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
           
-
           # Clear the in-shell GITHUB_TOKEN
           unset GITHUB_TOKEN || true
-
           git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
-
           # If not a pull_request event (e.g., workflow_dispatch or workflow_call),
           # skip source diff checking and mark as non-source change.
           if [ "${{ github.event_name }}" != "pull_request" ]; then
@@ -101,9 +97,7 @@ jobs:
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-
           base_ref="${{ github.base_ref }}"
-
           # check to avoid uci ref fetch
           case "$base_ref" in
             master|re231|uci-testing)
@@ -114,10 +108,8 @@ jobs:
               exit 0
               ;;
           esac
-
           # Short fetch, single ref; avoid tags and deep history
           git -c protocol.version=2 fetch --no-tags origin "${base_ref}" --depth=1
-
           # Case-insensitive extension match (c/h/cpp variants)
           if git diff --name-only "origin/${base_ref}"...HEAD |
              grep -Ei '\.(cpp|cxx|cc|c|h|hpp|hh)$' >/dev/null; then
@@ -125,8 +117,6 @@ jobs:
           else
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
           fi
-
-
   setup:
     name: Init
     runs-on: ubuntu-latest
@@ -145,7 +135,6 @@ jobs:
           printf "Actor: %s\n" "${{ github.actor }}"
           printf "Run ID: %s\n" "${{ github.run_id }}"
           printf "Start: %s\n" "$(date)"
-
       - name: Write Summary to GitHub UI
         run: |
           set -euo pipefail
@@ -160,7 +149,6 @@ jobs:
             echo "- **Session start:** $(date)"
             echo "- Source changed: ${{ needs.detect-src.outputs.src_changed }}"
           } >> "$GITHUB_STEP_SUMMARY"
-
   validate-inputs:
     name: Validate Matrix Inputs
     runs-on: ubuntu-latest
@@ -180,7 +168,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           # --- Define for child workflows ---
           allowed_os=( "ubuntu-latest" "macos-latest" )
           allowed_comp=( "gcc" "clang" )
@@ -189,13 +176,10 @@ jobs:
           os_raw='["ubuntu-latest","macos-latest"]'
           comp_raw='["gcc","clang"]'
           bt_raw='["Release","Debug"]'
-
           validate() {
             local json="$1"; shift
             local allowed=("$@")
-
             readarray -t vals < <(jq -r '.[]' <<<"$json")
-
             for v in "${vals[@]}"; do
               local ok=0
               for a in "${allowed[@]}"; do
@@ -207,16 +191,12 @@ jobs:
               fi
             done
           }
-
           validate "$os_raw"   "${allowed_os[@]}"
           validate "$comp_raw" "${allowed_comp[@]}"
           validate "$bt_raw"   "${allowed_bt[@]}"
-
           echo "os=$os_raw"   >> "$GITHUB_OUTPUT"
           echo "comp=$comp_raw" >> "$GITHUB_OUTPUT"
           echo "bt=$bt_raw"     >> "$GITHUB_OUTPUT"
-
-
   unix-ci:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
     name: 🧱 Unix Matrix Build and Test
@@ -269,12 +249,10 @@ jobs:
       - name: Generate Summary
         run: |
           set -euo pipefail
-
           {
             echo "## ICCDEV PR Summary"
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
-
           # Non-source change path
           if [ "${{ needs.detect-src.outputs.src_changed }}" != "true" ]; then
             {
@@ -284,39 +262,33 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-
           # Unix build
           if [ "${{ needs.unix-ci.result }}" = "success" ]; then
             echo "- Unix Build and Tests: Passed" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- Unix Build and Tests: Failed" >> "$GITHUB_STEP_SUMMARY"
           fi
-
           # Clang scan-build
           if [ "${{ needs.scan-build.result }}" = "success" ]; then
             echo "- Clang Static Report: Available" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- Clang Static Analysis: Failed" >> "$GITHUB_STEP_SUMMARY"
           fi
-
           # Cppcheck / Linters
           if [ "${{ needs.cppcheck-linters.result }}" = "success" ]; then
             echo "- Cppcheck and Linter Report: Available" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- Cppcheck and Linters: Failed" >> "$GITHUB_STEP_SUMMARY"
           fi
-
           # Windows build
           if [ "${{ needs.win-ci.result }}" = "success" ]; then
             echo "- Windows Build and Tests: Passed" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- Windows Build and Tests: Failed" >> "$GITHUB_STEP_SUMMARY"
           fi
-
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- Uploaded artifacts for all stages" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-
           # Final result
           if [ "${{ job.status }}" = "success" ]; then
             echo "### Overall Result: SUCCESS" >> "$GITHUB_STEP_SUMMARY"
