@@ -61,7 +61,9 @@ jobs:
           persist-credentials: false
 
       - name: Verify remote origin URL (opt out of malicious git configs)
-        shell: bash --noprofile --norc
+        shell: bash
+        env:
+         BASH_ENV: /dev/null
         run: |
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -78,7 +80,9 @@ jobs:
           fi
 
       - id: diffcheck
-        shell: bash --noprofile --norc
+        shell: bash
+        env:
+         BASH_ENV: /dev/null
         run: |
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
