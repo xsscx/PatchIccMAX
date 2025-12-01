@@ -147,15 +147,25 @@ jobs:
           brew update
           brew install cmake llvm wxwidgets libpng libtiff libxml2 nlohmann-json
 
-      - name: Set Compiler
-        run: |
-          if [ "${{ matrix.compiler }}" = "gcc" ]; then
-            echo "CC=gcc" >> $GITHUB_ENV
-            echo "CXX=g++" >> $GITHUB_ENV
-          else
-            echo "CC=clang" >> $GITHUB_ENV
-            echo "CXX=clang++" >> $GITHUB_ENV
-          fi
+       - name: Set Compiler
+         shell: bash
+         env:
+           BASH_ENV: /dev/null
+         run: |
+           set -euo pipefail
+       
+           git config --global --add safe.directory "$GITHUB_WORKSPACE"
+           git config --global credential.helper ""
+           unset GITHUB_TOKEN || true
+       
+           if [ "${{ matrix.compiler }}" = "gcc" ]; then
+             echo "CC=gcc" >> "$GITHUB_ENV"
+             echo "CXX=g++" >> "$GITHUB_ENV"
+           else
+             echo "CC=clang" >> "$GITHUB_ENV"
+             echo "CXX=clang++" >> "$GITHUB_ENV"
+           fi
+
 
       - name: Print Compiler Version
         run: |
