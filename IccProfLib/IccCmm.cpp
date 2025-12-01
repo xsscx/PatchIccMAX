@@ -5786,6 +5786,11 @@ void CIccXform3DLut::Apply(CIccApplyXform* pApply, icFloatNumber *DstPixel, cons
   Pixel[0] = SrcPixel[0];
   Pixel[1] = SrcPixel[1];
   Pixel[2] = SrcPixel[2];
+  
+  // make sure all output pixel values are initialized, just in case
+  for (i = 3; i < m_pTag->m_nOutput; ++i) {
+     Pixel[i] = 0.0;
+  }
 
   if (m_pTag->m_bInputMatrix) {
     if (m_ApplyCurvePtrB) {
