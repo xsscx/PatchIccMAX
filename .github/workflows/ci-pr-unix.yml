@@ -216,7 +216,14 @@ jobs:
 
       - name: Summary Report
         if: always()
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           echo "## 🧱 PR CI UNIX Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **OS:**         ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Compiler:**   ${{ matrix.compiler }}" >> $GITHUB_STEP_SUMMARY
