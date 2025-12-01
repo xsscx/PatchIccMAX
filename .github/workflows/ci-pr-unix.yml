@@ -121,6 +121,8 @@ jobs:
       - name: Install Dependencies (Linux)
         if: runner.os == 'Linux'
         shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y \
