@@ -7,11 +7,11 @@
 #
 ## Intent: iccDEV ci-pr-unix
 #
-## Last Updated: 21-NOV-2025 1800Z by David Hoyt 
-##               PR Status Labeler
+## Last Updated: 01-DEC-2025 1800Z by David Hoyt 
+##               Modify to reduce potential impacts of handling user controllable inputs
 ## TODO: Push binary releases, tags etc.. 
 #
-## Comment: Known good and working from PatchIccMax
+##
 #
 #
 #
