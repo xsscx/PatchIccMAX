@@ -119,7 +119,7 @@ jobs:
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
           fi
   setup:
-    name: Init
+    name: 🧭 Init
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -132,26 +132,48 @@ jobs:
           BASH_ENV: /dev/null
         run: |
           set -euo pipefail
-          printf "iccDEV PR Build & Check\n"
-          printf "Repository: %s\n" "${{ github.repository }}"
-          printf "Branch: %s\n" "${{ github.ref_name }}"
-          printf "Commit: %s\n" "${{ github.sha }}"
-          printf "Actor: %s\n" "${{ github.actor }}"
-          printf "Run ID: %s\n" "${{ github.run_id }}"
-          printf "Start: %s\n" "$(date)"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          echo "============================"
+          echo "   iccDEV PR Build & Check  "
+          echo "============================"
+          echo ""
+          echo "International Color Consortium"
+          echo "Thank you for opening a PR"
+          echo ""
+          echo "Trigger:   ${{ github.event_name }}"
+          echo "Repository:${{ github.repository }}"
+          echo "Branch:    ${{ github.ref_name }}"
+          echo "Commit:    ${{ github.sha }}"
+          echo "Actor:     ${{ github.actor }}"
+          echo "Run ID:    ${{ github.run_id }}"
+          echo "Start time: $(date)"
+          echo "Source changed: ${{ needs.detect-src.outputs.src_changed }}"
+          echo ""
+
+
       - name: Write Summary to GitHub UI
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
           set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          set -euo pipefail
           {
-            echo "## Init Complete"
+            echo "## 🧭 Init Complete"
+            echo ""
             echo "**Workflow:** ci-pr-action"
-            echo "- **Triggered by:** ${{ github.actor }}"
-            echo "- **Event type:** ${{ github.event_name }}"
-            echo "- **Branch:** ${{ github.ref_name }}"
-            echo "- **Commit:** ${{ github.sha }}"
-            echo "- **Run ID:** ${{ github.run_id }}"
+            echo "- **Triggered by:** \`${{ github.actor }}\`"
+            echo "- **Event type:** \`${{ github.event_name }}\`"
+            echo "- **Branch:** \`${{ github.ref_name }}\`"
+            echo "- **Commit:** \`${{ github.sha }}\`"
+            echo "- **Run ID:** \`${{ github.run_id }}\`"
             echo "- **Session start:** $(date)"
-            echo "- Source changed: ${{ needs.detect-src.outputs.src_changed }}"
+            echo "- **Source changed:** \`${{ needs.detect-src.outputs.src_changed }}\`"
+            echo ""
+            echo "✅ CI environment successfully initialized and ready for subsequent jobs."
           } >> "$GITHUB_STEP_SUMMARY"
 
   validate-inputs:
