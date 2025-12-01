@@ -179,7 +179,14 @@ jobs:
           $CXX --version >> $GITHUB_STEP_SUMMARY
 
       - name: Configure CMake
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           echo "Configuring CMake project..."
           mkdir -p Build
           cd Build
