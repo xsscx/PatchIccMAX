@@ -136,8 +136,14 @@ jobs:
             python3 python3-pip curl git llvm
 
       - name: Install Dependencies (macOS)
-        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           brew update
           brew install cmake llvm wxwidgets libpng libtiff libxml2 nlohmann-json
 
