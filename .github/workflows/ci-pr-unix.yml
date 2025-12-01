@@ -199,7 +199,14 @@ jobs:
           echo "::endgroup::"
 
       - name: Build
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           echo "Starting build..."
           cd Build
           echo "Compiler: $CC ($($CC --version | head -n 1))"
