@@ -165,7 +165,14 @@ jobs:
           fi
 
       - name: Print Compiler Version
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           echo "### Compiler Info" >> $GITHUB_STEP_SUMMARY
           echo "Using compiler: $CC / $CXX" >> $GITHUB_STEP_SUMMARY
           $CC --version >> $GITHUB_STEP_SUMMARY
