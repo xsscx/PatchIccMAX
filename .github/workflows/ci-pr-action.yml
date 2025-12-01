@@ -153,6 +153,7 @@ jobs:
             echo "- **Session start:** $(date)"
             echo "- Source changed: ${{ needs.detect-src.outputs.src_changed }}"
           } >> "$GITHUB_STEP_SUMMARY"
+
   validate-inputs:
     name: Validate Matrix Inputs
     runs-on: ubuntu-latest
@@ -170,6 +171,8 @@ jobs:
       - name: Validate fixed or upstream inputs
         id: v
         shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
           set -euo pipefail
           # --- Define for child workflows ---
