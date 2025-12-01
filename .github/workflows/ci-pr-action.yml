@@ -89,6 +89,7 @@ jobs:
           
           # Clear the in-shell GITHUB_TOKEN
           unset GITHUB_TOKEN || true
+          
           git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
           # If not a pull_request event (e.g., workflow_dispatch or workflow_call),
           # skip source diff checking and mark as non-source change.
@@ -126,6 +127,9 @@ jobs:
     needs: [detect-src]
     steps:
       - name: Display Environment Info
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
           set -euo pipefail
           printf "iccDEV PR Build & Check\n"
