@@ -170,8 +170,12 @@ jobs:
       - name: Validate fixed or upstream inputs
         id: v
         shell: bash
-        run: |
+        env:
+          BASH_ENV: /dev/null
+      run: |
           set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
           # --- Define for child workflows ---
           allowed_os=( "ubuntu-latest" "macos-latest" )
           allowed_comp=( "gcc" "clang" )
