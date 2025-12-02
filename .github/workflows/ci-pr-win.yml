@@ -134,6 +134,9 @@ jobs:
           Set-StrictMode -Version Latest
           $ErrorActionPreference = 'Stop'
           $ProgressPreference = 'SilentlyContinue'
+            if (Test-Path Env:GITHUB_TOKEN) {
+              Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
+            }
           pwd
           git branch
           git status
