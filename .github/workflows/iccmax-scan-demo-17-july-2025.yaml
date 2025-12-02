@@ -24,10 +24,18 @@ name: "Linux ICC Scanner"
 on:
   workflow_dispatch:
 
+env:
+  GH_REPO: ${{ github.repository }}
+  GH_NO_UPDATE_NOTIFIER: 1
+  GH_PROMPT_DISABLED: 1
+  RUN_URL: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}
+  PR: ${{ github.event.number }}
+
 jobs:
   build-linux:
     name: ICC Scanner Demo
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     strategy:
@@ -42,7 +50,14 @@ jobs:
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
     - name: Install dependencies
-      run: |
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
         sudo apt-get update
         sudo apt-get install -y \
           libxml2 libxml2-dev libtiff-dev nlohmann-json3-dev build-essential \
@@ -50,13 +65,28 @@ jobs:
           libopencl-clang-17-dev curl git llvm clang-17 libjpeg-dev libpng-dev \
           lcov gcovr tree moreutils liblcms2-utils liblcms2-dev liblcms2-2
     - name: Get research branch
-      run: |
-        git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git
-        cd DemoIccMAX
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
+
+        cd iccDEV
         git checkout research
     - name: Configure & Build Little ICC Scanner Demo
-      run: |
-        cd DemoIccMAX/contrib/Build/cmake/cov
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
+
+        cd contrib/Build/cmake/cov
         export CC=clang
         export CXX=clang++
         export PATH="/usr/lib/llvm-17/bin:$PATH"
@@ -68,8 +98,16 @@ jobs:
         # make -f Makefile.iccRoundTrip clean all AFL=0
         # tree -a 2>&1 | tee tree.log
     - name: Run ICC Scanner Demo
-      run: |
-          cd DemoIccMAX/contrib/Build/cmake/cov
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
+
+          cd contrib/Build/cmake/cov
           # Add Tools/* to PATH
           for d in ./*; do
             [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
@@ -110,35 +148,35 @@ jobs:
     - name: Upload binaries
       uses: actions/upload-artifact@v4
       with:
-        name: iccmax-cov-binaries
-        path: DemoIccMAX/contrib/Build/cmake/cov/**/*
+        name: iccdev-cov-binaries
+        path: contrib/Build/cmake/cov/**/*
 
     - name: Upload coverage HTML report
       uses: actions/upload-artifact@v4
       with:
         name: html-coverage-report
-        path: DemoIccMAX/contrib/Build/cmake/cov/cov_html/
+        path: contrib/Build/cmake/cov/cov_html/
 
     - name: Upload build logs and tree
       uses: actions/upload-artifact@v4
       with:
         name: build-logs
         path: |
-          DemoIccMAX/contrib/Build/cmake/cov/build.log
-          DemoIccMAX/contrib/Build/cmake/cov/check.log
-          DemoIccMAX/contrib/Build/cmake/cov/tree.txt
+          contrib/Build/cmake/cov/build.log
+          contrib/Build/cmake/cov/check.log
+          contrib/Build/cmake/cov/tree.txt
     - name: Upload diagnostics
       uses: actions/upload-artifact@v4
       with:
         name: diagnostics
         path: |
-          DemoIccMAX/contrib/Build/cmake/cov/sysinfo.txt
-          DemoIccMAX/contrib/Build/cmake/cov/env_dump.txt
+          contrib/Build/cmake/cov/sysinfo.txt
+          contrib/Build/cmake/cov/env_dump.txt
     - name: Summary Report
       if: always()
       run: |
         echo "### 🧪 Ubuntu CI Build Summary" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Instrumented Build: DemoIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
-        echo "- 📦 Binaries: iccmax-cov-binaries" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Instrumented Build: Build/" >> $GITHUB_STEP_SUMMARY
+        echo "- 📦 Binaries: iccdev-cov-binaries" >> $GITHUB_STEP_SUMMARY
         echo "- 📊 Coverage: html-coverage-report (LLVM format)" >> $GITHUB_STEP_SUMMARY
         echo "- 🧾 Logs: build.log, tree.txt, sysinfo.txt" >> $GITHUB_STEP_SUMMARY

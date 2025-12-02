@@ -88,6 +88,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
           unset GITHUB_TOKEN || true
+          set -euo pipefail
 
           OS="${{ matrix.os }}"
           COMP="${{ matrix.compiler }}"
