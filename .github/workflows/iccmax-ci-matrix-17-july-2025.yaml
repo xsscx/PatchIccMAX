@@ -213,7 +213,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           fetch-depth: 0
 
-      - name: UCI Gate 1 for Windows Powershell
+      - name: UCI Gate 1 for pwsh
         shell: pwsh
         env:
           POWERSHELL_TELEMETRY_OPTOUT: "1"
@@ -234,7 +234,7 @@ jobs:
              throw "Invalid GITHUB_WORKSPACE path: $env:GITHUB_WORKSPACE"
          }
          
-         # --- Remove tokens or uci that should not exist in PR CI ---
+         # --- Remove dangerous tokens that must not exist in PR CI ---
          foreach ($v in @(
              'GITHUB_TOKEN',
              'ACTIONS_RUNTIME_TOKEN',
@@ -246,7 +246,7 @@ jobs:
              }
          }
          
-         # --- Canonicalization then sanitize user controllable input ---
+         # --- Canonicalization helper for sanitizing user-controlled input ---
          function Canonicalize([string]$s) {
              if (-not $s) { return "" }
              $s = $s.Trim()
@@ -278,7 +278,7 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: UCI Gate 2 for Windows Powershell - Verify Branch Context
+      - name: UCI Gate 2 for pwsh - Verify Branch Context
         shell: pwsh
         env:
           POWERSHELL_TELEMETRY_OPTOUT: "1"
@@ -305,103 +305,82 @@ jobs:
             if (Test-Path Env:GITHUB_TOKEN) {
               Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
             }
-          Write-Host "============================= Starting Build =============================" -ForegroundColor Green
-          Write-Host "C 2025 International Color Consortium. All rights reserved." -ForegroundColor Green
-          
-          $env:VSCMD_ARG_HOST_ARCH = "x64"
-          $env:VSCMD_ARG_TGT_ARCH = "x64"
-          
-          $optDir = "C:\test"
-          $vcpkgDir = "$optDir\vcpkg"
-          $patchDir = "$optDir\DemoIccMAX"
-          
-          git config --global user.email "you@example.com"
-          git config --global user.name "Your Name"
-          
-          if (-Not (Test-Path $optDir)) { New-Item -ItemType Directory -Path $optDir | Out-Null }
-          if (-Not (Test-Path "$vcpkgDir\vcpkg.exe")) {
-              git clone https://github.com/microsoft/vcpkg.git $vcpkgDir
-              & "$vcpkgDir\bootstrap-vcpkg.bat"
-          }
-          if (-Not (Test-Path "$vcpkgDir\vcpkg.exe")) {
-              Write-Host "? ERROR: vcpkg failed to install!" -ForegroundColor Red
-              exit 1
-          }
           pwd
-          dir
-          del vcpkg.json
-          $packages = @(
-          "libpng:x64-windows", "jpeg:x64-windows", "jpeg:x64-windows-static",
-          "nlohmann-json:x64-windows", "nlohmann-json:x64-windows-static",
-          "libxml2:x64-windows", "libxml2:x64-windows-static",
-          "tiff:x64-windows", "tiff:x64-windows-static",
-          "wxwidgets:x64-windows", "wxwidgets:x64-windows-static"
-          )
-          foreach ($pkg in $packages) { & "$vcpkgDir\vcpkg.exe" install $pkg }
-      - name: Clone DemoIccMAX Repository
-        shell: pwsh
-        env:
-          POWERSHELL_TELEMETRY_OPTOUT: "1"
-        run: |
-          Set-StrictMode -Version Latest
-          $ErrorActionPreference = 'Stop'
-          $ProgressPreference = 'SilentlyContinue'
-            if (Test-Path Env:GITHUB_TOKEN) {
-              Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
-            }
-          $patchDir = "C:\test\DemoIccMAX"
-          if (Test-Path $patchDir) { Remove-Item -Recurse -Force $patchDir }
-          git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git $patchDir
-          cd $patchDir
-      - name: Configure & Build with CMake
-        shell: pwsh
-        run: |
-          cd C:\test\DemoIccMAX\Build\Cmake
-          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_TOOLCHAIN_FILE=C:/test/vcpkg/scripts/buildsystems/vcpkg.cmake `
-            -DCMAKE_C_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" `
-            -DCMAKE_CXX_FLAGS="/MD /I C:/test/vcpkg/installed/x64-windows/include" `
-            -DCMAKE_SHARED_LINKER_FLAGS="/LIBPATH:C:/test/vcpkg/installed/x64-windows/lib" `
-            -DENABLE_TOOLS=ON `
-            -DENABLE_SHARED_LIBS=ON `
-            -DENABLE_STATIC_LIBS=ON `
-            -DENABLE_TESTS=ON `
-            -DENABLE_INSTALL_RIM=ON `
-            -DENABLE_ICCXML=ON
-          cmake --build build --config Release -- /m /maxcpucount:32
-          Get-ChildItem -Recurse -Include *.exe -Path .\build_* | Where-Object { -not $_.PSIsContainer -and $_.FullName -notmatch '\\CMakeFiles\\' } | Select-Object FullName, Length | Sort-Object FullName
-          Get-ChildItem -Recurse -Include *.lib -Path .\build_* | Where-Object { -not $_.PSIsContainer -and $_.FullName -notmatch '\\CMakeFiles\\' } | Select-Object FullName, Length | Sort-Object FullName
-          Get-ChildItem -Recurse -Include *.exe,*.lib -Path .\build_* | Where-Object { -not $_.PSIsContainer -and $_.FullName -notmatch '\\CMakeFiles\\' } | Select-Object FullName, Length | Sort-Object FullName
-      - name: Verify Build Output
-        shell: pwsh
-        env:
-          POWERSHELL_TELEMETRY_OPTOUT: "1"
-        run: |
-          Set-StrictMode -Version Latest
-          $ErrorActionPreference = 'Stop'
-          $ProgressPreference = 'SilentlyContinue'
-            if (Test-Path Env:GITHUB_TOKEN) {
-              Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
-            }
-          $cmakeCache = "C:\test\DemoIccMAX\Build\Cmake\build\CMakeCache.txt"
-          if (Test-Path $cmakeCache) {
-            Write-Host "? Build succeeded. CMake cache found."
-          } else {
-            Write-Host "? Build failed! No CMakeCache.txt found."
-            exit 1
+          git branch
+          git status
+          Write-Host "========= Fetching Deps... ================`n"
+          Start-BitsTransfer -Source "https://github.com/InternationalColorConsortium/iccDEV/releases/download/v2.3.1/vcpkg-exported-deps.zip" -Destination "deps.zip"
+          Write-Host "========= Extracting Deps... ================`n"
+          tar -xf deps.zip
+          cd Build/Cmake
+          Write-Host "========= Building... ================`n"  
+          cmake  -B build -S . -DCMAKE_TOOLCHAIN_FILE="..\..\scripts\buildsystems\vcpkg.cmake" -DVCPKG_MANIFEST_MODE=OFF -DCMAKE_BUILD_TYPE=Debug  -Wno-dev
+          cmake --build build -- /m /maxcpucount
+          cmake --build build -- /m /maxcpucount
+          $exeDirs = Get-ChildItem -Recurse -File -Include *.exe -Path .\build\ |
+              Where-Object { $_.FullName -match 'icc' -and $_.FullName -notmatch '\\CMakeFiles\\' -and $_.Name -notmatch '^CMake(C|CXX)CompilerId\.exe$' } |
+              ForEach-Object { Split-Path $_.FullName -Parent } |
+              Sort-Object -Unique
+          $env:PATH = ($exeDirs -join ';') + ';' + $env:PATH
+          $env:PATH -split ';' | Select-String "icc"
+          $toolDirs = Get-ChildItem -Recurse -File -Include *.exe -Path .\Tools\ | ForEach-Object { Split-Path -Parent $_.FullName } | Sort-Object -Unique
+          $env:PATH = ($toolDirs -join ';') + ';' + $env:PATH
+          $env:PATH -split ';'
+          pwd
+          cd ..\..\Testing
+          .\CreateAllProfiles.bat
+          .\RunTests.bat
+          cd CalcTest\
+          .\checkInvalidProfiles.bat
+          .\runtests.bat
+          cd ..\Display
+          .\RunProtoTests.bat
+          cd ..\HDR
+          .\mkprofiles.bat
+          cd ..\mcs\
+          .\updateprev.bat
+          .\updateprevWithBkgd.bat
+          cd ..\Overprint
+          .\RunTests.bat
+          cd ..
+          cd hybrid
+          .\BuildAndTest.bat
+          cd ..
+          cd ..
+          pwd
+          # Collect .icc profile information
+          $profiles = Get-ChildItem -Path . -Filter "*.icc" -Recurse -File
+          $totalCount = $profiles.Count
+          
+          # Group profiles by directory
+          $groupedProfiles = $profiles | Group-Object { $_.Directory.FullName }
+          
+          # Generate Summary Report
+          Write-Host "`n========================="
+          Write-Host " ICC Profile Report"
+          Write-Host "========================="
+          
+          # Print count per subdirectory
+          foreach ($group in $groupedProfiles) {
+              Write-Host ("{0}: {1} .icc profiles" -f $group.Name, $group.Count)
           }
+          
+          Write-Host "`nTotal .icc profiles found: $totalCount"
+          Write-Host "=========================`n"
+          
+          Write-Host "All Done!"     
+          
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: iccmax-windows-msvc
-          path: C:\test\DemoIccMAX
+          name: iccdev-windows-msvc
+          path: Build
 
       - name: Upload Windows Logs
         uses: actions/upload-artifact@v4
         with:
-          name: iccmax-windows-logs
-          path: C:\test\DemoIccMAX\Build\Cmake\build\CMakeCache.txt
+          name: iccdev-windows-logs
+          path: Build\Cmake\build\CMakeCache.txt
 
       - name: Host System Info
         shell: pwsh
@@ -420,6 +399,6 @@ jobs:
         if: always()
         run: |
           echo "### Windows Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- Build Directory: DemoIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
-          echo "- Artifacts Uploaded: iccmax-macos-clang" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Directory: Build/" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts Uploaded: iccdev-windows-msvc" >> $GITHUB_STEP_SUMMARY
           echo "- Status: Success" >> $GITHUB_STEP_SUMMARY

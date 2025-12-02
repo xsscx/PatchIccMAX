@@ -217,7 +217,6 @@ jobs:
           Write-Host "=========================`n"
           
           Write-Host "All Done!"          
-          Write-Host "All Done!"
           
       - name: GitHub Summary
         if: always()
