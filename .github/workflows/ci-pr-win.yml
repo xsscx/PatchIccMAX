@@ -114,6 +114,7 @@ jobs:
         shell: pwsh
         env:
           POWERSHELL_TELEMETRY_OPTOUT: "1"
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           Set-StrictMode -Version Latest
           $ErrorActionPreference = 'Stop'
@@ -122,7 +123,7 @@ jobs:
           Write-Host "Triggered by:  $env:GITHUB_EVENT_NAME"
           Write-Host "Base branch:   $env:GITHUB_BASE_REF"
           Write-Host "Head branch:   $env:GITHUB_HEAD_REF"
-          Write-Host "Commit SHA:    $env:GITHUB_EVENT_PULL_REQUEST_HEAD_SHA"
+          Write-Host "Commit SHA:    $env:PR_HEAD_SHA"
           Write-Host "OS:            $env:RUNNER_OS"
 
       - name: Install dependencies and build
