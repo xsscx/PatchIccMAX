@@ -7,11 +7,16 @@
 #
 ## Intent: wasm-mtx-v231
 #
-## Last Updated: 22-NOV-2025 0000Z by David Hoyt 
-#                Add Permission Block
-## TODO: Push binary releases, tags etc...
+## Last Updated: 02-DEC-2025 2100Z by David Hoyt 
+#                Bump Version for PNG & JPEG
 #
-## Comment: Known good and working
+#
+#
+#
+#
+#
+#
+#
 #
 #
 #
@@ -32,6 +37,7 @@ jobs:
   wasm-build:
     name: WASM Matrix Build (${{ matrix.build_type }})
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       matrix:
         build_type: [Release, Debug, Asan]
@@ -40,19 +46,43 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
-
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          fetch-depth: 0
+          
     - name: Setup Git Identity
-      run: |
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
     - name: Install Emscripten SDK
-      run: |
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
         git clone https://github.com/emscripten-core/emsdk.git
         cd emsdk
         ./emsdk install latest
         ./emsdk activate latest
     - name: Clone iccDEV Repo and Build Dependencies
-      run: |
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
         source emsdk/emsdk_env.sh
         git clone https://github.com/InternationalColorConsortium/iccDEV.git
         cd iccDEV
@@ -69,7 +99,7 @@ jobs:
         CPPFLAGS="-I$(pwd)/../zlib" LDFLAGS="-L$(pwd)/../zlib/out/lib" emconfigure ./configure --disable-shared --enable-static --prefix=$(pwd)/out
         emmake make -j$(nproc) && emmake make install
         cd ..
-        curl -LO https://ijg.org/files/jpegsrc.v9e.tar.gz
+        curl -LO https://ijg.org/files/jpegsrc.v9f.tar.gz
         tar -xzf jpegsrc.v9e.tar.gz && mv jpeg-9e libjpeg && cd libjpeg
         emconfigure ./configure --prefix=$(pwd)/out --disable-shared --enable-static
         emmake make -j$(nproc) && emmake make install
@@ -91,7 +121,14 @@ jobs:
         curl -L https://github.com/nlohmann/json/releases/latest/download/json.hpp -o nlohmann/json/include/json.hpp
         cd ..
     - name: Configure and Build iccDEV-WASM
-      run: |
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
         source emsdk/emsdk_env.sh
         cd iccDEV/Build
         BUILD_FLAGS=""
@@ -133,7 +170,7 @@ jobs:
         emmake make -j$(nproc)
         find . -type f \( -name '*.js' -o -name '*.wasm' \) -ls
     - name: Upload WASM Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
       with:
         name: wasm-artifacts-${{ matrix.build_type }}
         path: iccDEV/Build/Tools/*
