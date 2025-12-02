@@ -126,19 +126,14 @@ jobs:
           Write-Host "Commit SHA:    $env:PR_HEAD_SHA"
           Write-Host "OS:            $env:RUNNER_OS"
 
-        - name: Install dependencies and build
-          shell: pwsh
-          env:
-            POWERSHELL_TELEMETRY_OPTOUT: "1"
-          run: |
-            Set-StrictMode -Version Latest
-            $ErrorActionPreference = 'Stop'
-            $ProgressPreference = 'SilentlyContinue'
-
-            if (Test-Path Env:GITHUB_TOKEN) {
-              Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
-            }
-
+      - name: Install dependencies and build
+        shell: pwsh
+        env:
+          POWERSHELL_TELEMETRY_OPTOUT: "1"
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
           pwd
           git branch
           git status
