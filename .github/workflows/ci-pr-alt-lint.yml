@@ -67,7 +67,14 @@ jobs:
           echo "Checks:        cppcheck, clang-tidy, clang-format"
       - name: Run Build
         continue-on-error: true
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           sudo apt-get update
           sudo apt-get install -y build-essential cmake git pkg-config
           sudo apt-get install -y \

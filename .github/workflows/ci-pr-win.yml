@@ -5,13 +5,13 @@
 ##                 https://color.org
 #
 #
-## Intent: iccDEV labeler
+## Intent: iccDEV ci-pr-win
 #
 ## Last Updated: 21-NOV-2025 1800Z by David Hoyt 
 ##               ci-pr-win
 ## TODO: Push binary releases, tags etc.. 
 #
-## Comment: Known good and working from PatchIccMax
+## 
 #
 #
 #
@@ -61,18 +61,78 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           fetch-depth: 0
 
-      - name: Verify Branch Context
+      - name: UCI Gate 1 for pwsh
+        shell: pwsh
+        env:
+          POWERSHELL_TELEMETRY_OPTOUT: "1"
         run: |
-          echo "Triggered by:  ${{ github.event_name }}"
-          echo "Base branch:   ${{ github.base_ref }}"
-          echo "Head branch:   ${{ github.head_ref }}"
-          echo "Commit SHA:    ${{ github.event.pull_request.head.sha }}"
-          echo "Build Type:    ${{ matrix.build_type }}"
-          echo "Compiler:      ${{ matrix.compiler }}"
-          echo "OS:            ${{ runner.os }}"
+         Set-StrictMode -Version Latest
+         $ErrorActionPreference = 'Stop'
+         $ProgressPreference = 'SilentlyContinue'
+         
+         $canonical = @{}
+         
+         # Enumerate environment safely
+         foreach ($entry in Get-ChildItem Env:) {
+             $k = $entry.Name
+             $v = $entry.Value
+         
+             if ($k.StartsWith('GITHUB_') -or
+                 $k -in 'PR','RUN_URL','GH_REPO') {
+         
+                 # Canonicalize
+                 $v = ($v | Out-String).Trim().Replace("`r`n","").Replace("`n","")
+                 $v = -join ($v.ToCharArray() | Where-Object { [int]$_ -ge 32 -or [int]$_ -eq 9 })
+         
+                 $canonical[$k] = $v
+             }
+         }
+         
+         # Remove bad tokens
+         foreach ($drop in @(
+             'GITHUB_TOKEN',
+             'ACTIONS_RUNTIME_TOKEN',
+             'ACTIONS_ID_TOKEN_REQUEST_URL',
+             'ACTIONS_ID_TOKEN_REQUEST_TOKEN'
+         )) {
+             if (Test-Path "Env:$drop") {
+                 Remove-Item "Env:$drop" -ErrorAction SilentlyContinue
+             }
+         }
+         
+         # List the output
+         foreach ($entry in $canonical.GetEnumerator()) {
+             Set-Item -Path "Env:$($entry.Key)" -Value $entry.Value
+         }
+
+          Write-Host "Finished UCI Gate 1 for pwsh" -ForegroundColor Green
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: UCI Gate 2 for pwsh - Verify Branch Context
+        shell: pwsh
+        env:
+          POWERSHELL_TELEMETRY_OPTOUT: "1"
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
+
+          Write-Host "Triggered by:  $env:GITHUB_EVENT_NAME"
+          Write-Host "Base branch:   $env:GITHUB_BASE_REF"
+          Write-Host "Head branch:   $env:GITHUB_HEAD_REF"
+          Write-Host "Commit SHA:    $env:GITHUB_EVENT_PULL_REQUEST_HEAD_SHA"
+          Write-Host "OS:            $env:RUNNER_OS"
 
       - name: Install dependencies and build
+        shell: pwsh
+        env:
+          POWERSHELL_TELEMETRY_OPTOUT: "1"
         run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
           pwd
           git branch
           git status
@@ -84,13 +144,70 @@ jobs:
           Write-Host "========= Building... ================`n"  
           cmake  -B build -S . -DCMAKE_TOOLCHAIN_FILE="..\..\scripts\buildsystems\vcpkg.cmake" -DVCPKG_MANIFEST_MODE=OFF -DCMAKE_BUILD_TYPE=Debug  -Wno-dev
           cmake --build build -- /m /maxcpucount
-          cmake --build build -- /m /maxcpucount          
+          cmake --build build -- /m /maxcpucount
+          $exeDirs = Get-ChildItem -Recurse -File -Include *.exe -Path .\build\ |
+              Where-Object { $_.FullName -match 'icc' -and $_.FullName -notmatch '\\CMakeFiles\\' -and $_.Name -notmatch '^CMake(C|CXX)CompilerId\.exe$' } |
+              ForEach-Object { Split-Path $_.FullName -Parent } |
+              Sort-Object -Unique
+          $env:PATH = ($exeDirs -join ';') + ';' + $env:PATH
+          $env:PATH -split ';' | Select-String "icc"
+          $toolDirs = Get-ChildItem -Recurse -File -Include *.exe -Path .\Tools\ | ForEach-Object { Split-Path -Parent $_.FullName } | Sort-Object -Unique
+          $env:PATH = ($toolDirs -join ';') + ';' + $env:PATH
+          $env:PATH -split ';'
+          pwd
+          cd ..\..\Testing
+          .\CreateAllProfiles.bat
+          .\RunTests.bat
+          cd CalcTest\
+          .\checkInvalidProfiles.bat
+          .\runtests.bat
+          cd ..\Display
+          .\RunProtoTests.bat
+          cd ..\HDR
+          .\mkprofiles.bat
+          cd ..\mcs\
+          .\updateprev.bat
+          .\updateprevWithBkgd.bat
+          cd ..\Overprint
+          .\RunTests.bat
+          cd ..
+          cd hybrid
+          .\BuildAndTest.bat
+          cd ..
+          cd ..
+          pwd
+          # Collect .icc profile information
+          $profiles = Get-ChildItem -Path . -Filter "*.icc" -Recurse -File
+          $totalCount = $profiles.Count
+          
+          # Group profiles by directory
+          $groupedProfiles = $profiles | Group-Object { $_.Directory.FullName }
+          
+          # Generate Summary Report
+          Write-Host "`n========================="
+          Write-Host " ICC Profile Report"
+          Write-Host "========================="
+          
+          # Print count per subdirectory
+          foreach ($group in $groupedProfiles) {
+              Write-Host ("{0}: {1} .icc profiles" -f $group.Name, $group.Count)
+          }
+          
+          Write-Host "`nTotal .icc profiles found: $totalCount"
+          Write-Host "=========================`n"
+          
+          Write-Host "All Done!"          
           Write-Host "All Done!"
           
       - name: GitHub Summary
         if: always()
         shell: pwsh
+        env:
+          POWERSHELL_TELEMETRY_OPTOUT: "1"
         run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
           "## 🧱 CMake Windows Build Summary" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
           "" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
           "Repository: ${{ github.repository }}" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append

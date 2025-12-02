@@ -5,13 +5,13 @@
 ##                 https://color.org
 #
 #
-## Intent: iccDEV ci-pr-unix
+## Intent: Unix/Linux and macOS multi-compiler build and test pipeline for PR validation
 #
-## Last Updated: 01-DEC-2025 1800Z by David Hoyt 
-##               Modify to reduce potential impacts of handling user controllable inputs
+## Last Updated: 21-NOV-2025 1800Z by David Hoyt 
+##               PR Status Labeler
 ## TODO: Push binary releases, tags etc.. 
 #
-##
+## Comment: Known good and working from PatchIccMax
 #
 #
 #
@@ -63,6 +63,7 @@ jobs:
   build:
     name: "${{ matrix.os }} • ${{ matrix.compiler }} • ${{ matrix.build_type }}"
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     defaults:
       run:
         shell: bash
@@ -89,17 +90,15 @@ jobs:
 
           case "$OS" in
             ubuntu-latest|macos-latest) ;;
-            *) echo "ERROR: invalid matrix.os: '$OS'"; exit 1 ;;
+            *) echo "ERROR: invalid matrix.os: '$OS'. Allowed: ubuntu-latest, macos-latest"; exit 1 ;;
           esac
-
           case "$COMP" in
             gcc|clang) ;;
-            *) echo "ERROR: invalid compiler: '$COMP'"; exit 1 ;;
+            *) echo "ERROR: invalid compiler: '$COMP'. Allowed: gcc, clang"; exit 1 ;;
           esac
-
           case "$BT" in
             Release|Debug) ;;
-            *) echo "ERROR: invalid build type: '$BT'"; exit 1 ;;
+            *) echo "ERROR: invalid build type: '$BT'. Allowed: Release, Debug"; exit 1 ;;
           esac
 
       - name: Checkout PR source
@@ -109,7 +108,14 @@ jobs:
           fetch-depth: 0
 
       - name: Verify Branch Context
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           echo "Triggered by:  ${{ github.event_name }}"
           echo "Base branch:   ${{ github.base_ref }}"
           echo "Head branch:   ${{ github.head_ref }}"
@@ -136,6 +142,7 @@ jobs:
             python3 python3-pip curl git llvm
 
       - name: Install Dependencies (macOS)
+        if: runner.os == 'macOS'
         shell: bash
         env:
           BASH_ENV: /dev/null
@@ -212,13 +219,11 @@ jobs:
           echo "Compiler: $CC ($($CC --version | head -n 1))"
           echo "CMake build type: ${{ matrix.build_type }}"
           make -j$(nproc || sysctl -n hw.logicalcpu)
-          pwd
           cd ../Testing/
           echo "=== Updating PATH ==="
           for d in ../Build/Tools/*; do
           [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
           done 
-          pwd
           sh CreateAllProfiles.sh
           sh RunTests.sh
           find . -iname "*.icc" | wc -l 
@@ -234,7 +239,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
           unset GITHUB_TOKEN || true
-          echo "## 🧱 PR CI UNIX Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 🧱 ci-pr-unix Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **OS:**         ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Compiler:**   ${{ matrix.compiler }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Build Type:** ${{ matrix.build_type }}" >> $GITHUB_STEP_SUMMARY
