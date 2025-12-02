@@ -158,23 +158,111 @@ jobs:
   windows:
     name: "Windows MSVC"
     runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: powershell
+    strategy:
+      fail-fast: false
     steps:
-      - name: Checkout master
-        uses: actions/checkout@v4
+      - name: Checkout PR source
+        uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          fetch-depth: 0
+
+      - name: UCI Gate 1 for Windows Powershell
+        shell: pwsh
+        env:
+          POWERSHELL_TELEMETRY_OPTOUT: "1"
+        run: |
+         Set-StrictMode -Version Latest
+         $ErrorActionPreference = 'Stop'
+         $ProgressPreference = 'SilentlyContinue'
+         
+         # --- Disable telemetry sources (pwsh / dotnet / gh) ---
+         $env:POWERSHELL_TELEMETRY_OPTOUT = "1"
+         $env:DOTNET_CLI_TELEMETRY_OPTOUT = "1"
+         $env:GH_NO_UPDATE_NOTIFIER = "1"
+         $env:GH_PROMPT_DISABLED = "1"
+         $env:NUGET_XMLDOC_MODE = "skip"
+         
+         # --- Validate workspace path (defense-in-depth) ---
+         if (-not (Test-Path $env:GITHUB_WORKSPACE)) {
+             throw "Invalid GITHUB_WORKSPACE path: $env:GITHUB_WORKSPACE"
+         }
+         
+         # --- Remove tokens or uci that should not exist in PR CI ---
+         foreach ($v in @(
+             'GITHUB_TOKEN',
+             'ACTIONS_RUNTIME_TOKEN',
+             'ACTIONS_ID_TOKEN_REQUEST_URL',
+             'ACTIONS_ID_TOKEN_REQUEST_TOKEN'
+         )) {
+             if (Test-Path "Env:$v") {
+                 Remove-Item "Env:$v" -ErrorAction SilentlyContinue
+             }
+         }
+         
+         # --- Canonicalization then sanitize user controllable input ---
+         function Canonicalize([string]$s) {
+             if (-not $s) { return "" }
+             $s = $s.Trim()
+             $s = $s.Replace("`r","").Replace("`n","")
+             $s = -join ($s.ToCharArray() | Where-Object { [int]$_ -ge 32 })
+             return $s
+         }
+         
+         # --- Canonicalize PR-controlled environment values ---
+         $env:GITHUB_REF      = Canonicalize $env:GITHUB_REF
+         $env:GITHUB_HEAD_REF = Canonicalize $env:GITHUB_HEAD_REF
+         $env:GITHUB_BASE_REF = Canonicalize $env:GITHUB_BASE_REF
+         
+         # --- Harden Git configuration ---
+         git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
+         git config --global credential.helper ""
+         
+         # --- PATH hardening: limit to trusted tool locations ---
+         $trustedPath = @(
+             "$env:SystemRoot\system32",
+             "$env:SystemRoot",
+             "$env:ProgramFiles\Git\bin",
+             "$env:ProgramFiles\PowerShell\7"
+         ) -join ';'
+         $env:PATH = $trustedPath
+         
+          Write-Host "Finished UCI Gate 1 for pwsh" -ForegroundColor Green
 
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1
+        uses: microsoft/setup-msbuild@v2
 
-      - name: Restore vcpkg Cache
-        uses: actions/cache@v3
-        with:
-          path: C:\test\vcpkg
-          key: Win70-${{ runner.os }}-${{ hashFiles('**/vcpkg.json', '**/bootstrap-vcpkg.bat') }}
-          restore-keys: |
-            Win70-${{ runner.os }}-
-      - name: Setup Environment & Build Preparation
+      - name: UCI Gate 2 for Windows Powershell - Verify Branch Context
         shell: pwsh
+        env:
+          POWERSHELL_TELEMETRY_OPTOUT: "1"
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
+
+          Write-Host "Triggered by:  $env:GITHUB_EVENT_NAME"
+          Write-Host "Base branch:   $env:GITHUB_BASE_REF"
+          Write-Host "Head branch:   $env:GITHUB_HEAD_REF"
+          Write-Host "Commit SHA:    $env:PR_HEAD_SHA"
+          Write-Host "OS:            $env:RUNNER_OS"
+
+      - name: Install dependencies and build
+        shell: pwsh
+        env:
+          POWERSHELL_TELEMETRY_OPTOUT: "1"
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
+            if (Test-Path Env:GITHUB_TOKEN) {
+              Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
+            }
           Write-Host "============================= Starting Build =============================" -ForegroundColor Green
           Write-Host "C 2025 International Color Consortium. All rights reserved." -ForegroundColor Green
           
