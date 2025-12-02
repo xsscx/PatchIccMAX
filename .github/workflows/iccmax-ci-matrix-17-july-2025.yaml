@@ -298,7 +298,15 @@ jobs:
           foreach ($pkg in $packages) { & "$vcpkgDir\vcpkg.exe" install $pkg }
       - name: Clone DemoIccMAX Repository
         shell: pwsh
+        env:
+          POWERSHELL_TELEMETRY_OPTOUT: "1"
         run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
+            if (Test-Path Env:GITHUB_TOKEN) {
+              Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
+            }
           $patchDir = "C:\test\DemoIccMAX"
           if (Test-Path $patchDir) { Remove-Item -Recurse -Force $patchDir }
           git clone https://github.com/InternationalColorConsortium/DemoIccMAX.git $patchDir
@@ -325,7 +333,15 @@ jobs:
           Get-ChildItem -Recurse -Include *.exe,*.lib -Path .\build_* | Where-Object { -not $_.PSIsContainer -and $_.FullName -notmatch '\\CMakeFiles\\' } | Select-Object FullName, Length | Sort-Object FullName
       - name: Verify Build Output
         shell: pwsh
+        env:
+          POWERSHELL_TELEMETRY_OPTOUT: "1"
         run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
+            if (Test-Path Env:GITHUB_TOKEN) {
+              Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
+            }
           $cmakeCache = "C:\test\DemoIccMAX\Build\Cmake\build\CMakeCache.txt"
           if (Test-Path $cmakeCache) {
             Write-Host "? Build succeeded. CMake cache found."
@@ -347,7 +363,15 @@ jobs:
 
       - name: Host System Info
         shell: pwsh
+        env:
+          POWERSHELL_TELEMETRY_OPTOUT: "1"
         run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
+            if (Test-Path Env:GITHUB_TOKEN) {
+              Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
+            }
           systeminfo
           Get-CimInstance -ClassName Win32_Processor
       - name: Summary Report

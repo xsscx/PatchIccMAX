@@ -78,3 +78,43 @@ jobs:
           path: |
             iccDEV/tidy-out/*
           if-no-files-found: warn
+      - name: Generate clang-tidy report summary
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+
+          echo "## 🧹 Clang-Tidy Summary — iccdev" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          OUTDIR="iccDEV/tidy-out"
+
+          if ! [ -d "$OUTDIR" ]; then
+            echo "**No tidy output directory found.**" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          total_logs=$(find "$OUTDIR" -type f -name "*.log" | wc -l | tr -d ' ')
+          echo "**Total translation units analyzed:** $total_logs" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Count warnings/errors without parsing user-controlled filenames into the shell
+          total_issues=$(grep -R "warning:" -H "$OUTDIR" | wc -l | tr -d ' ')
+          echo "**Total warnings detected:** $total_issues" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "### Sample Files With Most Warnings" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Top 10 files — safely aggregated
+          grep -R "warning:" -H "$OUTDIR" \
+            | cut -d: -f1 \
+            | sort \
+            | uniq -c \
+            | sort -rn \
+            | head -n 10 \
+            | sed 's/^/ - /' >> "$GITHUB_STEP_SUMMARY"
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "✔ Report summary generated." >> "$GITHUB_STEP_SUMMARY"
