@@ -39,7 +39,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Dependencies
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           sudo apt-get update
           sudo apt-get install -y \
             build-essential cmake gcc g++ clang clang-tools \
@@ -48,7 +55,14 @@ jobs:
             python3 python3-pip curl git llvm
 
       - name: Set Compiler
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           if [ "${{ matrix.compiler }}" = "gcc" ]; then
             echo "CC=gcc" >> $GITHUB_ENV
             echo "CXX=g++" >> $GITHUB_ENV
@@ -58,12 +72,26 @@ jobs:
           fi
 
       - name: Print Compiler Version
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           echo "Compiler Version:" >> $GITHUB_STEP_SUMMARY
           $CC --version >> $GITHUB_STEP_SUMMARY
 
       - name: CMake Configure
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           cd Build
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
                 -DCMAKE_BUILD_TYPE=Release \
@@ -73,12 +101,26 @@ jobs:
                 -Wno-dev Cmake/
 
       - name: Build
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           cd Build
           make -j$(nproc)
 
       - name: Verify CMake Cache
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
           if test -f Build/CMakeCache.txt; then
             echo "? Build OK" | tee -a $GITHUB_STEP_SUMMARY
           else
