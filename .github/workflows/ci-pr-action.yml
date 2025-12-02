@@ -79,6 +79,7 @@ jobs:
             exit 1
           fi
       - id: diffcheck
+        name: diffcheck for changes
         shell: bash
         env:
          BASH_ENV: /dev/null
