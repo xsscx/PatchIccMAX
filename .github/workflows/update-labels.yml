@@ -40,7 +40,8 @@ permissions:
 jobs:
   label-status:
     # Only allow manual runs from the repo owner; PR/schedule events still allowed.
-    if: github.event_name != 'workflow_dispatch' || github.actor == github.repository_owner
+    if: github.event_name != 'workflow_dispatch' ||
+        contains(fromJson('["xsscx","maxderhak","ChrisCoxArt","dwtza"]'), github.actor)
     runs-on: ubuntu-latest
 
     steps:
