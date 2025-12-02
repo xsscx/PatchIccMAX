@@ -212,6 +212,16 @@ jobs:
           echo "Compiler: $CC ($($CC --version | head -n 1))"
           echo "CMake build type: ${{ matrix.build_type }}"
           make -j$(nproc || sysctl -n hw.logicalcpu)
+          pwd
+          cd ../Testing/
+          echo "=== Updating PATH ==="
+          for d in ../Build/Tools/*; do
+          [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
+          done 
+          pwd
+          sh CreateAllProfiles.sh
+          sh RunTests.sh
+          find . -iname "*.icc" | wc -l 
           echo "Build complete."
 
       - name: Summary Report
