@@ -133,18 +133,41 @@ jobs:
           # ================================
           #   ICCDEV – Welcome Banner
           # ================================
-
           {
             echo "<div align=\"center\">"
             echo "  <a href=\"https://color.org\" target=\"_blank\">"
             echo "    <img src=\"https://color.org/system/images/ICC_logo_text.gif\" alt=\"ICC Logo\" width=\"320\">"
             echo "  </a>"
+            echo "  <h2>🎨 International Color Consortium</h2>"
             echo "  <h3>Welcome to the ICC Development Workflow</h3>"
             echo "  <strong>PRs Are Typically Reviewed Within 14 Days</strong><br>"
             echo "  ⏱️ <em>Date:</em> $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
             echo "</div>"
             echo ""
-            echo "## 🧩 ICCDEV PR Summary"
+            echo "## ✔️ PR Checklist"
+            echo ""
+            echo "- [x] You have followed the [guidelines for contributing](https://github.com/InternationalColorConsortium/iccDEV/blob/master/CONTRIBUTING.md)"
+            echo "- [x] Commits follow GitHub’s [acceptable use policy](https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies)"
+            echo "- [x] You checked for duplicate [pull requests](https://github.com/InternationalColorConsortium/iccDEV/pulls)"
+            echo "- [x] You built your PR locally using the official [Build Instructions](https://github.com/InternationalColorConsortium/iccDEV/blob/master/docs/build.md)"
+            echo "- [x] You included Unit Tests and/or Issue reproduction steps + fix"
+            echo ""
+            echo "> iccDEV Maintainers will review your PR within **14 days**."
+            echo ""
+            echo "If you have questions, contact a listed [Maintainer](https://github.com/InternationalColorConsortium/iccDEV/tree/master/.github/CODEOWNERS)."
+            echo ""
+            echo "## 🛡️ Legal Requirements"
+            echo ""
+            echo "All contributions to ICC open-source projects follow:"
+            echo "- The [International Color Consortium IP Policy](https://www.color.org/iccip.xalter)"
+            echo "- Open-source software best practices"
+            echo "- Contributor License Agreement (CLA) requirements"
+            echo ""
+            echo "### 📄 Contributor License Agreements"
+            echo "Before contributing code, you must complete a **Contributor License Agreement (CLA)**."
+            echo ""
+            echo "- [🧍 Personal CLA](https://github.com/InternationalColorConsortium/.github/blob/main/docs/CLA.md)"
+            echo "- [🏢 Corporate CLA](https://github.com/InternationalColorConsortium/.github/blob/main/docs/icc-individual-cla.pdf)"
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -160,27 +183,12 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
           # ================================
-          #   Contributor License Agreements
-          # ================================
-          echo "## 📄 Contributor License Agreements (CLA)" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Everyone who contributes code to ICC software is required to sign a Contributor License Agreement (CLA)." >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "1. Download the appropriate CLA:" >> "$GITHUB_STEP_SUMMARY"
-          echo "   - [Individual Contributor License Agreement](../docs/icc-individual-cla.pdf) – for individual contributors." >> "$GITHUB_STEP_SUMMARY"
-          echo "   - [Corporate Contributor License Agreement](../docs/icc-corporate-cla.pdf) – for contributions made as part of your job." >> "$GITHUB_STEP_SUMMARY"
-          echo "2. Sign the CLA in a PDF editor, or print, sign, and scan it." >> "$GITHUB_STEP_SUMMARY"
-          echo "3. Email the signed CLA to the ICC Secretary at [secretary@color.org](mailto:secretary@color.org)." >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-
-          # ================================
           #   Recent Commits
           # ================================
           echo "## 📝 Recent Git Commits" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           git --no-pager log -n 5 --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%nMessage: %s%n" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-
 
   setup:
     name: 🧭 Init
