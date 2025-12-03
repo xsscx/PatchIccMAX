@@ -139,7 +139,6 @@ jobs:
             echo "    <img src=\"https://color.org/system/images/ICC_logo_text.gif\" alt=\"ICC Logo\" width=\"320\">"
             echo "  </a>"
             echo "  <h2>🎨 International Color Consortium</h2>"
-            echo "  <h3>Welcome to the ICC Development Workflow</h3>"
             echo "  <strong>PRs Are Typically Reviewed Within 14 Days</strong><br>"
             echo "  ⏱️ <em>Date:</em> $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
             echo "</div>"
