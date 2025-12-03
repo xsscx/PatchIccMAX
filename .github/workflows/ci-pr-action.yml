@@ -133,14 +133,21 @@ jobs:
           # ================================
           #   ICCDEV – Welcome Banner
           # ================================
-          echo "<div align=\"center\">" >> "$GITHUB_STEP_SUMMARY"
-          echo "<h2>🎨 International Color Consortium</h2>" >> "$GITHUB_STEP_SUMMARY"
-          echo "<h3>Welcome to the ICC Development Workflow</h3>" >> "$GITHUB_STEP_SUMMARY"
-          echo "<strong>PRs Are Typically Reviewed Within 14 Days</strong>" >> "$GITHUB_STEP_SUMMARY"
-          echo "<br>" >> "$GITHUB_STEP_SUMMARY"
-          echo "⏱️ <em>Date:</em> $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
-          echo "</div>" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          {
+            echo "<div align=\"center\">"
+            echo "  <a href=\"https://color.org\" target=\"_blank\">"
+            echo "    <img src=\"https://color.org/system/images/ICC_logo_text.gif\" alt=\"ICC Logo\" width=\"320\">"
+            echo "  </a>"
+            echo "  <h2>🎨 International Color Consortium</h2>"
+            echo "  <h3>Welcome to the ICC Development Workflow</h3>"
+            echo "  <strong>PRs Are Typically Reviewed Within 14 Days</strong><br>"
+            echo "  ⏱️ <em>Date:</em> $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "</div>"
+            echo ""
+            echo "## 🧩 ICCDEV PR Summary"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
 
           # ================================
           #   Branch / PR Context
@@ -336,12 +343,18 @@ jobs:
     steps:
       - name: Generate Summary
         shell: bash
-        env:
-          BASH_ENV: /dev/null
         run: |
           set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
 
           {
+            echo "<div align=\"center\">"
+            echo "  <a href=\"https://color.org\" target=\"_blank\">"
+            echo "    <img src=\"https://color.org/system/images/ICC_logo_text.gif\" alt=\"ICC Logo\" width=\"320\">"
+            echo "  </a>"
+            echo "</div>"
+            echo ""
             echo "## 🧩 ICCDEV PR Summary"
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
