@@ -119,6 +119,63 @@ jobs:
           else
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Print PR Info
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
+
+          # ================================
+          #   ICCDEV – Welcome Banner
+          # ================================
+          echo "<div align=\"center\">" >> "$GITHUB_STEP_SUMMARY"
+          echo "<h2>🎨 International Color Consortium</h2>" >> "$GITHUB_STEP_SUMMARY"
+          echo "<h3>Welcome to the ICC Development Workflow</h3>" >> "$GITHUB_STEP_SUMMARY"
+          echo "<strong>PRs Are Typically Reviewed Within 14 Days</strong>" >> "$GITHUB_STEP_SUMMARY"
+          echo "<br>" >> "$GITHUB_STEP_SUMMARY"
+          echo "⏱️ <em>Date:</em> $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
+          echo "</div>" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # ================================
+          #   Branch / PR Context
+          # ================================
+          echo "## 📌 PR / Branch Context" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "HEAD_REF:  ${GITHUB_HEAD_REF:-<none>}" >> "$GITHUB_STEP_SUMMARY"
+          echo "BASE_REF:  ${GITHUB_BASE_REF:-<none>}" >> "$GITHUB_STEP_SUMMARY"
+          echo "GITHUB_REF: $GITHUB_REF" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # ================================
+          #   Contributor License Agreements
+          # ================================
+          echo "## 📄 Contributor License Agreements (CLA)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Everyone who contributes code to ICC software is required to sign a Contributor License Agreement (CLA)." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "1. Download the appropriate CLA:" >> "$GITHUB_STEP_SUMMARY"
+          echo "   - [Individual Contributor License Agreement](../docs/icc-individual-cla.pdf) – for individual contributors." >> "$GITHUB_STEP_SUMMARY"
+          echo "   - [Corporate Contributor License Agreement](../docs/icc-corporate-cla.pdf) – for contributions made as part of your job." >> "$GITHUB_STEP_SUMMARY"
+          echo "2. Sign the CLA in a PDF editor, or print, sign, and scan it." >> "$GITHUB_STEP_SUMMARY"
+          echo "3. Email the signed CLA to the ICC Secretary at [secretary@color.org](mailto:secretary@color.org)." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # ================================
+          #   Recent Commits
+          # ================================
+          echo "## 📝 Recent Git Commits" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          git --no-pager log -n 5 --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%nMessage: %s%n" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+
   setup:
     name: 🧭 Init
     runs-on: ubuntu-latest
