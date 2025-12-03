@@ -318,67 +318,110 @@ jobs:
     needs: [setup, detect-src, validate-inputs]
     uses: ./.github/workflows/ci-pr-win.yml
     
-  finalize:
-    name: 🧾 GitHub Summary Report
-    runs-on: ubuntu-latest
-    needs:
-      - detect-src
-      - unix-ci
-      - scan-build
-      - cppcheck-linters
-      - win-ci
+finalize:
+  name: 🧾 GitHub Summary Report
+  runs-on: ubuntu-latest
+  needs:
+    - detect-src
+    - unix-ci
+    - scan-build
+    - cppcheck-linters
+    - win-ci
+  if: always()
 
-    if: always()
-    permissions:
-      contents: read
-      pull-requests: read
-    steps:
-      - name: Generate Summary
-        run: |
-          set -euo pipefail
+  permissions:
+    contents: read
+    pull-requests: read
+
+  steps:
+    - name: Generate Summary
+      shell: bash
+      env:
+        BASH_ENV: /dev/null
+      run: |
+        set -euo pipefail
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        git config --global credential.helper ""
+
+        # ==========================================================
+        #   HEADER BANNER
+        # ==========================================================
+        {
+          echo "## 🧩 ICCDEV – Pull Request Summary"
+          echo "<hr>"
+          echo ""
+          echo "### 📬 Overview"
+          echo "- 📅 Generated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "- 🔗 Repository: \`${GITHUB_REPOSITORY}\`"
+          echo "- 🧪 Workflow: \`${GITHUB_WORKFLOW}\`"
+          echo ""
+        } >> "$GITHUB_STEP_SUMMARY"
+
+        # ==========================================================
+        #   NON-SOURCE PR PATH (FAST EXIT)
+        # ==========================================================
+        if [ "${{ needs.detect-src.outputs.src_changed }}" != "true" ]; then
           {
-            echo "## ICCDEV PR Summary"
+            echo "### 💤 No Source Code Changes Detected"
+            echo "This PR contains documentation, metadata, or other non-source updates."
             echo ""
+            echo "🔀 **Build + Analysis Skipped (Safe and Intended)**"
+            echo ""
+            echo "### ✔️ Overall Result: SUCCESS (Non-source PR bypass)"
+            echo "<hr>"
+            echo "<sub>Generated automatically by iccDEV Continuous Integration</sub>"
           } >> "$GITHUB_STEP_SUMMARY"
-          # Non-source change path
-          if [ "${{ needs.detect-src.outputs.src_changed }}" != "true" ]; then
-            {
-              echo "- Non-source PR detected — build, analysis, and linting skipped."
-              echo ""
-              echo "### Overall Result: SUCCESS (Bypass: Non-Source Change)"
-            } >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          # Unix build
-          if [ "${{ needs.unix-ci.result }}" = "success" ]; then
-            echo "- Unix Build and Tests: Passed" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- Unix Build and Tests: Failed" >> "$GITHUB_STEP_SUMMARY"
-          fi
-          # Clang scan-build
-          if [ "${{ needs.scan-build.result }}" = "success" ]; then
-            echo "- Clang Static Report: Available" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- Clang Static Analysis: Failed" >> "$GITHUB_STEP_SUMMARY"
-          fi
-          # Cppcheck / Linters
-          if [ "${{ needs.cppcheck-linters.result }}" = "success" ]; then
-            echo "- Cppcheck and Linter Report: Available" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- Cppcheck and Linters: Failed" >> "$GITHUB_STEP_SUMMARY"
-          fi
-          # Windows build
-          if [ "${{ needs.win-ci.result }}" = "success" ]; then
-            echo "- Windows Build and Tests: Passed" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- Windows Build and Tests: Failed" >> "$GITHUB_STEP_SUMMARY"
-          fi
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Uploaded artifacts for all stages" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          # Final result
-          if [ "${{ job.status }}" = "success" ]; then
-            echo "### Overall Result: SUCCESS" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "### Overall Result: FAILURE" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          exit 0
+        fi
+
+        # ==========================================================
+        #   PIPELINE STATUS SECTION
+        # ==========================================================
+        echo "### 🧱 Build & Analysis Results" >> "$GITHUB_STEP_SUMMARY"
+
+        # --- UNIX Build ---
+        if [ "${{ needs.unix-ci.result }}" = "success" ]; then
+          echo "- 🟢 **Unix Build & Tests:** Passed" >> "$GITHUB_STEP_SUMMARY"
+        else
+          echo "- 🔴 **Unix Build & Tests:** ${{ needs.unix-ci.result }}" >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+        # --- Clang scan-build ---
+        if [ "${{ needs.scan-build.result }}" = "success" ]; then
+          echo "- 🟢 **Clang Static Report:** Available" >> "$GITHUB_STEP_SUMMARY"
+        else
+          echo "- 🔴 **Clang Static Analysis:** ${{ needs.scan-build.result }}" >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+        # --- Cppcheck / Linters ---
+        if [ "${{ needs.cppcheck-linters.result }}" = "success" ]; then
+          echo "- 🟢 **Cppcheck + Linters:** Passed" >> "$GITHUB_STEP_SUMMARY"
+        else
+          echo "- 🔴 **Cppcheck + Linters:** ${{ needs.cppcheck-linters.result }}" >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+        # --- Windows Build ---
+        if [ "${{ needs.win-ci.result }}" = "success" ]; then
+          echo "- 🟢 **Windows Build & Tests:** Passed" >> "$GITHUB_STEP_SUMMARY"
+        else
+          echo "- 🔴 **Windows Build & Tests:** ${{ needs.win-ci.result }}" >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+        echo "" >> "$GITHUB_STEP_SUMMARY"
+        echo "### 📦 Artifacts" >> "$GITHUB_STEP_SUMMARY"
+        echo "- All stage artifacts have been uploaded." >> "$GITHUB_STEP_SUMMARY"
+        echo "" >> "$GITHUB_STEP_SUMMARY"
+
+        # ==========================================================
+        #   FINAL RESULT BANNER
+        # ==========================================================
+        if [ "${{ job.status }}" = "success" ]; then
+          echo "<div align=\"center\"><h2>🎉 CI Result: <span style='color:green;'>SUCCESS</span></h2></div>" >> "$GITHUB_STEP_SUMMARY"
+        else
+          echo "<div align=\"center\"><h2>🚨 CI Result: <span style='color:red;'>FAILURE</span></h2></div>" >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+        {
+          echo "<hr>"
+          echo "<sub>Generated automatically by iccDEV Continuous Integration</sub>"
+        } >> "$GITHUB_STEP_SUMMARY"
