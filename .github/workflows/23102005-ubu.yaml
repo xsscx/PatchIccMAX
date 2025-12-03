@@ -1,0 +1,76 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 23-OCT-2025 1200Z by David Hoyt
+#
+## Intent: Cmake testing / build
+#
+## TODO: Add Unit Test Suite
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: 23102005-ubu
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build_type: [Release]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Collect Workflow Telemetry
+        uses: catchpoint/workflow-telemetry-action@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake git pkg-config
+          sudo apt-get install -y \
+            build-essential cmake gcc g++ clang clang-tools \
+            libpng-dev libxml2 libxml2-dev libtiff-dev \
+            nlohmann-json3-dev libwxgtk3.2-dev wx-common \
+            python3 python3-pip curl git llvm zsh
+          git clone https://github.com/InternationalColorConsortium/iccDEV.git
+          cd iccDEV
+          echo "Dependencies installed."
+
+      - name: Configure
+        run: |
+          cd iccDEV/Build
+          cmake -B . -S Cmake \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          ls -l Tools
+
+      - name: Build project
+        run: |
+          cd iccDEV/Build
+          cmake --build . --config ${{ matrix.build_type }}
+          ls -l Tools
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: iccmax-libs-${{ matrix.build_type }}-linux
+          path: |
+            iccDEV/Build/**/*.so
+            iccDEV/Build/**/*.a
+            iccDEV/Build/**/*.out
+            iccDEV/Build/**/*.bin
+            iccDEV/Build/**/*.o
+            iccDEV/Build/Tools/**/*
+          if-no-files-found: warn

@@ -1,0 +1,91 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 03-DEC-2025 at 0800 EDT by David Hoyt (©)
+#
+## Intent: "ctx-os-releas
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: "ctx-os-release"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: "Build on ${{ matrix.os }} with ${{ matrix.compiler }}"
+    runs-on: ubuntu-22.04
+
+    container:
+      image: ubuntu:22.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            compiler: gcc
+          - os: ubuntu-22.04
+            compiler: clang
+
+    steps:
+      - name: Install Base Packages
+        run: |
+          apt-get update
+          apt-get install -y \
+            git curl build-essential cmake pkg-config \
+            libxml2 libxml2-dev nlohmann-json3-dev \
+            libtiff5 libtiff5-dev libgtk-3-dev \
+            libcurl4-openssl-dev llvm clang clang-tools \
+            libopencl-clang-dev \
+            libwxgtk3.0-gtk3-dev libwxgtk-media3.0-gtk3-dev \
+            libwxgtk-webview3.0-gtk3-dev wx3.0-headers
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Git Identity
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: Build wxWidgets (Linux only)
+        run: |
+          git clone https://github.com/wxWidgets/wxWidgets.git
+          cd wxWidgets
+          git submodule update --init --recursive
+          ./configure --enable-debug --prefix=/usr/local
+          make -j$(nproc)
+          make install
+          ldconfig
+
+      - name: Set Compiler Environment
+        run: |
+          if [ "${{ matrix.compiler }}" = "gcc" ]; then
+            echo "CC=gcc" >> $GITHUB_ENV
+            echo "CXX=g++" >> $GITHUB_ENV
+          else
+            echo "CC=clang" >> $GITHUB_ENV
+            echo "CXX=clang++" >> $GITHUB_ENV
+          fi
+
+      - name: CMake Configure + Build
+        run: |
+          cd Build
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local \
+                -DCMAKE_BUILD_TYPE=Release \
+                -Wno-dev Cmake/
+          make -j$(nproc)

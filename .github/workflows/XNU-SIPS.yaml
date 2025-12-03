@@ -1,0 +1,65 @@
+###############################################################
+#
+## Copyright (©) 2024-2025 David H Hoyt. All rights reserved.
+##                 https://srd.cx
+##
+## Last Updated: 25-OCT-2025 at 1030 EDT by David Hoyt (©)
+#
+## Intent: XNU-SIPS
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+
+name: "XNU-SIPS"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    name: Run sips
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Git Identity
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+      - name: Get research for sips
+        run: |
+          echo "========= BEGIN INSIDE STUB ========="
+          echo "=================== Running Checks off xnu-research Branch =========================================" 
+          set +e
+          echo "RUN sips"
+          cd Testing
+          echo -n "Found ICC files: "; find . -type f -name "*.icc" -print0 | tee >(tr '\0' ' ') | while IFS= read -r -d '' f; do echo ">>> SIPS: $f"; sips --verify "$f" || true; done
+          echo "========= INSIDE STUB EXIT ========="
+          EXIT_CODE=$?
+          if [ "$EXIT_CODE" -ne 0 ]; then
+          echo "PoC executed as expected with failure code $EXIT_CODE."
+          else
+          echo "Review Output."
+          fi
+          echo "========= OUTSIDE STUB EXIT ========="
+      - name: Summary Report
+        if: always()
+        run: |
+          echo "### Ubuntu Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Directory: PatchIccMAX/Build/" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts Uploaded: iccmax-macos-clang" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: Success" >> $GITHUB_STEP_SUMMARY
