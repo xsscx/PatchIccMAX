@@ -80,6 +80,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: |
           brew update
+          brew upgrade
           brew install libpng nlohmann-json libxml2 wxwidgets libtiff jpeg
       - name: Build wxWidgets (Linux only)
         if: startsWith(matrix.os, 'ubuntu')
