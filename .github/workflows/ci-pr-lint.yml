@@ -59,7 +59,6 @@ jobs:
               ;;
           esac
 
-
       - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
         with:
           fetch-depth: 0
@@ -119,13 +118,12 @@ jobs:
            # Clear the in-shell GITHUB_TOKEN
            unset GITHUB_TOKEN || true
 
-           git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
+          git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
 
-           # --- filename list ---
-           if [ -z "${base_ref:-}" ]; then
-             echo "Error: base_ref is unset or empty" >&2
-             exit 1
-           fi
+          base_ref="${{ github.base_ref }}"
+
+          # Full fetch due to Job Failure at URL https://github.com/InternationalColorConsortium/iccDEV/actions/runs/19976940423
+          git -c protocol.version=2 fetch --no-tags origin "${base_ref}" --depth=0
 
           # --- filename list ---
           git diff --name-only "origin/${base_ref}"...HEAD \
