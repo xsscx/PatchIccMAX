@@ -120,22 +120,24 @@ jobs:
 
           git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
 
-          base_ref="${{ github.base_ref }}"
+                     # --- filename list ---
+           if [ -z "${base_ref:-}" ]; then
+             echo "Error: base_ref is unset or empty" >&2
+             exit 1
+           fi
 
-          # Full fetch due to Job Failure at URL https://github.com/InternationalColorConsortium/iccDEV/actions/runs/19976940423
-          git -c protocol.version=2 fetch --no-tags origin "${base_ref}" --depth=0
+           git diff --name-only "origin/${base_ref}"...HEAD \
+             | tr -cd '[:alnum:]./_-\n' \
+             | grep -E '\.(cpp|cxx|cc|h|hpp)$' \
+             | tr '\n' '\0' > changed_files.txt
 
-          # --- filename list ---
-          git diff --name-only "origin/${base_ref}"...HEAD \
-            | grep -Ei '\.(cpp|cxx|cc|h|hpp)$' \
-            | tr '\n' '\0' > changed_files.txt
+           changed_file_count="$(xargs -0 -n1 < changed_files.txt | wc -l)"
 
-          changed_file_count=$(xargs -0 -n1 < changed_files.txt | wc -l)
            if [ "$changed_file_count" -eq 0 ]; then
-           echo "no_src_changes=true" >> "$GITHUB_OUTPUT"
-          else
-           echo "no_src_changes=false" >> "$GITHUB_OUTPUT"
-          fi
+             echo "no_src_changes=true" >> "$GITHUB_OUTPUT"
+           else
+             echo "no_src_changes=false" >> "$GITHUB_OUTPUT"
+           fi
 
       - name: Lint & code checks
         if: ${{ steps.diff.outputs.no_src_changes == 'false' }}
