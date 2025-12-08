@@ -118,31 +118,40 @@ jobs:
            # Clear the in-shell GITHUB_TOKEN
            unset GITHUB_TOKEN || true
 
+           # Display commit info safely
            git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
 
-           # --- filename list ---
-           if [ -z "${base_ref:-}" ]; then
-             echo "Error: base_ref is unset or empty" >&2
+           # --- SAFE base_ref handling (sanitize + validate) ---
+           raw_base_ref="${{ github.base_ref }}"
+           base_ref="$(printf '%s' "${raw_base_ref}" | tr -cd '[:alnum:]._-/')"
+
+           if [ -z "${base_ref}" ]; then
+             echo "ERROR: base_ref empty or invalid after sanitization" >&2
              exit 1
            fi
 
+           case "${base_ref}" in
+             master) ;;   # allowed
+             *)
+               echo "ERROR: Unsupported target branch '${base_ref}'. Only 'master' allowed." >&2
+               exit 1
+               ;;
+           esac
 
-          base_ref="${{ github.base_ref }}"
+           # --- filename list (safe pipeline) ---
+           git diff --name-only "origin/${base_ref}"...HEAD \
+             | tr -cd '[:alnum:]./_-\n' \
+             | grep -E '\.(cpp|cxx|cc|h|hpp)$' \
+             | tr '\n' '\0' > changed_files.txt
 
-          # Full fetch due to Job Failure at URL https://github.com/InternationalColorConsortium/iccDEV/actions/runs/19976940423
-          git -c protocol.version=2 fetch --no-tags origin "${base_ref}" --depth=0
+           changed_file_count="$(xargs -0 -n1 < changed_files.txt | wc -l)"
 
-          # --- filename list ---
-          git diff --name-only "origin/${base_ref}"...HEAD \
-            | grep -Ei '\.(cpp|cxx|cc|h|hpp)$' \
-            | tr '\n' '\0' > changed_files.txt
+           if [ "${changed_file_count}" -eq 0 ]; then
+             echo "no_src_changes=true" >> "$GITHUB_OUTPUT"
+           else
+             echo "no_src_changes=false" >> "$GITHUB_OUTPUT"
+           fi
 
-          changed_file_count=$(xargs -0 -n1 < changed_files.txt | wc -l)
-           if [ "$changed_file_count" -eq 0 ]; then
-           echo "no_src_changes=true" >> "$GITHUB_OUTPUT"
-          else
-           echo "no_src_changes=false" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Lint & code checks
         if: ${{ steps.diff.outputs.no_src_changes == 'false' }}
