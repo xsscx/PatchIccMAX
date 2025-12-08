@@ -118,12 +118,13 @@ jobs:
            # Clear the in-shell GITHUB_TOKEN
            unset GITHUB_TOKEN || true
 
-          git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
+           git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
 
-          base_ref="${{ github.base_ref }}"
-
-          # Full fetch due to Job Failure at URL https://github.com/InternationalColorConsortium/iccDEV/actions/runs/19976940423
-          git -c protocol.version=2 fetch --no-tags origin "${base_ref}" --depth=0
+           # --- filename list ---
+           if [ -z "${base_ref:-}" ]; then
+             echo "Error: base_ref is unset or empty" >&2
+             exit 1
+           fi
 
           # --- filename list ---
           git diff --name-only "origin/${base_ref}"...HEAD \
