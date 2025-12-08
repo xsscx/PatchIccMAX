@@ -39,8 +39,8 @@ on:
 
 jobs:
   build-linux:
-    name: Lint on ${{ inputs.ubuntu-version || 'ubuntu-latest' }}
-    runs-on: ${{ inputs.ubuntu-version || 'ubuntu-latest' }}
+    name: Lint on ${{ inputs.ubuntu-version != '' && inputs.ubuntu-version || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.ubuntu-version != '' && inputs.ubuntu-version || 'ubuntu-latest' }}
     timeout-minutes: 30
     steps:
 
