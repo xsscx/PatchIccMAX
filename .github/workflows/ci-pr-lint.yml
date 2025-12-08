@@ -70,7 +70,7 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
 
-      - name: Verify remote origin URL (opt out of malicious git configs)
+      - name: UCI Gate 1 - Verify remote origin URL (opt out of malicious git configs)
         shell: bash
         env:
           BASH_ENV: /dev/null
