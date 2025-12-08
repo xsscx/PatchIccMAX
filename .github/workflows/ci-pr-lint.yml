@@ -89,7 +89,17 @@ jobs:
           fi
 
       - name: Install Linux dependencies
+        shell: bash
+        env:
+         BASH_ENV: /dev/null
         run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          
+          # Clear the in-shell GITHUB_TOKEN
+          unset GITHUB_TOKEN || true
+
           sudo apt-get update
           sudo apt-get install -y cppcheck clang-format build-essential cmake git pkg-config \
             gcc g++ clang clang-tools libpng-dev libxml2 libxml2-dev libtiff-dev \
