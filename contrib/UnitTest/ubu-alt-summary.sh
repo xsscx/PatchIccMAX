@@ -1,13 +1,13 @@
-﻿#!zsh
+#!/usr/bin/env bash
 ##########################################################################################################
 #
-# Copyright (c) 2025. International Color Consortium. All rights reserved.
+# 
 # Copyright (c) 2024. David H Hoyt LLC. All rights reserved.
 #
-# Last Updated: 13-AUGUST-2025 at 1900Z by David Hoyt
+# Last Updated: 24-OCT-2025 at 1200 EDT by David Hoyt
 #
 # Intent:
-#   This script polls the unix zsh host, retrieves system, build and development environment
+#   This script polls the unix sh host, retrieves system, build and development environment
 #   details, and reports developer-related configurations.
 #
 # Features:
@@ -16,13 +16,14 @@
 #   - Examines environmental variables relevant to development
 #
 # Usage:
-#   Run this script from the Runner from project_root with:
-#     /usr/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/InternationalColorConsortium/DemoIccMAX/refs/heads/master/contrib/UnitTest/zsh_ubuntu_checks.zsh)"
+#   Run this script in a terminal from project_root with:
+#    bash -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/re231/contrib/UnitTest/ubu-alt-summary.sh)"
+##########################################################################################################
 
 set -euo pipefail
 
-log_file="linux_inventory_$(date +%Y%m%d_%H%M%S).log"
-HTML_FILE="linux_build_report.html"
+log_file="ubuntu_inventory_$(date +%Y%m%d_%H%M%S).log"
+HTML_FILE="ubuntu_build_report.html"
 
 typeset -a executables dynamic_libs static_libs signed_files unsigned_files_list
 executables=()
@@ -37,6 +38,8 @@ typeset -i dynamic_libs_count=0
 typeset -i static_libs_count=0
 typeset -i signed_count=0
 typeset -i unsigned_count=0
+
+declare -A file_types  # associative array: file_path → file_type
 
 log_message() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') | $1" | tee -a "$log_file"
@@ -64,6 +67,7 @@ while read -r binary; do
         file_info="UNKNOWN"
     fi
 
+    file_types["$binary"]="$file_info"  # store the file type
     log_message "Analyzing: $binary → $file_info"
 
     case "$file_info" in
@@ -97,7 +101,6 @@ done < <(
 )
 
 log_message "✅ Scan complete: total files = $total_files"
-
 log_message "Build Report Summary"
 log_message "----------------------"
 log_message "Total Files Found: $total_files"
@@ -118,7 +121,7 @@ generate_html_report() {
 <title>Linux Build Report</title>
 <style>
 body { font-family: Arial; margin: 20px; }
-table { width: 100%; border-collapse: collapse; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
 th, td { padding: 8px; border: 1px solid #ddd; }
 th { background-color: #f4f4f4; }
 pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
@@ -144,23 +147,24 @@ EOF
         local -a filelist
         filelist=("$@")
 
-        echo "<h2>$title</h2><table><tr><th>#</th><th>Path</th></tr>" >> "$HTML_FILE"
+        echo "<h2>$title</h2><table><tr><th>#</th><th>Path</th><th>Type</th></tr>" >> "$HTML_FILE"
         if (( ${#filelist[@]} > 0 )); then
             local i=1
             for f in "${filelist[@]}"; do
-                echo "<tr><td>$i</td><td>$(escape_html "$f")</td></tr>" >> "$HTML_FILE"
+                local type="${file_types[$f]:-UNKNOWN}"
+                echo "<tr><td>$i</td><td>$(escape_html "$f")</td><td>$(escape_html "$type")</td></tr>" >> "$HTML_FILE"
                 let "i+=1"
             done
         else
-            echo "<tr><td colspan='2'>None</td></tr>" >> "$HTML_FILE"
+            echo "<tr><td colspan='3'>None</td></tr>" >> "$HTML_FILE"
         fi
         echo "</table>" >> "$HTML_FILE"
     }
 
-    generate_table_section "Executables" "${(@)executables}"
-    generate_table_section "Dynamic Libraries" "${(@)dynamic_libs}"
-    generate_table_section "Static Libraries" "${(@)static_libs}"
-    generate_table_section "Unsigned Files" "${(@)unsigned_files_list}"
+    generate_table_section "Executables" "${executables[@]}"
+    generate_table_section "Dynamic Libraries" "${dynamic_libs[@]}"
+    generate_table_section "Static Libraries" "${static_libs[@]}"
+    generate_table_section "Unsigned Files" "${unsigned_files_list[@]}"
 
     echo "<h2>System Info</h2><pre>$(escape_html "$(uname -a)\n$(cat /etc/os-release 2>/dev/null || true)")</pre>" >> "$HTML_FILE"
     echo "</body></html>" >> "$HTML_FILE"

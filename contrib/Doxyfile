@@ -2,9 +2,9 @@
 #
 # IccMAX Doxygen Configuration file for Version 2.1.25
 #
-# Last Updated: 29-JULY-2025 2300Z by David Hoyt
+# Last Updated: 25-OCT-2025 1200Z by David Hoyt
 #
-# Intent: Update the Docs and Call Graphs for latest PR151
+# Intent: Runner Testing
 #
 # TODO: Refactor for full doc set outputs
 #
@@ -16,10 +16,9 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = iccDEV
-PROJECT_NUMBER         = 2.2.61
+PROJECT_NUMBER         = 2.3.1
 PROJECT_BRIEF          = "iccDEV Tools"
-# PROJECT_LOGO           = /home/xss/pr124/DemoIccMAX/ICC_header.png
-OUTPUT_DIRECTORY       = /home/xss/pr151/repro1/DemoIccMAX/dgen
+OUTPUT_DIRECTORY       = dgen
 CREATE_SUBDIRS         = YES
 CREATE_SUBDIRS_LEVEL   = 8
 ALLOW_UNICODE_NAMES    = YES
@@ -40,7 +39,7 @@ ABBREVIATE_BRIEF       = "The $name class" \
 ALWAYS_DETAILED_SEC    = YES
 INLINE_INHERITED_MEMB  = YES
 FULL_PATH_NAMES        = YES
-STRIP_FROM_PATH        =
+STRIP_FROM_PATH        = /home/runner/work/PatchIccMAX/PatchIccMAX/PatchIccMAX/
 STRIP_FROM_INC_PATH    =
 SHORT_NAMES            = YES
 JAVADOC_AUTOBRIEF      = NO
@@ -49,7 +48,7 @@ QT_AUTOBRIEF           = NO
 MULTILINE_CPP_IS_BRIEF = YES
 PYTHON_DOCSTRING       = YES
 INHERIT_DOCS           = YES
-SEPARATE_MEMBER_PAGES  = YES
+SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 4
 ALIASES                =
 OPTIMIZE_OUTPUT_FOR_C  = YES
@@ -59,7 +58,9 @@ OPTIMIZE_OUTPUT_VHDL   = NO
 OPTIMIZE_OUTPUT_SLICE  = NO
 EXTENSION_MAPPING      =
 MARKDOWN_SUPPORT       = YES
-TOC_INCLUDE_HEADINGS   = 5
+MARKDOWN_SUPPORT       = YES
+USE_MDFILE_AS_MAINPAGE = README.md
+TOC_INCLUDE_HEADINGS   = 8
 MARKDOWN_ID_STYLE      = DOXYGEN
 AUTOLINK_SUPPORT       = YES
 BUILTIN_STL_SUPPORT    = NO
@@ -123,7 +124,7 @@ SHOW_NAMESPACES        = YES
 FILE_VERSION_FILTER    =
 LAYOUT_FILE            =
 CITE_BIB_FILES         =
-INCLUDE_PATH = /usr/include/libxml2 /usr/include/x86_64-linux-gnu /usr/include /home/xss/pr151/repro1/DemoIccMAX/IccProfLib /home/xss/pr151/repro1/DemoIccMAXIccXML
+INCLUDE_PATH = /usr/include/libxml2 /usr/include/x86_64-linux-gnu /usr/include IccProfLib IccXML
 
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages
@@ -142,9 +143,12 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = /home/xss/pr151/repro1/DemoIccMAX/IccProfLib \
-                         /home/xss/pr151/repro1/DemoIccMAX/IccXML \
-                         /home/xss/pr151/repro1/DemoIccMAX/Tools
+INPUT                  = README.md \
+                         docs \
+                         Testing \
+                         IccProfLib \
+                         IccXML \
+                         Tools
 INPUT_ENCODING         = UTF-8
 INPUT_FILE_ENCODING    =
 FILE_PATTERNS          = *.c \
@@ -210,14 +214,13 @@ INPUT_FILTER           =
 FILTER_PATTERNS        =
 FILTER_SOURCE_FILES    = NO
 FILTER_SOURCE_PATTERNS =
-USE_MDFILE_AS_MAINPAGE =
 FORTRAN_COMMENT_AFTER  = 72
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
 #---------------------------------------------------------------------------
 SOURCE_BROWSER         = YES
 INLINE_SOURCES         = YES
-STRIP_CODE_COMMENTS    = YES
+STRIP_CODE_COMMENTS    = NO
 REFERENCED_BY_RELATION = YES
 REFERENCES_RELATION    = YES
 REFERENCES_LINK_SOURCE = YES
@@ -299,10 +302,13 @@ SEARCHENGINE_URL       =
 SEARCHDATA_FILE        = searchdata.xml
 EXTERNAL_SEARCH_ID     =
 EXTRA_SEARCH_MAPPINGS  =
+SOURCE_BROWSER          = YES
+HTML_DYNAMIC_SECTIONS   = YES
+GENERATE_TREEVIEW       = YES
 #---------------------------------------------------------------------------
 # Configuration options related to the LaTeX output
 #---------------------------------------------------------------------------
-GENERATE_LATEX         = YES
+GENERATE_LATEX         = NO
 LATEX_OUTPUT           = latex
 LATEX_CMD_NAME         =
 MAKEINDEX_CMD_NAME     = makeindex
@@ -323,7 +329,7 @@ LATEX_EMOJI_DIRECTORY  =
 #---------------------------------------------------------------------------
 # Configuration options related to the RTF output
 #---------------------------------------------------------------------------
-GENERATE_RTF           = YES
+GENERATE_RTF           = NO
 RTF_OUTPUT             = rtf
 COMPACT_RTF            = NO
 RTF_HYPERLINKS         = NO
@@ -332,7 +338,7 @@ RTF_EXTENSIONS_FILE    =
 #---------------------------------------------------------------------------
 # Configuration options related to the man page output
 #---------------------------------------------------------------------------
-GENERATE_MAN           = YES
+GENERATE_MAN           = NO
 MAN_OUTPUT             = man
 MAN_EXTENSION          = .3
 MAN_SUBDIR             =
@@ -340,14 +346,14 @@ MAN_LINKS              = NO
 #---------------------------------------------------------------------------
 # Configuration options related to the XML output
 #---------------------------------------------------------------------------
-GENERATE_XML           = YES
+GENERATE_XML           = NO
 XML_OUTPUT             = xml
 XML_PROGRAMLISTING     = YES
 XML_NS_MEMB_FILE_SCOPE = NO
 #---------------------------------------------------------------------------
 # Configuration options related to the DOCBOOK output
 #---------------------------------------------------------------------------
-GENERATE_DOCBOOK       = YES
+GENERATE_DOCBOOK       = NO
 DOCBOOK_OUTPUT         = docbook
 #---------------------------------------------------------------------------
 # Configuration options for the AutoGen Definitions output
@@ -411,7 +417,7 @@ CALLER_GRAPH           = YES
 GRAPHICAL_HIERARCHY    = YES
 DIRECTORY_GRAPH        = YES
 DIR_GRAPH_MAX_DEPTH    = 1
-DOT_IMAGE_FORMAT       = png
+DOT_IMAGE_FORMAT       = svg
 INTERACTIVE_SVG        = YES
 DOT_PATH               =
 DOTFILE_DIRS           =
@@ -420,7 +426,7 @@ DIAFILE_DIRS           =
 PLANTUML_JAR_PATH      =
 PLANTUML_CFG_FILE      =
 PLANTUML_INCLUDE_PATH  =
-DOT_GRAPH_MAX_NODES    = 50
+DOT_GRAPH_MAX_NODES    = 100
 MAX_DOT_GRAPH_DEPTH    = 0
 DOT_MULTI_TARGETS      = NO
 GENERATE_LEGEND        = YES

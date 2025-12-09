@@ -17,7 +17,7 @@
 #
 # Usage:
 #   Run this script in a terminal from project_root with:
-#    zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/research/contrib/UnitTest/zsh_ubuntu_checks.zsh)"
+#     zsh -c "$(curl -fsSL https://raw.githubusercontent.com/xsscx/PatchIccMAX/refs/heads/re231/contrib/UnitTest/zsh_ubuntu_checks.zsh)"
 
 set -euo pipefail
 
