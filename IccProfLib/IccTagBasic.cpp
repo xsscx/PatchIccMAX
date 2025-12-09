@@ -2064,7 +2064,7 @@ bool CIccTagTextDescription::Read(icUInt32Number size, CIccIO *pIO)
   icTagTypeSignature sig;
 
   m_szText[0] = '\0';
-  int64_t nEnd = pIO->Tell() + size;
+  size_t nEnd = pIO->Tell() + size;
 
   if (size<3*sizeof(icUInt32Number) || !pIO)
     return false;
@@ -2091,7 +2091,7 @@ bool CIccTagTextDescription::Read(icUInt32Number size, CIccIO *pIO)
   
   Release();
 
-  if ( (pIO->Tell() + int64_t(2 * sizeof(icUInt32Number))) > nEnd)
+  if (pIO->Tell() + 2 * sizeof(icUInt32Number) > nEnd)
     return false;
 
   if (!pIO->Read32(&m_nUnicodeLanguageCode) ||
@@ -4589,9 +4589,7 @@ bool CIccTagSparseMatrixArray::Read(icUInt32Number size, CIccIO *pIO)
 
       if (nSizeLeft<n)
         return false;
-      
-      size_t rowsRead = nRows+1;
-      if (pIO->Read16(pMatrix+2*sizeof(icUInt16Number), rowsRead)!=rowsRead) {
+      if (pIO->Read16(pMatrix+2*sizeof(icUInt16Number), nRows+1)!=nRows+1) {
         return false;
       }
 
@@ -4751,8 +4749,7 @@ bool CIccTagSparseMatrixArray::Write(CIccIO *pIO)
 
     //int n = (nRows+3)*sizeof(icUInt16Number);
 
-    size_t rowsToWrite = nRows+3;
-    if (pIO->Write16(pMatrix, rowsToWrite)!=rowsToWrite ||
+    if (pIO->Write16(pMatrix, nRows+3)!=nRows+3 ||
         pIO->Write16(mtx.GetColumnsForRow(0), mtx.GetNumEntries())!=mtx.GetNumEntries()) {
       return false;
     }

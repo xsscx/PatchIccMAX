@@ -1245,6 +1245,9 @@ bool CIccTagArray::Read(icUInt32Number size, CIccIO *pIO)
   SetTagArrayType(sigArrayType);
 
   icUInt32Number count, i, j;
+  IccTagEntry TagEntry;
+
+  TagEntry.pTag = NULL;
 
   if (!pIO->Read32(&count))
     return false;
