@@ -121,7 +121,6 @@ jobs:
             # Do not treat this as a hard failure, but signal downstream steps to skip.
             exit 0
           fi
-
       - name: Install Linux dependencies
         if: ${{ steps.origin.outputs.trusted_origin == 'true' }}
         shell: bash --noprofile --norc {0}
@@ -165,7 +164,6 @@ jobs:
 
           # Clear the in-shell GITHUB_TOKEN to avoid accidental use.
           unset GITHUB_TOKEN || true
-
           git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
 
           # Determine base ref; default to master if unavailable (e.g., workflow_dispatch)
