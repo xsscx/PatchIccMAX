@@ -7,10 +7,10 @@
 #
 ## Intent: iccDEV ci-pr-action
 #
-## Last Updated: 08-DEC-2025 1600Z by David Hoyt 
+## Last Updated: 06-DEC-2025 1600Z by David Hoyt 
 ##               Additional UCI Checks
-#                Consider Copilot Review
-#                Review GitHub Best Practice & Security Guides
+#
+#
 #
 #
 #
@@ -59,7 +59,7 @@ jobs:
           # Disable unsafe fetch options
           persist-credentials: false
 
-      - name: Verify remote origin URL (opt out of malicious git configs)
+      - name: UCI Gate 1 - Verify Remote Origin (opt out of malicious git configs)
         shell: bash
         env:
          BASH_ENV: /dev/null
@@ -103,7 +103,7 @@ jobs:
 
           base_ref="${{ github.base_ref }}"
 
-          # Avoid fetching refs from user-controllable inputs like ($base_ref)
+          # UCI Gate 2 - Verify Remote Origin (opt out of malicious $base_ref)
           case "$base_ref" in master)
               ;;
             *)
@@ -254,7 +254,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   validate-inputs:
-    name: Validate Matrix Inputs
+    name: UCI Gate 2 - Validate Matrix Inputs
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -267,7 +267,7 @@ jobs:
       build-types: ${{ steps.v.outputs.bt }}
 
     steps:
-      - name: Validate fixed or upstream inputs
+      - name: UCI Gate 3 - Sanity Checks
         id: v
         shell: bash
         run: |
@@ -331,6 +331,14 @@ jobs:
     with:
       build-type: 'Release'
 
+  cppcheck-linters:
+    if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
+    name: 🧪 Cppcheck and Linters
+    needs: [unix-ci, win-ci, detect-src]
+    uses: ./.github/workflows/ci-pr-lint.yml
+    with:
+      ubuntu-version: 'ubuntu-latest'
+
   win-ci:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
     name: 🧱 Windows Build and Test
@@ -344,6 +352,7 @@ jobs:
       - detect-src
       - unix-ci
       - scan-build
+      - cppcheck-linters
       - win-ci
     if: always()
     steps:
@@ -382,6 +391,12 @@ jobs:
             echo "- ✅ Clang Static Report: Available" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- ❌ Clang Static Analysis: ${{ needs.scan-build.result }}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "${{ needs.cppcheck-linters.result }}" == "success" ]; then
+            echo "- ✅ Cppcheck + Linter Report: Available" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- ❌ Cppcheck + Linters: ${{ needs.cppcheck-linters.result }}" >> "$GITHUB_STEP_SUMMARY"
           fi
 
           if [ "${{ needs.win-ci.result }}" == "success" ]; then

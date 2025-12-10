@@ -7,11 +7,11 @@
 #
 ## Intent: Static code analysis and linting (cppcheck, clang-tidy, clang-format) for PR validation
 #
-## Last Updated: 06-DEC-2025 1400Z by David Hoyt 
-##               TEST job Failures
-## TODO: Push binary releases, tags etc.. 
+## Last Updated: 09-DEC-2025 1730Z by David Hoyt 
+##               TESTing in Progress
+##
 #
-## Comment: Known good and working from PatchIccMax
+##
 #
 #
 #
@@ -58,7 +58,6 @@ jobs:
               exit 1
               ;;
           esac
-
       - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
         with:
           fetch-depth: 0
@@ -69,11 +68,10 @@ jobs:
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-
       - name: Verify remote origin URL (opt out of malicious git configs)
         shell: bash
         env:
-          BASH_ENV: /dev/null
+         BASH_ENV: /dev/null
         run: |
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -81,76 +79,46 @@ jobs:
           origin_url=$(git remote get-url origin || true)
           echo "Remote origin: $origin_url"
           # Enforce that origin points to the expected GitHub repository for this workflow run
-          expected_ssh="git@github.com:${{ github.repository }}.git"
-          # Allow both HTTPS and SSH (git@) forms if needed
-          if [[ "$origin_url" != "$expected" && "$origin_url" != "${expected%.git}" && "$origin_url" != "$expected_ssh" && "$origin_url" != "${expected_ssh%.git}" ]]; then
-            echo "Origin URL mismatch: expected $expected, ${expected%.git}, $expected_ssh, or ${expected_ssh%.git}, got $origin_url" 
-            exit 1
+          expected="https://github.com/${{ github.repository }}.git"
+          # Allow both HTTPS and git@ forms if needed
+          if [[ "$origin_url" != "$expected" && "$origin_url" != "${expected%.git}" && "$origin_url" != "git@github.com:InternationalColorConsortium/iccDEV.git" ]]; then
+            echo "Origin URL mismatch: expected $expected, ${expected%.git}, or git@github.com:InternationalColorConsortium/iccDEV.git, got $origin_url" >&2
+            echo "src_changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
-
       - name: Install Linux dependencies
-        shell: bash
-        env:
-         BASH_ENV: /dev/null
         run: |
-          set -euo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global credential.helper ""
-          
-          # Clear the in-shell GITHUB_TOKEN
-          unset GITHUB_TOKEN || true
-
           sudo apt-get update
           sudo apt-get install -y cppcheck clang-format build-essential cmake git pkg-config \
             gcc g++ clang clang-tools libpng-dev libxml2 libxml2-dev libtiff-dev \
             nlohmann-json3-dev libwxgtk3.2-dev wx-common python3 python3-pip curl git llvm zsh
-
-      - id: diffcheck
-        name: diffcheck for file changes
+      - name: Detect modified source files
+        id: diff
         shell: bash
         env:
-         BASH_ENV: /dev/null
+          BASH_ENV: /dev/null
         run: |
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
-          
           # Clear the in-shell GITHUB_TOKEN
           unset GITHUB_TOKEN || true
-
           git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
-
-          # If not a pull_request event (e.g., workflow_dispatch or workflow_call),
-          # skip source diff checking and mark as non-source change.
-          if [ "${{ github.event_name }}" != "pull_request" ]; then
-            echo "Non-PR event (${{ github.event_name }}) — skipping source diff check" >&2
-            echo "src_changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
+          # Determine base ref; default to master if unavailable
           base_ref="${{ github.base_ref }}"
-
-          # Avoid fetching refs from user-controllable inputs like ($base_ref)
-          case "$base_ref" in master)
-              ;;
-            *)
-              echo "Ref blocked or unsupported: $base_ref" >&2
-              echo "src_changed=false" >> "$GITHUB_OUTPUT"
-              exit 0
-              ;;
-          esac
-
-          # Short fetch, single ref; avoid tags and deep history
-          git -c protocol.version=2 fetch --no-tags origin "${base_ref}" --depth=1
-
-          # Case-insensitive extension match (c/h/cpp variants)
-          if git diff --name-only "origin/${base_ref}"...HEAD |
-             grep -Ei '\.(cpp|cxx|cc|c|h|hpp|hh)$' >/dev/null; then
-            echo "src_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "src_changed=false" >> "$GITHUB_OUTPUT"
+          if [ -z "$base_ref" ]; then
+            base_ref="master"
           fi
-          
+           # --- filename list ---
+           git diff --name-only "origin/${base_ref}"...HEAD \
+             | grep -Ei '\.(cpp|cxx|cc|h|hpp)$' \
+             | tr '\n' '\0' > changed_files.txt
+           changed_file_count=$(xargs -0 -n1 < changed_files.txt | wc -l)
+           if [ "$changed_file_count" -eq 0 ]; then
+             echo "no_src_changes=true" >> "$GITHUB_OUTPUT"
+           else
+             echo "no_src_changes=false" >> "$GITHUB_OUTPUT"
+           fi
       - name: Lint & code checks
         if: ${{ steps.diff.outputs.no_src_changes == 'false' }}
         shell: bash
@@ -205,7 +173,6 @@ jobs:
           mkdir -p lint_reports
           echo "No .cpp/.h changes detected; skipping lint." > lint_reports/cppcheck.txt
           : > lint_reports/clang_tidy.txt
-
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
         with:
           name: lint-reports
@@ -225,7 +192,6 @@ jobs:
           # Clear the in-shell GITHUB_TOKEN
           unset GITHUB_TOKEN || true
           echo "## 🧹 Lint Report Summary" >> $GITHUB_STEP_SUMMARY
-
           if [ "${{ steps.diff.outputs.no_src_changes }}" == "true" ]; then
             echo "🟦 Skipped — no modified source files detected." >> $GITHUB_STEP_SUMMARY
           elif [ -s lint_reports/cppcheck.txt ]; then
