@@ -1,0 +1,74 @@
+## Makefile.static
+#
+##
+## Copyright (c) 2024-2025. David H Hoyt LLC. All rights reserved.
+##
+## Written by David Hoyt
+## Date: 23-OCT-2025 2000 EDT
+#
+# Branch: re231
+# Intent: Builds iccScan static executable
+# Production: TRUE
+# Runner: TRUE
+#
+#
+# Updates:  Coverage Scope
+#
+#
+# Build: make -f Makefile.static STATIC=1 clean all
+#
+##
+
+TARGET := iccScan
+SRC := licc.cpp
+
+CXX := clang++
+ARCH := $(shell uname -m)
+UNAME_S := $(shell uname -s)
+
+# --- Includes and Defines ---
+INCLUDES := \
+  -I../../../../../IccProfLib \
+  -I../../../../../IccXML/IccLibXML \
+  -I/usr/local/include
+
+DEFS := -DPLATFORM_LINUX -DARCH_X64
+
+# --- Static archive paths (confirmed present) ---
+LCMS2_A   := /usr/local/lib/liblcms2.a
+ZLIB_A    := /usr/lib/x86_64-linux-gnu/libz.a
+MATH_A    := /usr/lib/x86_64-linux-gnu/libm.a
+LIBC_A    := /usr/lib/x86_64-linux-gnu/libc.a
+LIBSTDCPP_A := /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.a
+
+# Optional in-tree libs (if you built IccProfLib2 / IccXML2 static)
+ICCPROF_A := ../iccProfLib/libIccProfLib2.a
+ICCXML_A  := ../iccXmlLib/libIccXML2.a
+
+# --- Compiler flags ---
+CXXFLAGS := -O2 -g -fno-omit-frame-pointer -Wall $(INCLUDES) $(DEFS)
+
+# --- Linker flags ---
+# Force full static, explicitly list .a files (no -l autodetection)
+LDFLAGS := -static -s
+
+# --- Static libraries to link (explicit .a order matters) ---
+LIBS := \
+  $(ICCPROF_A) $(ICCXML_A) \
+  $(LCMS2_A) $(ZLIB_A) $(MATH_A) \
+  $(LIBSTDCPP_A) $(LIBC_A)
+
+.PHONY: all clean info
+
+all: info $(TARGET)
+
+info:
+	@echo "Building fully static licc on $(UNAME_S)/$(ARCH)"
+	@echo "Using archives:"
+	@ls -la $(LCMS2_A) $(ZLIB_A) $(MATH_A) $(LIBC_A) $(LIBSTDCPP_A)
+
+$(TARGET): $(SRC)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+clean:
+	rm -f $(TARGET)
