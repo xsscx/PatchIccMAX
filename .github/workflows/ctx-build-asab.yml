@@ -1,0 +1,206 @@
+###############################################################
+#
+## Copyright (©) 2025 International Color Consortium. 
+##                 All rights reserved. 
+##                 https://color.org
+#
+#
+## Intent: iccDEV ctx-build-asan
+#
+## Last Updated: 12-DEC-2025 0100Z by David Hoyt 
+##               Additional UCI Checks
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: ctx-build-asan
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/internationalcolorconsortium/iccdev:latest
+      options: --entrypoint /bin/bash
+
+    defaults:
+      run:
+        shell: bash {0}
+
+    steps:
+      - name: Verify ICCDev root
+        shell: bash
+        env:
+         BASH_ENV: /dev/null
+        run: |
+          test -d /opt/iccdev
+          cd /opt/iccdev
+          pwd
+      - name: Clean previous build artifacts
+        shell: bash
+        env:
+         BASH_ENV: /dev/null
+        run: |
+          cd /opt/iccdev
+          pwd
+          export CXX=clang++
+          git clone https://github.com/InternationalColorConsortium/iccDEV.git
+          cd iccDEV
+          pwd
+          ls
+          
+      - name: Configure with CMake (ASAN/UBSAN)
+        shell: bash
+        env:
+         BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+      
+          cd /opt/iccdev/iccDEV
+          git config --add safe.directory "$(pwd)"
+          # Clear the in-shell GITHUB_TOKEN
+          unset GITHUB_TOKEN || true
+          sed -i '/find_package(wxWidgets COMPONENTS core base REQUIRED)/,/endif()/ s/^/# /' Build/Cmake/CMakeLists.txt
+      
+          cd Build
+          cmake -DCMAKE_BUILD_TYPE=Debug \
+                -Wno-dev \
+                -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" \
+                Cmake
+
+      - name: Build ICCDev
+        shell: bash
+        env:
+         BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+      
+          cd /opt/iccdev/iccDEV
+          git config --add safe.directory "$(pwd)"
+          # Clear the in-shell GITHUB_TOKEN
+          unset GITHUB_TOKEN || true
+          cd /opt/iccdev/iccDEV/Build
+          make -j$(nproc)
+      - name: List newly built binaries and libraries
+        shell: bash
+        env:
+         BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+      
+          cd /opt/iccdev/iccDEV
+          git config --add safe.directory "$(pwd)"
+          # Clear the in-shell GITHUB_TOKEN
+          unset GITHUB_TOKEN || true
+          cd /opt/iccdev/iccDEV/Build
+          find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
+            -mmin -1440 \
+            ! -path "*/.git/*" \
+            ! -path "*/CMakeFiles/*" \
+            ! -name "*.sh" \
+            -print
+      - name: Generate profiles and run tests
+        shell: bash
+        env:
+         BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+      
+          cd /opt/iccdev/iccDEV
+          git config --add safe.directory "$(pwd)"
+          # Clear the in-shell GITHUB_TOKEN
+          unset GITHUB_TOKEN || true
+          cd /opt/iccdev/iccDEV/Testing
+          echo "=== Updating PATH ==="
+          for d in ../Build/Tools/*; do
+            [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
+          done
+          sh CreateAllProfiles.sh
+          sh RunTests.sh
+          cd HDR
+          sh mkprofiles.sh
+          cd ..
+          cd CalcTest
+          sh checkInvalidProfiles.sh
+          cd ..
+          cd mcs
+          sh updateprev.sh
+          sh updateprevWithBkgd.sh
+          cd ..
+          pwd
+          find . -iname "*.icc" | wc -l
+          echo "========= INSIDE STUB EXIT ========="
+          
+      - name: GitHub report (expanded)
+        if: always()
+        run: |
+          echo "::group::ICCDev ASAN Build Report"
+      
+          echo "::notice title=ICCDev ASAN Build::Container=ghcr.io/internationalcolorconsortium/iccdev:latest"
+          echo "::notice title=ICCDev ASAN Build::Repository=${GITHUB_REPOSITORY}"
+          echo "::notice title=ICCDev ASAN Build::Ref=${GITHUB_REF}"
+          echo "::notice title=ICCDev ASAN Build::Commit=${GITHUB_SHA}"
+          echo "::notice title=ICCDev ASAN Build::Workflow=${GITHUB_WORKFLOW}"
+          echo "::notice title=ICCDev ASAN Build::Job=${GITHUB_JOB}"
+          echo "::notice title=ICCDev ASAN Build::RunID=${GITHUB_RUN_ID}"
+          echo "::notice title=ICCDev ASAN Build::RunNumber=${GITHUB_RUN_NUMBER}"
+          echo "::notice title=ICCDev ASAN Build::Actor=${GITHUB_ACTOR}"
+          echo "::notice title=ICCDev ASAN Build::RunnerOS=${RUNNER_OS}"
+      
+          if command -v clang >/dev/null 2>&1; then
+            clang --version | head -n 1
+          else
+            echo "::warning title=Toolchain::clang not found"
+          fi
+      
+          if command -v cmake >/dev/null 2>&1; then
+            which cmake
+            cmake --version | head -n 1
+          fi
+      
+          if command -v ninja >/dev/null 2>&1; then
+            which ninja
+            ninja --version
+          fi
+      
+          echo "::notice title=Sanitizer::ASAN_OPTIONS=${ASAN_OPTIONS:-unset}"
+          echo "::notice title=Sanitizer::UBSAN_OPTIONS=${UBSAN_OPTIONS:-unset}"
+      
+          if [ -d build ]; then
+            echo "::notice title=Build::Build directory present"
+          else
+            echo "::warning title=Build::No build directory"
+          fi
+      
+          echo "::endgroup::"
+
+
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

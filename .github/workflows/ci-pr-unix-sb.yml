@@ -51,7 +51,7 @@ env:
 
 jobs:
   scan-build:
-    name: Ubuntu • scan-build
+    name: SAST
     runs-on: ubuntu-latest
     continue-on-error: true
     timeout-minutes: 20
