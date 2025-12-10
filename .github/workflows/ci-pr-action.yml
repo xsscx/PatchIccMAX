@@ -7,13 +7,13 @@
 #
 ## Intent: iccDEV ci-pr-action
 #
-## Last Updated: 08-DEC-2025 2300Z by David Hoyt 
-##               Additional UCI Checks
-#                Consider Copilot Review
-#                Review GitHub Best Practice & Security Guides
+## Last Updated: 12-DEC-2025 1330Z by David Hoyt 
+##               Add ci-pr-lint to ci-pr-action
+#                
 #
 #
-#
+#  Note: We continue to monitor the ci-pr- labels for issues
+#        Add TODO Issues with Comments, Suggestions & Feedback
 #
 #
 #
@@ -45,7 +45,7 @@ concurrency:
 
 jobs:
   detect-src:
-    name: Detect Source Changes
+    name: 🧭 iccDEV PR Init
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -59,24 +59,57 @@ jobs:
           # Disable unsafe fetch options
           persist-credentials: false
 
-      - name: Verify remote origin URL (opt out of malicious git configs)
+      - name: Check RO
         shell: bash
         env:
-         BASH_ENV: /dev/null
+          BASH_ENV: /dev/null
         run: |
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
-          origin_url=$(git remote get-url origin || true)
-          echo "Remote origin: $origin_url"
-          # Enforce that origin points to the expected GitHub repository for this workflow run
+
+          origin_url="$(git remote get-url origin || true)"
+
+          echo "=== Context diagnostics ==="
+          echo "github.repository=${{ github.repository }}"
+          echo "github.event_name=${{ github.event_name }}"
+          echo "github.ref=${{ github.ref }}"
+          echo "github.base_ref=${{ github.base_ref }}"
+          echo "github.head_ref=${{ github.head_ref }}"
+          echo "github.actor=${{ github.actor }}"
+          echo "origin_url=${origin_url}"
+
+          # Derived context
+          if [[ "${{ github.repository }}" != "${{ github.event.pull_request.head.repo.full_name || '' }}" ]]; then
+            echo "Context: fork PR detected (head repo differs)"
+          else
+            echo "Context: same-repo PR or direct branch"
+          fi
+
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "Context: running on master branch"
+          elif [[ "${{ github.ref }}" == refs/heads/* ]]; then
+            echo "Context: running on feature branch"
+          elif [[ "${{ github.ref }}" == refs/pull/* ]]; then
+            echo "Context: running on pull request ref"
+          fi
+
+          echo "=== Origin enforcement ==="
+
           expected="https://github.com/${{ github.repository }}.git"
-          # Allow both HTTPS and git@ forms if needed
-          if [[ "$origin_url" != "$expected" && "$origin_url" != "${expected%.git}" && "$origin_url" != "git@github.com:InternationalColorConsortium/iccDEV.git" ]]; then
-            echo "Origin URL mismatch: expected $expected, ${expected%.git}, or git@github.com:InternationalColorConsortium/iccDEV.git, got $origin_url" >&2
+          expected_nogit="${expected%.git}"
+          iccdev_ssh="git@github.com:InternationalColorConsortium/iccDEV.git"
+
+          if [[ "$origin_url" == "$expected" || "$origin_url" == "$expected_nogit" ]]; then
+            echo "Origin OK: matches repository HTTPS URL"
+          elif [[ "${{ github.repository }}" == "InternationalColorConsortium/iccDEV" && "$origin_url" == "$iccdev_ssh" ]]; then
+            echo "Origin OK: iccDEV SSH origin allowed for canonical repo"
+          else
+            echo "Origin REJECTED: unexpected origin URL" >&2
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+
 
       - id: diffcheck
         name: diffcheck for file changes
@@ -103,7 +136,7 @@ jobs:
 
           base_ref="${{ github.base_ref }}"
 
-          # Avoid fetching refs from user-controllable inputs like ($base_ref)
+          # UCI Check - Verify Remote Origin (opt out of malicious $base_ref)
           case "$base_ref" in master)
               ;;
             *)
@@ -124,7 +157,7 @@ jobs:
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
           fi
  
-      - name: Print PR Info
+      - name: iccDEV PR Summary
         shell: bash
         env:
           BASH_ENV: /dev/null
@@ -145,7 +178,7 @@ jobs:
             echo "  <h3>Welcome to the ICC Development Workflow</h3>"
             echo "</div>"
             echo ""        
-            echo "## 🧩 ICCDEV PR Summary"
+            echo "## 🧩 iccDEV PR Summary"
             echo "  ⏱️ <em>Date:</em> $(date -u '+%Y-%m-%d %H:%M:%S UTC')"     
             echo ""       
             echo "  <strong>PRs Are Typically Reviewed Within 14 Days</strong><br>"            
@@ -157,8 +190,6 @@ jobs:
             echo "- [x] You checked for duplicate [pull requests](https://github.com/InternationalColorConsortium/iccDEV/pulls)"
             echo "- [x] You built your PR locally using the official [Build Instructions](https://github.com/InternationalColorConsortium/iccDEV/blob/master/docs/build.md)"
             echo "- [x] You included Unit Tests and/or Issue reproduction steps + fix"
-            echo ""
-            echo "> iccDEV Maintainers will review your PR within **14 days**."
             echo ""
             echo "If you have questions, contact a listed [Maintainer](https://github.com/InternationalColorConsortium/iccDEV/tree/master/.github/CODEOWNERS)."
             echo ""
@@ -197,14 +228,14 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
   setup:
-    name: 🧭 Init
+    name: 🧭 iccDEV PR Setup
     runs-on: ubuntu-latest
+    needs: [detect-src]
     permissions:
       contents: read
       pull-requests: read
-    needs: [detect-src]
     steps:
-      - name: Display Environment Info
+      - name: iccDEV PR Detail
         shell: bash
         env:
           BASH_ENV: /dev/null
@@ -239,7 +270,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
           {
-            echo "## 🧭 Init Complete"
+            echo "## 🧭 iccDEV Init Complete"
             echo ""
             echo "**Workflow:** ci-pr-action"
             echo "- **Triggered by:** \`${{ github.actor }}\`"
@@ -254,7 +285,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   validate-inputs:
-    name: Validate Matrix Inputs
+    name: 🧭 iccDEV PR Runner Setup
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -267,7 +298,7 @@ jobs:
       build-types: ${{ steps.v.outputs.bt }}
 
     steps:
-      - name: Validate fixed or upstream inputs
+      - name: Define Valid Build Inputs
         id: v
         shell: bash
         run: |
@@ -313,7 +344,7 @@ jobs:
 
   unix-ci:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
-    name: 🧱 Unix Matrix Build and Test
+    name: 🧱 Unix Build & Test Profiles
     needs: [setup, detect-src, validate-inputs]
     uses: ./.github/workflows/ci-pr-unix.yml
     # pass minimized inputs
@@ -325,29 +356,38 @@ jobs:
 
   scan-build:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
-    name: 🔍 Clang Scan-Build Analysis
+    name: 🔍 Scan-Build
     needs: [unix-ci, detect-src]
     uses: ./.github/workflows/ci-pr-unix-sb.yml
     with:
       build-type: 'Release'
 
+  cppcheck-linters:
+    if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
+    name: 🧪 Style Checks
+    needs: [unix-ci, win-ci, detect-src]
+    uses: ./.github/workflows/ci-pr-lint.yml
+    with:
+      ubuntu-version: 'ubuntu-latest'
+
   win-ci:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
-    name: 🧱 Windows Build and Test
+    name: 🧱 Windows Build & Test Profiles
     needs: [setup, detect-src, validate-inputs]
     uses: ./.github/workflows/ci-pr-win.yml
     
   finalize:
-    name: 🧾 GitHub Summary Report
+    name: 🧾 iccDEV PR Summary
     runs-on: ubuntu-latest
     needs:
       - detect-src
       - unix-ci
       - scan-build
+      - cppcheck-linters
       - win-ci
     if: always()
     steps:
-      - name: Generate Summary
+      - name: 🧭 iccDEV PR Summary
         shell: bash
         run: |
           set -euo pipefail
@@ -361,7 +401,7 @@ jobs:
             echo "  </a>"
             echo "</div>"
             echo ""
-            echo "## 🧩 ICCDEV PR Summary"
+            echo "## 🧩 iccDEV PR Summary"
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
             
@@ -382,6 +422,12 @@ jobs:
             echo "- ✅ Clang Static Report: Available" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- ❌ Clang Static Analysis: ${{ needs.scan-build.result }}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "${{ needs.cppcheck-linters.result }}" == "success" ]; then
+            echo "- ✅ Cppcheck + Linter Report: Available" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- ❌ Cppcheck + Linters: ${{ needs.cppcheck-linters.result }}" >> "$GITHUB_STEP_SUMMARY"
           fi
 
           if [ "${{ needs.win-ci.result }}" == "success" ]; then
