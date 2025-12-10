@@ -1,0 +1,100 @@
+###############################################################
+#
+## Copyright (©) 2025 International Color Consortium. 
+##                 All rights reserved. 
+##                 https://color.org
+#
+#
+## Intent: iccDEV ctx-build-iccdev-rebuild
+#
+## Last Updated: 12-DEC-2025 0100Z by David Hoyt 
+##               Additional UCI Checks
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: ctx-build-iccdev-rebuild
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/internationalcolorconsortium/iccdev:latest
+      options: --entrypoint /bin/bash
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Verify ICCDev root
+        run: |
+          test -d /opt/iccdev
+          cd /opt/iccdev
+          pwd
+
+      - name: Clean previous build artifacts
+        run: |
+          cd /opt/iccdev
+          pwd
+          export CXX=clang++
+          git clone https://github.com/InternationalColorConsortium/iccDEV.git
+          cd iccDEV
+          pwd
+          ls
+          
+      - name: Configure with CMake
+        run: |
+          cd /opt/iccdev/iccDEV
+          sed -i '/find_package(wxWidgets COMPONENTS core base REQUIRED)/,/endif()/ s/^/# /' Build/Cmake/CMakeLists.txt
+          cd /opt/iccdev/iccDEV/Build
+          cmake -DCMAKE_BUILD_TYPE=Debug -Wno-dev -DCMAKE_CXX_FLAGS="-g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall" Cmake
+
+      - name: Build ICCDev
+        run: |
+          cd /opt/iccdev/iccDEV/Build
+          make -j$(nproc)
+
+      - name: List newly built binaries and libraries
+        run: |
+          cd /opt/iccdev/iccDEV/Build
+          find . -type f \( -perm -111 -o -name "*.a" -o -name "*.so" -o -name "*.dylib" \) \
+            -mmin -1440 \
+            ! -path "*/.git/*" \
+            ! -path "*/CMakeFiles/*" \
+            ! -name "*.sh" \
+            -print
+
+      - name: Generate profiles and run tests
+        run: |
+          cd /opt/iccdev/iccDEV/Testing
+          echo "=== Updating PATH ==="
+          for d in ../Build/Tools/*; do
+            [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
+          done
+          sh CreateAllProfiles.sh
+          sh RunTests.sh
+          cd HDR
+          sh mkprofiles.sh
+          cd ..
+          cd hybrid
+          sh BuildAndTest.sh
+          cd ..
+          cd CalcTest
+          sh checkInvalidProfiles.sh
+          cd ..
+          cd mcs
+          sh updateprev.sh
+          sh updateprevWithBkgd.sh
+          cd ..
+          pwd
