@@ -1,0 +1,60 @@
+###############################################################
+#
+## Copyright (©) 2025 International Color Consortium. 
+##                 All rights reserved. 
+##                 https://color.org
+#
+#
+## Intent: iccDEV ctx-build-iccdev
+#
+## Last Updated: 06-DEC-2025 1600Z by David Hoyt 
+##               Additional UCI Checks
+#
+#
+#
+#
+#
+#
+#
+#
+###############################################################
+
+name: ctx-build-iccdev
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/internationalcolorconsortium/iccdev:latest
+      options: --entrypoint /bin/bash
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Verify ICCDev layout
+        run: |
+          test -d /opt/iccdev
+          test -d /opt/iccdev/Testing
+          test -d /opt/iccdev/Build/Tools
+
+      - name: Populate PATH and run CreateAllProfiles
+        run: |
+          cd /opt/iccdev/Testing
+          for d in ../Build/Tools/*; do
+            [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
+          done
+          ./CreateAllProfiles.sh
+
+      - name: Validate generated ICC profiles
+        run: |
+          cd /opt/iccdev/Testing
+          count=$(find . -name '*.icc' | wc -l)
+          echo "ICC files generated: $count"
+          test "$count" -eq 204
+

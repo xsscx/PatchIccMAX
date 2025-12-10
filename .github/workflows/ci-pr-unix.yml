@@ -1,17 +1,17 @@
 ###############################################################
 #
-## Copyright (©) 2025 International Color Consortium. 
-##                 All rights reserved. 
-##                 https://color.org
+# Copyright (©) 2025 International Color Consortium. 
+#                 All rights reserved. 
+#                 https://color.org
 #
 #
-## Intent: Unix/Linux and macOS multi-compiler build and test pipeline for PR validation
+# Intent: Unix/Linux and macOS multi-compiler build and test pipeline for PR validation
 #
-## Last Updated: 21-NOV-2025 1800Z by David Hoyt 
-##               PR Status Labeler
-## TODO: Push binary releases, tags etc.. 
+# Last Updated: 12-DEC-2025 1630Z by David Hoyt 
+#               Modify Banners
+# 
 #
-## Comment: Known good and working from PatchIccMax
+#
 #
 #
 #
@@ -162,7 +162,7 @@ jobs:
             echo "CXX=clang++" >> $GITHUB_ENV
           fi
 
-      - name: Configure CMake
+      - name: Configure iccDEV
         shell: bash
         env:
           BASH_ENV: /dev/null
@@ -182,7 +182,7 @@ jobs:
           cat CMakeCache.txt || true
           echo "::endgroup::"
 
-      - name: Build
+      - name: Build iccDEV
         shell: bash
         env:
           BASH_ENV: /dev/null
@@ -196,7 +196,18 @@ jobs:
           echo "Compiler: $CC ($($CC --version | head -n 1))"
           echo "CMake build type: ${{ matrix.build_type }}"
           make -j$(nproc || sysctl -n hw.logicalcpu)
-          cd ../Testing/
+
+      - name: Create Profiles
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          unset GITHUB_TOKEN || true
+          echo "Starting build..."
+          cd Testing
           echo "=== Updating PATH ==="
           for d in ../Build/Tools/*; do
           [ -d "$d" ] && export PATH="$(realpath "$d"):$PATH"
