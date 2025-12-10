@@ -1106,7 +1106,8 @@ bool CIccSampledCurveSegment::Read(size_t size, CIccIO *pIO)
   }
 
   //Initialize first point with zero.  Properly initialized during Begin()
-  m_pSamples[0] = 0;
+  if (m_pSamples)   // should not be NULL, but add safety, and quiet the static analyzer
+    m_pSamples[0] = 0;
 
   return true;
 }
@@ -1974,6 +1975,9 @@ CIccSampledCalculatorCurve::CIccSampledCalculatorCurve(const CIccSampledCalculat
 ******************************************************************************/
 CIccSampledCalculatorCurve &CIccSampledCalculatorCurve::operator=(const CIccSampledCalculatorCurve &curve)
 {
+  if (this == &curve)   // safety
+    return (*this);
+
   if (m_pCalc)
     delete m_pCalc;
 
@@ -2678,7 +2682,7 @@ bool CIccSegmentedCurve::Read(icUInt32Number size, CIccIO *pIO)
 
   Reset();
 
-  size_t pos = pIO->Tell();
+  int64_t pos = pIO->Tell();
   icCurveSegSignature segSig;
   CIccCurveSegment *pSeg;
 
@@ -2710,7 +2714,8 @@ bool CIccSegmentedCurve::Read(icUInt32Number size, CIccIO *pIO)
     if (!breakpoints)
       return false;
 
-    if (pIO->ReadFloat32Float(breakpoints, nSegments-1)!=nSegments-1) {
+    size_t segmentsRead = nSegments-1;
+    if (pIO->ReadFloat32Float(breakpoints, segmentsRead)!=segmentsRead) {
       free(breakpoints);
       return false;
     }
@@ -3290,7 +3295,7 @@ bool CIccMpeCurveSet::Read(icUInt32Number size, CIccIO *pIO)
     icCurveElemSignature curveSig;
     for (i=0; i<m_nInputChannels; i++) {
       if (!map[m_position[i].offset]) {
-        size_t pos;
+        int64_t pos;
         if (!m_position[i].offset || !m_position[i].size) {
           return false;
         }
@@ -3555,7 +3560,10 @@ CIccMpeTintArray::CIccMpeTintArray(const CIccMpeTintArray &tintArray)
  ******************************************************************************/
 CIccMpeTintArray &CIccMpeTintArray::operator=(const CIccMpeTintArray &tintArray)
 {
-  m_nReserved = m_nReserved;
+  if (this == &tintArray)   // safety
+    return (*this);
+
+  m_nReserved = tintArray.m_nReserved;
 
   if (m_Array) {
     delete m_Array;
@@ -4630,21 +4638,18 @@ bool CIccMpeToneMap::Write(CIccIO* pIO)
   lumPos.size = (icUInt32Number)(pIO->Tell() - (lumPos.offset + nTagStartPos));
 
   //Keep track of tone function positions
-  icPositionNumber* funcPos = new icPositionNumber[m_nOutputChannels];
-  if (!funcPos)
-    return false;
+  icPositionNumber funcPos[ 16 ];   // maximum output channels
 
   //write out first tone function
-  int j;
   funcPos[0].offset = (icUInt32Number)(pIO->Tell() - nTagStartPos);
   if (!m_pToneFuncs[0]->Write(pIO)) {
-    delete[] funcPos;
     return false;
   }
   funcPos[0].size = (icUInt32Number)(pIO->Tell() - (funcPos[0].offset + nTagStartPos));
 
   //write out additional non-copied tone functions
   for (int i = 1; i < m_nOutputChannels; i++) {
+    int j;
     for (j = 0; j < i; j++)
       if (m_pToneFuncs[j] == m_pToneFuncs[i])
         break;
@@ -4654,7 +4659,6 @@ bool CIccMpeToneMap::Write(CIccIO* pIO)
     else {
       funcPos[i].offset = (icUInt32Number)(pIO->Tell() - nTagStartPos);
       if (!m_pToneFuncs[i]->Write(pIO)) {
-        delete[] funcPos;
         return false;
       }
       funcPos[i].size = (icUInt32Number)(pIO->Tell() - (funcPos[i].offset + nTagStartPos));
@@ -4670,7 +4674,6 @@ bool CIccMpeToneMap::Write(CIccIO* pIO)
 
   if (!pIO->Write32(&lumPos.offset) ||
       !pIO->Write32(&lumPos.size)) {
-    delete[] funcPos;
     return false;
   }
 
@@ -4678,11 +4681,9 @@ bool CIccMpeToneMap::Write(CIccIO* pIO)
   for (int i = 0; i < m_nOutputChannels; i++) {
     if (!pIO->Write32(&funcPos[i].offset) ||
       !pIO->Write32(&funcPos[i].size)) {
-      delete[] funcPos;
       return false;
     }
   }
-  delete[] funcPos;
 
   //Go back to end and we are done
   pIO->Seek(endOffset, icSeekSet);

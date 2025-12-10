@@ -13,6 +13,9 @@ Contributors are anyone who submits content to the project, Committers
 review and approve such submissions, and the ICC provides general project
 oversight.
 
+We require all participants to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+
 ## Get Connected
 
 The first thing to do, before anything else, is to talk to us! Whether you are reporting an issue, requesting or implementing a feature, or just asking a question, please don’t hesitate to reach out to project maintainers or the community as a whole. This is an important first step because your issue, feature, or question may have been solved or discussed already, and you will save yourself a lot of time by asking first.

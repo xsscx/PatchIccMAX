@@ -69,8 +69,8 @@ Copyright:  (c) see Software License
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef _ICCELEMBASIC_H
-#define _ICCELEMBASIC_H
+#ifndef _ICCMPEBASIC_H
+#define _ICCMPEBASIC_H
 
 #include "IccTagMPE.h"
 
@@ -833,4 +833,4 @@ public:
 
 
 
-#endif //_ICCELEMBASIC_H
+#endif //_ICCMPEBASIC_H
