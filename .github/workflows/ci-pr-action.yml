@@ -7,7 +7,7 @@
 #
 ## Intent: iccDEV ci-pr-action
 #
-## Last Updated: 12-DEC-2025 1330Z by David Hoyt 
+## Last Updated: 12-DEC-2025 2030Z by David Hoyt 
 ##               Add ci-pr-lint to ci-pr-action
 #                
 #
@@ -18,14 +18,14 @@
 #
 #
 ###############################################################
-
+ 
 name: "ci-pr-action"
-
+ 
 permissions:
   contents: read
   pull-requests: read
   # Avoid unnecessary permissions; do not add write permissions.
-
+ 
 on:
   workflow_dispatch:
   workflow_call:
@@ -42,7 +42,7 @@ on:
 concurrency:
   group: "ci-pr-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
   cancel-in-progress: true
-
+ 
 jobs:
   detect-src:
     name: 🧭 iccDEV PR Init
@@ -51,7 +51,9 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      src_changed: ${{ steps.diffcheck.outputs.src_changed }}
+      src_changed: ${{ steps.diffcheck.outputs.src_changed || steps.verify.outputs.src_changed }}
+      trusted_origin: ${{ steps.verify.outputs.trusted_origin }}
+      sanitized_context: ${{ steps.verify.outputs.sanitized_context }}
     steps:
       - name: Check RO
         id: verify
@@ -73,8 +75,9 @@ jobs:
           echo "github.head_ref=${{ github.head_ref }}"
           echo "github.actor=${{ github.actor }}"
 
+          # Default: treat as untrusted until explicitly determined trusted
           trusted=false
-          sanitized=true
+          sanitized=false
 
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             fork="${{ github.event.pull_request.head.repo.fork }}"
@@ -87,21 +90,31 @@ jobs:
 
             if [[ "$fork" == "false" && "$head_repo" == "$base_repo" ]]; then
               trusted=true
+              sanitized=false
               echo "Context: same-repo PR (trusted)"
             else
+              trusted=false
+              sanitized=true
               echo "Context: fork PR detected — running in sanitized mode"
             fi
           else
-            trusted=true
-            echo "Context: non-PR event (trusted)"
-          fi
-
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            echo "Context: running on master branch"
-          elif [[ "${{ github.ref }}" == refs/heads/* ]]; then
-            echo "Context: running on feature branch"
-          elif [[ "${{ github.ref }}" == refs/pull/* ]]; then
-            echo "Context: running on pull request ref"
+            # Non-PR events: make explicit policy decisions
+            if [[ "${{ github.event_name }}" == "workflow_call" ]]; then
+              # workflow_call can be invoked by external repos. Treat as untrusted by default.
+              # To trust workflow_call, implement an allow-list or require & validate a secret.
+              trusted=false
+              sanitized=true
+              echo "Context: workflow_call — treated as untrusted by default"
+            elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+              # Manual dispatch: treat as untrusted by default unless you want to trust dispatchers.
+              trusted=false
+              sanitized=true
+              echo "Context: workflow_dispatch — treated as untrusted by default"
+            else
+              trusted=true
+              sanitized=false
+              echo "Context: non-PR trusted event"
+            fi
           fi
 
           echo "=== Sanitization state ==="
@@ -111,7 +124,15 @@ jobs:
           echo "trusted_origin=$trusted" >> "$GITHUB_OUTPUT"
           echo "sanitized_context=$sanitized" >> "$GITHUB_OUTPUT"
 
+          if [ "$trusted" != "true" ]; then
+            # Mark no source changes and exit early; subsequent steps are conditional on trusted_origin.
+            echo "src_changed=false" >> "$GITHUB_OUTPUT"
+            echo "Not trusted; skipping further detect-src steps."
+            exit 0
+          fi
+
       - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
+        if: ${{ steps.verify.outputs.trusted_origin == 'true' }}
         with:
           fetch-depth: 2
           # Disable unsafe fetch options
@@ -119,6 +140,7 @@ jobs:
 
       - id: diffcheck
         name: diffcheck for file changes
+        if: ${{ steps.verify.outputs.trusted_origin == 'true' }}
         shell: bash
         env:
          BASH_ENV: /dev/null
@@ -133,7 +155,7 @@ jobs:
           git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
 
           # If not a pull_request event (e.g., workflow_dispatch or workflow_call),
-          # skip source diff checking and mark as non-source change.
+          # skip source diff checking and mark as non-source change
           if [ "${{ github.event_name }}" != "pull_request" ]; then
             echo "Non-PR event (${{ github.event_name }}) — skipping source diff check" >&2
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
@@ -162,8 +184,9 @@ jobs:
           else
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
           fi
- 
+
       - name: iccDEV PR Summary
+        if: ${{ steps.verify.outputs.trusted_origin == 'true' }}
         shell: bash
         env:
           BASH_ENV: /dev/null
@@ -266,7 +289,6 @@ jobs:
           echo "Source changed: ${{ needs.detect-src.outputs.src_changed }}"
           echo ""
 
-
       - name: Write Summary to GitHub UI
         shell: bash
         env:
@@ -297,12 +319,12 @@ jobs:
       contents: read
       pull-requests: read
     needs: [setup, detect-src]
-
+ 
     outputs:
       os-list: ${{ steps.v.outputs.os }}
       compilers: ${{ steps.v.outputs.comp }}
       build-types: ${{ steps.v.outputs.bt }}
-
+ 
     steps:
       - name: Define Valid Build Inputs
         id: v
@@ -349,7 +371,7 @@ jobs:
 
 
   unix-ci:
-    if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
+    if: ${{ needs.detect-src.outputs.src_changed == 'true' && needs.detect-src.outputs.trusted_origin == 'true' }}
     name: 🧱 Unix Build & Test Profiles
     needs: [setup, detect-src, validate-inputs]
     uses: ./.github/workflows/ci-pr-unix.yml
@@ -361,7 +383,7 @@ jobs:
       compilers: ${{ needs.validate-inputs.outputs.compilers }}
 
   scan-build:
-    if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
+    if: ${{ needs.detect-src.outputs.src_changed == 'true' && needs.detect-src.outputs.trusted_origin == 'true' }}
     name: 🔍 Scan-Build
     needs: [unix-ci, detect-src]
     uses: ./.github/workflows/ci-pr-unix-sb.yml
@@ -369,7 +391,7 @@ jobs:
       build-type: 'Release'
 
   cppcheck-linters:
-    if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
+    if: ${{ needs.detect-src.outputs.src_changed == 'true' && needs.detect-src.outputs.trusted_origin == 'true' }}
     name: 🧪 Style Checks
     needs: [unix-ci, win-ci, detect-src]
     uses: ./.github/workflows/ci-pr-lint.yml
@@ -377,7 +399,7 @@ jobs:
       ubuntu-version: 'ubuntu-latest'
 
   win-ci:
-    if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
+    if: ${{ needs.detect-src.outputs.src_changed == 'true' && needs.detect-src.outputs.trusted_origin == 'true' }}
     name: 🧱 Windows Build & Test Profiles
     needs: [setup, detect-src, validate-inputs]
     uses: ./.github/workflows/ci-pr-win.yml
@@ -410,7 +432,7 @@ jobs:
             echo "## 🧩 iccDEV PR Summary"
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
-            
+              
           if [ "${{ needs.detect-src.outputs.src_changed }}" != "true" ]; then
             echo "- 💤 Non-source PR detected — build, analysis, and linting skipped." >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -451,4 +473,3 @@ jobs:
           else
             echo "### ❌ Overall Result: FAILURE" >> "$GITHUB_STEP_SUMMARY"
           fi
-
