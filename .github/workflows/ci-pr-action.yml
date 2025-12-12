@@ -224,12 +224,8 @@ jobs:
           # ================================
           echo "## 📝 Recent Git Commits" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-          if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-            git --no-pager log -n 5 --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%nMessage: %s%n"
-          else
-            echo "Repository not checked out (sanitized / fork context)"
-          fi >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY
+          git --no-pager log -n 5 --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%nMessage: %s%n" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
   setup:
     name: 🧭 iccDEV PR Setup
@@ -449,4 +445,3 @@ jobs:
           else
             echo "### ❌ Overall Result: FAILURE" >> "$GITHUB_STEP_SUMMARY"
           fi
-
