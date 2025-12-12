@@ -52,23 +52,17 @@ jobs:
       pull-requests: read
     outputs:
       src_changed: ${{ steps.diffcheck.outputs.src_changed }}
-    steps:
-      - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
-        with:
-          fetch-depth: 2
-          # Disable unsafe fetch options
-          persist-credentials: false
-
       - name: Check RO
+        id: verify
         shell: bash
         env:
           BASH_ENV: /dev/null
         run: |
           set -euo pipefail
+
+          # Defensive git config (safe even without checkout)
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
-
-          origin_url="$(git remote get-url origin || true)"
 
           echo "=== Context diagnostics ==="
           echo "github.repository=${{ github.repository }}"
@@ -77,13 +71,28 @@ jobs:
           echo "github.base_ref=${{ github.base_ref }}"
           echo "github.head_ref=${{ github.head_ref }}"
           echo "github.actor=${{ github.actor }}"
-          echo "origin_url=${origin_url}"
 
-          # Derived context
-          if [[ "${{ github.repository }}" != "${{ github.event.pull_request.head.repo.full_name || '' }}" ]]; then
-            echo "Context: fork PR detected (head repo differs)"
+          trusted=false
+          sanitized=true
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            fork="${{ github.event.pull_request.head.repo.fork }}"
+            head_repo="${{ github.event.pull_request.head.repo.full_name }}"
+            base_repo="${{ github.repository }}"
+
+            echo "PR head repo: $head_repo"
+            echo "PR base repo: $base_repo"
+            echo "PR fork: $fork"
+
+            if [[ "$fork" == "false" && "$head_repo" == "$base_repo" ]]; then
+              trusted=true
+              echo "Context: same-repo PR (trusted)"
+            else
+              echo "Context: fork PR detected — running in sanitized mode"
+            fi
           else
-            echo "Context: same-repo PR or direct branch"
+            trusted=true
+            echo "Context: non-PR event (trusted)"
           fi
 
           if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
@@ -94,22 +103,18 @@ jobs:
             echo "Context: running on pull request ref"
           fi
 
-          echo "=== Origin enforcement ==="
+          echo "=== Sanitization state ==="
+          echo "trusted_origin=$trusted"
+          echo "sanitized_context=$sanitized"
 
-          expected="https://github.com/${{ github.repository }}.git"
-          expected_nogit="${expected%.git}"
-          iccdev_ssh="git@github.com:InternationalColorConsortium/iccDEV.git"
+          echo "trusted_origin=$trusted" >> "$GITHUB_OUTPUT"
+          echo "sanitized_context=$sanitized" >> "$GITHUB_OUTPUT"
 
-          if [[ "$origin_url" == "$expected" || "$origin_url" == "$expected_nogit" ]]; then
-            echo "Origin OK: matches repository HTTPS URL"
-          elif [[ "${{ github.repository }}" == "InternationalColorConsortium/iccDEV" && "$origin_url" == "$iccdev_ssh" ]]; then
-            echo "Origin OK: iccDEV SSH origin allowed for canonical repo"
-          else
-            echo "Origin REJECTED: unexpected origin URL" >&2
-            echo "src_changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
+      - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
+        with:
+          fetch-depth: 2
+          # Disable unsafe fetch options
+          persist-credentials: false
 
       - id: diffcheck
         name: diffcheck for file changes
