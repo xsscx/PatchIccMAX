@@ -1,84 +1,101 @@
 ###############################################################
 #
-# Copyright (©) 2025 International Color Consortium.
-#                 All rights reserved.
-#                 https://color.org
-#
-# Intent: Static code analysis & linting
-#
-# Last Updated: 12-DEC-2025 1400Z by David Hoyt 
-#
-# Note: This lint action needs a scope & purpose
-#       Currently some filler & reporting from templates
+## Copyright (©) 2025 International Color Consortium. 
+##                 All rights reserved. 
+##                 https://color.org
 #
 #
+## Intent: iccDEV ci-pr-action
+#
+## Last Updated: 12-DEC-2025 1445Z by David Hoyt 
+##               Add ci-pr-lint to ci-pr-action
+#                
 #
 #
+#  Note: We continue to monitor the ci-pr- labels for issues
+#        Add TODO Issues with Comments, Suggestions & Feedback
 #
 #
 #
 ###############################################################
 
-name: "ci-pr-lint"
+name: "ci-pr-action"
+
+permissions:
+  contents: read
+  pull-requests: read
+  # Avoid unnecessary permissions; do not add write permissions.
 
 on:
+  workflow_dispatch:
   workflow_call:
-    inputs:
-      ubuntu-version:
-        required: false
-        type: string
+  pull_request:
+    branches:
+      - master
+      
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+concurrency:
+  group: "ci-pr-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
+  cancel-in-progress: true
 
 jobs:
-  lint:
-    name: lint
+  detect-src:
+    name: 🧭 iccDEV PR Init
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     permissions:
       contents: read
-
-    env:
-      BASH_ENV: /dev/null
-
+      pull-requests: read
+    outputs:
+      src_changed: ${{ steps.diffcheck.outputs.src_changed }}
     steps:
+
       - name: Check RO
-        id: verify_origin
+        id: verify
         shell: bash
+        env:
+          BASH_ENV: /dev/null
         run: |
           set -euo pipefail
 
-          # Default: untrusted
           trusted=false
+          sanitized=false
 
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            fork="${{ github.event.pull_request.head.repo.fork }}"
             head_repo="${{ github.event.pull_request.head.repo.full_name }}"
             base_repo="${{ github.repository }}"
-            fork="${{ github.event.pull_request.head.repo.fork }}"
 
             if [[ "$fork" == "false" && "$head_repo" == "$base_repo" ]]; then
               trusted=true
+              sanitized=true
+            else
+              # Fork PR: allowed, sanitized only
+              trusted=false
+              sanitized=true
             fi
           else
             # Non-PR events from same repo
             trusted=true
+            sanitized=true
           fi
 
           echo "trusted_origin=$trusted" >> "$GITHUB_OUTPUT"
+          echo "sanitized_context=$sanitized" >> "$GITHUB_OUTPUT"
 
-          if [[ "$trusted" != "true" ]]; then
-            echo "::error::Untrusted workflow caller / forked origin"
-            exit 1
-          fi
-
-      # ------------------------------------------------------------
-      # Checkout following Check RO
-      # ------------------------------------------------------------
-      - name: Checkout repository
-        uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
+      - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
+        if: steps.verify.outputs.trusted_origin == 'true'
         with:
+          fetch-depth: 2
           persist-credentials: false
-          fetch-depth: 0
 
-      - name: Set up Git anonymous identity
+      - id: diffcheck
+        name: diffcheck for file changes
+        if: steps.verify.outputs.trusted_origin == 'true'
         shell: bash
         env:
          BASH_ENV: /dev/null
@@ -86,289 +103,319 @@ jobs:
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
-          
-          # Clear the in-shell GITHUB_TOKEN
+
           unset GITHUB_TOKEN || true
 
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "GitHub Actions"
-
-      - name: Verify RO
-        id: origin
-        shell: bash
-        env:
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global credential.helper ""
-
-          origin_url="$(git remote get-url origin || true)"
-          echo "Remote origin: $origin_url"
-
-          # Expected primary origin is the current repository.
-          expected_https="https://github.com/${GITHUB_REPOSITORY}.git"
-          expected_https_nogit="${expected_https%.git}"
-
-          # Secondary trusted origin for cross-repo work:
-          # InternationalColorConsortium/iccDEV is trusted for this workflow's context.
-          trusted_ssh_iccdev="git@github.com:InternationalColorConsortium/iccDEV.git"
-
-          trusted_origin=false
-
-          if [ "$origin_url" = "$expected_https" ] \
-             || [ "$origin_url" = "$expected_https_nogit" ] \
-             || [ "$origin_url" = "$trusted_ssh_iccdev" ]; then
-            trusted_origin=true
-          fi
-
-          echo "trusted_origin=$trusted_origin" >> "$GITHUB_OUTPUT"
-
-          if [ "$trusted_origin" != "true" ]; then
-            echo "Origin URL mismatch:" >&2
-            echo "  got:      $origin_url" >&2
-            echo "  expected: $expected_https OR $expected_https_nogit OR $trusted_ssh_iccdev" >&2
-            # Do not treat this as a hard failure, but signal downstream steps to skip.
-            exit 0
-          fi
-      - name: Install Linux dependencies
-        if: ${{ steps.origin.outputs.trusted_origin == 'true' }}
-        shell: bash
-        env:
-         BASH_ENV: /dev/null
-        run: |
-          set -euo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global credential.helper ""
-          
-          # Clear the in-shell GITHUB_TOKEN
-          unset GITHUB_TOKEN || true
-
-          sudo apt-get update -y
-          sudo apt-get install -y --no-install-recommends \
-            cppcheck \
-            clang-format \
-            build-essential \
-            cmake \
-            git \
-            pkg-config \
-            gcc \
-            g++ \
-            clang \
-            clang-tools \
-            libpng-dev \
-            libxml2 \
-            libxml2-dev \
-            libtiff-dev \
-            nlohmann-json3-dev \
-            libwxgtk3.2-dev \
-            wx-common \
-            python3 \
-            python3-pip \
-            curl \
-            llvm \
-            zsh
-
-      - name: Detect modified source files
-        id: diff
-        if: ${{ steps.origin.outputs.trusted_origin == 'true' }}
-        shell: bash --noprofile --norc {0}
-        run: |
-          set -euo pipefail
-
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global credential.helper ""
-
-          # Clear the in-shell GITHUB_TOKEN to avoid accidental use.
-          unset GITHUB_TOKEN || true
           git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
 
-          # Determine base ref; default to master if unavailable (e.g., workflow_dispatch)
-          base_ref="${{ github.base_ref }}"
-          if [ -z "$base_ref" ]; then
-            base_ref="master"
-          fi
-
-          # --- filename list (null-delimited) ---
-          git diff --name-only "origin/${base_ref}"...HEAD \
-            | grep -Ei '\.(cpp|cxx|cc|h|hpp)$' \
-            | tr '\n' '\0' > changed_files.txt || true
-
-          # If grep finds nothing, changed_files.txt may be empty
-          if [ ! -s changed_files.txt ]; then
-            changed_file_count=0
-          else
-            changed_file_count="$(xargs -0 -n1 < changed_files.txt | wc -l | tr -d '[:space:]')"
-          fi
-
-          if [ "$changed_file_count" -eq 0 ]; then
-            echo "no_src_changes=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "no_src_changes=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Cmake Configure & Build
-        if: ${{ steps.origin.outputs.trusted_origin == 'true' && steps.diff.outputs.no_src_changes == 'false' }}
-        shell: bash --noprofile --norc {0}
-        env:
-         BASH_ENV: /dev/null
-        run: |
-          set -euo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global credential.helper ""
-          
-          # Clear the in-shell GITHUB_TOKEN
-          unset GITHUB_TOKEN || true
-          mkdir -p lint_reports Build
-          echo "Configuring build for clang-tidy..."
-          cmake -S Build/Cmake -B Build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-          cmake --build Build -- -j"$(nproc)"
-
-      - name: Run cppcheck
-        if: ${{ steps.origin.outputs.trusted_origin == 'true' && steps.diff.outputs.no_src_changes == 'false' }}
-        shell: bash --noprofile --norc {0}
-        env:
-         BASH_ENV: /dev/null
-        run: |
-          set -euo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global credential.helper ""
-          
-          # Clear the in-shell GITHUB_TOKEN
-          unset GITHUB_TOKEN || true
-
-          echo "Running cppcheck (project mode)..."
-          : > lint_reports/cppcheck.txt
-          cppcheck \
-            --project=Build/compile_commands.json \
-            --enable=warning,performance,portability \
-            --std=c++17 \
-            --suppress=toomanyconfigs \
-            --template='{file}:{line}:{severity}:{id}:{message}' \
-            --output-file=lint_reports/cppcheck.txt || true
-
-      - name: Run clang-tidy
-        if: ${{ steps.origin.outputs.trusted_origin == 'true' && steps.diff.outputs.no_src_changes == 'false' }}
-        shell: bash --noprofile --norc {0}
-        env:
-         BASH_ENV: /dev/null
-        run: |
-          set -euo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global credential.helper ""
-          
-          # Clear the in-shell GITHUB_TOKEN
-          unset GITHUB_TOKEN || true
-          # --- clang-tidy ---
-          : > lint_reports/clang_tidy.txt
-          if [ -s changed_files.txt ]; then
-            xargs -0 run-clang-tidy \
-              -p Build \
-              -checks='modernize-*,readability-*,cppcoreguidelines-*,clang-analyzer-core.*,clang-analyzer-security.*,clang-analyzer-alpha.core.*,clang-analyzer-alpha.security.*' \
-              < changed_files.txt \
-              | tee lint_reports/clang_tidy.txt || true
-          else
-            echo "No files listed in changed_files.txt; skipping clang-tidy." >> lint_reports/clang_tidy.txt
-          fi
-
-      - name: Run clang-format
-        if: ${{ steps.origin.outputs.trusted_origin == 'true' && steps.diff.outputs.no_src_changes == 'false' }}
-        shell: bash --noprofile --norc {0}
-        env:
-         BASH_ENV: /dev/null
-        run: |
-          set -euo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global credential.helper ""
-          
-          # Clear the in-shell GITHUB_TOKEN
-          unset GITHUB_TOKEN || true
-          # Optional: clang-format check (uncomment to enable)
-          echo "Running clang-format on modified source files..."
-          mkdir -p lint_reports
-          : > lint_reports/clang_format.txt
-      
-          # Find all C/C++ files under the repo and check formatting
-          files=$(git ls-files '*.c' '*.cc' '*.cxx' '*.cpp' '*.h' '*.hpp' || true)
-          if [ -z "$files" ]; then
-            echo "No C/C++ files found; skipping clang-format." >> lint_reports/clang_format.txt
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "src_changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-      - name: Skip lint
-        if: ${{ steps.origin.outputs.trusted_origin != 'true' || steps.diff.outputs.no_src_changes == 'true' }}
-        shell: bash --noprofile --norc {0}
+          base_ref="${{ github.base_ref }}"
+
+          case "$base_ref" in master) ;; *)
+              echo "src_changed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+              ;;
+          esac
+
+          git -c protocol.version=2 fetch --no-tags origin "${base_ref}" --depth=1
+
+          if git diff --name-only "origin/${base_ref}"...HEAD |
+             grep -Ei '\.(cpp|cxx|cc|c|h|hpp|hh)$' >/dev/null; then
+            echo "src_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "src_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+ 
+      - name: iccDEV PR Summary
+        shell: bash
         env:
-         BASH_ENV: /dev/null
+          BASH_ENV: /dev/null
         run: |
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
-          
-          # Clear the in-shell GITHUB_TOKEN
           unset GITHUB_TOKEN || true
 
-          mkdir -p lint_reports
+          # ================================
+          #   ICCDEV – Welcome Banner
+          # ================================
+          {
+            echo "<div align=\"center\">"
+            echo "  <a href=\"https://color.org\" target=\"_blank\">"
+            echo "    <img src=\"https://color.org/system/images/ICC_logo_text.gif\" alt=\"ICC Logo\" width=\"320\">"
+            echo "  </a>"
+            echo "  <h3>Welcome to the ICC Development Workflow</h3>"
+            echo "</div>"
+            echo ""        
+            echo "## 🧩 iccDEV PR Summary"
+            echo "  ⏱️ <em>Date:</em> $(date -u '+%Y-%m-%d %H:%M:%S UTC')"     
+            echo ""       
+            echo "  <strong>PRs Are Typically Reviewed Within 14 Days</strong><br>"            
+            echo ""
+            echo "## ✔️ PR Checklist"
+            echo ""
+            echo "- [x] You have followed the [guidelines for contributing](https://github.com/InternationalColorConsortium/iccDEV/blob/master/CONTRIBUTING.md)"
+            echo "- [x] Commits follow GitHub’s [acceptable use policy](https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies)"
+            echo "- [x] You checked for duplicate [pull requests](https://github.com/InternationalColorConsortium/iccDEV/pulls)"
+            echo "- [x] You built your PR locally using the official [Build Instructions](https://github.com/InternationalColorConsortium/iccDEV/blob/master/docs/build.md)"
+            echo "- [x] You included Unit Tests and/or Issue reproduction steps + fix"
+            echo ""
+            echo "If you have questions, contact a listed [Maintainer](https://github.com/InternationalColorConsortium/iccDEV/tree/master/.github/CODEOWNERS)."
+            echo ""
+            echo "## 🛡️ Legal Requirements"
+            echo ""
+            echo "All contributions to ICC open-source projects follow:"
+            echo "- The [International Color Consortium IP Policy](https://www.color.org/iccip.xalter)"
+            echo "- Open-source software best practices"
+            echo "- Contributor License Agreement (CLA) requirements"
+            echo ""
+            echo "### 📄 Contributor License Agreements"
+            echo "Before contributing code, you must complete a **Contributor License Agreement (CLA)**."
+            echo ""
+            echo "- [🧍 Personal CLA](https://github.com/InternationalColorConsortium/.github/blob/main/docs/CLA.md)"
+            echo "- [🏢 Corporate CLA](https://github.com/InternationalColorConsortium/.github/blob/main/docs/icc-individual-cla.pdf)"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
 
-          if [ "${{ steps.origin.outputs.trusted_origin }}" != "true" ]; then
-            echo "Origin not trusted; skipping lint." > lint_reports/cppcheck.txt
-          else
-            echo "No .cpp/.h changes detected; skipping lint." > lint_reports/cppcheck.txt
-          fi
+          # ================================
+          #   Branch / PR Context
+          # ================================
+          echo "## 📌 PR / Branch Context" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "HEAD_REF:  ${GITHUB_HEAD_REF:-<none>}" >> "$GITHUB_STEP_SUMMARY"
+          echo "BASE_REF:  ${GITHUB_BASE_REF:-<none>}" >> "$GITHUB_STEP_SUMMARY"
+          echo "GITHUB_REF: $GITHUB_REF" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
 
-          : > lint_reports/clang_tidy.txt
-          # : > lint_reports/clang_format.txt  # if clang-format is enabled above
+          # ================================
+          #   Recent Commits
+          # ================================
+          echo "## 📝 Recent Git Commits" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          git --no-pager log -n 5 --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%nMessage: %s%n" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload lint reports
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
-        with:
-          name: lint-reports
-          path: lint_reports/
-
-      - name: Generate GitHub summary
-        if: always()
-        shell: bash --noprofile --norc {0}
+  setup:
+    name: 🧭 iccDEV PR Setup
+    runs-on: ubuntu-latest
+    needs: [detect-src]
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: iccDEV PR Detail
+        shell: bash
         env:
-         BASH_ENV: /dev/null
+          BASH_ENV: /dev/null
         run: |
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
-          
-          # Clear the in-shell GITHUB_TOKEN
-          unset GITHUB_TOKEN || true
+          echo "============================"
+          echo "   iccDEV PR Build & Check  "
+          echo "============================"
+          echo ""
+          echo "International Color Consortium"
+          echo "Thank you for opening a PR"
+          echo ""
+          echo "Trigger:   ${{ github.event_name }}"
+          echo "Repository:${{ github.repository }}"
+          echo "Branch:    ${{ github.ref_name }}"
+          echo "Commit:    ${{ github.sha }}"
+          echo "Actor:     ${{ github.actor }}"
+          echo "Run ID:    ${{ github.run_id }}"
+          echo "Start time: $(date)"
+          echo "Source changed: ${{ needs.detect-src.outputs.src_changed }}"
+          echo ""
 
-          echo "## Lint Report Summary" >> "$GITHUB_STEP_SUMMARY"
 
-          trusted_origin="${{ steps.origin.outputs.trusted_origin }}"
-          no_src_changes="${{ steps.diff.outputs.no_src_changes || 'true' }}"
+      - name: Write Summary to GitHub UI
+        shell: bash
+        env:
+          BASH_ENV: /dev/null
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+          {
+            echo "## 🧭 iccDEV Init Complete"
+            echo ""
+            echo "**Workflow:** ci-pr-action"
+            echo "- **Triggered by:** \`${{ github.actor }}\`"
+            echo "- **Event type:** \`${{ github.event_name }}\`"
+            echo "- **Branch:** \`${{ github.ref_name }}\`"
+            echo "- **Commit:** \`${{ github.sha }}\`"
+            echo "- **Run ID:** \`${{ github.run_id }}\`"
+            echo "- **Session start:** $(date)"
+            echo "- **Source changed:** \`${{ needs.detect-src.outputs.src_changed }}\`"
+            echo ""
+            echo "✅ CI environment successfully initialized and ready for subsequent jobs."
+          } >> "$GITHUB_STEP_SUMMARY"
 
-          if [ "$trusted_origin" != "true" ]; then
-            echo "Skipped — repository origin was not trusted." >> "$GITHUB_STEP_SUMMARY"
-          elif [ "$no_src_changes" = "true" ]; then
-            echo "Skipped — no modified .cpp/.cxx/.cc/.h/.hpp files detected." >> "$GITHUB_STEP_SUMMARY"
-          elif [ -s lint_reports/cppcheck.txt ]; then
-            echo "### cppcheck (last 30 lines)" >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            tail -n 30 lint_reports/cppcheck.txt >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
+  validate-inputs:
+    name: 🧭 iccDEV PR Runner Setup
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    needs: [setup, detect-src]
+
+    outputs:
+      os-list: ${{ steps.v.outputs.os }}
+      compilers: ${{ steps.v.outputs.comp }}
+      build-types: ${{ steps.v.outputs.bt }}
+
+    steps:
+      - name: Define Valid Build Inputs
+        id: v
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # --- Define for child workflows ---
+          # Windows is Hardcoded - TODO
+          allowed_os=( "ubuntu-latest" "macos-latest" )
+          allowed_comp=( "gcc" "clang" )
+          allowed_bt=( "Release" "Debug" )
+          # --- Define for child workflows ---
+          # Windows is Hardcoded - TODO
+          os_raw='["ubuntu-latest","macos-latest"]'
+          comp_raw='["gcc","clang"]'
+          bt_raw='["Release","Debug"]'
+
+          validate() {
+            local json="$1"; shift
+            local allowed=("$@")
+
+            readarray -t vals < <(jq -r '.[]' <<<"$json")
+
+            for v in "${vals[@]}"; do
+              local ok=0
+              for a in "${allowed[@]}"; do
+                [[ "$v" == "$a" ]] && ok=1
+              done
+              if [[ $ok -eq 0 ]]; then
+                echo "Invalid matrix value: $v" >&2
+                exit 1
+              fi
+            done
+          }
+
+          validate "$os_raw"   "${allowed_os[@]}"
+          validate "$comp_raw" "${allowed_comp[@]}"
+          validate "$bt_raw"   "${allowed_bt[@]}"
+
+          echo "os=$os_raw"   >> "$GITHUB_OUTPUT"
+          echo "comp=$comp_raw" >> "$GITHUB_OUTPUT"
+          echo "bt=$bt_raw"     >> "$GITHUB_OUTPUT"
+
+
+  unix-ci:
+    if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
+    name: 🧱 Unix Build & Test Profiles
+    needs: [setup, detect-src, validate-inputs]
+    uses: ./.github/workflows/ci-pr-unix.yml
+    # pass minimized inputs
+    with:
+      # only these, bail if not defined
+      os-list: ${{ needs.validate-inputs.outputs.os-list }}
+      build-types: ${{ needs.validate-inputs.outputs.build-types }}
+      compilers: ${{ needs.validate-inputs.outputs.compilers }}
+
+  scan-build:
+    if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
+    name: 🔍 Scan-Build
+    needs: [unix-ci, detect-src]
+    uses: ./.github/workflows/ci-pr-unix-sb.yml
+    with:
+      build-type: 'Release'
+
+  cppcheck-linters:
+    if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
+    name: 🧪 Style Checks
+    needs: [unix-ci, win-ci, detect-src]
+    uses: ./.github/workflows/ci-pr-lint.yml
+    with:
+      ubuntu-version: 'ubuntu-latest'
+
+  win-ci:
+    if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
+    name: 🧱 Windows Build & Test Profiles
+    needs: [setup, detect-src, validate-inputs]
+    uses: ./.github/workflows/ci-pr-win.yml
+    
+  finalize:
+    name: 🧾 iccDEV PR Summary
+    runs-on: ubuntu-latest
+    needs:
+      - detect-src
+      - unix-ci
+      - scan-build
+      - cppcheck-linters
+      - win-ci
+    if: always()
+    steps:
+      - name: 🧭 iccDEV PR Summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+
+          {
+            echo "<div align=\"center\">"
+            echo "  <a href=\"https://color.org\" target=\"_blank\">"
+            echo "    <img src=\"https://color.org/system/images/ICC_logo_text.gif\" alt=\"ICC Logo\" width=\"320\">"
+            echo "  </a>"
+            echo "</div>"
+            echo ""
+            echo "## 🧩 iccDEV PR Summary"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+            
+          if [ "${{ needs.detect-src.outputs.src_changed }}" != "true" ]; then
+            echo "- 💤 Non-source PR detected — build, analysis, and linting skipped." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### ✅ Overall Result: SUCCESS (Bypass: Non-Source Change)" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ "${{ needs.unix-ci.result }}" == "success" ]; then
+            echo "- ✅ Unix Build + Tests: Passed" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "✅ No cppcheck warnings or errors detected." >> "$GITHUB_STEP_SUMMARY"
+            echo "- ❌ Unix Build + Tests: ${{ needs.unix-ci.result }}" >> "$GITHUB_STEP_SUMMARY"
           fi
 
-          if [ -s lint_reports/clang_tidy.txt ]; then
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "### clang-tidy (last 30 lines)" >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            tail -n 30 lint_reports/clang_tidy.txt >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ needs.scan-build.result }}" == "success" ]; then
+            echo "- ✅ Clang Static Report: Available" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- ❌ Clang Static Analysis: ${{ needs.scan-build.result }}" >> "$GITHUB_STEP_SUMMARY"
           fi
 
-          if [ -s lint_reports/clang_format.txt ]; then
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "### clang-format (last 30 lines)" >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            tail -n 30 lint_reports/clang_format.txt >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ needs.cppcheck-linters.result }}" == "success" ]; then
+            echo "- ✅ Cppcheck + Linter Report: Available" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- ❌ Cppcheck + Linters: ${{ needs.cppcheck-linters.result }}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "${{ needs.win-ci.result }}" == "success" ]; then
+            echo "- ✅ Windows Build + Tests: Passed" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- ❌ Windows Build + Tests: ${{ needs.win-ci.result }}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Uploaded artifacts for all stages" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "### ✅ Overall Result: SUCCESS" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### ❌ Overall Result: FAILURE" >> "$GITHUB_STEP_SUMMARY"
           fi
