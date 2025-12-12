@@ -55,50 +55,20 @@ jobs:
       src_changed: ${{ steps.diffcheck.outputs.src_changed }}
 
     steps:
-      # ------------------------------------------------------------
-      # 1. Checkout (must have full history for reliable diff)
-      # ------------------------------------------------------------
       - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
         with:
           fetch-depth: 2
           persist-credentials: false
 
-      # ------------------------------------------------------------
-      # 2. Context / trust check
-      # ------------------------------------------------------------
       - name: Check RO
         shell: bash
         env:
           BASH_ENV: /dev/null
         run: |
           set -euo pipefail
-
           git config --add safe.directory "$PWD"
           git config --global credential.helper ""
 
-          trusted=false
-          sanitized=true
-
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            fork="${{ github.event.pull_request.head.repo.fork }}"
-            head_repo="${{ github.event.pull_request.head.repo.full_name }}"
-            base_repo="${{ github.repository }}"
-
-            if [[ "$fork" == "false" && "$head_repo" == "$base_repo" ]]; then
-              trusted=true
-              sanitized=false
-            fi
-          else
-            trusted=true
-            sanitized=false
-          fi
-
-          echo "trusted_origin=$trusted"
-          echo "sanitized_context=$sanitized"
-
-      # ------------------------------------------------------------
-      # 3. Diff check 
-      # ------------------------------------------------------------
       - name: diffcheck for file changes
         id: diffcheck
         shell: bash
@@ -110,18 +80,17 @@ jobs:
           git config --add safe.directory "$PWD"
           unset GITHUB_TOKEN || true
 
-          # Only PRs have a meaningful base_ref
           if [[ "${{ github.event_name }}" != "pull_request" ]]; then
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           base_ref="${{ github.base_ref }}"
+          base_sha="${{ github.event.pull_request.base.sha }}"
 
-          # Fetch base branch explicitly
-          git -c protocol.version=2 fetch --no-tags origin "$base_ref"
+          # fetch the base commit to restore merge-base
+          git -c protocol.version=2 fetch --no-tags origin "$base_sha"
 
-          # Detect C/C++ source changes
           if git diff --name-only "origin/$base_ref"...HEAD | \
              grep -Ei '\.(c|cc|cxx|cpp|h|hh|hpp)$' >/dev/null; then
             echo "src_changed=true" >> "$GITHUB_OUTPUT"
@@ -135,7 +104,7 @@ jobs:
           BASH_ENV: /dev/null
         run: |
           set -euo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --add safe.directory "$PWD"
           git config --global credential.helper ""
           unset GITHUB_TOKEN || true
 
@@ -417,5 +386,6 @@ jobs:
           else
             echo "### ❌ Overall Result: FAILURE" >> "$GITHUB_STEP_SUMMARY"
           fi
+
 
 
