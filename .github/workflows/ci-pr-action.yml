@@ -53,64 +53,6 @@ jobs:
     outputs:
       src_changed: ${{ steps.diffcheck.outputs.src_changed }}
     steps:
-      - name: Check RO
-        id: verify
-        shell: bash
-        env:
-          BASH_ENV: /dev/null
-        run: |
-          set -euo pipefail
-
-          # Defensive git config (safe even without checkout)
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global credential.helper ""
-
-          echo "=== Context diagnostics ==="
-          echo "github.repository=${{ github.repository }}"
-          echo "github.event_name=${{ github.event_name }}"
-          echo "github.ref=${{ github.ref }}"
-          echo "github.base_ref=${{ github.base_ref }}"
-          echo "github.head_ref=${{ github.head_ref }}"
-          echo "github.actor=${{ github.actor }}"
-
-          trusted=false
-          sanitized=true
-
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            fork="${{ github.event.pull_request.head.repo.fork }}"
-            head_repo="${{ github.event.pull_request.head.repo.full_name }}"
-            base_repo="${{ github.repository }}"
-
-            echo "PR head repo: $head_repo"
-            echo "PR base repo: $base_repo"
-            echo "PR fork: $fork"
-
-            if [[ "$fork" == "false" && "$head_repo" == "$base_repo" ]]; then
-              trusted=true
-              echo "Context: same-repo PR (trusted)"
-            else
-              echo "Context: fork PR detected — running in sanitized mode"
-            fi
-          else
-            trusted=true
-            echo "Context: non-PR event (trusted)"
-          fi
-
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            echo "Context: running on master branch"
-          elif [[ "${{ github.ref }}" == refs/heads/* ]]; then
-            echo "Context: running on feature branch"
-          elif [[ "${{ github.ref }}" == refs/pull/* ]]; then
-            echo "Context: running on pull request ref"
-          fi
-
-          echo "=== Sanitization state ==="
-          echo "trusted_origin=$trusted"
-          echo "sanitized_context=$sanitized"
-
-          echo "trusted_origin=$trusted" >> "$GITHUB_OUTPUT"
-          echo "sanitized_context=$sanitized" >> "$GITHUB_OUTPUT"
-
       - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
         with:
           fetch-depth: 2
@@ -451,4 +393,3 @@ jobs:
           else
             echo "### ❌ Overall Result: FAILURE" >> "$GITHUB_STEP_SUMMARY"
           fi
-
