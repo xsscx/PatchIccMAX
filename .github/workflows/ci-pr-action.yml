@@ -7,7 +7,7 @@
 #
 ## Intent: iccDEV ci-pr-action
 #
-## Last Updated: 12-DEC-2025 1330Z by David Hoyt 
+## Last Updated: 12-DEC-2025 1445Z by David Hoyt 
 ##               Add ci-pr-lint to ci-pr-action
 #                
 #
@@ -53,66 +53,49 @@ jobs:
     outputs:
       src_changed: ${{ steps.diffcheck.outputs.src_changed }}
     steps:
-      - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
-        with:
-          fetch-depth: 2
-          # Disable unsafe fetch options
-          persist-credentials: false
 
       - name: Check RO
+        id: verify
         shell: bash
         env:
           BASH_ENV: /dev/null
         run: |
           set -euo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global credential.helper ""
 
-          origin_url="$(git remote get-url origin || true)"
+          trusted=false
+          sanitized=false
 
-          echo "=== Context diagnostics ==="
-          echo "github.repository=${{ github.repository }}"
-          echo "github.event_name=${{ github.event_name }}"
-          echo "github.ref=${{ github.ref }}"
-          echo "github.base_ref=${{ github.base_ref }}"
-          echo "github.head_ref=${{ github.head_ref }}"
-          echo "github.actor=${{ github.actor }}"
-          echo "origin_url=${origin_url}"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            fork="${{ github.event.pull_request.head.repo.fork }}"
+            head_repo="${{ github.event.pull_request.head.repo.full_name }}"
+            base_repo="${{ github.repository }}"
 
-          # Derived context
-          if [[ "${{ github.repository }}" != "${{ github.event.pull_request.head.repo.full_name || '' }}" ]]; then
-            echo "Context: fork PR detected (head repo differs)"
+            if [[ "$fork" == "false" && "$head_repo" == "$base_repo" ]]; then
+              trusted=true
+              sanitized=true
+            else
+              # Fork PR: allowed, sanitized only
+              trusted=false
+              sanitized=true
+            fi
           else
-            echo "Context: same-repo PR or direct branch"
+            # Non-PR events from same repo
+            trusted=true
+            sanitized=true
           fi
 
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            echo "Context: running on master branch"
-          elif [[ "${{ github.ref }}" == refs/heads/* ]]; then
-            echo "Context: running on feature branch"
-          elif [[ "${{ github.ref }}" == refs/pull/* ]]; then
-            echo "Context: running on pull request ref"
-          fi
+          echo "trusted_origin=$trusted" >> "$GITHUB_OUTPUT"
+          echo "sanitized_context=$sanitized" >> "$GITHUB_OUTPUT"
 
-          echo "=== Origin enforcement ==="
-
-          expected="https://github.com/${{ github.repository }}.git"
-          expected_nogit="${expected%.git}"
-          iccdev_ssh="git@github.com:InternationalColorConsortium/iccDEV.git"
-
-          if [[ "$origin_url" == "$expected" || "$origin_url" == "$expected_nogit" ]]; then
-            echo "Origin OK: matches repository HTTPS URL"
-          elif [[ "${{ github.repository }}" == "InternationalColorConsortium/iccDEV" && "$origin_url" == "$iccdev_ssh" ]]; then
-            echo "Origin OK: iccDEV SSH origin allowed for canonical repo"
-          else
-            echo "Origin REJECTED: unexpected origin URL" >&2
-            echo "src_changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
+      - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
+        if: steps.verify.outputs.trusted_origin == 'true'
+        with:
+          fetch-depth: 2
+          persist-credentials: false
 
       - id: diffcheck
         name: diffcheck for file changes
+        if: steps.verify.outputs.trusted_origin == 'true'
         shell: bash
         env:
          BASH_ENV: /dev/null
@@ -120,42 +103,33 @@ jobs:
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
-          
-          # Clear the in-shell GITHUB_TOKEN
+
           unset GITHUB_TOKEN || true
 
           git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
 
-          # If not a pull_request event (e.g., workflow_dispatch or workflow_call),
-          # skip source diff checking and mark as non-source change.
           if [ "${{ github.event_name }}" != "pull_request" ]; then
-            echo "Non-PR event (${{ github.event_name }}) — skipping source diff check" >&2
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           base_ref="${{ github.base_ref }}"
 
-          # UCI Check - Verify Remote Origin (opt out of malicious $base_ref)
-          case "$base_ref" in master)
-              ;;
-            *)
-              echo "Ref blocked or unsupported: $base_ref" >&2
+          case "$base_ref" in master) ;; *)
               echo "src_changed=false" >> "$GITHUB_OUTPUT"
               exit 0
               ;;
           esac
 
-          # Short fetch, single ref; avoid tags and deep history
           git -c protocol.version=2 fetch --no-tags origin "${base_ref}" --depth=1
 
-          # Case-insensitive extension match (c/h/cpp variants)
           if git diff --name-only "origin/${base_ref}"...HEAD |
              grep -Ei '\.(cpp|cxx|cc|c|h|hpp|hh)$' >/dev/null; then
             echo "src_changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
           fi
+
  
       - name: iccDEV PR Summary
         shell: bash
