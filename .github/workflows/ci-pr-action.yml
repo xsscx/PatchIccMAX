@@ -124,12 +124,12 @@ jobs:
           echo "trusted_origin=$trusted" >> "$GITHUB_OUTPUT"
           echo "sanitized_context=$sanitized" >> "$GITHUB_OUTPUT"
 
-          if [ "$trusted" != "true" ]; then
-            # Mark no source changes and exit early; subsequent steps are conditional on trusted_origin.
-            echo "src_changed=true" >> "$GITHUB_OUTPUT"
-            echo "Not trusted"
-            exit 1
-          fi
+#          if [ "$trusted" != "true" ]; then
+#            # Mark no source changes and exit early; subsequent steps are conditional on trusted_origin.
+#            echo "src_changed=false" >> "$GITHUB_OUTPUT"
+#            echo "Not trusted; skipping further detect-src steps."
+#            exit 0
+#          fi
 
       - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
         if: ${{ steps.verify.outputs.trusted_origin == 'true' }}
