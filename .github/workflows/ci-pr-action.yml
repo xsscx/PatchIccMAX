@@ -80,18 +80,12 @@ jobs:
           git config --add safe.directory "$PWD"
           unset GITHUB_TOKEN || true
 
-          if [[ "${{ github.event_name }}" != "pull_request" ]]; then
-            echo "src_changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          base_ref="${{ github.base_ref }}"
           base_sha="${{ github.event.pull_request.base.sha }}"
+          head_sha="${{ github.event.pull_request.head.sha }}"
 
-          # fetch the base commit to restore merge-base
-          git -c protocol.version=2 fetch --no-tags origin "$base_sha"
+          git fetch --no-tags origin "$base_sha" "$head_sha"
 
-          if git diff --name-only "origin/$base_ref"...HEAD | \
+          if git diff --name-only "$base_sha" "$head_sha" | \
              grep -Ei '\.(c|cc|cxx|cpp|h|hh|hpp)$' >/dev/null; then
             echo "src_changed=true" >> "$GITHUB_OUTPUT"
           else
@@ -387,6 +381,7 @@ jobs:
           else
             echo "### ❌ Overall Result: FAILURE" >> "$GITHUB_STEP_SUMMARY"
           fi
+
 
 
 
