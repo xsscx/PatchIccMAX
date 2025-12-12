@@ -7,7 +7,7 @@
 #
 ## Intent: iccDEV ci-pr-action
 #
-## Last Updated: 12-DEC-2025 1300Z by David Hoyt 
+## Last Updated: 12-DEC-2025 1330Z by David Hoyt 
 ##               Add ci-pr-lint to ci-pr-action
 #                
 #
@@ -45,7 +45,7 @@ concurrency:
 
 jobs:
   detect-src:
-    name: Gate 1 - Detect Source Changes
+    name: 🧭 iccDEV PR Init
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -59,7 +59,7 @@ jobs:
           # Disable unsafe fetch options
           persist-credentials: false
 
-      - name: UCI Check - Verify Remote Origin (opt out of malicious git configs)
+      - name: Check RO
         shell: bash
         env:
          BASH_ENV: /dev/null
@@ -124,7 +124,7 @@ jobs:
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
           fi
  
-      - name: Print PR Info
+      - name: iccDEV PR Summary
         shell: bash
         env:
           BASH_ENV: /dev/null
@@ -145,7 +145,7 @@ jobs:
             echo "  <h3>Welcome to the ICC Development Workflow</h3>"
             echo "</div>"
             echo ""        
-            echo "## 🧩 ICCDEV PR Summary"
+            echo "## 🧩 iccDEV PR Summary"
             echo "  ⏱️ <em>Date:</em> $(date -u '+%Y-%m-%d %H:%M:%S UTC')"     
             echo ""       
             echo "  <strong>PRs Are Typically Reviewed Within 14 Days</strong><br>"            
@@ -157,8 +157,6 @@ jobs:
             echo "- [x] You checked for duplicate [pull requests](https://github.com/InternationalColorConsortium/iccDEV/pulls)"
             echo "- [x] You built your PR locally using the official [Build Instructions](https://github.com/InternationalColorConsortium/iccDEV/blob/master/docs/build.md)"
             echo "- [x] You included Unit Tests and/or Issue reproduction steps + fix"
-            echo ""
-            echo "> iccDEV Maintainers will review your PR within **14 days**."
             echo ""
             echo "If you have questions, contact a listed [Maintainer](https://github.com/InternationalColorConsortium/iccDEV/tree/master/.github/CODEOWNERS)."
             echo ""
@@ -197,12 +195,12 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
   setup:
-    name: 🧭 iccDEV Init
+    name: 🧭 iccDEV PR Setup
     runs-on: ubuntu-latest
+    needs: [detect-src]
     permissions:
       contents: read
       pull-requests: read
-    needs: [detect-src]
     steps:
       - name: Display Environment Info
         shell: bash
@@ -254,7 +252,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   validate-inputs:
-    name: Gate 2 - Validate Matrix Inputs
+    name: 🧭 iccDEV PR Runner Setup
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -313,7 +311,7 @@ jobs:
 
   unix-ci:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
-    name: 🧱 Unix Matrix Build and Test
+    name: 🧱 Unix Build & Test Profiles
     needs: [setup, detect-src, validate-inputs]
     uses: ./.github/workflows/ci-pr-unix.yml
     # pass minimized inputs
@@ -325,7 +323,7 @@ jobs:
 
   scan-build:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
-    name: 🔍 Clang Scan-Build Analysis
+    name: 🔍 Scan-Build
     needs: [unix-ci, detect-src]
     uses: ./.github/workflows/ci-pr-unix-sb.yml
     with:
@@ -333,7 +331,7 @@ jobs:
 
   cppcheck-linters:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
-    name: 🧪 Cppcheck and Linters
+    name: 🧪 Style Checks
     needs: [unix-ci, win-ci, detect-src]
     uses: ./.github/workflows/ci-pr-lint.yml
     with:
@@ -341,12 +339,12 @@ jobs:
 
   win-ci:
     if: ${{ needs.detect-src.outputs.src_changed == 'true' }}
-    name: 🧱 Windows Build and Test
+    name: 🧱 Windows Build & Test Profiles
     needs: [setup, detect-src, validate-inputs]
     uses: ./.github/workflows/ci-pr-win.yml
     
   finalize:
-    name: 🧾 iccDEV PR Summary Report
+    name: 🧾 iccDEV PR Summary
     runs-on: ubuntu-latest
     needs:
       - detect-src
@@ -356,7 +354,7 @@ jobs:
       - win-ci
     if: always()
     steps:
-      - name: Generate Summary
+      - name: 🧭 iccDEV PR Summary
         shell: bash
         run: |
           set -euo pipefail
