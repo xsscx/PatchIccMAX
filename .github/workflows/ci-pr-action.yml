@@ -50,14 +50,22 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+
     outputs:
       src_changed: ${{ steps.diffcheck.outputs.src_changed }}
+
     steps:
+      # ------------------------------------------------------------
+      # 1. Checkout (must have full history for reliable diff)
+      # ------------------------------------------------------------
       - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
         with:
           fetch-depth: 2
-          # Disable unsafe fetch options
           persist-credentials: false
+
+      # ------------------------------------------------------------
+      # 2. Context / trust check
+      # ------------------------------------------------------------
       - name: Check RO
         shell: bash
         env:
@@ -65,17 +73,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Defensive git config (safe even without checkout)
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --add safe.directory "$PWD"
           git config --global credential.helper ""
-
-          echo "=== Context diagnostics ==="
-          echo "github.repository=${{ github.repository }}"
-          echo "github.event_name=${{ github.event_name }}"
-          echo "github.ref=${{ github.ref }}"
-          echo "github.base_ref=${{ github.base_ref }}"
-          echo "github.head_ref=${{ github.head_ref }}"
-          echo "github.actor=${{ github.actor }}"
 
           trusted=false
           sanitized=true
@@ -85,82 +84,51 @@ jobs:
             head_repo="${{ github.event.pull_request.head.repo.full_name }}"
             base_repo="${{ github.repository }}"
 
-            echo "PR head repo: $head_repo"
-            echo "PR base repo: $base_repo"
-            echo "PR fork: $fork"
-
             if [[ "$fork" == "false" && "$head_repo" == "$base_repo" ]]; then
               trusted=true
-              echo "Context: same-repo PR (trusted)"
-            else
-              echo "Context: fork PR detected — running in sanitized mode"
+              sanitized=false
             fi
           else
             trusted=true
-            echo "Context: non-PR event (trusted)"
+            sanitized=false
           fi
 
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            echo "Context: running on master branch"
-          elif [[ "${{ github.ref }}" == refs/heads/* ]]; then
-            echo "Context: running on feature branch"
-          elif [[ "${{ github.ref }}" == refs/pull/* ]]; then
-            echo "Context: running on pull request ref"
-          fi
-
-          echo "=== Sanitization state ==="
           echo "trusted_origin=$trusted"
           echo "sanitized_context=$sanitized"
 
-          echo "trusted_origin=$trusted" >> "$GITHUB_OUTPUT"
-          echo "sanitized_context=$sanitized" >> "$GITHUB_OUTPUT"
-
-      - id: diffcheck
-        name: diffcheck for file changes
+      # ------------------------------------------------------------
+      # 3. Diff check 
+      # ------------------------------------------------------------
+      - name: diffcheck for file changes
+        id: diffcheck
         shell: bash
         env:
-         BASH_ENV: /dev/null
+          BASH_ENV: /dev/null
         run: |
           set -euo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global credential.helper ""
-          
-          # Clear the in-shell GITHUB_TOKEN
+
+          git config --add safe.directory "$PWD"
           unset GITHUB_TOKEN || true
 
-          git show --stat --pretty=format:"Commit: %H%nAuthor: %an%nDate: %ad%n" HEAD
-
-          # If not a pull_request event (e.g., workflow_dispatch or workflow_call),
-          # skip source diff checking and mark as non-source change.
-          if [ "${{ github.event_name }}" != "pull_request" ]; then
-            echo "Non-PR event (${{ github.event_name }}) — skipping source diff check" >&2
+          # Only PRs have a meaningful base_ref
+          if [[ "${{ github.event_name }}" != "pull_request" ]]; then
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           base_ref="${{ github.base_ref }}"
 
-          # UCI Check - Verify Remote Origin (opt out of malicious $base_ref)
-          case "$base_ref" in master)
-              ;;
-            *)
-              echo "Ref blocked or unsupported: $base_ref" >&2
-              echo "src_changed=false" >> "$GITHUB_OUTPUT"
-              exit 0
-              ;;
-          esac
+          # Fetch base branch explicitly
+          git -c protocol.version=2 fetch --no-tags origin "$base_ref"
 
-          # Short fetch, single ref; avoid tags and deep history
-          git -c protocol.version=2 fetch --no-tags origin "${base_ref}" --depth=1
-
-          # Case-insensitive extension match (c/h/cpp variants)
-          if git diff --name-only "origin/${base_ref}"...HEAD |
-             grep -Ei '\.(cpp|cxx|cc|c|h|hpp|hh)$' >/dev/null; then
+          # Detect C/C++ source changes
+          if git diff --name-only "origin/$base_ref"...HEAD | \
+             grep -Ei '\.(c|cc|cxx|cpp|h|hh|hpp)$' >/dev/null; then
             echo "src_changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
           fi
- 
+
       - name: iccDEV PR Summary
         shell: bash
         env:
@@ -449,4 +417,5 @@ jobs:
           else
             echo "### ❌ Overall Result: FAILURE" >> "$GITHUB_STEP_SUMMARY"
           fi
+
 
