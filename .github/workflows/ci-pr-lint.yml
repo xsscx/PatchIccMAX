@@ -41,8 +41,8 @@ on:
 jobs:
   build-linux:
     # NOTE: Name is cosmetic; we do not trust this for security decisions.
-    name: Lint on ${{ inputs.ubuntu-version || 'ubuntu-latest' }}
-
+    # name: Lint on ${{ inputs.ubuntu-version || 'ubuntu-latest' }}
+    name: Lint
     # SECURITY: We only allow GitHub-hosted ubuntu runners,
     # and we validate the input before doing any real work.
     runs-on: ${{ inputs.ubuntu-version || 'ubuntu-latest' }}
@@ -85,7 +85,7 @@ jobs:
               ;;
           esac
 
-      - name: Checkout repository (no persisted credentials)
+      - name: Checkout iccDEV PR
         uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
         with:
           fetch-depth: 0
@@ -106,7 +106,7 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
 
-      - name: Verify remote origin URL (enforce trusted remotes)
+      - name: Verify RO
         id: origin
         shell: bash --noprofile --norc {0}
         env:
@@ -309,7 +309,7 @@ jobs:
             exit 0
           fi
 
-      - name: Skip lint (no source changes or untrusted origin)
+      - name: Skip lint
         if: ${{ steps.origin.outputs.trusted_origin != 'true' || steps.diff.outputs.no_src_changes == 'true' }}
         shell: bash --noprofile --norc {0}
         env:
