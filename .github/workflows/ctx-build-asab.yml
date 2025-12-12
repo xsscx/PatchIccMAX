@@ -34,7 +34,7 @@ jobs:
 
     defaults:
       run:
-        shell: bash {0}
+        shell: bash
 
     steps:
       - name: Verify ICCDev root
