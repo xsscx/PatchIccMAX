@@ -53,6 +53,11 @@ jobs:
     outputs:
       src_changed: ${{ steps.diffcheck.outputs.src_changed }}
     steps:
+      - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
+        with:
+          fetch-depth: 2
+          # Disable unsafe fetch options
+          persist-credentials: false
       - name: Check RO
         id: verify
         shell: bash
@@ -110,12 +115,6 @@ jobs:
 
           echo "trusted_origin=$trusted" >> "$GITHUB_OUTPUT"
           echo "sanitized_context=$sanitized" >> "$GITHUB_OUTPUT"
-
-      - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
-        with:
-          fetch-depth: 2
-          # Disable unsafe fetch options
-          persist-credentials: false
 
       - id: diffcheck
         name: diffcheck for file changes
