@@ -7,13 +7,13 @@
 #
 ## Intent: iccDEV ci-pr-action
 #
-## Last Updated: 06-DEC-2025 1600Z by David Hoyt 
-##               Additional UCI Checks
+## Last Updated: 12-DEC-2025 1300Z by David Hoyt 
+##               Add ci-pr-lint to ci-pr-action
+#                
 #
 #
-#
-#
-#
+#  Note: We continue to monitor the ci-pr- labels for issues
+#        Add TODO Issues with Comments, Suggestions & Feedback
 #
 #
 #
@@ -45,7 +45,7 @@ concurrency:
 
 jobs:
   detect-src:
-    name: Detect Source Changes
+    name: Gate 1 - Detect Source Changes
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -59,7 +59,7 @@ jobs:
           # Disable unsafe fetch options
           persist-credentials: false
 
-      - name: UCI Gate 1 - Verify Remote Origin (opt out of malicious git configs)
+      - name: UCI Check - Verify Remote Origin (opt out of malicious git configs)
         shell: bash
         env:
          BASH_ENV: /dev/null
@@ -103,7 +103,7 @@ jobs:
 
           base_ref="${{ github.base_ref }}"
 
-          # UCI Gate 2 - Verify Remote Origin (opt out of malicious $base_ref)
+          # UCI Check - Verify Remote Origin (opt out of malicious $base_ref)
           case "$base_ref" in master)
               ;;
             *)
@@ -197,7 +197,7 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
   setup:
-    name: 🧭 Init
+    name: 🧭 iccDEV Init
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -239,7 +239,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
           {
-            echo "## 🧭 Init Complete"
+            echo "## 🧭 iccDEV Init Complete"
             echo ""
             echo "**Workflow:** ci-pr-action"
             echo "- **Triggered by:** \`${{ github.actor }}\`"
@@ -254,7 +254,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   validate-inputs:
-    name: UCI Gate 2 - Validate Matrix Inputs
+    name: Gate 2 - Validate Matrix Inputs
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -267,7 +267,7 @@ jobs:
       build-types: ${{ steps.v.outputs.bt }}
 
     steps:
-      - name: UCI Gate 3 - Sanity Checks
+      - name: Define Valid Build Inputs
         id: v
         shell: bash
         run: |
@@ -346,7 +346,7 @@ jobs:
     uses: ./.github/workflows/ci-pr-win.yml
     
   finalize:
-    name: 🧾 GitHub Summary Report
+    name: 🧾 iccDEV PR Summary Report
     runs-on: ubuntu-latest
     needs:
       - detect-src
@@ -370,7 +370,7 @@ jobs:
             echo "  </a>"
             echo "</div>"
             echo ""
-            echo "## 🧩 ICCDEV PR Summary"
+            echo "## 🧩 iccDEV PR Summary"
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
             
