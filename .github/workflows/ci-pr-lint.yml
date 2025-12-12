@@ -6,7 +6,7 @@
 #
 # Intent: Static code analysis & linting
 #
-# Last Updated: 12-DEC-2025 1930Z by David Hoyt 
+# Last Updated: 12-DEC-2025 1300Z by David Hoyt 
 #
 # Note: This lint action needs a scope & purpose
 #       Currently some filler & reporting from templates
@@ -26,6 +26,9 @@ permissions:
   pull-requests: read
 
 on:
+  # Allow manual trigger
+  workflow_dispatch:
+
   # Allow other workflows to call this
   workflow_call:
     inputs:
@@ -36,11 +39,13 @@ on:
         type: string
 
 jobs:
-  lint:
+  build-linux:
+    # NOTE: Name is cosmetic; we do not trust this for security decisions.
+    # name: Lint on ${{ inputs.ubuntu-version || 'ubuntu-latest' }}
     name: Lint
     # SECURITY: We only allow GitHub-hosted ubuntu runners,
     # and we validate the input before doing any real work.
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.ubuntu-version || 'ubuntu-latest' }}
 
     timeout-minutes: 30
 
@@ -101,6 +106,45 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
 
+      - name: Verify RO
+        id: origin
+        shell: bash --noprofile --norc {0}
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global credential.helper ""
+
+          origin_url="$(git remote get-url origin || true)"
+          echo "Remote origin: $origin_url"
+
+          # Expected primary origin is the current repository.
+          expected_https="https://github.com/${GITHUB_REPOSITORY}.git"
+          expected_https_nogit="${expected_https%.git}"
+
+          # Secondary trusted origin for cross-repo work:
+          # InternationalColorConsortium/iccDEV is trusted for this workflow's context.
+          trusted_ssh_iccdev="git@github.com:InternationalColorConsortium/iccDEV.git"
+
+          trusted_origin=false
+
+          if [ "$origin_url" = "$expected_https" ] \
+             || [ "$origin_url" = "$expected_https_nogit" ] \
+             || [ "$origin_url" = "$trusted_ssh_iccdev" ]; then
+            trusted_origin=true
+          fi
+
+          echo "trusted_origin=$trusted_origin" >> "$GITHUB_OUTPUT"
+
+          if [ "$trusted_origin" != "true" ]; then
+            echo "Origin URL mismatch:" >&2
+            echo "  got:      $origin_url" >&2
+            echo "  expected: $expected_https OR $expected_https_nogit OR $trusted_ssh_iccdev" >&2
+            # Do not treat this as a hard failure, but signal downstream steps to skip.
+            exit 0
+          fi
       - name: Install Linux dependencies
         if: ${{ steps.origin.outputs.trusted_origin == 'true' }}
         shell: bash --noprofile --norc {0}
