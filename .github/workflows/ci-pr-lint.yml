@@ -1,13 +1,22 @@
 ###############################################################
 #
-## Copyright (©) 2025 International Color Consortium.
-##                 All rights reserved.
-##                 https://color.org
+# Copyright (©) 2025 International Color Consortium.
+#                 All rights reserved.
+#                 https://color.org
 #
-## Intent: Static code analysis and linting (cppcheck, clang-tidy
-##
-## Last Updated: 10-DEC-2025 1913Z by David Hoyt
-##
+# Intent: Static code analysis & linting
+#
+# Last Updated: 12-DEC-2025 1300Z by David Hoyt 
+#
+# Note: This lint action needs a scope & purpose
+#       Currently some filler & reporting from templates
+#
+#
+#
+#
+#
+#
+#
 ###############################################################
 
 name: "ci-pr-lint"
