@@ -69,21 +69,47 @@ jobs:
           git config --global credential.helper ""
 
           origin_url="$(git remote get-url origin || true)"
-          echo "Remote origin: $origin_url"
+
+          echo "=== Context diagnostics ==="
+          echo "github.repository=${{ github.repository }}"
+          echo "github.event_name=${{ github.event_name }}"
+          echo "github.ref=${{ github.ref }}"
+          echo "github.base_ref=${{ github.base_ref }}"
+          echo "github.head_ref=${{ github.head_ref }}"
+          echo "github.actor=${{ github.actor }}"
+          echo "origin_url=${origin_url}"
+
+          # Derived context
+          if [[ "${{ github.repository }}" != "${{ github.event.pull_request.head.repo.full_name || '' }}" ]]; then
+            echo "Context: fork PR detected (head repo differs)"
+          else
+            echo "Context: same-repo PR or direct branch"
+          fi
+
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "Context: running on master branch"
+          elif [[ "${{ github.ref }}" == refs/heads/* ]]; then
+            echo "Context: running on feature branch"
+          elif [[ "${{ github.ref }}" == refs/pull/* ]]; then
+            echo "Context: running on pull request ref"
+          fi
+
+          echo "=== Origin enforcement ==="
 
           expected="https://github.com/${{ github.repository }}.git"
           expected_nogit="${expected%.git}"
           iccdev_ssh="git@github.com:InternationalColorConsortium/iccDEV.git"
 
           if [[ "$origin_url" == "$expected" || "$origin_url" == "$expected_nogit" ]]; then
-            :
+            echo "Origin OK: matches repository HTTPS URL"
           elif [[ "${{ github.repository }}" == "InternationalColorConsortium/iccDEV" && "$origin_url" == "$iccdev_ssh" ]]; then
-            :
+            echo "Origin OK: iccDEV SSH origin allowed for canonical repo"
           else
-            echo "Origin URL mismatch: $origin_url" >&2
+            echo "Origin REJECTED: unexpected origin URL" >&2
             echo "src_changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+
 
       - id: diffcheck
         name: diffcheck for file changes
