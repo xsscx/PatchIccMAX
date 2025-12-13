@@ -39,7 +39,9 @@ jobs:
     steps:
       - name: Checkout master
         uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
-
+        with:
+          fetch-depth: 2
+          persist-credentials: false
       - name: Install Dependencies
         shell: bash
         env:
