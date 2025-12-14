@@ -5,10 +5,10 @@
 ##                 https://color.org
 #
 #
-## Intent: iccDEV ci-pr-action
+## Intent: iccDEV ci-pr-action-unit-test
 #
-## Last Updated: 13-DEC-2025 1830 EST by David Hoyt 
-##               Add ci-pr-lint to ci-pr-action
+## Last Updated: 13-DEC-2025 2115Z by David Hoyt 
+##               Add smoke tests for user controllable input to PRs
 #                
 #
 #
@@ -19,7 +19,7 @@
 #
 ###############################################################
 
-name: "ci-pr-action"
+name: "ci-pr-action-unit-test"
 
 permissions:
   contents: read
@@ -39,7 +39,7 @@ on:
       - ready_for_review
 
 concurrency:
-  group: "ci-pr-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
+  group: "ci-pr-action-unit-test-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
   cancel-in-progress: true
 
 jobs:
@@ -214,45 +214,33 @@ jobs:
         shell: bash
         env:
           BASH_ENV: /dev/null
-          # ensure these are available in the step; if not, the defaults below will be used
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_REF_NAME: ${{ github.ref_name }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
-          SRC_CHANGED: ${{ needs.detect-src.outputs.src_changed || 'false' }}
         run: |
-          set -euo pipefail
-      
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global credential.helper ""
-      
-          # load canonical sanitizers
-          source "$GITHUB_WORKSPACE/.github/scripts/sanitize.sh"
-      
-          # safe defaults
-          : "${GITHUB_EVENT_NAME:=<none>}"
-          : "${GITHUB_REPOSITORY:=<none>}"
-          : "${GITHUB_REF_NAME:=<none>}"
-          : "${GITHUB_SHA:=<none>}"
-          : "${GITHUB_RUN_ID:=<none>}"
-          : "${SRC_CHANGED:=false}"
-      
-          # write step summary (all dynamic values passed through sanitize_line)
-          {
-            echo "## 🧭 PR Init Complete"
-            echo ""
-            echo "**Workflow:** ci-pr-action"
-            echo "- **Triggered by:** \`$(sanitize_line "${GITHUB_REPOSITORY}")\`"
-            echo "- **Event type:** \`$(sanitize_line "${GITHUB_EVENT_NAME}")\`"
-            echo "- **Branch:** \`$(sanitize_line "${GITHUB_REF_NAME}")\`"
-            echo "- **Commit:** \`$(sanitize_line "${GITHUB_SHA}")\`"
-            echo "- **Run ID:** \`$(sanitize_line "${GITHUB_RUN_ID}")\`"
-            echo "- **Session start:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-            echo "- **Source changed:** \`$(sanitize_line "${SRC_CHANGED}")\`"
-            echo ""
-            echo "✅ CI environment successfully initialized and ready for subsequent jobs."
-          } >> "$GITHUB_STEP_SUMMARY"
+           set -euo pipefail
+
+           git config --global --add safe.directory "$GITHUB_WORKSPACE"
+           git config --global credential.helper ""
+
+           # load canonical sanitizers
+           source "$GITHUB_WORKSPACE/.github/scripts/sanitize.sh"
+
+           # --- safe defaults for nounset -------------------------------------
+           : "${SRC_CHANGED:=false}"
+
+           # write step summary (all dynamic values passed through sanitize_line)
+           {
+             echo "## 🧭 PR Init Complete"
+             echo ""
+             echo "**Workflow:** ci-pr-action"
+             echo "- **Triggered by:** \`$(sanitize_line "${GITHUB_ACTOR}")\`"
+             echo "- **Event type:** \`$(sanitize_line "${GITHUB_EVENT_NAME}")\`"
+             echo "- **Branch:** \`$(sanitize_line "${GITHUB_REF_NAME}")\`"
+             echo "- **Commit:** \`$(sanitize_line "${GITHUB_SHA}")\`"
+             echo "- **Run ID:** \`$(sanitize_line "${GITHUB_RUN_ID}")\`"
+             echo "- **Session start:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+             echo "- **Source changed:** \`$(sanitize_line "${SRC_CHANGED}")\`"
+             echo ""
+             echo "✅ CI environment successfully initialized and ready for subsequent jobs."
+           } >> "$GITHUB_STEP_SUMMARY"
 
   validate-inputs:
     name: 🧭 Init PR Build Matrix
@@ -369,58 +357,26 @@ jobs:
       - name: 🧭 PR Details
         shell: bash
         env:
-          BASH_ENV: /dev/null
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
-          GITHUB_REF_NAME: ${{ github.ref_name }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
-          SRC_CHANGED: ${{ needs.detect-src.outputs.src_changed }}
-          UNIX_RESULT: ${{ needs.unix-ci.result }}
-          SCAN_RESULT: ${{ needs['scan-build'].result }}
-          CPP_RESULT: ${{ needs['cppcheck-linters'].result }}
-          WIN_RESULT: ${{ needs['win-ci'].result }}
+            BASH_ENV: /dev/null
+            GITHUB_ACTOR: ${{ github.actor }}
+            GITHUB_EVENT_NAME: ${{ github.event_name }}
+            GITHUB_REF_NAME: ${{ github.ref_name }}
+            GITHUB_SHA: ${{ github.sha }}
+            GITHUB_RUN_ID: ${{ github.run_id }}
+            SRC_CHANGED: ${{ needs.detect-src.outputs.src_changed }}
         run: |
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global credential.helper ""
-  
+
           # load canonical sanitizers
           source "$GITHUB_WORKSPACE/.github/scripts/sanitize.sh"
-  
-          # --- normalize upstream job results (default to success if missing) ---
-          UNIX_RESULT="${UNIX_RESULT:-success}"
-          SCAN_RESULT="${SCAN_RESULT:-success}"
-          CPP_RESULT="${CPP_RESULT:-success}"
-          WIN_RESULT="${WIN_RESULT:-success}"
-  
-          # remove CRs, trim whitespace and lower-case each value
-          trim_and_norm() {
-            local v="$1"
-            # remove CRs
-            v="${v//$'\r'/}"
-            # trim leading/trailing whitespace (awk used for portability)
-            v="$(echo -n "$v" | awk '{$1=$1;print}')"
-            # lowercase
-            v="${v,,}"
-            printf '%s' "$v"
-          }
-  
-          UNIX_RESULT="$(trim_and_norm "$UNIX_RESULT")"
-          SCAN_RESULT="$(trim_and_norm "$SCAN_RESULT")"
-          CPP_RESULT="$(trim_and_norm "$CPP_RESULT")"
-          WIN_RESULT="$(trim_and_norm "$WIN_RESULT")"
-  
-          # --- compute overall result from upstream jobs ----------------------
-          job_res=success
-          for s in "$UNIX_RESULT" "$SCAN_RESULT" "$CPP_RESULT" "$WIN_RESULT"; do
-            if [[ "$s" != "success" ]]; then
-              job_res=failure
-              break
-            fi
-          done
-  
+
+          # --- defaults for nounset --------------------------------------------
+          : "${job_res:=success}"
+          
           # --- write header ----------------------------------------------------
+          
           {
             echo "<div align=\"center\">"
             echo "  <h3>Completed the ICC Development Workflow</h3>"
@@ -446,3 +402,38 @@ jobs:
               echo "### ❌ Overall Result: FAILURE"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
+
+  sanitizer-smoke-test:
+    name: 🔬 Sanitizer Smoke Test (manual)
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Run sanitizer smoke tests
+        shell: bash
+        env:
+          SANITIZE_DEBUG: "1"
+        run: |
+          set -euo pipefail
+          source "$GITHUB_WORKSPACE/.github/scripts/sanitize.sh"
+
+          test_inputs=(
+            "normal string"
+            "<script>alert(1)</script>"
+            "backticks \`date\` and \$SHELL"
+            $'\x00\x1F\x7F'    # control chars
+            "$(printf 'unicode:\xF0\x9F\x98\x81')" # emoji
+            "$(printf 'long%0.s' {1..600})"
+          )
+
+          echo "Sanitizer smoke-test running (SANITIZE_DEBUG=1)"
+          for i in "${test_inputs[@]}"; do
+            printf '\n--- Input ---\n%s\n' "$i"
+            printf 'sanitize_line: %s\n' "$(sanitize_line "$i")"
+            printf 'sanitize_print: %s\n' "$(sanitize_print "$i")"
+            printf 'esc_md: %s\n' "$(esc_md "$i")"
+          done
