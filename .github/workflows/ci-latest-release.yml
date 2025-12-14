@@ -440,10 +440,11 @@ jobs:
         if: always()
         shell: pwsh
         run: |
+          # Gather and sanitize git info
+          $branch = (git.exe rev-parse --abbrev-ref HEAD).Trim() -replace '[\r\n`]', ''
+          $commit = (git.exe rev-parse --short HEAD).Trim() -replace '[\r\n`]', ''
           echo "### Windows Build Summary" >> $env:GITHUB_STEP_SUMMARY
           echo "" >> $env:GITHUB_STEP_SUMMARY
           echo "**Build Directory:** Build/" >> $env:GITHUB_STEP_SUMMARY
-          echo "**Branch:** $(git rev-parse --abbrev-ref HEAD)" >> $env:GITHUB_STEP_SUMMARY
-          echo "**Commit:** $(git rev-parse --short HEAD)" >> $env:GITHUB_STEP_SUMMARY
-          echo "**Omitted Artifacts Uploaded:** iccdev-windows-msvc" >> $env:GITHUB_STEP_SUMMARY
-          echo "**Status:** Success" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Branch:** $branch" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Commit:** $commit" >> $env:GITHUB_STEP_SUMMARY
